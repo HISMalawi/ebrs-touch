@@ -7,6 +7,11 @@ require 'rails'
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
 
+settings_path = Dir.pwd + "/config/settings.yml"
+settings = YAML.load_file(settings_path)
+$app_mode = settings['application_mode']
+$app_mode = 'HQ' if app_mode.blank?
+
 couch_db_settings = db_settings[Rails.env]
 
 couch_protocol = couch_db_settings["protocol"]
@@ -30,9 +35,9 @@ mysql_adapter = mysql_db_settings["adapter"]
 #reading db_mapping
 
 $client = Mysql2::Client.new(:host => mysql_host,
-  :username => mysql_username,
-  :password => mysql_password,
-  :database => mysql_db
+                             :username => mysql_username,
+                             :password => mysql_password,
+                             :database => mysql_db
 )
 class Methods
   def self.update_doc(doc)
@@ -41,6 +46,8 @@ class Methods
     table = doc['type']
     doc_id = doc['document_id']
     return nil if doc_id.blank?
+
+
     rows = client.query("SELECT * FROM #{table} WHERE document_id = '#{doc_id}' LIMIT 1").each(:as => :hash)
     data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
 
@@ -51,7 +58,7 @@ class Methods
           v = v.to_datetime.to_s(:db) rescue v
         end
 
-        unless (['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null'))
+        unless ['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null')
           update_query += " #{k} = \"#{v}\", "
         end
       end
@@ -73,7 +80,17 @@ class Methods
           v = v.to_datetime.to_s(:db) rescue v
         end
         keys << k
-        values << v
+        if k == 'level' && table == 'person_birth_details'
+          values << $app_mode
+        else
+          values << v
+        end
+
+      end
+
+      if table == 'person_birth_details' && !keys.include?('level')
+        keys << 'level'
+        values << $app_mode
       end
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
@@ -88,7 +105,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
   # Which database should we connect to?
   database "#{mysql_adapter}://#{mysql_username}:#{mysql_password}@#{mysql_host}:#{mysql_port}/#{mysql_db}"
   #StatusCouchdb Document Type
-
   document 'type' => 'core_person' do |doc|
     output = Methods.update_doc(doc.document)
   end
@@ -129,4 +145,3 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
 end
-
