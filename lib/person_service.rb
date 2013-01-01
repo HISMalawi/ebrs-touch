@@ -208,13 +208,13 @@ module PersonService
           fac_serial_query =  " AND pbd.facility_serial_number = '#{filters[k]['person[facility_serial_number]']}' "
         when 'Child Name'
           if filters[k]["person[last_name]"].present?
-            name_query += " AND  n.last_name = '#{filters[k]["person[last_name]"]}'"
+            name_query += " AND  n.last_name = \"#{filters[k]["person[last_name]"]}\" "
           end
           if filters[k]["person[middle_name]"].present?
-            name_query += " AND n.middle_name = '#{filters[k]["person[middle_name]"]}'"
+            name_query += " AND n.middle_name = \"#{filters[k]["person[middle_name]"]}\" "
           end
           if filters[k]["person[first_name]"].present?
-            name_query += " AND n.first_name = '#{filters[k]["person[first_name]"]}'"
+            name_query += " AND n.first_name = \"#{filters[k]["person[first_name]"]}\" "
           end
         when 'Child Gender'
           gender_query = " AND person.gender = '#{filters[k]["person[gender]"].split('')[0]}' "
