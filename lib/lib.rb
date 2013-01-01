@@ -220,7 +220,7 @@ module Lib
 
     if informant[:phone_number].present?
       PersonAttribute.create(
-          :person_id                => person.id,
+          :person_id                => informant_person.id,
           :person_attribute_type_id => PersonAttributeType.where(name: 'cell phone number').last.id,
           :value                    => informant[:phone_number],
           :voided                   => 0

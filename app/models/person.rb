@@ -90,4 +90,9 @@ class Person < ActiveRecord::Base
         return self.birthdate.to_date.strftime("%d/%b/%Y")
       end
     end
+
+    def get_attribute(type)
+      type_id = PersonAttributeType.where(name: type).last.id rescue nil
+      PersonAttribute.where(person_id: self.person_id, person_attribute_type_id: type_id, voided: 0).last.value rescue nil
+    end
 end

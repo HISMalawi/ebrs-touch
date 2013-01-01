@@ -57,7 +57,7 @@ class Methods
       end
       update_query = update_query.strip.sub(/\,$/, '')
       update_query += " WHERE document_id = '#{doc_id}' "
-      out = client.query(update_query) rescue  nil #(raise table.to_s)
+      out = client.query(update_query) rescue (raise table.to_s)
     else
       insert_query = "INSERT INTO #{table} ("
       keys = []
@@ -78,7 +78,7 @@ class Methods
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
       insert_query += ( "\"" + values.join( "\", \"")) + "\")"
-      client.query(insert_query) rescue nil #(raise insert_query.to_s)
+      client.query(insert_query) rescue (raise insert_query.to_s)
     end
     client.query("SET FOREIGN_KEY_CHECKS = 1")
   end
@@ -96,9 +96,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_addresses' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'guardianship' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_attributes' do |doc|
@@ -120,9 +117,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_attributes' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'person_type' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_record_statuses' do |doc|

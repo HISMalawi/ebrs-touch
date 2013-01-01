@@ -110,7 +110,7 @@ class PersonController < ApplicationController
             },
             {
                 "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
-                "If yes, date of marriage" => "#{@birth_details.date_of_marriage rescue nil}"
+                "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
             },
 
             {
@@ -202,7 +202,7 @@ class PersonController < ApplicationController
                 "City" => "#{@informant_address.city rescue nil}"
             },
             {
-                "Phone Number" => "#{@informant_person.phone_number rescue ""}",
+                "Phone Number" => "#{@informant_person.get_attribute('Cell Phone Number')}",
                 "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
