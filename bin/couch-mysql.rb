@@ -4,13 +4,13 @@ require "yaml"
 require 'mysql2'
 require 'rails'
 
+
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
-
 settings_path = Dir.pwd + "/config/settings.yml"
 settings = YAML.load_file(settings_path)
 $app_mode = settings['application_mode']
-$app_mode = 'HQ' if app_mode.blank?
+$app_mode = 'HQ' if $app_mode.blank?
 
 couch_db_settings = db_settings[Rails.env]
 
@@ -46,6 +46,7 @@ class Methods
     table = doc['type']
     doc_id = doc['document_id']
     return nil if doc_id.blank?
+    level = nil
 
 
     rows = client.query("SELECT * FROM #{table} WHERE document_id = '#{doc_id}' LIMIT 1").each(:as => :hash)
@@ -54,6 +55,10 @@ class Methods
     if !rows.blank?
       update_query = "UPDATE #{table} SET "
       data.each do |k, v|
+        if k == 'level' && table == 'person_birth_details' && ({'FC' => ['FC'], 'DC' => ['FC', 'DC'], 'HQ' => []}[v].include?(v) rescue true)
+          next
+        end
+
         if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
@@ -64,7 +69,7 @@ class Methods
       end
       update_query = update_query.strip.sub(/\,$/, '')
       update_query += " WHERE document_id = '#{doc_id}' "
-      out = client.query(update_query) rescue (raise table.to_s)
+      out = client.query(update_query) rescue nil #(raise table.to_s)
     else
       insert_query = "INSERT INTO #{table} ("
       keys = []
@@ -76,26 +81,28 @@ class Methods
           next
         end
 
+        if k == 'level' && table == 'person_birth_details' && v != $app_mode
+          level = v
+          v = $app_mode
+        end
+
         if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
         keys << k
-        if k == 'level' && table == 'person_birth_details'
-          values << $app_mode
-        else
-          values << v
-        end
-
-      end
-
-      if table == 'person_birth_details' && !keys.include?('level')
-        keys << 'level'
-        values << $app_mode
+        values << v
       end
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
       insert_query += ( "\"" + values.join( "\", \"")) + "\")"
-      client.query(insert_query) rescue (raise insert_query.to_s)
+
+      client.query(insert_query) rescue nil # (raise insert_query.to_s)
+
+      if table == 'person_birth_details' && level.present?
+        Thread.new{
+          `bundle exec rails runner bin/push_back.rb #{doc_id}`
+        }
+      end
     end
     client.query("SET FOREIGN_KEY_CHECKS = 1")
   end
@@ -145,3 +152,4 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
 end
+
