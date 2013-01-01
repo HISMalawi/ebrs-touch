@@ -5,3 +5,4 @@ duplicate_precision: 80
 potential_search: false
 app_gate_url: nil
 assign_ben: true
+sync_url: http://0.0.0.0:5984/ebrs2_hq
