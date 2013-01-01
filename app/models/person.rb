@@ -5,6 +5,11 @@ class Person < ActiveRecord::Base
     has_many :person_names
     include EbrsAttribute
 
+
+    def addresses
+      PersonAddress.where(person_id: self.id)
+    end
+
     def mother
       result = nil
       relationship_type = PersonRelationType.find_by_name("Mother")
