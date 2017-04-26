@@ -1,0 +1,13 @@
+== eBRS Facility 2.0
+
+eBRS Facility with relational model.
+
+Requirements:
+
+* Ruby 2.1.2
+
+* Rails 4.2.6
+
+* Passenger 4.0.53
+
+* Ubuntu 14.04 LTS
