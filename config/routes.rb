@@ -7,17 +7,15 @@ Rails.application.routes.draw do
 
   get 'person/create'
 
-  get 'index/show'
+  resources :people	
 
-  get 'index/new'
+  resources :users
 
-  get 'index/create'
-
-  get 'index/show'
-
-  get 'index/new'
-
-  get 'index/create'
+  resource :login do
+    collection do
+      get :logout
+    end
+  end	
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

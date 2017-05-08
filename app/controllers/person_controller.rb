@@ -6,6 +6,10 @@ class PersonController < ApplicationController
   end
 
   def new
+     @person = Person.new
+
+     @section = "New Person"
+     render :layout => "touch"
   end
 
   def create

@@ -1,0 +1,177 @@
+<style>
+    fieldset {
+        margin: 20px;
+        border-radius: 5px;
+        border: 1px solid #3465a4;
+        padding: 20px;
+    }
+
+    legend {
+        font-size: 18px;
+        font-weight: normal;
+        color: #3465a4;
+    }
+
+    div.field {
+        font-weight: normal;
+        display: inline-block;
+        margin: 10px;
+        color: #000;
+    }
+
+    select {
+        min-width: 100%;
+    }
+
+</style>
+
+<%= form_for(@person) do |f| %>
+
+    <fieldset>
+
+      <legend><font size='5' style=''>Details of Person</font></legend>
+
+      <div class="field">
+        <label for="person_last_name">Surname</label>
+        <br>
+        <%= (f.text_field :last_name, :class => "input_cell") %>
+
+      </div>
+      <div class="field">
+        <%= f.label :first_name %>
+        <br>
+
+        <%= (f.text_field :first_name, :class => "input_cell") %>
+      </div>
+      <div class="field">
+        <label for="person_middle_name">Other Names</label>
+        <br>
+        <%= (f.text_field :middle_name, :class => "input_cell") %>
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend><font size='5' style=''>Details of Person: Continued..</font></legend>
+
+      <div class="field">
+        <label for="person_birthdate">Date of Birth</label>
+        <br>
+        <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :fieldtype => "date",
+                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+
+
+      </div>
+      <div class="field">
+        <label for="person_gender">Sex</label><br>
+        <select id="person_gender" name="person[gender]" class="input_cell">
+          <option></option>
+          <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
+          <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
+        </select>
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend><font size='5' style=''>Details of Person: Continued..</font></legend>
+
+      <div class="field">
+        <label for="person_birthweight">Birth weight (in Kilogrammes)</label>
+        <br>
+        <%= (f.text_field :birth_weight,
+                          :value => "",
+                          :placeholder => "0.000",
+                          :class => "input_cell",
+                          :fieldtype => "decimal",
+                          :regex => '^\d+\.\d{3}$',
+                          :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) to the weight for you?",
+                          :absolute_min => 0.7,
+                          :absolute_max => 6,
+                          :max => 4,
+                          :min => 2.5,
+                          :optional => true) %>
+      </div>
+      <div class="field">
+        <%= f.label :type_of_birth %>
+        <br>
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+          <option></option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >Triplet</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
+        <br>
+        <%= (f.text_field :other_type_of_birth, :class => "input_cell", :condition => "__$('person_type_of_birth').value.trim() == 'Other'",:optional=>true) rescue ""  %>
+      </div>
+
+      <div class="field">
+        <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
+        <br>
+        <select id="person_parents_married_to_each_other" name="person[parents_married_to_each_other]" class="input_cell" >
+          <option></option>
+          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_parents_date_of_marriage">If yes, date of marriage</label>
+        <br>
+        <%= (f.text_field :date_of_marriage,
+                          :class => "input_cell",
+                          :condition => "__$('person_parents_married_to_each_other').value.trim() == 'Yes'",
+                          :fieldtype => "date",
+                          :optional => true,
+                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+      </div>
+
+
+    </fieldset>
+
+    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'No'">
+      <legend><font size='5' style=''>Acknowledgment of Paternity: Person born out of wedlock</font></legend>
+
+      <div class="field">
+        <label for="person_court_order_attached">Court order attached?</label><br>
+        <select id="person_court_order_attached" name="person[court_order_attached]" class="input_cell">
+          <option></option>
+          <option  <%= ((@person[court_order_attached] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option  <%= ((@person[court_order_attached] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="person_parents_signed">Parents signed?</label>
+        <br>
+        <select id="person_parents_signed" name="person[parents_signed]" class="input_cell" condition="__$('person_court_order_attached').value.trim() == 'No'">
+          <option></option>
+          <option <%= ((@person[:parents_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option <%= ((@person[:parents_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+
+      </div>
+
+    </fieldset>
+     
+    <div class="actions">
+      <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
+    </div> 
+
+    <% end %>
+
+    <script>
+     init();
+    </script>
