@@ -71,4 +71,6 @@ gem 'whenever',  :require => false
 
 gem 'sucker_punch', '~> 2.0'
 
+gem 'countries'
+
 
