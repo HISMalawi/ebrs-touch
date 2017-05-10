@@ -21,7 +21,7 @@ class CreatePersonBirthDetails < ActiveRecord::Migration
       t.integer :alive_inclusive
       t.integer :still_alive
       t.string :level_of_education
-      t.Integer :district_id_number
+      t.integer :district_id_number
       t.integer :facility_code
       t.integer :district_code
       t.integer :national_serial_number

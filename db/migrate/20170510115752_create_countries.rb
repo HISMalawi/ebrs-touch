@@ -4,11 +4,12 @@ class CreateCountries < ActiveRecord::Migration
       t.string :name
       t.string :nationality
       t.string :continent
-      t.string :country_code
+      t.integer :country_code
+      t.string :country_short_code  
       t.string :region
       t.string :sub_region
       t.string :world_region
-      t.string :curreny
+      t.string :currency
       t.string :ioc
       t.string :gec
 
