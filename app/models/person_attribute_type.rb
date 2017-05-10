@@ -1,2 +1,0 @@
-class PersonAttributeType < ActiveRecord::Base
-end
