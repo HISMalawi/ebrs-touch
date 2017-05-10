@@ -7,6 +7,7 @@ class CreateHealthFacilities < ActiveRecord::Migration
       t.string :zone
       t.string :fac_type
       t.string :mga
+      t.string :f_type
       t.string :latitude
       t.string :longitude
 
