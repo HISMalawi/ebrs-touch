@@ -2,6 +2,7 @@ class CreateUsers < ActiveRecord::Migration
   def change
     create_table :users do |t|
       t.integer :person_id
+      t.string :username
       t.string :password_hash
       t.datetime :last_password_date
       t.integer :password_attempt
