@@ -13,6 +13,9 @@ begin
         require Rails.root.join('db','load_districts.rb')
         require Rails.root.join('db','load_tas_and_villages.rb')
         require Rails.root.join('db','load_health_facilities.rb')
+        require Rails.root.join('db','person_types.rb')
+        require Rails.root.join('db','person_relationship_types.rb')
+        
     end
 rescue => e 
 	puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
