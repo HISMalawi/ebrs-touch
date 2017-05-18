@@ -295,11 +295,11 @@ ActiveRecord::Schema.define(version: 0) do
   end
 
   create_table "user_role", id: false, force: :cascade do |t|
-    t.integer "user_id", limit: 4,  default: 0,  null: false
+    t.integer "user_role_id", limit: 4,  default: 0,  null: false
     t.string  "role",    limit: 50, default: "", null: false
   end
 
-  add_index "user_role", ["user_id"], name: "fk_user_role_1_idx", using: :btree
+  add_index "user_role", ["user_role_id"], name: "fk_user_role_1_idx", using: :btree
 
   create_table "user_role_activity", primary_key: "user_role_activity_id", force: :cascade do |t|
     t.integer  "user_role_id", limit: 4, null: false
@@ -333,7 +333,6 @@ ActiveRecord::Schema.define(version: 0) do
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "cities", "country", primary_key: "country_id", name: "fk_cities_1"
-  add_foreign_key "location", "location_tag_map", column: "location_id", primary_key: "location_id", name: "fk_location_1"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
   add_foreign_key "location_tag_map", "location_tag", primary_key: "location_tag_id", name: "fk_location_tag_map_2"
   add_foreign_key "person", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_1"
@@ -365,7 +364,7 @@ ActiveRecord::Schema.define(version: 0) do
   add_foreign_key "person_relationship", "core_person", column: "person_b", primary_key: "person_id", name: "fk_person_relationship_2"
   add_foreign_key "person_relationship", "person_relationship_types", primary_key: "person_relationship_type_id", name: "fk_person_relationship_3"
   add_foreign_key "role_activity", "user_role", column: "role_activity_id", primary_key: "user_id", name: "fk_role_activity_1"
-  add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
+  add_foreign_key "user_role", "users", primary_key: "user_role_id", name: "fk_user_role_1"
   add_foreign_key "user_role_activity", "user_role", primary_key: "user_id", name: "fk_user_role_activity_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
