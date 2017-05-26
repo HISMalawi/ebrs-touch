@@ -10,22 +10,8 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-class CreateDatabase < ActiveRecord::Migration  
 
-# encoding: UTF-8
-# This file is auto-generated from the current state of the database. Instead
-# of editing this file, please use the migrations feature of Active Record to
-# incrementally modify your database, and then regenerate this schema definition.
-#
-# Note that this schema.rb definition is the authoritative source for your
-# database schema. If you need to create the application database on another
-# system, you should be using db:schema:load, not running all the migrations
-# from scratch. The latter is a flawed and unsustainable approach (the more migrations
-# you'll amass, the slower it'll run and the greater likelihood for issues).
-#
-# It's strongly recommended that you check this file into your version control system.
-
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 1) do
 
   create_table "cities", primary_key: "city_id", force: :cascade do |t|
     t.string   "name",       limit: 255
@@ -220,47 +206,6 @@ ActiveRecord::Schema.define(version: 0) do
   add_index "person_birth_details", ["place_of_birth"], name: "fk_person_birth_details_4_idx", using: :btree
   add_index "person_birth_details", ["type_of_birth"], name: "fk_person_birth_details_2_idx", using: :btree
 
-  create_table "person_identifier", primary_key: "person_identifier_id", force: :cascade do |t|
-    t.integer  "person_id",       limit: 4,                null: false
-    t.string   "identifier",      limit: 50,  default: "", null: false
-    t.integer  "identifier_type", limit: 4,                null: false
-    t.integer  "preferred",       limit: 2,   default: 0,  null: false
-    t.integer  "location_id",     limit: 4,                null: false
-    t.integer  "creator",         limit: 4,                null: false
-    t.integer  "voided",          limit: 2,   default: 0,  null: false
-    t.integer  "voided_by",       limit: 4
-    t.datetime "date_voided"
-    t.string   "void_reason",     limit: 255
-    t.string   "uuid",            limit: 38,               null: false
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
-  end
-
-  add_index "person_identifier", ["creator"], name: "fk_person_identifier_3_idx", using: :btree
-  add_index "person_identifier", ["identifier_type"], name: "fk_person_identifier_1_idx", using: :btree
-  add_index "person_identifier", ["location_id"], name: "fk_person_identifier_5_idx", using: :btree
-  add_index "person_identifier", ["person_id"], name: "fk_person_identifier_2_idx", using: :btree
-  add_index "person_identifier", ["voided_by"], name: "fk_person_identifier_4_idx", using: :btree
-
-  create_table "person_identifier_type", primary_key: "person_identifier_type_id", force: :cascade do |t|
-    t.string   "name",               limit: 50,    default: "", null: false
-    t.text     "description",        limit: 65535,              null: false
-    t.string   "format",             limit: 50
-    t.integer  "check_digit",        limit: 2,     default: 0,  null: false
-    t.string   "required",           limit: 45
-    t.integer  "format_description", limit: 2,     default: 0,  null: false
-    t.string   "validator",          limit: 200
-    t.integer  "retired",            limit: 2,     default: 0,  null: false
-    t.integer  "retired_by",         limit: 4
-    t.datetime "date_retired"
-    t.string   "retire_reason",      limit: 255
-    t.string   "uuid",               limit: 38,                 null: false
-    t.datetime "created_at",                                    null: false
-    t.datetime "updated_at",                                    null: false
-  end
-
-  add_index "person_identifier_type", ["retired_by"], name: "fk_person_identifier_type_1_idx", using: :btree
-
   create_table "person_name", primary_key: "person_name_id", force: :cascade do |t|
     t.integer  "person_id",   limit: 4,               null: false
     t.string   "first_name",  limit: 45,              null: false
@@ -409,12 +354,6 @@ ActiveRecord::Schema.define(version: 0) do
   add_foreign_key "person_birth_details", "location", column: "place_of_birth", primary_key: "location_id", name: "fk_person_birth_details_2"
   add_foreign_key "person_birth_details", "mode_of_delivery", column: "mode_of_delivery", primary_key: "mode_of_delivery_id", name: "fk_person_birth_details_5"
   add_foreign_key "person_birth_details", "person_type_of_births", column: "type_of_birth", primary_key: "person_type_of_birth_id", name: "fk_person_birth_details_7"
-  add_foreign_key "person_identifier", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_identifier_2"
-  add_foreign_key "person_identifier", "location", primary_key: "location_id", name: "fk_person_identifier_5"
-  add_foreign_key "person_identifier", "person_identifier_type", column: "identifier_type", primary_key: "person_identifier_type_id", name: "fk_person_identifier_1"
-  add_foreign_key "person_identifier", "users", column: "creator", primary_key: "user_id", name: "fk_person_identifier_3"
-  add_foreign_key "person_identifier", "users", column: "voided_by", primary_key: "user_id", name: "fk_person_identifier_4"
-  add_foreign_key "person_identifier_type", "users", column: "retired_by", primary_key: "user_id", name: "fk_person_identifier_type_1"
   add_foreign_key "person_name", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_name_1"
   add_foreign_key "person_name", "users", column: "voided_by", primary_key: "user_id", name: "fk_person_name_2"
   add_foreign_key "person_name_code", "person_name", primary_key: "person_name_id", name: "fk_person_name_code_1"
@@ -429,6 +368,4 @@ ActiveRecord::Schema.define(version: 0) do
   add_foreign_key "user_role_activity", "user_role", primary_key: "user_id", name: "fk_user_role_activity_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
-end
-
 end
