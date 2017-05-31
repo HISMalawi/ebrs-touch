@@ -1,0 +1,12 @@
+location_tag_id,name,description,creator,date_created,retired,retired_by,date_retired,retire_reason,uuid
+1,"Workstation Location",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad61ce-fc3a-11e2-b661-003018a93ab3
+2,"Northern TB DOT Sites",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad6428-fc3a-11e2-b661-003018a93ab3
+3,"Northern TB Registration Centres",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad64f9-fc3a-11e2-b661-003018a93ab3
+4,"Central TB DOT Sites",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad659f-fc3a-11e2-b661-003018a93ab3
+5,"Central TB Registration Centres",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad663e-fc3a-11e2-b661-003018a93ab3
+6,"South TB DOT Sites",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad66db-fc3a-11e2-b661-003018a93ab3
+7,"South TB Registration Centres",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad6777-fc3a-11e2-b661-003018a93ab3
+8,Ward,NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad6807-fc3a-11e2-b661-003018a93ab3
+9,"KCH referral section",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad68aa-fc3a-11e2-b661-003018a93ab3
+10,"Facility adult sections",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad6939-fc3a-11e2-b661-003018a93ab3
+11,"Facility peads sections",NULL,1,"2011-04-27 14:58:31",0,NULL,NULL,NULL,d6ad69ca-fc3a-11e2-b661-003018a93ab3
