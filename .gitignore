@@ -18,7 +18,6 @@ config/*.pem
 config/*.yml
 *.lock
 *~
-db/schema.rb
 .idea/*
 .ruby-version
 *.pid
