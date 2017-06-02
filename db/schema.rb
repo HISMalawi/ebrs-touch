@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 1) do
+ActiveRecord::Schema.define(version: 0) do
 
   create_table "city", primary_key: "city_id", force: :cascade do |t|
     t.string   "name",       limit: 255
@@ -29,6 +29,7 @@ ActiveRecord::Schema.define(version: 1) do
   end
 
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
+  add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
 
   create_table "country", primary_key: "country_id", force: :cascade do |t|
     t.string   "name",               limit: 255
@@ -327,6 +328,13 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "update_at",                          null: false
   end
 
+  create_table "person_type", primary_key: "person_type_id", force: :cascade do |t|
+    t.string   "name",        limit: 45, null: false
+    t.string   "description", limit: 45, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
   create_table "person_type_of_birth", primary_key: "person_type_of_birth_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
     t.string   "description", limit: 100
@@ -454,6 +462,7 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "village", ["voided_by"], name: "fk_village_2_idx", using: :btree
 
   add_foreign_key "city", "country", primary_key: "country_id", name: "fk_cities_1"
+  add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
   add_foreign_key "district", "region", primary_key: "region_id", name: "fk_district_1"
   add_foreign_key "district", "user", column: "voided_by", primary_key: "user_id", name: "fk_district_2"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
