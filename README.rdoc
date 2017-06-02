@@ -14,4 +14,4 @@ Requirements:
 
 Setup:
 
-1. run bundle exec rake db:create db:schema:load db:schema:seed
+1. run bundle exec rake db:create db:schema:load db:seed
