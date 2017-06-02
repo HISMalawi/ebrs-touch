@@ -46,6 +46,20 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "updated_at",                     null: false
   end
 
+  create_table "district", primary_key: "district_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,             null: false
+    t.integer  "region_id",   limit: 4,              null: false
+    t.integer  "voided",      limit: 1,  default: 0, null: false
+    t.datetime "date_voided"
+    t.integer  "voided_by",   limit: 4
+    t.string   "void_reason", limit: 45
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+  end
+
+  add_index "district", ["region_id"], name: "fk_district_1_idx", using: :btree
+  add_index "district", ["voided_by"], name: "fk_district_2_idx", using: :btree
+
   create_table "guardianship", primary_key: "guardianship_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
     t.string   "description", limit: 100
@@ -324,6 +338,19 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "date_voided"
   end
 
+  create_table "region", primary_key: "region_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,             null: false
+    t.integer  "country_id",  limit: 4
+    t.integer  "voided",      limit: 1,  default: 0, null: false
+    t.integer  "voided_by",   limit: 4
+    t.string   "void_reason", limit: 45
+    t.datetime "date_voided"
+    t.datetime "updated_at",                         null: false
+    t.datetime "created_at",                         null: false
+  end
+
+  add_index "region", ["country_id"], name: "fk_region_1_idx", using: :btree
+
   create_table "role_activity", primary_key: "role_activity_id", force: :cascade do |t|
     t.string   "activity",    limit: 45,             null: false
     t.integer  "voided",      limit: 1,  default: 0, null: false
@@ -343,6 +370,21 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
   end
+
+  create_table "traditional_authority", primary_key: "traditional_authority_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,             null: false
+    t.integer  "district_id", limit: 4,              null: false
+    t.integer  "voided",      limit: 1,  default: 0, null: false
+    t.datetime "date_voided"
+    t.string   "void_reason", limit: 45
+    t.integer  "voided_by",   limit: 4
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+  end
+
+  add_index "traditional_authority", ["district_id"], name: "fk_traditional_authority_1_idx", using: :btree
+  add_index "traditional_authority", ["voided"], name: "fk_traditional_authority_2_idx", using: :btree
+  add_index "traditional_authority", ["voided_by"], name: "fk_traditional_authority_2_idx1", using: :btree
 
   create_table "user", primary_key: "user_id", force: :cascade do |t|
     t.integer  "location_id",        limit: 4,               null: false
@@ -395,20 +437,37 @@ ActiveRecord::Schema.define(version: 1) do
   end
 
   add_index "user_role_activity", ["role_activity_id"], name: "fk_user_role_activity_2_idx", using: :btree
+  add_index "user_role_activity", ["user_role_id"], name: "fk_user_role_activity_1", using: :btree
+
+  create_table "village", primary_key: "village_id", force: :cascade do |t|
+    t.string   "name",                     limit: 45,             null: false
+    t.integer  "traditional_authority_id", limit: 4,              null: false
+    t.integer  "voided",                   limit: 1,  default: 0, null: false
+    t.integer  "voided_by",                limit: 4
+    t.string   "void_reason",              limit: 45
+    t.datetime "date_voided"
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
+  end
+
+  add_index "village", ["traditional_authority_id"], name: "fk_village_1_idx", using: :btree
+  add_index "village", ["voided_by"], name: "fk_village_2_idx", using: :btree
 
   add_foreign_key "city", "country", primary_key: "country_id", name: "fk_cities_1"
+  add_foreign_key "district", "region", primary_key: "region_id", name: "fk_district_1"
+  add_foreign_key "district", "user", column: "voided_by", primary_key: "user_id", name: "fk_district_2"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
   add_foreign_key "location_tag_map", "location_tag", primary_key: "location_tag_id", name: "fk_location_tag_map_2"
   add_foreign_key "person", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_1"
   add_foreign_key "person_address", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_addresses_1"
   add_foreign_key "person_address", "country", column: "citizenship", primary_key: "country_id", name: "fk_person_addresses_8"
   add_foreign_key "person_address", "country", column: "residential_country", primary_key: "country_id", name: "fk_person_addresses_9"
-  add_foreign_key "person_address", "location", column: "current_district", primary_key: "location_id", name: "fk_person_addresses_4"
-  add_foreign_key "person_address", "location", column: "current_ta", primary_key: "location_id", name: "fk_person_addresses_3"
-  add_foreign_key "person_address", "location", column: "current_village", primary_key: "location_id", name: "fk_person_addresses_2"
-  add_foreign_key "person_address", "location", column: "home_district", primary_key: "location_id", name: "fk_person_addresses_7"
-  add_foreign_key "person_address", "location", column: "home_ta", primary_key: "location_id", name: "fk_person_addresses_6"
-  add_foreign_key "person_address", "location", column: "home_village", primary_key: "location_id", name: "fk_person_addresses_5"
+  add_foreign_key "person_address", "district", column: "current_district", primary_key: "district_id", name: "fk_person_addresses_4"
+  add_foreign_key "person_address", "district", column: "home_district", primary_key: "district_id", name: "fk_person_addresses_7"
+  add_foreign_key "person_address", "traditional_authority", column: "current_ta", primary_key: "traditional_authority_id", name: "fk_person_addresses_3"
+  add_foreign_key "person_address", "traditional_authority", column: "home_ta", primary_key: "traditional_authority_id", name: "fk_person_addresses_6"
+  add_foreign_key "person_address", "village", column: "current_village", primary_key: "village_id", name: "fk_person_addresses_2"
+  add_foreign_key "person_address", "village", column: "home_village", primary_key: "village_id", name: "fk_person_addresses_5"
   add_foreign_key "person_attribute", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_attributes_1"
   add_foreign_key "person_attribute", "person_attribute_type", primary_key: "person_attribute_type_id", name: "fk_person_attributes_2"
   add_foreign_key "person_birth_detail", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_birth_details_1"
@@ -434,6 +493,9 @@ ActiveRecord::Schema.define(version: 1) do
   add_foreign_key "person_relationship", "core_person", column: "person_a", primary_key: "person_id", name: "fk_person_relationship_1"
   add_foreign_key "person_relationship", "core_person", column: "person_b", primary_key: "person_id", name: "fk_person_relationship_2"
   add_foreign_key "person_relationship", "person_relationship_type", primary_key: "person_relationship_type_id", name: "fk_person_relationship_3"
+  add_foreign_key "region", "country", primary_key: "country_id", name: "fk_region_1"
+  add_foreign_key "traditional_authority", "district", primary_key: "district_id", name: "fk_traditional_authority_1"
+  add_foreign_key "traditional_authority", "user", column: "voided_by", primary_key: "user_id", name: "fk_traditional_authority_2"
   add_foreign_key "user", "core_person", column: "person_id", primary_key: "person_id", name: "fk_user_1"
   add_foreign_key "user", "core_person", column: "voided_by", primary_key: "person_id", name: "fk_user_2"
   add_foreign_key "user", "location", primary_key: "location_id", name: "fk_user_4"
@@ -441,4 +503,6 @@ ActiveRecord::Schema.define(version: 1) do
   add_foreign_key "user", "user_role", column: "role_id", primary_key: "user_role_id", name: "fk_user_3"
   add_foreign_key "user_role_activity", "role_activity", primary_key: "role_activity_id", name: "fk_user_role_activity_2"
   add_foreign_key "user_role_activity", "user_role", primary_key: "user_role_id", name: "fk_user_role_activity_1"
+  add_foreign_key "village", "traditional_authority", primary_key: "traditional_authority_id", name: "fk_village_1"
+  add_foreign_key "village", "user", column: "voided_by", primary_key: "user_id", name: "fk_village_2"
 end
