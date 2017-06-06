@@ -1,0 +1,74 @@
+<div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
+  <div class="button" onclick="window.location = '<%= new_user_path %>'" tag=0>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          Add User
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          Add new system user at facility.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="button" onclick="window.location = '/block'" tag=5>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          Block User
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          Revoke user access rights at facility.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="button" onclick="window.location = '/unblock'" tag=5>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          Unblock User
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          Give back access rights to blocked user at facility.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="button" onclick="window.location = '/view_users'" tag=1>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          View Users
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          View all users, their roles and access rights at facility.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,123 @@
+<style>
+
+    .record td {
+        font-size: 18px;
+        font-style: italic;
+        color: #000;
+    }
+
+    .record td strong {
+        font-size: 14px;
+        font-style: normal;
+        color: #3465a4;
+    }
+
+    fieldset {
+        margin: 20px;
+        border-radius: 5px;
+        border: 1px solid #3465a4;
+        padding: 20px;
+    }
+
+    legend {
+        font-size: 18px;
+        font-weight: normal;
+        color: #3465a4;
+    }
+
+</style>
+
+<fieldset>
+  <legend>
+    User Details
+  </legend>
+
+  <fieldset style="border: 1px solid #eee;">
+  <table class="record" style="margin: auto;" cellpadding="10" cellspacing="5">
+    <tr>
+      <td colspan="3">
+        <p id="notice"><%= notice %></p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <strong>Username:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+        <%= @user.username %>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <strong>First Name:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+	 <%= @person_name.first_name %>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <strong>Last Name:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+	 <%= @person_name.last_name %>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td>
+        <strong>Role:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+	<%= @user_role.role %>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td>
+        <strong>Created:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+        <%= @user.created_at.to_date.strftime("%d/%b/%Y") rescue nil %>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <strong>Updated:</strong>
+      </td>
+      <td>
+        :
+      </td>
+      <td>
+        <%= @user.updated_at.to_date.strftime("%d/%b/%Y") rescue nil %>
+      </td>
+    </tr>
+
+  </table>
+
+  </fieldset>
+
+  <fieldset style="border: 1px solid #eee;"></fieldset>
+
+</fieldset>
