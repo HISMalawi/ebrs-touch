@@ -1,4 +1,30 @@
 Rails.application.routes.draw do
+  get 'users/index'
+
+  root 'children#index'
+
+  get 'users/show'
+
+  get 'users/view'
+
+  get 'users/new'
+
+  get 'users/create'
+
+  get "/block_user/:id" => "users#block_user"
+
+  get "/unblock_user/:id" => "users#unblock_user"
+
+  get '/block'  => "users#block"
+
+  get '/unblock' => "users#unblock"
+
+  get '/query_users' =>"users#query_users"
+
+  get "/view" => "children#view"
+
+  get "/view_users" => "users#view"
+
   get 'person/index'
 
   get 'person/show'
@@ -7,7 +33,7 @@ Rails.application.routes.draw do
 
   get 'person/create'
 
-  resources :people	
+  resources :people
 
   resources :users
 
@@ -15,7 +41,7 @@ Rails.application.routes.draw do
     collection do
       get :logout
     end
-  end	
+  end
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

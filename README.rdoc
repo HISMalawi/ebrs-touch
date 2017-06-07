@@ -11,3 +11,7 @@ Requirements:
 * Passenger 4.0.53
 
 * Ubuntu 14.04 LTS
+
+Setup:
+
+1. run bundle exec rake db:create db:schema:load db:seed
