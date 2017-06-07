@@ -7,7 +7,7 @@ Source_path = '/home/comish/Desktop/datamigration/'
 
 
 def startRetrieval
-  
+ datarow =[]
  rows = {}
  location = []
  description = []
@@ -17,12 +17,12 @@ def startRetrieval
        rows = row[0]
        location = row[1]
        description = row[2]
-  
-   puts ">>>>>>>>>>>#{rows}>>>>>>>>>>>>>>>>>>>>>>>>>#{location}>>>>>>>>>>>>>>>>>>>#{description}"
-
+       datarow = [[row[0]],[row[1]],[row[2]]]
+    
+      puts ">>>>>>>>>>>>>>>>>>>>>>>>>..#{datarow}"  
  end
 
-
+  
 end
 
 startRetrieval
