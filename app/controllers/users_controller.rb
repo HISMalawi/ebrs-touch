@@ -2,6 +2,8 @@ class UsersController < ApplicationController
 
   #Displays User Management Section
   def index
+
+    @icoFolder = icoFolder("icoFolder")
     #raise @icoFolder.inspect
     @section = "User Management"
 
@@ -20,8 +22,8 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
 
     @person_name = PersonName.find_by_person_id(@user.person_id)
-	#raise @user.inspect
-    @user_role = UserRole.find(@user.user_id)
+
+    @user_role = UserRole.find(@user.user_role_id)
 
     @targeturl = "/view_users"
 
@@ -57,7 +59,9 @@ class UsersController < ApplicationController
   # Edits Selected User
   def edit
 
-    redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Update User"))
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Update User"))
+
+    @user = User.find(params[:id])
 
     @section = "Edit User"
 
@@ -81,8 +85,9 @@ class UsersController < ApplicationController
       person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
 
-      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id: 1,  email: params[:user]['email'], person_id: core_person.person_id)
-      user_role = UserRole.create(user_role_id: @user.user_id, role: params[:user]['user_role']['role'], level: 1, voided: 0)
+      user_role = UserRole.create(role: params[:user]['user_role']['role'], level: 1, voided: 0)
+
+      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id:     	 user_role.user_role_id,  email: params[:user]['email'], person_id: core_person.person_id)
 
       respond_to do |format|
 

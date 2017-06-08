@@ -27,6 +27,29 @@ Rails.application.routes.draw do
 
   get 'users/my_account'
 
+  post 'users/update_password'
+
+  get 'users/change_password'
+
+  get "/query" => "children#query"
+
+  get "query_sync" =>"children#query_sync"
+
+
+  get "/logout" => "logins#logout"
+
+  get "/change_password" => "users#change_password"
+
+  get "/login" => "logins#login"
+
+  get "/search_by_fullname/:id" => "children#search_by_fullname"
+
+  get "/search_by_name" => "children#search_by_name"
+
+  get "/set_context/:id" => "logins#set_context"
+
+  get "/edit_account" => "users#edit_account"
+
   get 'person/index'
 
   get 'person/show'
