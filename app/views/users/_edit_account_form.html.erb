@@ -1,16 +1,17 @@
-<%= form_for(@user) do |f| %>
+
+<%= form_for(@current_user) do |f| %>
 
     <fieldset>
       <legend>
         User Details
       </legend>
 
-      <% if @user.errors.any? %>
+      <% if @current_user.errors.any? %>
           <div id="error_explanation">
-            <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+            <h2><%= pluralize(@current_user.errors.count, "error") %> prohibited this user from being saved:</h2>
 
             <ul>
-              <% @user.errors.full_messages.each do |message| %>
+              <% @current_user.errors.full_messages.each do |message| %>
                   <li><%= message %></li>
               <% end %>
             </ul>
@@ -19,138 +20,24 @@
 
       <table cellpadding="5" width="90%" style="margin: auto; margin-top: 0px;">
         <tr>
-          <td colspan="2">
-            &nbsp;
-          </td>
-          <td>
-            <span id='notice' style="font-style: italic; font-size: 0.9em;"></span><br/>
-          </td>
-        </tr>
-        <tr>
           <td align="right">
-            <%= f.label :username %>
-          </td>
-          <td>
-            :
-          </td>
-
-          <td>
-            <% if request.path.match(/new/) %>
-
-                <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :textCase => "lower", :uniq_check => "/username_availability?search_str=" %>
-
-            <%else %>
-
-
-                <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower" %>
-
-            <% end %>
-          </td>
-
-        </tr>
-
-        <%= f.fields_for :person do |i| %>
-        <tr>
-          <td align="right">
-             <%= i.label :first_name %>
+            <label for="user_preferred_keyboard">Preferred Keyboard</label>
           </td>
           <td>
             :
           </td>
           <td>
-            <%= i.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true %>
+            <%= select_tag "user[preferred_keyboard]", options_for_select(@keyboards, @user.preferred_keyboard), :class => 'input_cell', :placeholder => "Select Preferred Keyboard", :required => true, :style => "width: 81.4% !important;" %>
           </td>
         </tr>
-        <tr>
-          <td align="right">
-            <%= i.label :last_name %>
-          </td>
-          <td>
-            :
-          </td>
-          <td>
-            <%= i.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true %>
-          </td>
-           <% end %>
-        </tr>
-
-	<%= f.fields_for :user_role do |i| %>
-	<% @roles = UserRole.all.each %>
-        <tr>
-          <td align="right">
-            <%= i.label :role %>
-          </td>
-          <td>
-            :
-          </td>
-          <td>
-     <%= i.select :role, options_for_select(@roles.map{ |r| [r.role, r.role]}), :class => "input_cell", :placeholder => "Select Role", :required => true %>
-          </td>
-        </tr>
-	  <% end %>
-
-
-
-        <% if request.path.match(/new/) %>
-
-            <tr>
-              <td align="right">
-                <label for="user_password">Password</label>
-              </td>
-              <td>
-                :
-              </td>
-              <td>
-                <%= f.password_field :password,
-                                     :class => "input_cell",
-                                     :placeholder => "Password",
-                                     :required => true,
-                                     :textCase => "lower",
-                                     :absolute_min => 6,
-                										 :absolute_max => 20 %>
-              </td>
-            </tr>
-
-            <tr>
-              <td align="right">
-                <%= f.label :confirm_password %>
-              </td>
-              <td>
-                :
-              </td>
-              <td>
-                <%= f.password_field :confirm_password, :class => "input_cell", :placeholder => "Confirm the password entered", :required => true, :textCase => "lower" %>
-              </td>
-            </tr>
-
-        <% else %>
-<tr>
-              <td align="right">
-                <label for="user_password">Password</label>
-              </td>
-              <td>
-                :
-              </td>
-              <td>
-                <%= f.password_field :password, :class => "input_cell", :placeholder => "Password", :optional => true, :textCase => "lower" %>
-              </td>
-            </tr>
-
-        <% end %>
-
-        <tr>
-          <td align="right">
-            <%= f.label :email %>
-          </td>
-          <td>
-            :
-          </td>
-          <td>
-            <%= f.text_field :email, :class => "input_cell", :placeholder => "Email Address", :optional => true %>
-          </td>
-        </tr>
-
       </table>
+
+      <div class="actions">
+        <%#= f.hidden_field :_rev %>
+        <%#= f.hidden_field :created_at %>
+        <%#= f.hidden_field :updated_at %>
+        <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;", :onclick => "submitForm()"  %>
+      </div>
 
     </fieldset>
 
@@ -177,7 +64,7 @@
         first_name = document.getElementById('user_first_name');
         last_name = document.getElementById('user_last_name');
         user_role = document.getElementById('user_role');
-        password = document.getElementById('user_password');
+        password = document.getElementById('user_password_hash');
         password_confirm = document.getElementById('user_confirm_password');
 
         if (username.value == '') {

@@ -25,6 +25,8 @@ Rails.application.routes.draw do
 
   get "/view_users" => "users#view"
 
+  get 'users/my_account'
+
   get 'person/index'
 
   get 'person/show'
