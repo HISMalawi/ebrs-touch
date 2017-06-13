@@ -9,7 +9,7 @@ class PersonController < ApplicationController
      @person = Person.new
 
      @section = "New Person"
-     render :layout => "touch"
+     render "_form"
   end
 
   def create
