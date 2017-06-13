@@ -3,4 +3,5 @@ class PersonName < ActiveRecord::Base
     self.primary_key = :person_name_id
     belongs_to :person
     belongs_to :core_person
+    has_one :person_name_code
 end

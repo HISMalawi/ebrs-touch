@@ -2,6 +2,8 @@ class UsersController < ApplicationController
 
   #Displays User Management Section
   def index
+
+    @icoFolder = icoFolder("icoFolder")
     #raise @icoFolder.inspect
     @section = "User Management"
 
@@ -20,8 +22,8 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
 
     @person_name = PersonName.find_by_person_id(@user.person_id)
-	#raise @user.inspect
-    @user_role = UserRole.find(@user.user_id)
+
+    @user_role = UserRole.find(@user.user_role_id)
 
     @targeturl = "/view_users"
 
@@ -57,6 +59,8 @@ class UsersController < ApplicationController
   # Edits Selected User
   def edit
 
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Update User"))
+
     @user = User.find(params[:id])
 
     @section = "Edit User"
@@ -81,8 +85,9 @@ class UsersController < ApplicationController
       person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
 
-      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, role_id: 1, email: "admin@admin.com", person_id: core_person.person_id)
-      user_role = UserRole.create(user_role_id: @user.user_id, role: params[:user]['user_role']['role'], level: 1, voided: 0)
+      user_role = UserRole.create(role: params[:user]['user_role']['role'], level: 1, voided: 0)
+
+      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id:     	 user_role.user_role_id,  email: params[:user]['email'], person_id: core_person.person_id)
 
       respond_to do |format|
 
@@ -101,18 +106,17 @@ class UsersController < ApplicationController
     if request.referrer.match('edit_account')
       @current_user.preferred_keyboard = params[:user][:preferred_keyboard]
       @current_user.save!
-      #Audit.create(record_id: @current_user.id, audit_type: "Audit", level: "User", reason: "Updated user preference")
       redirect_to '/users/my_account' and return
     end
 
     if params[:user][:plain_password].present? && params[:user][:plain_password].length > 1
       @user.update_attributes(:password_hash => params[:user][:plain_password], :password_attempt => 0, :last_password_date => Time.now)
-       #Audit.create(record_id: @user.id, audit_type: "Audit", level: "User", reason: "Updated user password")
+
     end
- #raise @user.inspect
+
     respond_to do |format|
       #if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false) and @user.update_attributes(user_params)
-         #Audit.create(record_id: @user.id, audit_type: "Audit", level: "User", reason: "Updated user")
+
         if @user.present?
         format.html { redirect_to @user, :notice => 'User was successfully updated.' }
         format.json { render :show, :status => :ok, :location => @user }
@@ -129,16 +133,15 @@ class UsersController < ApplicationController
     results = []
 
     users = User.all
-
-    users.each do |user|
+      users.each do |user|
     	next if user.core_person.blank? || user.core_person.person_name.blank?
 
     	record = {
           	"username" => "#{user.username}",
-          	"user_id" => "#{user.user_id}",
           	"name" => "#{user.core_person.person_name.first_name} #{user.core_person.person_name.last_name}",
-          	"roles" => "#{user.user_role.role}",
-         	"active" => (user.active rescue true)
+          	#"role" => "#{user.user_role.role}",
+          	"user_id" => "#{user.user_id}",
+         	"active" => (user.active rescue false)
       	    	}
 
       	results << record
@@ -210,6 +213,158 @@ class UsersController < ApplicationController
     end
 
     redirect_to "/view_users" and return
+
+  end
+
+  def search
+
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("View Users"))
+
+    @section = "Search for User"
+
+    @targeturl = "/users"
+
+    render :layout => "facility"
+
+  end
+
+  def search_by_username
+
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("View Users"))
+
+    name = params[:id].strip rescue ""
+
+    results = []
+
+    if name.length > 1
+
+      users = User.by_username.key(name).limit(10).each
+
+    else
+
+      users = User.by_username.limit(10).each
+
+    end
+
+    users.each do |user|
+
+      next if user.username.strip.downcase == User.current_user.username.strip.downcase
+
+      record = {
+          "username" => "#{user.username}",
+          "fname" => "#{user.core_person.person_name.first_name}",
+          "lname" => "#{user.core_person.person_name.last_name}",
+          "role" => "#{user.user_role.role}",
+          "active" => (user.active rescue false)
+      }
+
+      results << record
+
+    end
+
+    render :text => results.to_json
+
+  end
+
+  def search_by_active
+
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("View Users"))
+
+    status = params[:status] == "true" ? true : false
+
+    results = []
+
+    users = User.by_active.key(status).limit(10).each
+
+    users.each do |user|
+
+      next if user.username.strip.downcase == User.current_user.username.strip.downcase
+
+      record = {
+          "username" => "#{user.username}",
+          "fname" => "#{user.core_person.person_name.first_name}",
+          "lname" => "#{user.core_person.person_name.last_name}",
+          "role" => "#{user.user_role.role}",
+          "active" => (user.active rescue false)
+      }
+
+      results << record
+
+    end
+
+    render :text => results.to_json
+
+  end
+
+
+
+  def username_availability
+    user = User.get_active_user(params[:search_str])
+    render :text => user = user.blank? ? 'OK' : 'N/A' and return
+  end
+
+  def my_account
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Change own password"))
+
+    @section = "My Account"
+
+    @targeturl = "/"
+
+    @user = User.current_user
+
+    render :layout => "facility"
+
+  end
+
+  def change_password
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Change own password"))
+
+    @section = "Change Password"
+
+    @targeturl = "/"
+
+    @user = User.current_user
+
+    render :layout => "facility"
+
+  end
+
+  def update_password
+
+    user = User.current_user
+
+    result = user.password_matches?(params[:old_password])
+
+    if user && !user.password_matches?(params[:old_password])
+    	 result = "not same"
+    elsif user && user.password_matches?(params[:new_password])
+    	 result = "same"
+    else
+      user.update_attributes(:password_hash => params[:new_password], :password_attempt => 0, :last_password_date => Time.now)
+      flash["notice"] = "Your new password has been changed succesfully"
+
+    end
+
+    render :text => result
+
+  end
+
+  private
+  # Use callbacks to share common setup or constraints between actions.
+  def set_user
+    @user = User.find(params[:id])
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def user_params
+    params.require(:user).permit(:username, :active, :create_at, :creator, :email, :first_name, :last_name, :notify, :plain_password, :role, :updated_at, :_rev)
+  end
+
+  def check_if_user_admin
+
+    @search = icoFolder("search")
+
+    @admin = ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
 
   end
 

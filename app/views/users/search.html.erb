@@ -1,0 +1,365 @@
+<style>
+
+    .record td {
+        font-size: 18px;
+        font-style: italic;
+        color: #000;
+    }
+
+    .record td strong {
+        font-size: 14px;
+        font-style: normal;
+        color: #3465a4;
+    }
+
+    fieldset {
+        margin: 20px;
+        border-radius: 5px;
+        border: 1px solid #3465a4;
+        padding: 20px;
+    }
+
+    legend {
+        font-size: 18px;
+        font-weight: normal;
+        color: #3465a4;
+    }
+
+</style>
+
+<fieldset>
+  <form autocomplete="off">
+    <table cellpadding="5" width="90%" style="margin: auto; margin-top: 30px;">
+      <tr>
+        <td align="right">
+          Search for Username
+        </td>
+        <td>
+          :
+        </td>
+        <td>
+          <input type="text" class="input_cell" id="username" name="username" value="" style="width: 97%;"/>
+        </td>
+        <td>
+          <img src="<%= @search rescue nil %>" height="60" style="cursor: pointer; border-radius: 10px; padding: 5px; border: 1px solid #fff;"
+               onclick="checkPopUp();" onmouseover="this.style.border = '1px #ccc solid'; " onmouseout="this.style.border = '1px #fff solid'; "/>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          Username
+        </td>
+        <td>
+          :
+        </td>
+        <td>
+          <input type="text" class="input_cell" id="uname" name="uname" value="" style="width: 97%;" disabled/>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          First Name
+        </td>
+        <td>
+          :
+        </td>
+        <td>
+          <input type="text" class="input_cell" id="fname" name="fname" value="" style="width: 97%;" disabled/>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          Last Name
+        </td>
+        <td>
+          :
+        </td>
+        <td>
+          <input type="text" class="input_cell" id="lname" name="lname" value="" style="width: 97%;" disabled/>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          Role
+        </td>
+        <td>
+          :
+        </td>
+        <td>
+          <input type="text" class="input_cell" id="role" name="role" value="" style="width: 97%;" disabled/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          &nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          &nbsp;
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;">Edit</button>
+
+</fieldset>
+
+<script>
+
+    var users = [];
+
+    var timerHnd;
+
+    var active = false;
+
+    function __$(id) {
+        return document.getElementById(id);
+    }
+
+    function checkCtrl(obj) {
+        var o = obj;
+        var t = o.offsetTop;
+        var l = o.offsetLeft + 1;
+        var w = o.offsetWidth;
+        var h = o.offsetHeight;
+
+        while ((o ? (o.offsetParent != document.body) : false)) {
+            o = o.offsetParent;
+            t += (o ? o.offsetTop : 0);
+            l += (o ? o.offsetLeft : 0);
+        }
+        return [w, h, t, l];
+    }
+
+    function checkPopUp() {
+
+        if (__$("popup")) {
+
+            clearTimeout(timerHnd);
+
+            document.body.removeChild(__$("popup"));
+
+        } else {
+
+            ajaxTasks();
+
+        }
+
+    }
+
+    function ajaxTasks() {
+
+        clearTimeout(timerHnd);
+
+        var name = __$("username").value.trim();
+
+        var url = "/search_by_username/" + name;
+
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            handleTasks(httpRequest);
+        };
+        try {
+            httpRequest.open('GET', url, true);
+            httpRequest.send(null);
+        } catch (e) {
+        }
+    }
+
+    function handleTasks(aXMLHttpRequest) {
+        if (!aXMLHttpRequest) return;
+
+        if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
+                aXMLHttpRequest.status == 304)) {
+
+            var result = JSON.parse(aXMLHttpRequest.responseText);
+
+            users = result;
+
+            loadRows();
+
+        }
+    }
+
+    function loadRows() {
+
+        if (!__$("popup")) {
+
+            var pos = checkCtrl(__$("username"));
+
+            var popup = document.createElement("div");
+            popup.style.position = "absolute";
+            popup.style.width = (pos[0] - 3) + "px";
+            popup.style.height = "200px";
+            popup.style.border = "1px solid #3465a4";
+            popup.style.backgroundColor = "rgba(255,255,255,0.9)";
+            popup.style.overflow = "auto";
+            popup.style.top = (pos[2] + pos[1] + 2) + "px";
+            popup.style.left = pos[3] + "px";
+            popup.id = "popup";
+
+            document.body.appendChild(popup);
+
+        }
+
+        __$("popup").innerHTML = "";
+
+        if (!active)
+            clearFields();
+
+        for (var i = 0; i < users.length; i++) {
+
+            var row = document.createElement("div");
+            row.style.margin = "5px";
+            row.style.border = "1px solid #ccc";
+            // row.style.height = "50px";
+            row.style.cursor = "pointer";
+            row.innerHTML = "&nbsp;";
+            row.setAttribute("pos", i);
+            row.setAttribute("tag", (i % 2 > 0 ? "odd" : "even"));
+            row.style.verticalAlign = "middle";
+            row.style.padding = "20px";
+
+            row.innerHTML = users[i]["username"];
+
+            row.style.backgroundColor = (i % 2 > 0 ? "#fff" : "#eee");
+
+            row.onmouseover = function () {
+
+                this.style.backgroundColor = "lightblue";
+
+            }
+
+            row.onmouseout = function () {
+
+                if (this.getAttribute("tag") == "even") {
+
+                    this.style.backgroundColor = "#eee";
+
+                } else {
+
+                    this.style.backgroundColor = "#fff";
+
+                }
+
+
+            }
+
+            row.onclick = function () {
+
+                active = true;
+
+                clearTimeout(timerHnd);
+
+                loadItem(this.getAttribute("pos"));
+
+            }
+
+            __$("popup").appendChild(row);
+
+        }
+
+        if (!active && __$("fname").value.trim().length == 0) {
+
+            timerHnd = setTimeout("ajaxTasks()", 1000);
+
+        }
+
+    }
+
+    function loadItem(pos) {
+
+        clearTimeout(timerHnd);
+
+        if (__$("username")) {
+
+            __$("username").value = users[pos]["username"];
+
+        }
+
+        if (__$("uname")) {
+
+            __$("uname").value = users[pos]["username"];
+
+        }
+
+        if (__$("fname")) {
+
+            __$("fname").value = users[pos]["fname"];
+
+        }
+
+        if (__$("lname")) {
+
+            __$("lname").value = users[pos]["lname"];
+
+        }
+
+        if (__$("role")) {
+
+            __$("role").value = users[pos]["role"];
+
+        }
+
+        document.body.removeChild(__$("popup"));
+
+        if (__$("btnAction")) {
+
+            __$("btnAction").className = "blue";
+
+            __$("btnAction").onclick = function () {
+
+                window.location = "/users/" + users[pos]["username"] + "/edit";
+
+
+            }
+
+        }
+
+        active = false;
+
+    }
+
+    function clearFields() {
+
+        if (__$("uname")) {
+
+            __$("uname").value = "";
+
+        }
+
+        if (__$("fname")) {
+
+            __$("fname").value = "";
+
+        }
+
+        if (__$("lname")) {
+
+            __$("lname").value = "";
+
+        }
+
+        if (__$("role")) {
+
+            __$("role").value = "";
+
+        }
+
+        if (__$("btnAction")) {
+
+            __$("btnAction").className = "gray";
+
+            __$("btnAction").onclick = function () {
+            };
+
+        }
+
+    }
+
+    //showFixedKeyboard(__$("username"), __$("keyboard-container"));
+    //showKeyboard(__$("username"))
+
+</script>
