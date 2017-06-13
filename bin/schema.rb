@@ -13,15 +13,6 @@
 
 ActiveRecord::Schema.define(version: 1) do
 
-  create_table "cities", primary_key: "city_id", force: :cascade do |t|
-    t.string   "name",       limit: 255
-    t.integer  "country_id", limit: 4
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-  end
-
-  add_index "cities", ["country_id"], name: "fk_cities_1_idx", using: :btree
-
   create_table "core_person", primary_key: "person_id", force: :cascade do |t|
     t.integer  "person_type_id", limit: 4, null: false
     t.datetime "created_at",               null: false
@@ -29,22 +20,7 @@ ActiveRecord::Schema.define(version: 1) do
   end
 
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
-
-  create_table "country", primary_key: "country_id", force: :cascade do |t|
-    t.string   "name",               limit: 255
-    t.string   "nationality",        limit: 255
-    t.string   "continent",          limit: 255
-    t.integer  "country_code",       limit: 4
-    t.string   "country_short_code", limit: 255
-    t.string   "region",             limit: 255
-    t.string   "sub_region",         limit: 255
-    t.string   "world_region",       limit: 255
-    t.string   "currency",           limit: 255
-    t.string   "ioc",                limit: 255
-    t.string   "gec",                limit: 255
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
-  end
+  add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
 
   create_table "guardianship", primary_key: "guardianship_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
@@ -69,12 +45,33 @@ ActiveRecord::Schema.define(version: 1) do
   end
 
   create_table "location", primary_key: "location_id", force: :cascade do |t|
-    t.string   "name",               limit: 45,  null: false
-    t.string   "description",        limit: 100
-    t.integer  "location_parent_id", limit: 4
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
+    t.string   "code",            limit: 45
+    t.string   "name",            limit: 255, default: "",    null: false
+    t.string   "description",     limit: 255
+    t.string   "postal_code",     limit: 50
+    t.string   "country",         limit: 50
+    t.string   "latitude",        limit: 50
+    t.string   "longitude",       limit: 50
+    t.integer  "creator",         limit: 4,   default: 0,     null: false
+    t.datetime "date_created",                                null: false
+    t.string   "county_district", limit: 255
+    t.boolean  "voided",                      default: false, null: false
+    t.integer  "voided_by",       limit: 4
+    t.datetime "date_voided"
+    t.string   "void_reason",     limit: 255
+    t.integer  "parent_location", limit: 4
+    t.string   "uuid",            limit: 38,                  null: false
+    t.integer  "changed_by",      limit: 4
+    t.datetime "date_changed"
   end
+
+  add_index "location", ["changed_by"], name: "location_changed_by", using: :btree
+  add_index "location", ["creator"], name: "user_who_created_location", using: :btree
+  add_index "location", ["name"], name: "name_of_location", using: :btree
+  add_index "location", ["parent_location"], name: "parent_location", using: :btree
+  add_index "location", ["uuid"], name: "location_uuid_index", unique: true, using: :btree
+  add_index "location", ["voided"], name: "retired_status", using: :btree
+  add_index "location", ["voided_by"], name: "user_who_retired_location", using: :btree
 
   create_table "location_tag", primary_key: "location_tag_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
@@ -144,7 +141,6 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "person_addresses", ["home_ta"], name: "fk_person_addresses_6_idx", using: :btree
   add_index "person_addresses", ["home_village"], name: "fk_person_addresses_5_idx", using: :btree
   add_index "person_addresses", ["person_id"], name: "fk_person_addresses_1_idx", using: :btree
-  add_index "person_addresses", ["residential_country"], name: "fk_person_addresses_9_idx", using: :btree
 
   create_table "person_attribute_types", primary_key: "person_attribute_type_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
@@ -261,13 +257,16 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "person_relationship", ["person_relationship_type_id"], name: "fk_person_relationship_3_idx", using: :btree
 
   create_table "person_relationship_types", primary_key: "person_relationship_type_id", force: :cascade do |t|
-    t.string   "name",        limit: 20,             null: false
+    t.string   "name",        limit: 25,             null: false
     t.integer  "voided",      limit: 1,  default: 0, null: false
     t.string   "description", limit: 45
     t.integer  "voided_by",   limit: 4
     t.datetime "date_voided"
-    t.datetime "created_at",                         null: false
-    t.datetime "update_at",                          null: false
+  end
+
+  create_table "person_type", primary_key: "person_type_id", force: :cascade do |t|
+    t.string "name",        limit: 45, null: false
+    t.string "description", limit: 45
   end
 
   create_table "person_type_of_births", primary_key: "person_type_of_birth_id", force: :cascade do |t|
@@ -281,11 +280,13 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "date_voided"
   end
 
-  create_table "role_activity", primary_key: "role_activity_id", force: :cascade do |t|
-    t.string   "activity",   limit: 50, default: "", null: false
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+  create_table "role", id: false, force: :cascade do |t|
+    t.integer "role_id", limit: 4,  default: 0,  null: false
+    t.string  "role",    limit: 50, default: "", null: false
+    t.integer "level",   limit: 4
   end
+
+  add_index "role", ["role_id"], name: "fk_user_role_1_idx", using: :btree
 
   create_table "statuses", primary_key: "status_id", force: :cascade do |t|
     t.string   "name",        limit: 45
@@ -294,24 +295,16 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "updated_at",              null: false
   end
 
-  create_table "user_role", id: false, force: :cascade do |t|
-    t.integer "user_id", limit: 4,  default: 0,  null: false
-    t.string  "role",    limit: 50, default: "", null: false
+  create_table "user_role", primary_key: "user_role_id", force: :cascade do |t|
+    t.integer "user_id", limit: 4, null: false
+    t.integer "role_id", limit: 4, null: false
   end
 
+  add_index "user_role", ["role_id"], name: "fk_user_role_2_idx", using: :btree
   add_index "user_role", ["user_id"], name: "fk_user_role_1_idx", using: :btree
 
-  create_table "user_role_activity", primary_key: "user_role_activity_id", force: :cascade do |t|
-    t.integer  "user_role_id", limit: 4, null: false
-    t.integer  "activity_id",  limit: 4, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-  end
-
-  add_index "user_role_activity", ["user_role_id"], name: "fk_user_role_activity_1_idx", using: :btree
-
   create_table "users", primary_key: "user_id", force: :cascade do |t|
-    t.integer  "location_id",     limit: 4,               null: false
+    t.integer  "location_id",     limit: 4
     t.string   "username",        limit: 50
     t.string   "password",        limit: 128
     t.string   "salt",            limit: 128
@@ -332,13 +325,11 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
-  add_foreign_key "cities", "country", primary_key: "country_id", name: "fk_cities_1"
+  add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
   add_foreign_key "location_tag_map", "location_tag", primary_key: "location_tag_id", name: "fk_location_tag_map_2"
   add_foreign_key "person", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_1"
   add_foreign_key "person_addresses", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_addresses_1"
-  add_foreign_key "person_addresses", "country", column: "citizenship", primary_key: "country_id", name: "fk_person_addresses_8"
-  add_foreign_key "person_addresses", "country", column: "residential_country", primary_key: "country_id", name: "fk_person_addresses_9"
   add_foreign_key "person_addresses", "location", column: "current_district", primary_key: "location_id", name: "fk_person_addresses_4"
   add_foreign_key "person_addresses", "location", column: "current_ta", primary_key: "location_id", name: "fk_person_addresses_3"
   add_foreign_key "person_addresses", "location", column: "current_village", primary_key: "location_id", name: "fk_person_addresses_2"
@@ -363,9 +354,8 @@ ActiveRecord::Schema.define(version: 1) do
   add_foreign_key "person_relationship", "core_person", column: "person_a", primary_key: "person_id", name: "fk_person_relationship_1"
   add_foreign_key "person_relationship", "core_person", column: "person_b", primary_key: "person_id", name: "fk_person_relationship_2"
   add_foreign_key "person_relationship", "person_relationship_types", primary_key: "person_relationship_type_id", name: "fk_person_relationship_3"
-  add_foreign_key "role_activity", "user_role", column: "role_activity_id", primary_key: "user_id", name: "fk_role_activity_1"
+  add_foreign_key "user_role", "role", primary_key: "role_id", name: "fk_user_role_2"
   add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
-  add_foreign_key "user_role_activity", "user_role", primary_key: "user_id", name: "fk_user_role_activity_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
 end
