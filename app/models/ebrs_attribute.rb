@@ -12,7 +12,8 @@ module EbrsAttribute
     and (self.creator.blank? || self.creator == 0)and User.current != nil
     self.provider_id = User.current.person.id if self.attribute_names.include?("provider_id") and \
       (self.provider_id.blank? || self.provider_id == 0)and User.current != nil
-    self.date_created = Time.now if self.attribute_names.include?("date_created")
+    self.created_at = Time.now if self.attribute_names.include?("created_at")
+    self.updated_at = Time.now if self.attribute_names.include?("updated_at")
     self.uuid = ActiveRecord::Base.connection.select_one("SELECT UUID() as uuid")['uuid'] \
       if self.attribute_names.include?("uuid")
   end
