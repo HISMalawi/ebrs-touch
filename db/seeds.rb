@@ -60,4 +60,4 @@ end
 	
   
   
-puts "Successful created: your new username is: #{User.username}  and password: adminebrs"
+puts "Successful created: your new username is: #{user.username}  and password: adminebrs"

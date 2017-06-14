@@ -25,7 +25,7 @@
 
 </style>
 
-<%= form_for(@person) do |f| %>
+<%= form_for :person do |f| %>
 
     <fieldset>
 
@@ -57,11 +57,12 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <%= (f.text_field :birthdate,
+        <input type="text" id="person_birthdate" name="person[birthdate]" class="input_cell" fieldtype = "date">
+        <!--%= (f.text_field :birthdate,
                           :class => "input_cell",
                           :fieldtype => "date",
                           :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
-                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %-->
 
 
       </div>
@@ -83,6 +84,7 @@
         <label for="person_birthweight">Birth weight (in Kilogrammes)</label>
         <br>
         <%= (f.text_field :birth_weight,
+          :id => "person_birthweight",
                           :value => "",
                           :placeholder => "0.000",
                           :class => "input_cell",
@@ -121,23 +123,25 @@
       <div class="field">
         <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
         <br>
-        <select id="person_parents_married_to_each_other" name="person[parents_married_to_each_other]" class="input_cell" >
+        <select id="person_parents_married_to_each_other" name="person_birth_details[parents_married_to_each_other]" class="input_cell" >
           <option></option>
-          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
-          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
+          <option <%= ((@person_birth_details[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option <%= ((@person_birth_details[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
         </select>
       </div>
       <div class="field">
         <label for="person_parents_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <%= (f.text_field :date_of_marriage,
+        <input type="text" name="person_birth_details[:date_of_marriage]" id="person_parents_date_of_marriage" :class="input_cell" fieldtype="date" optional=true 
+        condition= "__$('person_parents_married_to_each_other').value.trim() == 'Yes'" >
+        <!-- %= (f.text_field "person_birth_details[:date_of_marriage]",
+          :id => "person_parents_married_to_each_other",
                           :class => "input_cell",
-                          :condition => "__$('person_parents_married_to_each_other').value.trim() == 'Yes'",
+                          
                           :fieldtype => "date",
                           :optional => true,
-                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" % -->
       </div>
-
 
     </fieldset>
 

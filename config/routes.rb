@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get 'users/index'
 
-  root 'children#index'
+  root 'person#index'
 
   get 'users/show'
 
@@ -21,7 +21,7 @@ Rails.application.routes.draw do
 
   get '/query_users' =>"users#query_users"
 
-  get "/view" => "children#view"
+  get "/view" => "person#view"
 
   get "/view_users" => "users#view"
 
@@ -31,9 +31,9 @@ Rails.application.routes.draw do
 
   get 'users/change_password'
 
-  get "/query" => "children#query"
+  get "/query" => "person#query"
 
-  get "query_sync" =>"children#query_sync"
+  get "query_sync" =>"person#query_sync"
 
 
   get "/logout" => "logins#logout"
@@ -42,9 +42,9 @@ Rails.application.routes.draw do
 
   get "/login" => "logins#login"
 
-  get "/search_by_fullname/:id" => "children#search_by_fullname"
+  get "/search_by_fullname/:id" => "person#search_by_fullname"
 
-  get "/search_by_name" => "children#search_by_name"
+  get "/search_by_name" => "person#search_by_name"
 
   get "/set_context/:id" => "logins#set_context"
 
@@ -58,7 +58,7 @@ Rails.application.routes.draw do
 
   get 'person/create'
 
-  resources :people
+  resources :person
 
   resources :users
 

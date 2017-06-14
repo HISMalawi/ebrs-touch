@@ -6,7 +6,7 @@ class PersonController < ApplicationController
   end
 
   def new
-     @person = Person.new
+     @person = PersonName.new
 
      @section = "New Person"
      render :layout => "touch"
