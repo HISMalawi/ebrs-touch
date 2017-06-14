@@ -3,6 +3,7 @@ module PersonService
 	require 'json'
 
   def self.create_record(params)
+    #raise params.inspect
     first_name 			                  = params[:person][:first_name]
     last_name 			                  = params[:person][:last_name]
     middle_name 		                  = params[:person][:middle_name]
@@ -14,7 +15,6 @@ module PersonService
 
     gender 				      	            = params[:child][:gender]
     home_address_same_as_physical     = params[:child][:home_address_same_as_physical]
-    details_of_father_known 	        = params[:child][:details_of_father_known]
     same_address_with_mother	        = params[:child][:same_address_with_mother]
     registration_type 	              = params[:child][:registration_type]
     copy_mother_name                  = params[:child][:copy_mother_name]
@@ -32,11 +32,27 @@ module PersonService
     mother_foreigner_home_district    = params[:child][:mother][:foreigner_home_district]
     mother_foreigner_home_village     = params[:child][:mother][:foreigner_home_village]
     mother_foreigner_home_ta          = params[:child][:mother][:foreigner_home_ta]
+    mother_estimated_dob	            =	params[:child][:mother][:birthdate_estimated]
     mother_mode_of_delivery           = params[:child][:mode_of_delivery]
     mother_level_of_education         = params[:child][:level_of_education]
-    
+
+    ########################### father details ########################################
+
     father_birthdate_estimated        = params[:child][:father][:birthdate_estimated]
     father_residential_country        = params[:child][:father][:residential_country]
+    father_lastname                   = params[:child][:father][:last_name]
+    father_firstname                  = params[:child][:father][:first_name]
+    father_middlename                 = params[:child][:father][:middle_name]
+    father_birthdate                  = params[:child][:father][:birthdate]
+    father_citizenship                = params[:child][:father][:citizenship]
+    father_current_district           = params[:child][:father][:current_district]
+    father_current_ta                 = params[:child][:father][:current_ta]
+    father_current_village            = params[:child][:father][:current_village]
+    father_home_district              = params[:child][:father][:home_district]
+    father_home_ta                    = params[:child][:father][:home_ta]
+    father_home_village               = params[:child][:father][:home_village]
+
+    ######################### father details (end) #################################
 
     informant_last_name               = params[:child][:informant][:last_name]
     informant_first_name              = params[:child][:informant][:first_name]
@@ -48,16 +64,23 @@ module PersonService
     informant_addressline1            = params[:child][:informant][:addressline1]
     informant_addressline2            = params[:child][:informant][:addressline2]
     informant_phone_number            = params[:child][:informant][:phone_number]
-    informant_form_signed             = params[:child][:informant][:form_signed]
+    informant_form_signed             = params[:child][:form_signed]
     informant_same_as_mother          = params[:child][:informant][:informant_same_as_mother]
 
 
-    mother_estimated_dob	            =	params[:child][:mother][:birthdate_estimated]
+
     court_order_attached	            =	params[:child][:court_order_attached]
+    parents_signed                    = params[:child][:parents_signed]
 
     parents_married_to_each_other	    =	params[:child][:parents_married_to_each_other]
 
-  
+    month_prenatal_care_started               = params[:month_prenatal_care_started]
+    number_of_prenatal_visits                 = params[:number_of_prenatal_visits]
+    gestation_at_birth                        = params[:gestation_at_birth]
+    number_of_children_born_alive_inclusive   = params[:number_of_children_born_alive_inclusive]
+    number_of_children_born_still_alive       = params[:number_of_children_born_still_alive]
+    details_of_father_known 	                = params[:details_of_father_known]
+
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
     person = Person.create(person_id: core_person.id, 
@@ -95,6 +118,51 @@ module PersonService
       facility_serial_number:                   nil,
       adoption_court_order:                     0
     )
+
+    ################################### recording mother details (start) ###############################################
+    core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
+
+    person_mother = Person.create(person_id: core_person_mother.id,
+        gender: "F",
+        birthdate: (mother_birthdate.to_date rescue Date.today))
+
+    person_name_mother = PersonName.create(first_name: mother_first_name,
+        middle_name: mother_middle_name,
+        last_name: mother_last_name, person_id: core_person_mother.id)
+
+    PersonNameCode.create(person_name_id: person_name_mother.id,
+        first_name_code: mother_first_name.soundex,
+        last_name_code: mother_last_name.soundex,
+        middle_name_code: (mother_middle_name.soundex rescue nil))
+
+    PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Child-Mother').first.id)
+    ################################### recording mother details (end)   ###############################################
+
+    ################################### recording father details (start) ###############################################
+    if(details_of_father_known == "Yes")
+
+      core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
+
+      person_father = Person.create(person_id: core_person_father.id,
+          gender: "M",
+          birthdate: (father_birthdate.to_date rescue Date.today))
+
+      person_name_father = PersonName.create(first_name: father_firstname,
+          middle_name: (father_middlename rescue nil),
+          last_name: father_lastname, person_id: core_person_father.id)
+
+      PersonNameCode.create(person_name_id: person_name_father.id,
+          first_name_code: father_firstname.soundex,
+          last_name_code: father_lastname.soundex,
+          middle_name_code: (father_middlename.soundex rescue nil))
+
+      PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+          person_relationship_type_id: PersonRelationType.where(name: 'Child-Father').first.id)
+
+    end
+    ################################### recording father details (end)   ###############################################
+
     
     raise "........... #{mother_residental_country}" 
   end

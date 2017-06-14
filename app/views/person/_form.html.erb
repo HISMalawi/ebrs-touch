@@ -126,7 +126,7 @@
                           :optional => true) %>
       </div>
       <div class="field">
-        <%= f.label :type_of_birth %>
+        <label for="person_type_of_birth">Type of birth</label>
         <br>
         <select id="person_type_of_birth" name="child[type_of_birth]" class="input_cell" optional="true">
           <option></option>
@@ -145,7 +145,11 @@
       <div class="field">
         <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
         <br>
-        <%= (f.text_field :other_type_of_birth, :class => "input_cell", :condition => "__$('person_type_of_birth').value.trim() == 'Other'",:optional=>true) rescue ""  %>
+        <%= (f.text_field :other_type_of_birth,
+                          :id => "person_other_type_of_birth",
+                          :class => "input_cell",
+                          :condition => "__$('person_type_of_birth').value.trim() == 'Other'",
+                          :optional=> true) rescue ""  %>
       </div>
 
       <div class="field">
@@ -160,12 +164,13 @@
       <div class="field">
         <label for="person_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <%= (f.text_field :date_of_marriage,
-                          :class => "input_cell",
-													:condition => "__$('person_parents_married_to_each_other').value.trim() == 'Yes'",
-													:fieldtype => "date",
-													:optional => true,
-                                                    :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+        <input type="text" name="date_of_marriage"
+                          id="person_date_of_marriage"
+                          class="input_cell"
+													condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+													fieldtype="date",
+													optional=true,
+                          absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>" >
       </div>
 
 
@@ -485,22 +490,29 @@
       <div class="field">
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
-        <%= (f.number_field :gestation_at_birth, :id => "person_gestation_at_birth", :class => "input_cell", 
+        <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
+                class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
+        <!-- %= (f.number_field :gestation_at_birth, :id => "person_gestation_at_birth", :class => "input_cell",
         :fieldtype => "number", :min => 36,
         :absolute_min => 23, :max => 42, 
-        :absolute_max => 45 , :optional=>true) rescue "" %>
+        :absolute_max => 45 , :optional=>true) rescue "" % -->
       </div>
       <div class="field">
-        <%= f.label :number_of_prenatal_visits %>
+        <label for="person_number_of_prenatal_visits">Number of prenatal visits</label>
+        <!-- %= f.label :number_of_prenatal_visits % -->
         <br>
-        <%= (f.number_field :number_of_prenatal_visits, :class => "input_cell", :fieldtype => "number", :min => 3,
-                            :absolute_min => 0, :max => 6, :absolute_max => 12, :optional=>true) rescue "" %>
+        <input type="text" fieldtype="number" name="number_of_prenatal_visits" id="person_number_of_prenatal_visits"
+                class="input_cell" min="3" absolute_min="0" max="6" absolute_max="12" optional="true" >
+        <!-- %= (f.number_field :number_of_prenatal_visits, :class => "input_cell", :fieldtype => "number", :min => 3,
+                            :absolute_min => 0, :max => 6, :absolute_max => 12, :optional=>true) rescue "" % -->
       </div>
       <div class="field">
         <label for="person_month_prenatal_care_started">Month of pregnancy prenatal care started</label>
         <br>
-        <%= (f.number_field :month_prenatal_care_started, :class => "input_cell", :fieldtype => "number", :min => 3,
-                            :absolute_min => 1, :max => 6, :absolute_max => 10, :optional=>true) rescue "" %>
+        <input type="text" fieldtype="number" name="month_prenatal_care_started" id="person_month_prenatal_care_started"
+               class="input_cell" min="3" absolute_min="1" max="6" absolute_max="10" optional="true">
+        <!-- %= (f.number_field :month_prenatal_care_started, :class => "input_cell", :fieldtype => "number", :min => 3,
+                            :absolute_min => 1, :max => 6, :absolute_max => 10, :optional=>true) rescue "" % -->
       </div>
       <div class="field">
         <%= f.label :mode_of_delivery %>
@@ -523,12 +535,17 @@
         <label for="person_number_of_children_born_alive_inclusive">Number of children born to the mother, including this
           child</label>
         <br>
-        <%= (f.number_field :number_of_children_born_alive_inclusive, :class => "input_cell", :fieldtype => "number",
+        <input type="text" fieldtype="number" name="number_of_children_born_alive_inclusive" id="person_number_of_children_born_alive_inclusive"
+                class="input_cell" absolute_min="1" max="6" absolute_max="20"
+               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+                >
+        <!-- %= (f.number_field :number_of_children_born_alive_inclusive, :class => "input_cell", :fieldtype => "number",
                             :absolute_min => 1,
                             :max => 6,
                             :absolute_max => 20,
                             :tt_onLoad => "possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))",
-                            :tt_onUnload => "navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())") rescue "" %>
+                            :tt_onUnload => "navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())") rescue "" % -->
       </div>
 
 
@@ -536,13 +553,15 @@
         <label for="person_number_of_children_born_still_alive">Number of children born to the mother, and still
           living</label>
         <br>
-        <%= (f.number_field :number_of_children_born_still_alive,
+        <input type="text" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive"
+                class="input_cell" max="6" absolute_max="20" absolute_min="0" >
+        <!-- %= (f.number_field :number_of_children_born_still_alive,
         										:class => "input_cell",
         										:absolute_max => 20,
         										:fieldtype => "number",
                             :absolute_min => 0,
                             :optional => true,
-                            :max => 6) rescue "" %>
+                            :max => 6) rescue "" % -->
       </div>
 
 
