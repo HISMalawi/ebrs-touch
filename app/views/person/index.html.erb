@@ -25,9 +25,9 @@
           </tr>
         </table>
       </div>
-  <!-- % #end % -->
+  <!--% #end % -->
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("View a record") % -->
+  <!--% #if User.current_user.activities_by_level("Facility").include?("View a record") %-->
       <div class="button" onmousedown="window.location = '/view'" tag=1>
         <table style="text-align: left;">
           <tr>
@@ -46,7 +46,7 @@
         </table>
       </div>
   <!-- % #end % -->
-    <!-- % if User.current_user.activities_by_level("Facility").include?("View a record") % -->
+    <!-- % #if User.current_user.activities_by_level("Facility").include?("View a record") % -->
       <div class="button" onmousedown="window.location = '/view_sync'" tag=1>
         <table style="text-align: left;">
           <tr>
@@ -70,7 +70,7 @@
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
-          <img src="<%= @icoFolder %>" height="60"/>
+          <img src="<%#= @icoFolder %>" height="60"/>
         </td>
         <td style="height: 30px;">
           Edit Record
@@ -102,7 +102,7 @@
     </table>
   </div>
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("Activate User") or
+  <!-- %# if User.current_user.activities_by_level("Facility").include?("Activate User") or
           User.current_user.activities_by_level("Facility").include?("Deactivate User") or
           User.current_user.activities_by_level("Facility").include?("Create User") or
           User.current_user.activities_by_level("Facility").include?("Update User") % -->
@@ -125,9 +125,9 @@
     </table>
   </div>
 
-  <!-- % end % -->
+  <!-- %# end % -->
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("Change own password") % -->
+  <!-- %# if User.current_user.activities_by_level("Facility").include?("Change own password") % -->
       <div class="button" onmousedown="window.location = '/users/my_account';" tag=8>
         <table style="text-align: left;">
           <tr>
@@ -145,7 +145,7 @@
           </tr>
         </table>
       </div>
-  <!-- % end % -->
+  <!--% #end % -->
 
 </div>
 
@@ -270,4 +270,3 @@
     }
 
 </script>
-

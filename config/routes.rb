@@ -54,10 +54,11 @@ Rails.application.routes.draw do
 
   get 'person/show'
 
-  get 'person/new'
+ # get 'person/new'
 
   post 'person/create'
 
+<<<<<<< HEAD
   ########################### (create record form) routes
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}
   get '/get_first_names' => 'person#get_names', :defaults => {first_name: 'first_name'}
@@ -77,6 +78,8 @@ Rails.application.routes.draw do
 
 
 
+=======
+>>>>>>> 3a72b92a38c235d976ca193b68c0dd7bc6d26878
   resources :person
 
   resources :users
