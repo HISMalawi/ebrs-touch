@@ -73,12 +73,13 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
+        
         <%= (f.text_field :birthdate,
                           :class => "input_cell",
-                          :id => "person_birthdate",
-                          :fieldtype => "date",
+                          :value => Date.today.strftime('%d/%b/%Y'),
                           :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
                           :absolute_max => Date.today.strftime('%Y/%m/%d'),
+                          :fieldtype => "date",
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>

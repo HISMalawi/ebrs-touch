@@ -58,6 +58,27 @@ Rails.application.routes.draw do
 
   get 'person/create'
 
+
+
+  ########################### (create record form) routes
+  get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}
+  get '/get_first_names' => 'person#get_names', :defaults => {first_name: 'first_name'}
+  get '/search_by_nationality' => 'person#get_nationality'
+  get '/search_by_country' => 'person#get_country'
+  get '/search_by_district' => 'person#get_district'
+  get '/search_by_ta' => 'person#get_ta'
+  get '/search_by_village' => 'person#get_village'
+  ########################### (create record form) routes end
+
+
+
+
+
+
+
+
+
+
   resources :person
 
   resources :users
