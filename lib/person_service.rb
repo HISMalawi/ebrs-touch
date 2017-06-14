@@ -75,7 +75,7 @@ module PersonService
 
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      place_of_birth:                           place_of_birth,
+      place_of_birth:                           1,
       birth_location_id:                        (Location.last.id),
       birth_weight:                             birth_weight,
       type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
@@ -84,17 +84,16 @@ module PersonService
       gestation_at_birth:                       (gestation_at_birth.to_f rescue nil),
       number_of_prenatal_visits:                (number_of_prenatal_visits.to_i rescue nil),
       month_prenatal_care_started:              (month_prenatal_care_started.to_i rescue nil),
-      mode_of_delivery:                         (ModeOfDelivery.where(name: mother_mode_of_delivery).first.id rescue 1),
+      mode_of_delivery_id:                      (ModeOfDelivery.where(name: mother_mode_of_delivery).first.id rescue 1),
       number_of_children_born_alive_inclusive:  (number_of_children_born_alive_inclusive rescue 1),
       number_of_children_born_still_alive:      (number_of_children_born_still_alive rescue 1),
-      level_of_education:                       (LevelOfEducation.where(name: mother_level_of_education).first.id rescue 1),
+      level_of_education_id:                    (LevelOfEducation.where(name: mother_level_of_education).first.id rescue 1),
       district_id_number:                       nil,     
       national_serial_number:                   nil,
       court_order_attached:                     (court_order_attached == 'No' ? 0 : 1),
       acknowledgement_of_receipt_date:          (acknowledgement_of_receipt_date.to_date rescue nil),
       facility_serial_number:                   nil,
-      guardianship:                             nil,
-      adoption_court_order:                     nil
+      adoption_court_order:                     0
     )
     
     raise "........... #{mother_residental_country}" 

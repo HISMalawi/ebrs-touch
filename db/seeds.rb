@@ -12,6 +12,22 @@ begin
     ActiveRecord::Base.transaction do
       require Rails.root.join('db','load_person_types.rb')
       require Rails.root.join('db','load_person_relationship_types.rb')
+
+      delivery_modes = ['SVD','Vacuum Extraction','Breech','Forceps','Caesarean Section']
+      delivery_modes.each do |d|
+        ModeOfDelivery.create(name: d)
+      end
+
+      levels_of_edu = ['None','Primary','Secondary','Higher Education']
+      levels_of_edu.each do |l|
+        LevelOfEducation.create(name: l)
+      end
+
+      type_of_births = ['Single','Twin','Second Twin','Triplet','Second Triplet','Third Triplet','Other']
+      type_of_births.each do |t|
+        PersonTypeOfBirth.create(name: t)
+      end
+
     end
 rescue => e 
 	puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
