@@ -13,6 +13,8 @@ class PersonController < ApplicationController
   end
 
   def create
+    PersonService.create_record(params)
+    redirect_to '/'
   end
 
   #########################################################################

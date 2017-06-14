@@ -56,9 +56,7 @@ Rails.application.routes.draw do
 
   get 'person/new'
 
-  get 'person/create'
-
-
+  post 'person/create'
 
   ########################### (create record form) routes
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}

@@ -28,7 +28,7 @@
     }*/
 </style>
 
-<%= form_for :person do |f| %>
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 
     <fieldset>
 
