@@ -5,7 +5,6 @@ class Location < ActiveRecord::Base
 
   has_many :users
   
-  cattr_accessor :current_location
   cattr_accessor :current_district
   cattr_accessor :current_health_facility
     
