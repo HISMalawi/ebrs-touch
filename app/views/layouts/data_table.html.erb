@@ -18,11 +18,45 @@
           min-width: 684px;
           min-height: 519px;
       }
+
+      .dataTables_length {
+        display: none;
+      }
+
+      .data-table-container {
+        margin: 15px;
+      }
+
+      /* .......... buttons ......... */
+      .btn {
+      }
+
+      .btn {
+        font-weight: bold;
+      }
+
+      .btn-info {
+        background-color: lightblue;
+      }
+      
+      .btn-warning {
+        background-color: lightyellow;
+      }
+      
+      .btn-success {
+        background-color: lightgreen;
+      }
+      /* .......... buttons ends ......... */
   </style>
 
   <script>
       
   </script>
+
+  <%=javascript_include_tag "DataTables/jquery" %>                          
+  <%=javascript_include_tag "DataTables/jquery.dataTables.min" %>
+
+  <%= stylesheet_link_tag "DataTables/demo_table_jui" %>                                     
 
 </head>
 <body onload="resize()" onresize="resize()">
@@ -82,7 +116,7 @@
 
         <button class="red" style="position: absolute; right: 30px; bottom: 20px; cursor: pointer;
                 border: 1px solid #fff; padding: 5px; border-radius: 50px; padding-top: 7px;"
-                onmousedown="window.location = '<%= (!@targeturl.blank? ? "#{@targeturl}" : "/view") %>'">
+                onmousedown="window.location = '<%= (!@targeturl.blank? ? "#{@targeturl}" : "/") %>'">
           <%= (!@targettext.blank? ? @targettext : "Finish") %>
         </button>
 

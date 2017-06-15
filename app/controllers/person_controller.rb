@@ -1,9 +1,22 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
+  
+    render :layout => 'facility'
   end
 
   def show
+  end
+
+  def records
+    person_type = PersonType.where(name: 'Client').first
+    @records = Person.where("p.person_type_id = ?", 
+      person_type.id).joins("INNER JOIN core_person p ON person.person_id = p.person_id
+      INNER JOIN person_name n 
+      ON n.person_id = p.person_id").group('n.person_id').select("person.*, n.*").order('p.created_at DESC')
+      
+         
+    render :layout => 'data_table'
   end
 
   def new
