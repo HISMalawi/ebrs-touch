@@ -1,7 +1,9 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
-  
+    
+    @targeturl = "/login"
+    @targettext = "Logout"
     render :layout => 'facility'
   end
 

@@ -1,395 +1,67 @@
 
-<div id="table" class="table" style="width: 90%; border-spacing: 0px; margin: auto; margin-top: 40px;">
-  <div class="row">
-    <div class="cell"
-         style="border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;">
-      #
-    </div>
-    <div class="cell" style="border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px;">
-      Username
-    </div>
-    <div class="cell"
-         style="border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;">
-      User's Name
-    </div>
-    <div class="cell"
-         style="border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;">
-      Role(s)
-    </div>
-    <div class="cell" style="border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;">
-      Status
-    </div>
-    <div class="cell" style="border-bottom: 1px solid #3465a4; padding: 5px; text-align: center;">
-      Operations
-    </div>
-  </div>
-</div>
+<div class='data-table-container'>
 
-<button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="window.location = '<%= new_user_path %>'">Add User</button>
+<table id="example" class="display" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th style="text-align: center;">#</th>
+      <th style="text-align: left;">Username</th>
+      <th style="text-align: left;">First name</th>
+      <th style="text-align: left;">Last name</th>
+      <th style="text-align: center; width:120px;">Role</th>
+      <th style="text-align: center;">Status</th>
+      <th>&nbsp;</th>
+  </tr>
+  </thead>
+    <%(@users || []).each_with_index do |record, i|
+      names = record.core_person.person_name
+      name = "#{names.first_name} #{names.last_name}"
+    %>
+      <tr>
+        <td style="text-align: left;"><%= (i+1) %></td>
+        <td style="text-align: left;"><%= record.username %></td>
+        <td style="text-align: left;"><%= names.first_name %></td>
+        <td style="text-align: left;"><%= names.last_name %></td>
+        <td style="text-align: center;"><%= record.user_role.role.role %></td>
+        <td style="text-align: center;">
+          <%if record.active == 1%>
+            <%= image_tag "tick.png", class: 'btn-images' %></button>
+          <%else %>
+            <%= image_tag "cancel.png", class: 'btn-images' %></button>
+          <%end %>
+        </td>
+        <td>
+          <table style="width: 100%; text-align: center; border-style: none;">
+            <tr>  
+              <td><button class="btn btn-info" onmousedown="javascript:location='/users/<%=record.id%>';">
+                <%= image_tag "view.png", class: 'btn-images' %></button>
+              </td>
+              <td><button class="btn btn-warning" onmousedown="javascript:location='/users/<%=record.id%>/edit';">
+                <%= image_tag "edit.png", class: 'btn-images' %></button>
+               </td>
+              <td>
+                <%if User.current.id == record.id %>
+                  &nbsp;
+                <%else%>
+                  <button class="btn btn-success" onmousedown="javascript:location='/void_user/<%=record.id%>';">
+                  <%= image_tag "void.png", class: 'btn-images' %></button>
+                <%end%>
+               </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    <%end%>
+  <tbody>
+  </tbody>
+</table>
+
+</div>
 
 <script>
 
-    var currentPage = 0;
-    var users = [];
-    var currentPagesize = 15;
-
-    var currentUser = "<%= User.current_user.username rescue nil %>";
-
-    var active = "data:image/png;base64,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";
-
-    var blocked = "data:image/png;base64,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";
-
-    function __$(id) {
-        return document.getElementById(id);
-    }
-
-    function ajaxTasks(page, pagesize) {
-
-        if (pagesize == undefined)
-            pagesize = currentPagesize;
-
-        var url = "/query_users?page=" + (page + 1) + "&size=" + pagesize;
-
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function () {
-            handleTasks(httpRequest, page, pagesize);
-        };
-        try {
-            httpRequest.open('GET', url, true);
-            httpRequest.send(null);
-        } catch (e) {
-        }
-    }
-
-    function handleTasks(aXMLHttpRequest, page, pagesize) {
-        if (!aXMLHttpRequest) return;
-
-        if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
-                aXMLHttpRequest.status == 304)) {
-
-            var result = JSON.parse(aXMLHttpRequest.responseText);
-
-            users = result;
-
-            loadRows(page, pagesize);
-
-        }
-    }
-
-    function loadRows(page, pagesize) {
-
-        if (pagesize == undefined)
-            pagesize = currentPagesize;
-
-        var header_cells = [
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center; font-weight: bold;",
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; font-weight: bold;",
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center; font-weight: bold;",
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center; font-weight: bold;",
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center; font-weight: bold;  width: 100px;",
-            "border-bottom: 1px solid #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center; width: 300px; font-weight: bold;",
-            "border-bottom: 1px solid #3465a4; padding: 5px; text-align: center; font-weight: bold;"
-        ];
-
-        var header_text = [
-            "#",
-            "Username",
-            "User's Name",
-            "Role(s)",
-            "Status",
-            "Operations",
-            "&nbsp;"
-        ];
-
-        var header_row = document.createElement("div");
-        header_row.className = "row";
-
-        if (__$("table")) {
-
-            __$("table").innerHTML = "";
-
-            __$("table").appendChild(header_row);
-
-        }
-        for (var c = 0; c < header_cells.length; c++) {
-
-            var cell = document.createElement("div");
-            cell.className = "cell";
-            cell.setAttribute("style", header_cells[c]);
-
-            cell.innerHTML = header_text[c];
-
-            header_row.appendChild(cell);
-
-        }
-
-        var base = 0;
-        var scrollsize = pagesize;
-
-        if(page == 0){
-
-            base = 0;
-
-            scrollsize = pagesize;
-
-        } else {
-
-            base = (page * pagesize) - page;
-
-            scrollsize = base + pagesize;
-
-        }
-
-        var r = 0;
-
-        for (var i = base; i < scrollsize; i++) {
-            var row = document.createElement("div");
-            row.className = "row";
-
-            if (__$("table")) {
-
-                __$("table").appendChild(row);
-
-            }
-
-            var cells = [
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;",
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px;",
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px;",
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px;",
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;",
-                "border-bottom: 1px dotted #3465a4; border-right: 1px dotted #3465a4; padding: 5px; text-align: center;",
-                "padding: 5px; text-align: center; width: 30px;"
-            ]
-
-            for (var c = 0; c < cells.length; c++) {
-
-                var cell = document.createElement("div");
-                cell.className = "cell";
-                cell.setAttribute("style", cells[c]);
-                cell.style.verticalAlign = "middle";
-
-                if (c == cells.length - 1 && i == scrollsize - 1) {
-
-                    cell.style.verticalAlign = "middle";
-
-                    cell.setAttribute("style", cell.getAttribute("style") + " border-bottom: 1px dotted #3465a4;");
-
-                    var arrowdown = document.createElement("div");
-                    arrowdown.className = "arrow-down";
-
-                    arrowdown.onclick = function () {
-
-                        currentPage++;
-
-                        ajaxTasks(currentPage);
-
-                    }
-
-                    cell.appendChild(arrowdown);
-
-                } else if (c == cells.length - 1 && i == base) {
-
-                    cell.style.verticalAlign = "middle";
-
-                    var arrowup = document.createElement("div");
-                    arrowup.className = "arrow-up";
-
-                    arrowup.onclick = function () {
-
-                        if (currentPage - 1 >= 0)
-                            currentPage--;
-
-                        ajaxTasks(currentPage);
-
-                    }
-
-                    cell.appendChild(arrowup);
-
-                } else {
-
-                    if(c == 1) {
-
-                        if (r < users.length) {
-
-                            cell.innerHTML = users[r]["username"];
-
-                        } else {
-
-                            cell.innerHTML = (c == 0 ? (i + 1) : "&nbsp;");
-
-                        }
-
-                    } else if(c == 2){
-
-                        if(r < users.length){
-
-                            cell.innerHTML = users[r]["name"];
-
-                        } else {
-
-                            cell.innerHTML = (c == 0 ? (i + 1) : "&nbsp;");
-
-                        }
-
-                    } else if(c == 3){
-
-                        if(r < users.length){
-
-                            cell.innerHTML = users[r]["role"];
-
-                        } else {
-
-                            cell.innerHTML = (c == 0 ? (i + 1) : "&nbsp;");
-
-                        }
-
-                    } else if(c == 4){
-
-                        if(r < users.length && users[r]["username"].trim() != currentUser.trim()){
-
-                            cell.innerHTML = "";
-
-                            var root = "";
-
-                            if(users[r]["active"]){
-
-                                var imgView = document.createElement("img");
-                                imgView.height = 50;
-                                imgView.setAttribute("src", active);
-
-                                cell.appendChild(imgView);
-
-                            } else {
-
-                                var imgView = document.createElement("img");
-                                imgView.height = 60;
-                                imgView.setAttribute("src", blocked);
-
-                                cell.appendChild(imgView);
-
-                                root = "un";
-
-                            }
-
-                            cell.style.cursor = "pointer";
-
-                            cell.setAttribute("tag", users[r]["username"]);
-
-                            cell.setAttribute("root", root);
-
-                            cell.onclick = function(){
-
-                                if(confirm("Are you sure about switching the status?")){
-
-                                    var reason = prompt("Specify reason for " + this.getAttribute("root").trim() + "blocking this user:");
-
-                                    if(reason.trim().length > 0) {
-
-                                        window.location = "/" + this.getAttribute("root").trim() + "block_user/" + this.getAttribute("tag").trim() + "?reason=" + reason;
-
-                                    } else {
-
-                                        showMsg("Can't " + this.getAttribute("root").trim() + "block user without explanation! Aborting operation!");
-
-                                    }
-
-                                }
-
-                            }
-
-                        } else {
-
-                            cell.innerHTML = (c == 0 ? (i + 1) : "&nbsp;");
-
-                        }
-
-                    } else if(c == 5){
-
-                        if(r < users.length){
-
-                            var btnShow = document.createElement("a");
-                            btnShow.setAttribute("href", "/users/" + users[r]["user_id"]);
-
-                            // cell.appendChild(btnShow);
-
-                            var btnEdit = document.createElement("a");
-                            btnEdit.setAttribute("href", "/users/" + users[r]["user_id"] + "/edit");
-                            btnEdit.style.marginLeft = "30px";
-                            btnEdit.style.marginRight = "30px";
-
-                            // cell.appendChild(btnEdit);
-
-                            var imgView = document.createElement("img");
-                            imgView.height = 60;
-                            imgView.setAttribute("src", icoView);
-                            imgView.setAttribute("user", users[r]["user_id"]);
-                            imgView.style.cursor = "pointer";
-
-                            imgView.onclick = function(){
-
-                                window.location = "/users/" + this.getAttribute("user").trim();
-
-                            }
-
-                            cell.appendChild(imgView);
-
-                            var imgEdit = document.createElement("img");
-                            imgEdit.height = 60;
-                            imgEdit.setAttribute("src", icoEdit);
-                            imgEdit.setAttribute("user", users[r]["user_id"]);
-                            imgEdit.style.marginLeft = "30px";
-                            imgEdit.style.marginRight = "30px";
-                            imgEdit.style.cursor = "pointer";
-
-                            imgEdit.onclick = function(){
-
-                                window.location = "/users/" + this.getAttribute("user").trim() + "/edit"
-
-                            }
-
-                            cell.appendChild(imgEdit);
-
-                            var btnDelete = document.createElement("a");
-                            btnDelete.setAttribute("data-method", "delete");
-                            btnDelete.setAttribute("ref", "nofollow");
-                            btnDelete.setAttribute("data-confirm", "Are you sure?");
-                            btnDelete.setAttribute("href", "/users/" + users[r]["user_id"]);
-
-                            cell.appendChild(btnDelete);
-
-                            var imgDelete = document.createElement("img");
-                            imgDelete.height = 60;
-                            imgDelete.setAttribute("src", icoDelete);
-
-                            btnDelete.appendChild(imgDelete);
-
-                        } else {
-
-                            cell.innerHTML = "<div style='height: 60px;'>&nbsp;</div>";
-
-                        }
-
-                    } else {
-
-                        cell.style.verticalAlign = "middle";
-
-                        cell.innerHTML = (c == 0 ? (i + 1) : "&nbsp;");
-
-                    }
-
-                }
-
-                row.appendChild(cell);
-
-            }
-
-            r++;
-        }
-    }
-
-    currentPage = 0;
-
-    ajaxTasks(currentPage);
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
 
 </script>

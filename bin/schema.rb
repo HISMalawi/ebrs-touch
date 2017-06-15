@@ -149,7 +149,7 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer  "voided_by",   limit: 4
     t.datetime "date_voided"
     t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                           null: false
+    t.datetime "updated_at",                          null: false
   end
 
   create_table "person_attributes", primary_key: "person_attribute_id", force: :cascade do |t|
@@ -247,7 +247,7 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer  "person_b",                    limit: 4, null: false
     t.integer  "person_relationship_type_id", limit: 4, null: false
     t.datetime "created_at",                            null: false
-    t.datetime "updated_at",                             null: false
+    t.datetime "updated_at",                            null: false
   end
 
   add_index "person_relationship", ["person_a"], name: "fk_person_relationship_1_idx", using: :btree
@@ -278,10 +278,9 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "date_voided"
   end
 
-  create_table "role", id: false, force: :cascade do |t|
-    t.integer "role_id", limit: 4,  default: 0,  null: false
-    t.string  "role",    limit: 50, default: "", null: false
-    t.integer "level",   limit: 4
+  create_table "role", primary_key: "role_id", force: :cascade do |t|
+    t.string  "role",  limit: 50, default: "", null: false
+    t.integer "level", limit: 4
   end
 
   add_index "role", ["role_id"], name: "fk_user_role_1_idx", using: :btree
@@ -302,22 +301,26 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "user_role", ["user_id"], name: "fk_user_role_1_idx", using: :btree
 
   create_table "users", primary_key: "user_id", force: :cascade do |t|
-    t.integer  "location_id",     limit: 4
-    t.string   "username",        limit: 50
-    t.string   "password",        limit: 128
-    t.string   "salt",            limit: 128
-    t.string   "secret_question", limit: 255
-    t.string   "secret_answer",   limit: 255
-    t.integer  "creator",         limit: 4,   default: 0, null: false
-    t.datetime "created_at",                              null: false
-    t.integer  "updated_by",      limit: 4
-    t.datetime "updated_at"
-    t.integer  "person_id",       limit: 4
-    t.integer  "voided",          limit: 1,   default: 0, null: false
-    t.integer  "voided_by",       limit: 4
+    t.integer  "location_id",        limit: 4
+    t.string   "username",           limit: 50
+    t.string   "plain_password",     limit: 255
+    t.string   "password_hash",      limit: 255
+    t.integer  "creator",            limit: 4,   default: 0,     null: false
+    t.integer  "person_id",          limit: 4
+    t.integer  "active",             limit: 1,   default: 1,     null: false
+    t.string   "un_or_block_reason", limit: 225
+    t.integer  "voided",             limit: 1,   default: 0,     null: false
+    t.integer  "voided_by",          limit: 4
     t.datetime "date_voided"
-    t.string   "void_reason",     limit: 255
-    t.string   "uuid",            limit: 38,              null: false
+    t.string   "void_reason",        limit: 255
+    t.string   "email",              limit: 225
+    t.integer  "notify",             limit: 1,   default: 0,     null: false
+    t.string   "preferred_keyboard", limit: 10,  default: "abc", null: false
+    t.integer  "password_attempt",   limit: 4,   default: 0
+    t.datetime "last_password_date"
+    t.string   "uuid",               limit: 38,                  null: false
+    t.datetime "updated_at"
+    t.datetime "created_at"
   end
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree

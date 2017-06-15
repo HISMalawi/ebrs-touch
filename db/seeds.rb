@@ -27,8 +27,8 @@ def create_user
   puts "Creating User"
 
   user = User.create!(username: 'admin', 
-                      password: 'adminebrs', 
-                      creator: 1, 
+                      password_hash: 'adminebrs', 
+                      creator: 1, last_password: Time.now().strftime('%Y-%m-%d %H:%M:%S'), 
                       person_id: core_person.person_id)
 
   puts "Creating Role for User"

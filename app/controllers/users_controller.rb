@@ -23,7 +23,7 @@ class UsersController < ApplicationController
 
     @person_name = PersonName.find_by_person_id(@user.person_id)
 
-    @user_role = UserRole.find(@user.user_role_id)
+    @user_role = @user.user_role.role
 
     @targeturl = "/view_users"
 
@@ -40,7 +40,7 @@ class UsersController < ApplicationController
 
     @targeturl = "/users"
 
-    render :layout => "facility"
+    render :layout => "data_table"
   end
 
   #Adds A New User
@@ -115,7 +115,7 @@ class UsersController < ApplicationController
     end
 
     respond_to do |format|
-      #if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false) and @user.update_attributes(user_params)
+      #if ((User.current_user.role.strip.downcase.match(/Administrator/i) rescue false) ? true : false) and @user.update_attributes(user_params)
 
         if @user.present?
         format.html { redirect_to @user, :notice => 'User was successfully updated.' }
@@ -153,8 +153,11 @@ class UsersController < ApplicationController
   #Deletes Selected User
   def destroy
 
-    @user.destroy if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
-      respond_to do |format|
+    if ((User.current.user_role.role.role.strip.downcase.match(/Administrator/i) rescue false) ? true : false)
+      @user.update_attributes(voided: true)
+    end
+
+    respond_to do |format|
       format.html { redirect_to "/view_users", :notice => 'User was successfully destroyed.' }
       format.json { head :no_content }
     end
@@ -193,9 +196,28 @@ class UsersController < ApplicationController
     user = User.find(params[:id]) rescue nil
 
     if !user.nil?
+      role = User.current.user_role.role.role.strip rescue nil
+      if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
+        user.update_attributes(active: false, 
+          un_or_block_reason: params[:reason]) 
+      end
+    end
 
-      user.update_attributes(:active => false, :un_or_block_reason => params[:reason]) if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
+    redirect_to "/view_users" and return
 
+  end
+
+  #Gives Back Bloked User Access Rights
+  def void_user
+
+    user = User.find(params[:id]) rescue nil
+
+    if !user.nil?
+      role = User.current.user_role.role.role.strip rescue nil
+      if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
+        user.update_attributes(voided: true, 
+          :void_reason => "Removed from system by (user_id): #{User.current.id}") 
+      end
     end
 
     redirect_to "/view_users" and return
@@ -208,8 +230,11 @@ class UsersController < ApplicationController
     user = User.find(params[:id]) rescue nil
 
     if !user.nil?
-
-      user.update_attributes(:active => true, :un_or_block_reason => params[:reason]) if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
+      role = User.current.user_role.role.role.strip rescue nil
+      if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
+        user.update_attributes(active: true, 
+          :un_or_block_reason => params[:reason]) 
+      end
     end
 
     redirect_to "/view_users" and return
@@ -248,7 +273,7 @@ class UsersController < ApplicationController
 
     users.each do |user|
 
-      next if user.username.strip.downcase == User.current_user.username.strip.downcase
+      next if user.username.strip.downcase == User.current.username.strip.downcase
 
       record = {
           "username" => "#{user.username}",
@@ -278,7 +303,7 @@ class UsersController < ApplicationController
 
     users.each do |user|
 
-      next if user.username.strip.downcase == User.current_user.username.strip.downcase
+      next if user.username.strip.downcase == User.current.username.strip.downcase
 
       record = {
           "username" => "#{user.username}",
@@ -310,7 +335,7 @@ class UsersController < ApplicationController
 
     @targeturl = "/"
 
-    @user = User.current_user
+    @user = User.current
 
     render :layout => "facility"
 
@@ -323,7 +348,7 @@ class UsersController < ApplicationController
 
     @targeturl = "/"
 
-    @user = User.current_user
+    @user = User.current
 
     render :layout => "facility"
 
@@ -331,7 +356,7 @@ class UsersController < ApplicationController
 
   def update_password
 
-    user = User.current_user
+    user = User.current
 
     result = user.password_matches?(params[:old_password])
 
@@ -364,7 +389,7 @@ class UsersController < ApplicationController
 
     @search = icoFolder("search")
 
-    @admin = ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
+    @admin = ((User.current.user_role.role.role.strip.downcase.match(/Administrator/i) rescue false) ? true : false)
 
   end
 

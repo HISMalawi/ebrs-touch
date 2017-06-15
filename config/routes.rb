@@ -15,6 +15,8 @@ Rails.application.routes.draw do
 
   get "/unblock_user/:id" => "users#unblock_user"
 
+  get "/void_user/:id" => "users#void_user"
+
   get '/block'  => "users#block"
 
   get '/unblock' => "users#unblock"
