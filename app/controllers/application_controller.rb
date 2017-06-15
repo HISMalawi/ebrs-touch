@@ -46,7 +46,8 @@ class ApplicationController < ActionController::Base
   private
 
   def check_if_logged_in
-    application_mode = SETTINGS['application_mode'] 
+    application_mode = SETTINGS['application_mode']
+    
     if application_mode == 'DC'
       Location.current_district         =  Location.find(SETTINGS['district_id'])
       Location.current                  =  Location.find(SETTINGS['district_id'])
