@@ -66,6 +66,7 @@ module PersonService
     informant_phone_number            = params[:child][:informant][:phone_number]
     informant_form_signed             = params[:child][:form_signed]
     informant_same_as_mother          = params[:child][:informant][:informant_same_as_mother]
+    informant_same_as_father          = params[:child][:informant][:informant_same_as_father]
 
 
 
@@ -162,6 +163,44 @@ module PersonService
 
     end
     ################################### recording father details (end)   ###############################################
+    ################################### recording informant details (start) ############################################
+    
+    if (informant_same_as_mother == "Yes")
+
+        PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
+        
+    elsif (informant_same_as_father == "Yes")
+
+        PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
+
+    else
+
+      core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
+
+      person_informant = Person.create(person_id: core_person_informant.id,
+          gender: "N/A",
+          birthdate: ("1900-01-01".to_date))
+
+      person_name_informant = PersonName.create(first_name: informant_first_name,
+          middle_name: (informant_middle_name rescue nil),
+          last_name: informant_last_name, person_id: core_person_informant.id)
+
+      PersonNameCode.create(person_name_id: person_name_informant.id,
+          first_name_code: informant_first_name.soundex,
+          last_name_code: informant_last_name.soundex,
+          middle_name_code: (informant_middle_name.soundex rescue nil))
+
+      PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
+          person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
+       
+    end
+
+    ################################### recording informant details (end) ############################################
+
+
+
 
     
     raise "........... #{mother_residental_country}" 
