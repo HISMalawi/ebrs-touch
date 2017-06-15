@@ -39,11 +39,11 @@
         <div class="field">
           <label for="registration_type">Registration type:</label>
           <br>
-             <select id="registration_type" name="registration_type" class="input_cell">
+             <select id="registration_type" name="registration_type" class="input_cell" onChange="eventCapture();">
           <option></option>
-          <option value="normal" >Normal</option>
-          <option value="Abandoned" >Abandoned</option>
-          <option >Adopted</option>
+          <option value="normal">Normal</option>
+          <option value="Abandoned">Abandoned</option>
+          <option value="Adopted">Adopted</option>
           <option >Orphaned</option>
         </select>
         </div>
@@ -118,13 +118,18 @@
         </select>
       </div>
 
+    </fieldset>
+
+    <fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';">
+      <legend><font size='5' style=''>Details of Child: Continued..</font></legend>
+
       <div class="field">
         <label for="birth_place_details_available">Birth Details Available?</label>
         <br>
         <select id="birth_place_details_available"
                 name="birth_place_details_available"
                 class="input_cell" 
-                condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';" />
+                condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';"/>
             <option></option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -138,7 +143,7 @@
         <select id="parents_details_available"
                 name="parents_details_available"
                 class="input_cell"
-                condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';" />
+                 />
             <option></option>
             <option value="None">None</option>
             <option value="Both">Both</option>
@@ -147,8 +152,59 @@
         </select>
       </div>
       
+</fieldset>
 
-    </fieldset>
+<fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'adopted';">
+<legend><font size='5' style=''>Details of Child: Continued..</font></legend>
+  <div class="field">
+        <label for="child_adoption_court_order">Adoption Court Order Attached?</label><br>
+        <select id="child_adoption_court_order" name="child[adoption_court_order]" class="input_cell">
+          <option></option>
+          <option  <%= ((@child[adoption_court_order] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option  <%= ((@child[adoption_court_order] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="biological_parents">Biological Parents</label>
+        <br>
+        <select id="biological_parents"
+                name="biological_parents"
+                class="input_cell" />
+            <option></option>
+            <option value="None">None</option>
+            <option value="Mother">Mother</option>
+            <option value="Father">Father</option>
+            <option value="Both">Both</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="foster_parents">Adoptive Parents</label>
+        <br>
+        <select id="foster_parents"
+                name="foster_parents"
+                class="input_cell" />
+            <option></option>
+            <option value="Mother">Mother</option>
+            <option value="Father">Father</option>
+            <option value="Both">Both</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="birth_details_available">Birth Details Available?</label>
+        <br>
+        <select id="birth_details_available"
+                name="birth_place_details_available"
+                class="input_cell" >
+            <option></option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+      </div>
+
+</fieldset>
   
   <%  if SETTINGS['application_mode'] == "DC" %>
     <fieldset>
@@ -275,11 +331,13 @@
       <div class="field">
         <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
         <br>
-        <%= (f.text_field :other_type_of_birth,
+         <input type="text" name="other_type_of_birth" id="person_other_type_of_birth" class="input_cell"
+         condition="__$('person_type_of_birth').value.trim() == 'Other'" optional=true >
+        <!-- %= (f.text_field :other_type_of_birth,
                           :id => "person_other_type_of_birth",
                           :class => "input_cell",
                           :condition => "__$('person_type_of_birth').value.trim() == 'Other'",
-                          :optional=> true) rescue ""  %>
+                          :optional=> true) rescue ""  % -->
       </div>
 
       <div class="field">
@@ -333,7 +391,7 @@
 
     <!-- Mother -->
 
-    <fieldset>
+    <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
       <legend><font size='5' style=''>Details of Mother</font></legend>
 
       <div class="field">
@@ -386,7 +444,7 @@
     </fieldset>
 
 
-    <fieldset>
+    <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
 
       <div class="field">
@@ -420,7 +478,7 @@
 
     </fieldset>
 
-    <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'">
+    <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && __$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
       <legend><font size='5' style=''>Details of Mother continued: Physical residential address</font></legend>
 
       <div class="field">
@@ -451,7 +509,7 @@
 
     </fieldset>
 
-     <fieldset condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'">
+     <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && __$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
 
       <legend><font size='5' style=''>Details of Mother continued: Physical residential address</font></legend>
 
@@ -492,7 +550,7 @@
     </fieldset>
 
 
-    <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian'">
+    <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && __$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'"">
       <legend><font size='5' style=''>Details of Mother continued: Home address</font></legend>
 
 
@@ -550,7 +608,7 @@
     </fieldset>
 
 
-     <fieldset condition="__$('person_mother_citizenship').value.trim() != 'Malawian'">
+     <!-- fieldset condition="__$('person_mother_citizenship').value.trim() != 'Malawian'">
 
       <legend><font size='5' style=''>Details of Mother continued: Home address</font></legend>
 
@@ -611,10 +669,9 @@
 
 
 
-    </fieldset>
+    </fieldset -->
 
-
-    <fieldset>
+    <fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'normal';">
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
 
       <div class="field">
@@ -659,7 +716,8 @@
 
       </fieldset>
 
-      <fieldset>
+
+      <fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'normal';">
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
       <div class="field">
         <label for="person_number_of_children_born_alive_inclusive">Number of children born to the mother, including this
@@ -1159,6 +1217,45 @@
             var pos = parseInt(__$("textForfather_home_address_same_as_physical").getAttribute("pos"));
             navigateTo(pos, section, false);
         }, 25);
+
+    }
+
+    function eventCapture(){
+
+      var e = __$('registration_type').value
+      //alert(e)
+      if(e ==="Abandoned"){
+
+        $.ajax({
+              type: "POST",
+              url: "/application/get_registration_type",
+              data: { registration_type: e},
+              success: function (data) {
+                   return true
+              },
+             error:function (data) {
+                   return false
+             }
+         })
+
+        //alert("yes")
+
+        content = "<label for='adoption_court_order_attached'>Adoption Court Order Attached?</label>"
+        content +="<label for='parents_details_available'>Parents Details Available?</label>"
+        content +="<br>"
+        content +="<select id='parents_details_available'"
+        content +="name='parents_details_available'"
+        content +="class='input_cell'"
+        content +="condition='__$(\"registration_type\").value.trim().toLowerCase() == \"abandoned\";'' />"
+        content +="<option></option>"
+        content +="<option value='None'>None</option>"
+        content +="<option value='Both'>Both</option>"
+        content +="<option value='Mother'>Mother</option>"
+        content +="<option value='Father'>Father</option>"
+        content +="</select>"
+
+         __$('testcode').innerHTML = "<input type='text' name='some'>"
+      }
 
     }
 
@@ -2045,6 +2142,13 @@
       } else {
       
         return true;
+      }
+
+      if (__$('registration_type').value.trim().toLowerCase() == 'abandoned') 
+      {
+        alert("Hello java")
+        //div = document.getElementById("f")
+        //#div.innerHTML = "Hello world"
       }
        
     
