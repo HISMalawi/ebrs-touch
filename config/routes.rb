@@ -60,6 +60,8 @@ Rails.application.routes.draw do
 
   post 'person/create'
 
+  post '/application/get_registration_type'
+
   get 'records/:status' => 'person#records'
 
   ########################### (create record form) routes
@@ -70,6 +72,7 @@ Rails.application.routes.draw do
   get '/search_by_district' => 'person#get_district'
   get '/search_by_ta' => 'person#get_ta'
   get '/search_by_village' => 'person#get_village'
+  get '/search_by_hospital' => 'person#get_hospital'
   ########################### (create record form) routes end
 
 
