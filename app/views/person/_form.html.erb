@@ -29,16 +29,34 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+   
+  <% if(SETTINGS["application_mode"]== "DC") %>
+  
+      <fieldset>
 
+          <legend><font size='5' style=''>Details of Child</font></legend>
+
+        <div class="field">
+          <label for="registration_type">Registration type:</label>
+          <br>
+             <input id="registration_type" type="text" class="input_cell" name="registration_type"/>
+        </div>
+
+      </fieldset>
+
+     <% end %>
+    
     <fieldset>
 
       <legend><font size='5' style=''>Details of Child</font></legend>
 
+      
+      <% if (SETTINGS["application_mode"] == "FC") %>
       <%= f.hidden_field :_rev rescue "" %>
       <%= f.hidden_field :place_of_birth, :value => "Hospital" %>
       <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.id}" %>
       <%= f.hidden_field :birth_district, :value => "#{Location.current.district.id}" %>
-
+      <% end %>
       <input id="person_original_surname" type="hidden"/>
 
 
@@ -95,6 +113,81 @@
       </div>
 
     </fieldset>
+  
+  <%  if SETTINGS['application_mode'] == "DC" %>
+    <fieldset>
+
+      <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
+
+      <div class="field">
+        <label for="child_place_of_birth">Place of birth</label><br>
+        <select id="child_place_of_birth" name="place_of_birth" class="input_cell" >
+          <option></option>
+          <option <%= ((@child[:place_of_birth] rescue nil) == "Home" ? "selected" : "") %> >Home</option>
+          <option <%= ((@child[:place_of_birth] rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
+          <option <%= ((@child[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+        
+      
+      <div class="field">
+        <label for="child_bd_holder">Birth District</label><br>
+
+        <input id="child_bd_holder"
+               name="birth_district"
+               type="text"
+               condition="beforeLiveDate()"
+               value="<%= @child[:bd] rescue nil %>"
+               ajaxURL = "/search_by_district"  
+               tt_onUnload = "navigablefieldsets[parseInt(__$('textForchild_birth_ta').getAttribute('section'))][parseInt(__$('textForchild_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('child_bd_holder').value);navigablefieldsets[parseInt(__$('textForchild_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForchild_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('child_bd_holder').value);setDistrict('district');"
+               class="input_cell"
+                />
+
+      </div>
+
+      <div class="field">
+        <label for="child_hospital_of_birth">Name of Hospital</label>
+        <br>
+        <input type="text" name="hospital_of_birth" class="input_cell" id="child_hospital_of_birth"
+            condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital';" >
+        <!-- %= (f.text_field :hospital_of_birth,
+                          :class => "input_cell",
+                          :condition => "__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
+                          :tt_onUnload => "setDistrict('district');",
+                          :ajaxURL => "/search_by_hospital") rescue "" % -->
+      </div>
+
+      <div class="field">
+        <label for="child_birth_ta">T/A</label>
+        <br>
+        <input type="text" name="birth_ta" class="input_cell" id="child_birth_ta" 
+                condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'home'" >
+        <!-- %= (f.text_field :birth_ta,
+                          :class => "input_cell",
+                          :condition => "__$('child_place_of_birth').value.trim().toLowerCase() == 'home'",
+                          :ajaxURL => "/search_by_district",
+:tt_onload => "navigablefieldsets[parseInt(__$('textForchild_birth_ta').getAttribute('section'))][parseInt(__$('textForchild_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('child_birth_district').value);",
+                          :tt_onUnload => "navigablefieldsets[parseInt(__$('textForchild_birth_village').getAttribute('section'))][parseInt(__$('textForchild_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('child_birth_district').value + '&ta=' + __$('textForchild_birth_ta').value);") rescue "" % -->
+      </div>
+      <div class="field">
+        <label for="child_birth_village">Village</label>
+        <br>
+        <input type="text" name="birth_village" class="input_cell" id="child_birth_village" 
+              condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'home'" 
+              ajaxURL="/search_by_village">
+        <!-- %= (f.text_field :birth_village, :class => "input_cell", :condition => "__$('child_place_of_birth').value.trim().toLowerCase() == 'home'", :ajaxURL => "/search_by_village") rescue "" % -->
+      </div>
+      <div class="field">
+        <label for="child_other_birth_place_details">Give Details</label>
+        <br>
+        <input type="text" name="other_birth_place_details" class="input_cell" 
+              id="child_other_birth_place_details" 
+              condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'other'" >
+        <!-- %= (f.text_field :other_birth_place_details, :class => "input_cell", :condition => "__$('child_place_of_birth').value.trim().toLowerCase() == 'other'") rescue "" % -->
+      </div>
+
+    </fieldset>
+    <% end %>
 
 
 
@@ -1888,6 +1981,38 @@
             __$('registration_type').value = 'No'
         }
     }
+
+    var full_place_of_birth;
+   
+    if (__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital') 
+    {
+      full_place_of_birth = ["child_hospital_of_birth", "child_birth_district"] ;
+        
+    }
+      else if (__$('child_place_of_birth').value.trim().toLowerCase() == 'home')
+    {
+      full_place_of_birth = ["child_birth_ta", "child_birth_village", "child_birth_district"] ;
+    }
+    else {
+    
+      full_place_of_birth = ["child_other_birth_place_details", "child_birth_district"];
+    }
+
+      function beforeLiveDate(){
+      startDate = new Date("8/1/2015");
+     
+      if (handleDate(__$('person_birthdate').value.trim()) > startDate){
+       
+         return false;
+      
+      } else {
+      
+        return true;
+      }
+       
+    
+    }
+
 
     /*summaryHash = {};
 
