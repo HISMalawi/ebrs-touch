@@ -1,0 +1,3 @@
+application_mode: FC #FC|DC
+facility_id: fc_id #this is the location_id of the health facility in location table
+district_id: dc_id #this is the location_id of the district in location table
