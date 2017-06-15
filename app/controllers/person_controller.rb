@@ -1,5 +1,6 @@
 class PersonController < ApplicationController
   def index
+    @icoFolder = icoFolder("icoFolder")
   end
 
   def show
