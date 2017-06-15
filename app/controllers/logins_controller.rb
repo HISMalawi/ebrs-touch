@@ -39,7 +39,6 @@ class LoginsController < ApplicationController
       redirect_to "/login"
     end
 
-    raise "ZZZZZZZZZZ"
   end
 
   def logout

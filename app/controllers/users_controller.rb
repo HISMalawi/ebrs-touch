@@ -102,29 +102,43 @@ class UsersController < ApplicationController
   end
 
   def update
+    @user = User.find(params[:id])
 
     if request.referrer.match('edit_account')
-      @current_user.preferred_keyboard = params[:user][:preferred_keyboard]
-      @current_user.save!
+      @user.preferred_keyboard = params[:user][:preferred_keyboard]
+      @user.save!
       redirect_to '/users/my_account' and return
     end
 
     if params[:user][:plain_password].present? && params[:user][:plain_password].length > 1
-      @user.update_attributes(:password_hash => params[:user][:plain_password], :password_attempt => 0, :last_password_date => Time.now)
-
+      @user.update_attributes(password_hash: params[:user][:plain_password], 
+        password_attempt: 0, last_password_date: Time.now)
     end
 
     respond_to do |format|
-      #if ((User.current_user.role.strip.downcase.match(/Administrator/i) rescue false) ? true : false) and @user.update_attributes(user_params)
+      role = User.current.user_role.role.role
+      if ((role.strip.downcase.match(/Administrator/i) rescue false) ? true : false) and @user.update_attributes(user_params)
+
+        if params[:user][:person][:first_name].present? && params[:user][:person][:last_name].present?
+          @user.core_person.person_name.update_attributes(voided: true, void_reason: 'Edited')
+          person_name = PersonName.create(person_id: @user.person_id, 
+            first_name: params[:user][:person][:first_name],
+            last_name: params[:user][:person][:last_name])
+          
+          PersonNameCode.create(person_name_id: person_name.person_name_id, 
+            first_name_code: params[:user]['person']['first_name'].soundex, 
+            last_name_code: params[:user]['person']['last_name'].soundex )
+        end
 
         if @user.present?
-        format.html { redirect_to @user, :notice => 'User was successfully updated.' }
-        format.json { render :show, :status => :ok, :location => @user }
+          format.html { redirect_to @user, :notice => 'User was successfully updated.' }
+          format.json { render :show, :status => :ok, :location => @user }
         else
-        format.html { render :edit }
-        format.json { render :json => @user.errors, :status => :unprocessable_entity }
+          format.html { render :edit }
+          format.json { render :json => @user.errors, :status => :unprocessable_entity }
+        end
       end
-      end
+    end
   end
 
   #Displays All Users

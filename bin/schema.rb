@@ -302,7 +302,7 @@ ActiveRecord::Schema.define(version: 1) do
 
   create_table "users", primary_key: "user_id", force: :cascade do |t|
     t.integer  "location_id",        limit: 4
-    t.string   "username",           limit: 50
+    t.string   "username",           limit: 50,                  null: false
     t.string   "plain_password",     limit: 255
     t.string   "password_hash",      limit: 255
     t.integer  "creator",            limit: 4,   default: 0,     null: false
@@ -324,6 +324,7 @@ ActiveRecord::Schema.define(version: 1) do
   end
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
+  add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
