@@ -349,7 +349,7 @@
         </tr>
         <tr>
           <td colspan="5" align="center" style="font-size: 36px; color: #3465a4;;">
-            eBRS<sub style="font-size: 11px;">facility</sub>
+            eBRS<sub style="font-size: 11px;"><%=application_mode == 'DC' ? application_mode : application_mode.downcase %></sub>
           </td>
         </tr>
         <!--tr style="cursor: pointer;" onclick="switchContext()">

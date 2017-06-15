@@ -55,6 +55,15 @@ class ApplicationController < ActionController::Base
       Location.current_health_facility  =  Location.find(SETTINGS['facility_id'])
       Location.current                  =  Location.find(SETTINGS['facility_id'])
     end
+
+    if session[:user_id].blank?
+      if request.filtered_parameters["action"] == 'create' and request.filtered_parameters["controller"] == 'logins'
+        return
+      end
+      redirect_to '/login' and return
+    else
+      User.current = User.find(session[:user_id])
+    end
   end
 
 end

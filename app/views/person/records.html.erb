@@ -24,9 +24,15 @@
         <td>
           <table style="width: 100%; text-align: center; border-style: none;">
             <tr>  
-              <td><button class="btn btn-info" onmousedown="javascript:alert();">View</button></td>
-              <td><button class="btn btn-warning" onmousedown="javascript:alert();">Edit</button></td>
-              <td><button class="btn btn-success" onmousedown="javascript:alert();">Print</button></td>
+              <td><button class="btn btn-info" onmousedown="javascript:alert();">
+                <%= image_tag "view.png", class: 'btn-images' %></button>
+              </td>
+              <td><button class="btn btn-warning" onmousedown="javascript:alert();">
+                <%= image_tag "edit.png", class: 'btn-images' %></button>
+               </td>
+              <td><button class="btn btn-success" onmousedown="javascript:alert();">
+                <%= image_tag "void.png", class: 'btn-images' %></button>
+               </td>
             </tr>
           </table>
         </td>

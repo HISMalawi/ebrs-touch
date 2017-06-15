@@ -36,7 +36,7 @@
             <td style="vertical-align: middle;">
               <div style="border: 1px solid dimgray; color: dimgray; border-radius: 20px; padding: 2px; font-size: 0.4em;
                       height: 20px; padding-left: 20px; padding-right: 20px;">
-                <%= User.current_user.username rescue nil %>@<%= Location.current.name.titleize rescue "PLEASE SET LOCATION" %> | <span style="font-weight: bold !important;"><%= Date.today.strftime("%d/%b/%Y") %></span>
+                <%= User.current.username rescue nil %>@<%= Location.current.name.titleize rescue "PLEASE SET LOCATION" %> | <span style="font-weight: bold !important;"><%= Date.today.strftime("%d/%b/%Y") %></span>
               </div>
             </td>
             <td>
