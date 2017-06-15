@@ -1,6 +1,8 @@
 class PersonBirthDetail < ActiveRecord::Base
     self.table_name = :person_birth_detail
     self.primary_key = :person_birth_details_id
+    include EbrsAttribute
+
     belongs_to :core_person, foreign_key: "person_id"
     has_one :location, foreign_key: "location_id"
     has_one :level_of_education, foreign_key: "level_of_education_id"

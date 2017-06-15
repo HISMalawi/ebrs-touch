@@ -1,0 +1,8 @@
+{
+ "adapter": "mysql",
+  "username": "root",
+  "database": "openmrs",
+  "password": "password",
+  "host": "localhost",
+  "pool": "500"
+}

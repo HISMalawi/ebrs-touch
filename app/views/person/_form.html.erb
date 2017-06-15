@@ -25,7 +25,7 @@
 
 </style>
 
-<%= form_for(@person) do |f| %>
+<%= form_for :person do |f| %>
 
     <fieldset>
 
@@ -34,7 +34,7 @@
       <div class="field">
         <label for="person_last_name">Surname</label>
         <br>
-        <%= (f.text_field :last_name, :class => "input_cell") %>
+        <%= (f.text_field :gender, :class => "input_cell") %>
 
       </div>
       <div class="field">

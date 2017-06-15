@@ -1,6 +1,7 @@
 class CorePerson < ActiveRecord::Base
     self.table_name = :core_person
-    self.primary_key = :person_id
+    include EbrsAttribute
+
     has_one :person, foreign_key: "person_id"
     has_one :person_birth_detail, foreign_key: "person_id"
     has_one :person_address, foreign_key: "person_id"
