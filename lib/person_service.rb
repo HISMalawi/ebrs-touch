@@ -4,6 +4,14 @@ module PersonService
 
   def self.create_record(params)
     #raise params.inspect
+
+    adoption_court_order              = params[:child][:adoption_court_order]
+    adoption_court_order              = params[:child][:informant][:designation]
+    birth_place_details_available     = params[:birth_place_details_available]
+    parents_details_available         = params[:parents_details_available]
+    biological_parents                = params[:biological_parents]
+    foster_parents                    = params[:foster_parents]
+
     first_name 			                  = params[:person][:first_name]
     last_name 			                  = params[:person][:last_name]
     middle_name 		                  = params[:person][:middle_name]
@@ -78,8 +86,8 @@ module PersonService
     month_prenatal_care_started               = params[:month_prenatal_care_started]
     number_of_prenatal_visits                 = params[:number_of_prenatal_visits]
     gestation_at_birth                        = params[:gestation_at_birth]
-    number_of_children_born_alive_inclusive   = params[:number_of_children_born_alive_inclusive]
-    number_of_children_born_still_alive       = params[:number_of_children_born_still_alive]
+    number_of_children_born_alive_inclusive   = params[:number_of_children_born_alive_inclusive].to_i rescue 1
+    number_of_children_born_still_alive       = params[:number_of_children_born_still_alive].to_i rescue 1
     details_of_father_known 	                = params[:details_of_father_known]
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
@@ -109,8 +117,8 @@ module PersonService
       number_of_prenatal_visits:                (number_of_prenatal_visits.to_i rescue nil),
       month_prenatal_care_started:              (month_prenatal_care_started.to_i rescue nil),
       mode_of_delivery_id:                      (ModeOfDelivery.where(name: mother_mode_of_delivery).first.id rescue 1),
-      number_of_children_born_alive_inclusive:  (number_of_children_born_alive_inclusive rescue 1),
-      number_of_children_born_still_alive:      (number_of_children_born_still_alive rescue 1),
+      number_of_children_born_alive_inclusive:  (number_of_children_born_alive_inclusive),
+      number_of_children_born_still_alive:      (number_of_children_born_still_alive),
       level_of_education_id:                    (LevelOfEducation.where(name: mother_level_of_education).first.id rescue 1),
       district_id_number:                       nil,     
       national_serial_number:                   nil,
@@ -186,11 +194,15 @@ module PersonService
       person_name_informant = PersonName.create(first_name: informant_first_name,
           middle_name: (informant_middle_name rescue nil),
           last_name: informant_last_name, person_id: core_person_informant.id)
+      begin
 
-      PersonNameCode.create(person_name_id: person_name_informant.id,
+        PersonNameCode.create(person_name_id: person_name_informant.id,
           first_name_code: informant_first_name.soundex,
           last_name_code: informant_last_name.soundex,
           middle_name_code: (informant_middle_name.soundex rescue nil))
+      rescue
+
+      end
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
