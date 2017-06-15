@@ -34,12 +34,18 @@
   
       <fieldset>
 
-          <legend><font size='5' style=''>Details of Child</font></legend>
+          <legend><font size='5' style='border: 2px;'>Type of registration</font></legend>
 
         <div class="field">
           <label for="registration_type">Registration type:</label>
           <br>
-             <input id="registration_type" type="text" class="input_cell" name="registration_type"/>
+             <select id="registration_type" name="registration_type" class="input_cell">
+          <option></option>
+          <option value="normal" >Normal</option>
+          <option value="Abandoned" >Abandoned</option>
+          <option >Adopted</option>
+          <option >Orphaned</option>
+        </select>
         </div>
 
       </fieldset>
@@ -112,6 +118,36 @@
         </select>
       </div>
 
+      <div class="field">
+        <label for="birth_place_details_available">Birth Details Available?</label>
+        <br>
+        <select id="birth_place_details_available"
+                name="birth_place_details_available"
+                class="input_cell" 
+                condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';" />
+            <option></option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+      </div>
+      
+      
+      <div class="field">
+        <label for="parents_details_available">Parents Details Available?</label>
+        <br>
+        <select id="parents_details_available"
+                name="parents_details_available"
+                class="input_cell"
+                condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';" />
+            <option></option>
+            <option value="None">None</option>
+            <option value="Both">Both</option>
+            <option value="Mother">Mother</option>
+            <option value="Father">Father</option>
+        </select>
+      </div>
+      
+
     </fieldset>
   
   <%  if SETTINGS['application_mode'] == "DC" %>
@@ -149,7 +185,8 @@
         <label for="child_hospital_of_birth">Name of Hospital</label>
         <br>
         <input type="text" name="hospital_of_birth" class="input_cell" id="child_hospital_of_birth"
-            condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital';" >
+            condition="__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital';"
+            ajaxURL="/search_by_hospital" >
         <!-- %= (f.text_field :hospital_of_birth,
                           :class => "input_cell",
                           :condition => "__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
@@ -248,7 +285,7 @@
       <div class="field">
         <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
         <br>
-        <select id="person_parents_married_to_each_other" name="child[parents_married_to_each_other]" class="input_cell" >
+        <select id="person_parents_married_to_each_other" name="child[parents_married_to_each_other]" class="input_cell" condition="__$('registration_type').value.trim().toLowerCase() != 'abandoned';" >
           <option></option>
           <option <%= ((@child[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option <%= ((@child[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
