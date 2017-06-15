@@ -50,7 +50,7 @@ class UsersController < ApplicationController
 
     @section = "Create User"
 
-    @targeturl = "/user"
+    @targeturl = "/users"
 
     render :layout => "touch"
 

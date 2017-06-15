@@ -8,4 +8,8 @@ module ApplicationHelper
     end
   end
 
+  def preferred_keyboard
+    return User.current.preferred_keyboard
+  end
+
 end
