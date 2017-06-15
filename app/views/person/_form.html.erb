@@ -990,7 +990,91 @@
 
     </fieldset>
 
-    <fieldset>
+    <fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'abandoned';">
+      <legend><font size='5' style='border: 2px;'>Details of Informant</font></legend>
+
+      <!-- Informant -->
+      
+      <div class="field">
+        <label for="child_informant_designation">Designation</label><br>
+        <input id="child_informant_designation"
+               name="child[informant][designation]"
+               type="text"
+               value="<%= @child[:informant][:designation] rescue nil %>"
+               class="input_cell" />
+      </div>
+
+      <div class="field">
+        <label for="child_informant_last_name">Surname</label><br>
+        <input id="child_informant_last_name"
+               name="child[informant][last_name]"
+               type="text"
+               ajaxURL = "/get_last_names"
+               value="<%= @child[:informant][:last_name] rescue nil %>"
+               class="input_cell"
+               />
+      </div>
+
+      <div class="field">
+        <label for="child_informant_first_name">First Name</label><br>
+        <input id="child_informant_first_name"
+               name="child[informant][first_name]"
+               type="text"
+               ajaxURL = "/get_first_names"
+               value="<%= @child[:informant][:first_name] rescue nil %>"
+               class="input_cell"
+               />
+      </div>
+
+      <div class="field">
+        <label for="child_informant_middle_name">Other Name</label><br>
+        <input id="child_informant_middle_name"
+               name="child[informant][middle_name]"
+               type="text"
+               ajaxURL = "/get_first_names"
+               value="<%= @child[:informant][:middle_name] rescue nil %>"
+               class="input_cell" optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="child_informant_id_number">ID Number</label><br>
+        <input id="child_informant_id_number" 
+               name="child[informant][id_number]" 
+               type="text" 
+               value="<%= @child[:informant][:id_number] rescue nil %>"
+               class="input_cell" 
+               condition="false"
+               optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="child_informant_relationship_to_child">Relationship To Child</label><br>
+        <select id="child_informant_relationship_to_child" name="child[informant][relationship_to_child]" class="input_cell">
+          <option></option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          <option <%= ((@child[:child_informant_relationship_to_child] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+    </div>
+    
+    <div class="field">
+        <label for="child_informant_other_relationship_to_child">Specify Relationship</label><br>
+        <input id="child_informant_other_relationship_to_child" 
+               name="child[informant][other_relationship_to_child]" 
+               type="text" 
+               value="<%= @child[:informant][:other_relationship_to_child] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_informant_relationship_to_child').value.trim().toLowerCase() == 'other'"
+               />
+      </div>
+    
+    </fieldset>
+
+    <fieldset condition="__$('registration_type').value.trim().toLowerCase() == 'normal';">
       <legend><font size='5' style=''>Details of Informant</font></legend>
 
       <!-- Informant -->
@@ -1096,6 +1180,8 @@
       </div>
 
       </fieldset>
+
+
       <fieldset>
       <legend><font size='5' style=''>Details of Informant continued.. </font></legend>
 
@@ -1138,6 +1224,7 @@
         <select id="person_copy_mother_name"
 		            name="copy_mother_name"
 		            class="input_cell"
+                condition = "__$('registration_type').value.trim().toLowerCase() == 'abandoned';"
                 tt_onUnload="if(__$('textForperson_copy_mother_name').value.trim() == 'Yes'){copyMothersName();}">
           	<option></option>
           	<option value="Yes">Yes</option>
