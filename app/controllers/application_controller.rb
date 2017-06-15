@@ -20,6 +20,13 @@ class ApplicationController < ActionController::Base
 
   end
 
+  def application_mode
+    if SETTINGS['application_mode'] == 'FC'
+      return 'Facility'
+    else
+      return 'DC'
+    end
+  end
 
 
   def folder
@@ -42,8 +49,10 @@ class ApplicationController < ActionController::Base
     application_mode = SETTINGS['application_mode'] 
     if application_mode == 'DC'
       Location.current_district         =  Location.find(SETTINGS['district_id'])
+      Location.current                  =  Location.find(SETTINGS['district_id'])
     else
       Location.current_health_facility  =  Location.find(SETTINGS['facility_id'])
+      Location.current                  =  Location.find(SETTINGS['facility_id'])
     end
   end
 
