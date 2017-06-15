@@ -149,7 +149,7 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer  "voided_by",   limit: 4
     t.datetime "date_voided"
     t.datetime "created_at",                          null: false
-    t.datetime "update_at",                           null: false
+    t.datetime "updated_at",                           null: false
   end
 
   create_table "person_attributes", primary_key: "person_attribute_id", force: :cascade do |t|
@@ -247,7 +247,7 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer  "person_b",                    limit: 4, null: false
     t.integer  "person_relationship_type_id", limit: 4, null: false
     t.datetime "created_at",                            null: false
-    t.datetime "update_at",                             null: false
+    t.datetime "updated_at",                             null: false
   end
 
   add_index "person_relationship", ["person_a"], name: "fk_person_relationship_1_idx", using: :btree

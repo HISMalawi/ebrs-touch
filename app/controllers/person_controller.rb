@@ -24,14 +24,14 @@ class PersonController < ApplicationController
     if params["last_name"]
       data = PersonName.where("last_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:last_name).uniq.join("n") and return
+        render text: data.collect(&:last_name).uniq.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
       data = PersonName.where("first_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:first_name).uniq.join("n") and return
+        render text: data.collect(&:first_name).uniq.join("\n") and return
       else
         render text: "" and return
       end
