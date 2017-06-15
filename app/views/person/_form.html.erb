@@ -36,8 +36,8 @@
 
       <%= f.hidden_field :_rev rescue "" %>
       <%= f.hidden_field :place_of_birth, :value => "Hospital" %>
-      <%= f.hidden_field :hospital_of_birth, :value => "facility.name" %>
-      <%= f.hidden_field :birth_district, :value => "district.name" %>
+      <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.id}" %>
+      <%= f.hidden_field :birth_district, :value => "#{Location.current.district.id}" %>
 
       <input id="person_original_surname" type="hidden"/>
 

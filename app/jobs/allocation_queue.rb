@@ -10,7 +10,7 @@ class AllocationQueue
     begin
       (queue || []).each do |record|
         if record.identifier_type == 'BEN'
-          district_code = Location.current_district.code rescue 'BLK'
+          district_code = Location.current.district.code
           district_code_len = district_code.length
           year = Date.today.year
           year_len = year.to_s.length
