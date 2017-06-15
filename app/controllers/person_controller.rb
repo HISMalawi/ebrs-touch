@@ -1,6 +1,7 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
+  
     render :layout => 'facility'
   end
 
