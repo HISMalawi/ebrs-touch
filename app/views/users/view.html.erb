@@ -31,7 +31,7 @@
 
     var currentPage = 0;
     var users = [];
-    var currentPagesize = 15;
+    var currentPagesize = 8;
 
     var currentUser = "<%= User.current_user.username rescue nil %>";
 
@@ -236,7 +236,7 @@
 
                         if(r < users.length){
 
-                            cell.innerHTML = users[r]["role"];
+                            cell.innerHTML = (users[r]["role"] || "&nbsp;");
 
                         } else {
 

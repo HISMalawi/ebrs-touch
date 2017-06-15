@@ -76,6 +76,7 @@
 
 	<%= f.fields_for :user_role do |i| %>
 	<% @roles = UserRole.all.each %>
+
         <tr>
           <td align="right">
             <%= i.label :role %>
@@ -84,7 +85,7 @@
             :
           </td>
           <td>
-     <%= i.select :role, options_for_select(@roles.map{ |r| [r.role, r.role]}), :class => "input_cell", :placeholder => "Select Role", :required => true %>
+     <%= i.select :role, options_for_select(@roles.map{ |r| [r.user_id, r.role.role]}), :class => "input_cell", :placeholder => "Select Role", :required => true %>
           </td>
         </tr>
 	  <% end %>
@@ -144,7 +145,7 @@
             :
           </td>
           <td>
-            <%= f.text_field :email, :class => "input_cell", :placeholder => "Email Address", :optional => true %>
+
           </td>
         </tr>
 

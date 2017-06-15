@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   def index
 
     @icoFolder = icoFolder("icoFolder")
-    #raise @icoFolder.inspect
+
     @section = "User Management"
 
     @targeturl = "/"
@@ -23,7 +23,8 @@ class UsersController < ApplicationController
 
     @person_name = PersonName.find_by_person_id(@user.person_id)
 
-    @user_role = UserRole.find(@user.user_role_id)
+    @user_role =  UserRole.find_by_user_id(@user.user_id)
+
 
     @targeturl = "/view_users"
 
@@ -33,8 +34,6 @@ class UsersController < ApplicationController
 
   #Displays All Users
   def view
-
-    @users = User.all.each
 
     @section = "View Users"
 
@@ -75,19 +74,29 @@ class UsersController < ApplicationController
   def create
 
       @targeturl = "/user"
-      #user = User.find(params[:user]['username'])
+	person_type = PersonType.where(name: 'User').first
 
-      #if user.present?
-        #flash["notice"] = "User already already exists"
-         #redirect_to "/user/new" and return
-      #end
-      core_person = CorePerson.create(person_type_id: 1)
-      person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
-      person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
+	core_person = CorePerson.create(person_type_id: person_type.id)
+	person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'])
 
-      user_role = UserRole.create(role: params[:user]['user_role']['role'], level: 1, voided: 0)
+	person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
 
-      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id:     	 user_role.user_role_id,  email: params[:user]['email'], person_id: core_person.person_id)
+	[['Administrator', 1], ['Nurse', 2], ['Midwife', 2], ['Data clerk', 3]].each do |r, l|
+	  Role.create(role: r, level: l)
+	end
+
+	role = Role.where(role:  params[:user]['user_role']['role']).first
+
+	@user = User.create(username: params[:user]['username'], password: params[:user]['password'], creator: 1, person_id: core_person.person_id)
+
+	@user_role = UserRole.create(user_id: @user.id, role_id: role.id)
+
+	loc_tags = ['Country','District','Village','Traditional Authority','Health facility']
+	loc_tags.each do |t|
+	  LocationTag.create(name: t)
+	end
+
+	User.current = User.first
 
       respond_to do |format|
 
@@ -102,18 +111,17 @@ class UsersController < ApplicationController
   end
 
   def update
+     #raise params.inspect
 
-    if request.referrer.match('edit_account')
-      @current_user.preferred_keyboard = params[:user][:preferred_keyboard]
-      @current_user.save!
-      redirect_to '/users/my_account' and return
-    end
+     @user = User.find(params[:id])
+       #if params["user"]["password"].present? && params["user"]["password"].length > 1
+          @person_name = PersonName.find_by_person_id(@user.person_id)
+	  @person_name.update_attributes(:first_name => params["user"]["person"]["first_name"], :last_name => params["user"]["person"]["last_name"])
+	  #@user_role =  UserRole.find_by_user_id(@user.user_id)
+	  # @user_role.update_attributes(:role => params["user"]["user_role"]["role"])
+	  @user.update_attributes(:password => params["user"]["password"])
 
-    if params[:user][:plain_password].present? && params[:user][:plain_password].length > 1
-      @user.update_attributes(:password_hash => params[:user][:plain_password], :password_attempt => 0, :last_password_date => Time.now)
-
-    end
-
+       #end
     respond_to do |format|
       #if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false) and @user.update_attributes(user_params)
 
@@ -139,12 +147,11 @@ class UsersController < ApplicationController
     	record = {
           	"username" => "#{user.username}",
           	"name" => "#{user.core_person.person_name.first_name} #{user.core_person.person_name.last_name}",
-          	#"role" => "#{user.user_role.role}",
           	"user_id" => "#{user.user_id}",
+          	"role" => "#{(UserRole.find_by_user_id(user.user_id).role.role rescue "")}",
          	"active" => (user.active rescue false)
       	    	}
-
-      	results << record
+       	results << record
     end
 
     render :text => results.to_json
@@ -153,7 +160,9 @@ class UsersController < ApplicationController
   #Deletes Selected User
   def destroy
 
-    @user.destroy if ((User.current_user.role.strip.downcase.match(/admin/) rescue false) ? true : false)
+     @user = User.find(params[:id])
+     #raise @user.inspect
+     @user.destroy
       respond_to do |format|
       format.html { redirect_to "/view_users", :notice => 'User was successfully destroyed.' }
       format.json { head :no_content }
@@ -230,8 +239,6 @@ class UsersController < ApplicationController
 
   def search_by_username
 
-    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("View Users"))
-
     name = params[:id].strip rescue ""
 
     results = []
@@ -251,10 +258,10 @@ class UsersController < ApplicationController
       next if user.username.strip.downcase == User.current_user.username.strip.downcase
 
       record = {
-          "username" => "#{user.username}",
-          "fname" => "#{user.core_person.person_name.first_name}",
-          "lname" => "#{user.core_person.person_name.last_name}",
-          "role" => "#{user.user_role.role}",
+                "username" => "#{user.username}",
+          	"name" => "#{user.core_person.person_name.first_name} #{user.core_person.person_name.last_name}",
+          	"user_id" => "#{user.user_id}",
+          	"role" => "#{(UserRole.find_by_user_id(user.user_id).role.role rescue "")}",
           "active" => (user.active rescue false)
       }
 
@@ -281,11 +288,11 @@ class UsersController < ApplicationController
       next if user.username.strip.downcase == User.current_user.username.strip.downcase
 
       record = {
-          "username" => "#{user.username}",
-          "fname" => "#{user.core_person.person_name.first_name}",
-          "lname" => "#{user.core_person.person_name.last_name}",
-          "role" => "#{user.user_role.role}",
-          "active" => (user.active rescue false)
+          	"username" => "#{user.username}",
+          	"name" => "#{user.core_person.person_name.first_name} #{user.core_person.person_name.last_name}",
+          	"user_id" => "#{user.user_id}",
+          	"role" => "#{(UserRole.find_by_user_id(user.user_id).role.role rescue "")}",
+         	"active" => (user.active rescue false)
       }
 
       results << record
@@ -357,7 +364,7 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:username, :active, :create_at, :creator, :email, :first_name, :last_name, :notify, :plain_password, :role, :updated_at, :_rev)
+    params.require(:user).permit(:username, :active, :create_at, :creator, :first_name, :last_name, :notify, :password, :role, :updated_at)
   end
 
   def check_if_user_admin

@@ -13,17 +13,17 @@ begin
       require Rails.root.join('db','load_person_types.rb')
       require Rails.root.join('db','load_person_relationship_types.rb')
     end
-rescue => e 
+rescue => e
 	puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
 end
 
 person_type = PersonType.where(name: 'User').first
 
 core_person = CorePerson.create(person_type_id: person_type.id)
-person_name = PersonName.create(person_id: core_person.person_id, 
+person_name = PersonName.create(person_id: core_person.person_id,
   first_name: 'System', last_name: 'Admin')
 
-person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, 
+person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id,
   first_name_code: 'System'.soundex, last_name_code: 'Admin'.soundex )
 
 [['Administrator', 1], ['Nurse', 2], ['Midwife', 2], ['Data clerk', 3]].each do |r, l|
@@ -32,8 +32,8 @@ end
 
 role = Role.where(role: 'Administrator').first
 
-user = User.create(username: 'admin', 
-  password: 'adminebrs', 
+user = User.create(username: 'admin',
+  password: 'adminebrs',
   creator: 1, person_id: core_person.person_id)
 
 UserRole.create(user_id: user.id, role_id: role.id)
@@ -54,10 +54,10 @@ begin
     require Rails.root.join('db','load_tas_and_villages.rb')
     require Rails.root.join('db','load_health_facilities.rb')
   end
-rescue => e 
+rescue => e
 	puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
 end
-	
-  
-  
-puts "Successful created: your new username is: #{User.username}  and password: adminebrs"
+
+
+
+puts "Successful created: your new username is: #{user.username}  and password: adminebrs"
