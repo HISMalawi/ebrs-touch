@@ -65,6 +65,9 @@ Rails.application.routes.draw do
   get 'records/:status' => 'person#records'
 
   ########################### (create record form) routes
+
+  get '/new_registration' => "dc#new_registration"
+
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}
   get '/get_first_names' => 'person#get_names', :defaults => {first_name: 'first_name'}
   get '/search_by_nationality' => 'person#get_nationality'

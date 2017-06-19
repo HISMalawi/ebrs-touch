@@ -1,1 +1,23 @@
+<%  if SETTINGS['application_mode'] == "FC" %>
 <%= render 'form' %>
+<%  elsif SETTINGS['application_mode'] == "DC" %>
+
+<% if !@person["type_of_birth"].blank? && @person["type_of_birth"] != "Single" %>
+
+	<%= render 'multiplebirth' %> 
+
+<% else %> 
+ <% case params[:relationship].downcase 
+ 
+		when 'normal'  %>  
+			 <%= render 'dcform' %>
+		<% when 'adopted'  %>  
+			<%= render 'adopted' %>
+		<% when 'orphaned'  %>
+			<%= render 'orphaned' %>
+		<% when 'abandoned' %>
+		  <%= render 'abandoned' %>
+		<% end %>
+ 
+<% end %>
+<%  end %>

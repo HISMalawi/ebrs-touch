@@ -1,0 +1,19 @@
+ <%= form_tag("#{@form_action}", method: "get") do %>
+ <input name="id" type="hidden" value="<%= @child_id %>">
+<fieldset>
+	 <legend><font size='5' style='border: 2px;'>Type of registration</font></legend>
+	 <div class="field">
+        <label for="relationship">Registration Type</label><br>
+        <select id="relationship" name="relationship" class="input_cell">
+          <option>Normal</option>
+          <option>Abandoned</option>
+          <option>Adopted</option>
+          <option>Orphaned</option>
+        </select>
+      </div>
+</fieldset>
+<% end %>
+<script type="text/javascript">
+	init();
+	$("#relationship").css("height : 300px;")
+</script>

@@ -1,0 +1,500 @@
+<style>
+    fieldset {
+        margin: 20px;
+        border-radius: 5px;
+        border: 1px solid #3465a4;
+        padding: 20px;
+    }
+
+    legend {
+        font-size: 18px;
+        font-weight: normal;
+        color: #3465a4;
+    }
+
+    div.field {
+        font-weight: normal;
+        display: inline-block;
+        margin: 10px;
+        color: #000;
+    }
+
+    select {
+        min-width: 100%;
+    }
+
+    /*input {
+        min-width: 100%;
+    }*/
+</style>
+
+<%= form_for(@child) do |f| %>
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
+
+      <%= f.hidden_field :_rev rescue "" %>
+
+
+       <%= f.hidden_field :place_of_birth %> <!--@child[:place_of_birth] -->
+       <%= f.hidden_field :hospital_of_birth %> <!--hospital_of_birth -->
+       <%= f.hidden_field :birth_address  %> <!--birth_address -->
+       <%= f.hidden_field :birth_district %> <!--birth_district -->
+       <%= f.hidden_field :birth_ta  %> <!--birth_ta -->
+       <%= f.hidden_field :birth_village  %> <!--birth_village -->
+       <%= f.hidden_field :other_birth_place_details  %> <!--other_birth_place_details -->
+       <%= f.hidden_field :parents_married_to_each_other  %> <!--@child[:parents_married_to_each_other] -->
+       <%= f.hidden_field :date_of_marriage %> <!--date_of_marriage -->
+       <%= f.hidden_field :court_order_attached  %> <!--child_court_order_attached -->
+       <%= f.hidden_field :parents_signed  %>
+       <%= f.hidden_field :acknowledgement_of_receipt_date %> <!--child_parents_signed -->
+       <%= f.hidden_field :type_of_birth %>
+       <%= f.hidden_field :multiple_birth_id %>
+       <input type="hidden" name="registration_type" id="registration_type" />
+
+       <input id="child_relationship" name="child[relationship]" value="normal" type="hidden"/>
+      
+       <input name="relationship" value="normal" type="hidden"/>
+      
+
+       <input type="hidden" id="child_mother_last_name" name="child[mother][last_name]" value="<%= @child[:mother][:last_name] rescue nil %>" />
+       <input type="hidden" id="child_mother_first_name"  name="child[mother][first_name]" value="<%= @child[:mother][:first_name] rescue nil %>" />
+       <input type="hidden" id="child_mother_middle_name"  name="child[mother][middle_name]" value="<%= @child[:mother][:middle_name] rescue nil %>" />
+       <input type="hidden" id="child_mother_id_number" name="child[mother][id_number]" value="<%= @child[:mother][:id_number] rescue nil %>" />
+
+       <input type="hidden" id="child_mother_birthdate" name="child[mother][birthdate]" value="<%= @child[:mother][:birthdate] rescue nil %>" />
+       <input type="hidden" id="child_mother_birthdate_estimated" name="child[mother][birthdate_estimated]" value="<%= @child[:mother][:birthdate_estimated] rescue nil %>" />
+       <input type="hidden" id="child_mother_citizenship" name="child[mother][citizenship]" value="<%= @child[:mother][:citizenship] rescue nil %>" />
+       <input type="hidden" id="child_mother_current_district" name="child[mother][current_district]" value="<%= @child[:mother][:current_district] rescue nil %>" />
+       <input type="hidden" id="child_mother_current_ta" name="child[mother][current_ta]" value="<%= @child[:mother][:current_ta] rescue nil %>" />
+       <input type="hidden" id="child_mother_current_village" name="child[mother][current_village]" value="<%= @child[:mother][:current_village] rescue nil %>" />
+       <input type="hidden" id="child_mother_residential_country" name="child[mother][residential_country]" value="<%= @child[:mother][:residential_country] rescue nil %>" />
+
+       <input type="hidden" id="child_mother_home_district" name="child[mother][home_district]" value="<%= @child[:mother][:home_district] rescue nil %>" />
+       <input type="hidden" id="child_mother_home_ta" name="child[mother][home_ta]" value="<%= @child[:mother][:home_ta] rescue nil %>" />
+       <input type="hidden" id="child_mother_home_village" name="child[mother][home_village]" value="<%= @child[:mother][:home_village] rescue nil %>" />
+
+
+
+       <%= f.hidden_field :gestation_at_birth  %>
+       <%= f.hidden_field :number_of_prenatal_visits %>
+       <%= f.hidden_field :month_prenatal_care_started %>
+
+       <%#= f.hidden_field :mode_of_delivery  %> <!--@child[:mode_of_delivery] -->
+       <%= f.hidden_field :number_of_children_born_alive_inclusive %>
+       <%= f.hidden_field :number_of_children_born_still_alive %>
+
+       <%= f.hidden_field :level_of_education  %> <!-- @child[:level_of_education] -->
+
+       <input type="hidden" id="child_father_last_name"  name="child[father][last_name]" value="<%= @child[:father][:last_name] rescue nil %>" />
+       <input type="hidden" id="child_father_first_name"  name="child[father][first_name]" value="<%= @child[:father][:first_name] rescue nil %>" />
+       <input type="hidden" id="child_father_middle_name"  name="child[father][middle_name]" value="<%= @child[:father][:middle_name] rescue nil %>" />
+       <input type="hidden" id="child_father_id_number" name="child[father][id_number]" value="<%= @child[:father][:id_number] rescue nil %>" />
+
+       <input type="hidden" id="child_father_birthdate" name="child[father][birthdate]" value="<%= @child[:father][:birthdate] rescue nil %>" />
+       <input type="hidden" id="child_father_birthdate_estimated" name="child[father][birthdate_estimated]" value="<%= @child[:father][:birthdate_estimated] rescue nil %>" />
+       <input type="hidden" id="child_father_citizenship" name="child[father][citizenship]" value="<%= @child[:father][:citizenship] rescue nil %>" />
+       <input type="hidden" id="child_father_current_district" name="child[father][current_district]" value="<%= @child[:father][:current_district] rescue nil %>" />
+       <input type="hidden" id="child_father_current_ta" name="child[father][current_ta]" value="<%= @child[:father][:current_ta] rescue nil %>" />
+       <input type="hidden" id="child_father_current_village" name="child[father][current_village]" value="<%= @child[:father][:current_village] rescue nil %>" />
+       <input type="hidden" id="child_father_residential_country" name="child[father][residential_country]" value="<%= @child[:father][:residential_country] rescue nil %>" />
+
+       <input type="hidden" id="child_father_home_district" name="child[father][home_district]" value="<%= @child[:father][:home_district] rescue nil %>" />
+       <input type="hidden" id="child_father_home_ta" name="child[father][home_ta]" value="<%= @child[:father][:home_ta] rescue nil %>" />
+       <input type="hidden" id="child_father_home_village" name="child[father][home_village]" value="<%= @child[:father][:home_village] rescue nil %>" />
+
+       <input type="hidden" id="child_informant_last_name" name="child[informant][last_name]" value="<%= @child[:informant][:last_name] rescue nil %>" />
+       <input type="hidden" id="child_informant_first_name" name="child[informant][first_name]" value="<%= @child[:informant][:first_name] rescue nil %>" />
+       <input type="hidden" id="child_informant_middle_name" name="child[informant][middle_name]" value="<%= @child[:informant][:middle_name] rescue nil %>" />
+       <input type="hidden" id="child_informant_id_number" name="child[informant][id_number]" value="<%= @child[:informant][:id_number] rescue nil %>" />
+
+       <input type="hidden" id="child_informant_relationship_to_child" name="child[informant][relationship_to_child]" value="<%= @child[:informant][:relationship_to_child] rescue nil %>" />
+
+       <input type="hidden" id="child_informant_current_district" name="child[informant][current_district]" value="<%= @child[:informant][:current_district] rescue nil %>" />
+
+       <input type="hidden" id="child_informant_current_ta" name="child[informant][current_ta]" value="<%= @child[:informant][:current_ta] rescue nil %>" />
+
+       <input type="hidden" id="child_informant_current_village" name="child[informant][current_village]" value="<%= @child[:informant][:current_village] rescue nil %>" />
+       <input type="hidden" id="child_informant_addressline1 " name="child[informant][addressline1 ]" value="<%= @child[:informant][:addressline1] rescue nil %>" />
+       <input type="hidden" id="child_informant_addressline2" name="child[informant][addressline2]" value="<%= @child[:informant][:addressline2] rescue nil %>" />
+       <input type="hidden" id="child_informant_city" name="child[informant][city]" value="<%= @child[:informant][:city] rescue nil %>" />
+       <input type="hidden" id="child_informant_phone_number" name="child[informant][phone_number]" value="<%= @child[:informant][:phone_number] rescue nil %>" />
+
+       <%= f.hidden_field :record_status  %>
+       <%= f.hidden_field :form_signed  %> <!-- @child[:form_signed] -->
+
+      <div class="field">
+        <label for="child_last_name">Surname</label>
+        <br>
+        <%= (f.text_field :last_name, :ajaxURL => "/get_last_names", :class => "input_cell") rescue "" %>
+      </div>
+      <div class="field">
+        <%= f.label :first_name %>
+        <br>
+        <%= (f.text_field :first_name, :ajaxURL => "/get_first_names",  :class => "input_cell", :tt_onUnload => "updateRegistrationType()") rescue "" %>
+      </div>
+      <div class="field">
+        <label for="child_middle_name">Other Names</label>
+        <br>
+        <%= (f.text_field :middle_name, :ajaxURL => "/get_first_names", :class => "input_cell", :optional => :true) rescue "" %>
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Child continued..</font></legend>
+
+      <div class="field">
+        <label for="child_birthdate">Date of Birth</label>
+        <br>
+        <%= (f.text_field :birthdate, :class => "input_cell", :fieldtype => "date",
+                          :absolute_min => @child.birthdate.to_date.advance(:days => -2).strftime('%Y/%m/%d'),
+                          :absolute_max => @child.birthdate.to_date.advance(:days => 2).strftime('%Y/%m/%d')) rescue "" %>
+        <%= f.hidden_field :birthdate_estimated rescue "" %>
+      </div>
+      <div class="field">
+        <label for="child_gender">Sex</label><br>
+        <select id="child_gender" name="child[gender]" class="input_cell">
+          <option></option>
+          <option <%= ((@child[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
+          <option <%= ((@child[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="child_birth_weight">Birth weight (in Kilogrammes)</label>
+        <br>
+        <% if @prev_child_weight.present? %>
+            <%= (f.text_field :birth_weight,
+            									:value => "",
+            									:placeholder => "0.000",
+            									:class => "input_cell",
+            									:fieldtype => "decimal",
+            									:regex => '^\d+\.\d{3}$',
+            									:regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) or truncate the weight for you?",
+            									:absolute_min => 0.7 ,
+            									:absolute_max => 6,
+        			 								:min => 2.5,
+        			 								:max => 4 ) %>
+        <% else %>
+        			 <%= (f.text_field :birth_weight,
+        			 									 :value => "",
+        			 									 :placeholder => "0.000",
+        			 									 :class => "input_cell",
+        			 									 :fieldtype => "decimal",
+        			 									 :regex => '^\d+\.\d{3}$',
+        			 									 :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) truncate the weight for you?",
+        			 									 :absolute_min => 0.7 ,
+        			 									 :absolute_max => 6,
+        			 									 :min => 2.5,
+        			 									 :max => 4,
+        			 									 :optional => :true) %>
+
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= f.label :mode_of_delivery %>
+        <br>
+        <select id="child_mode_of_delivery" name="child[mode_of_delivery]" class="input_cell" optional="true">
+          <option></option>
+          <option <%= ((@child[:mode_of_delivery] rescue nil) == "SVD" ? "selected" : "") %> >SVD</option>
+          <option <%= ((@child[:mode_of_delivery] rescue nil) == "Vacuum Extraction" ? "selected" : "") %> >Vacuum Extraction</option>
+          <option <%= ((@child[:mode_of_delivery] rescue nil) == "Breech" ? "selected" : "") %> >Breech</option>
+          <option <%= ((@child[:mode_of_delivery] rescue nil) == "Forceps" ? "selected" : "") %> >Forceps</option>
+          <option <%= ((@child[:mode_of_delivery] rescue nil) == "Caesarean Section" ? "selected" : "") %> >Caesarean Section</option>
+        </select>
+      </div>
+
+      <!--div class="field">
+        <%= f.label :type_of_birth %>
+        <br>
+        <select id="child_type_of_birth" name="child[type_of_birth]" class="input_cell" optional="true" >
+          <option></option>
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
+
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
+
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >First Triplet</option>
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
+
+          <option <%= ((@child[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="child_other_type_of_birth">Specify Other Type of Birth</label>
+        <br>
+        <%= (f.text_field :other_type_of_birth, :class => "input_cell", :condition => "__$('child_type_of_birth').value.trim() == 'Other'", :optional => :true ) rescue "" %>
+      </div-->
+
+    </fieldset>
+
+
+    <div class="actions">
+      <%= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
+    </div>
+<% end %>
+
+<script>
+
+    function copyMothersResidence() {
+
+        if (__$("child_father_current_district") && __$("child_mother_current_district") && __$("textForchild_father_current_district")) {
+
+            __$("child_father_current_district").value = __$("child_mother_current_district").value;
+
+            __$("textForchild_father_current_district").value = __$("child_mother_current_district").value;
+
+        }
+
+        if (__$("child_father_current_ta") && __$("child_mother_current_ta") && __$("textForchild_father_current_ta")) {
+
+            __$("child_father_current_ta").value = __$("child_mother_current_ta").value;
+
+            __$("textForchild_father_current_ta").value = __$("child_mother_current_ta").value;
+
+        }
+
+        if (__$("child_father_current_village") && __$("child_mother_current_village") && __$("textForchild_father_current_village")) {
+
+            __$("child_father_current_village").value = __$("child_mother_current_village").value;
+
+            __$("textForchild_father_current_village").value = __$("child_mother_current_village").value;
+
+        }
+
+    }
+
+    function deleteFathersResidence() {
+
+        if (__$("child_father_current_district") && __$("textForchild_father_current_district")) {
+
+            __$("child_father_current_district").value = "";
+
+            __$("textForchild_father_current_district").value = "";
+
+        }
+
+        if (__$("child_father_current_ta") && __$("textForchild_father_current_ta")) {
+
+            __$("child_father_current_ta").value = "";
+
+            __$("textForchild_father_current_ta").value = "";
+
+        }
+
+        if (__$("child_father_current_village") && __$("textForchild_father_current_village")) {
+
+            __$("child_father_current_village").value = "";
+
+            __$("textForchild_father_current_village").value = "";
+
+        }
+
+    }
+
+    function loadMothersDetails(){
+
+        if (__$("child_mother_first_name") && __$("child_informant_first_name") && __$("textForchild_informant_first_name")) {
+
+            __$("child_informant_first_name").value = __$("child_mother_first_name").value;
+
+            __$("textForchild_informant_first_name").value = __$("child_mother_first_name").value;
+
+        }
+
+        if (__$("child_mother_middle_name") && __$("child_informant_middle_name") && __$("textForchild_informant_middle_name")) {
+
+            __$("child_informant_middle_name").value = __$("child_mother_middle_name").value;
+
+            __$("textForchild_informant_middle_name").value = __$("child_mother_middle_name").value;
+
+        }
+
+        if (__$("child_mother_last_name") && __$("child_informant_last_name") && __$("textForchild_informant_last_name")) {
+
+            __$("child_informant_last_name").value = __$("child_mother_last_name").value;
+
+            __$("textForchild_informant_last_name").value = __$("child_mother_last_name").value;
+
+        }
+
+        if (__$("child_informant_relationship_to_child") && __$("textForchild_informant_relationship_to_child")) {
+
+            __$("child_informant_relationship_to_child").value = "Mother";
+
+            __$("textForchild_informant_relationship_to_child").value = "Mother";
+
+        }
+
+        if (__$("child_mother_current_district") && __$("child_informant_current_district")) {
+
+            __$("child_informant_current_district").value = __$("child_mother_current_district").value;
+
+        }
+
+        if (__$("child_mother_current_ta") && __$("child_informant_current_ta")) {
+
+            __$("child_informant_current_ta").value = __$("child_mother_current_ta").value;
+
+        }
+
+        if (__$("child_mother_current_village") && __$("child_informant_current_village")) {
+
+            __$("child_informant_current_village").value = __$("child_mother_current_village").value;
+
+        }
+
+        if (__$("child_mother_id_number")) {
+
+            __$("child_informant_id_number").value = __$("child_mother_id_number").value;
+
+            __$("textForchild_informant_id_number").value = __$("child_mother_id_number").value;
+
+
+        }
+
+    }
+
+    function unloadMothersDetails(){
+
+        if (__$("child_informant_first_name") && __$("textForchild_informant_first_name")) {
+
+            __$("child_informant_first_name").value = "";
+
+            __$("textForchild_informant_first_name").value = "";
+
+        }
+
+        if (__$("child_informant_middle_name") && __$("textForchild_informant_middle_name")) {
+
+            __$("child_informant_middle_name").value = "";
+
+            __$("textForchild_informant_middle_name").value = "";
+
+        }
+
+        if (__$("child_informant_last_name") && __$("textForchild_informant_last_name")) {
+
+            __$("child_informant_last_name").value = "";
+
+            __$("textForchild_informant_last_name").value = "";
+
+        }
+
+        if (__$("child_informant_relationship_to_child") && __$("textForchild_informant_relationship_to_child")) {
+
+            __$("child_informant_relationship_to_child").value = "";
+
+            __$("textForchild_informant_relationship_to_child").value = "";
+
+        }
+
+        if (__$("child_informant_current_district") && __$("textForchild_informant_current_district")) {
+
+            __$("child_informant_current_district").value = "";
+
+            __$("textForchild_informant_current_district").value = "";
+
+        }
+
+        if (__$("child_informant_current_ta") && __$("textForchild_informant_current_ta")) {
+
+            __$("child_informant_current_ta").value = "";
+
+            __$("textForchild_informant_current_ta").value = "";
+
+        }
+
+        if (__$("child_informant_current_village") && __$("textForchild_informant_current_village")) {
+
+            __$("child_informant_current_village").value = "";
+
+            __$("textForchild_informant_current_village").value = "";
+
+        }
+
+        if(__$("child_informant_id_number") && __$("textForchild_informant_id_number")) {
+
+             __$("child_informant_id_number").value = "";
+
+            __$("textForchild_informant_id_number").value = "";
+        }
+
+
+    }
+
+    init();
+
+    summaryHash = {
+                    "Child Name" : ["child_first_name","child_middle_name","child_last_name"],
+                    "Child Gender" : ["child_gender"],
+                    "Child Date of Birth" : ["child_birthdate"],
+                    "Place of Birth" : ((__$('child_place_of_birth').value.trim().toLowerCase() == 'hospital') ? ["child_hospital_of_birth"] : ["child_place_of_birth"]),
+                    "Mother " : ["child_mother_first_name", "child_mother_middle_name", "child_mother_last_name"],
+                    "Father" : ["child_father_first_name", "child_father_middle_name","child_father_last_name"],
+                    "Parents Married to each Other?": ['child_parents_married_to_each_other'],
+                    "Court order attached?": ['child_court_order_attached'],
+                    "Parents signed?" : ["child_parents_signed"],
+                    "Form Signed by Informant?" : ["child_form_signed"],
+                    "Delayed Registration" : ['registration_type']
+                   };
+
+  function updateRegistrationType()
+    {
+
+        var child_dob = __$('child_birthdate').value;
+
+        var dob = child_dob.split('/');
+
+        if (child_dob.match(/\W?/i)) {
+            if (dob[1] == '?') {
+                dob[0] = "1";
+                dob[1] = "07";
+            }
+            else if (dob[0] == '?') {
+                dob[1] = parseInt(monthNames[dob[1]]);
+                dob[0] = "15"
+            }
+        }
+        else {
+            dob[1] = parseInt(monthNames[dob[1]]);
+            dob[1] = dob[1] + 1
+
+            if (dob[1] < 10){
+                dob[1] = "0" + dob[1];
+            }
+        }
+
+        if (((Date.parse(__$('child_acknowledgement_of_receipt_date').value) - Date.parse((dob[0] + "/" + dob[1] + "/" + dob[2])))/ (1000 * 60 * 60 * 24)) > 42)
+        {
+            __$('registration_type').value = 'Yes'
+        }
+        else
+        {
+            __$('registration_type').value = 'No'
+        }
+
+    }
+
+  showMessage();
+
+		function  showMessage() {
+
+				<% if @child.errors.any?
+          errors = []
+          errors << "<p>" + pluralize(@child.errors.count, "error") + " occured while saving this record:</p>"
+           @child.errors.full_messages.each do |message|
+             errors << "<li>" + message + "</li>"
+          end %>
+
+           showMsg('<%= errors.join.html_safe %>', true);
+
+        <% end %>
+
+     }
+
+
+</script>

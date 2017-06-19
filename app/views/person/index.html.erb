@@ -1,6 +1,6 @@
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
   <!-- % if User.current_user.activities_by_level("Facility").include?("Register a record") % -->
-      <div class="button" onmousedown="window.location = '<%= new_person_path %>'" tag=0>
+      <div class="button" onmousedown="window.location = '<%=application_mode == 'DC' ? '/new_registration' : new_person_path %>'" tag=0>
 
         <!--div>
           <form id="barcodescan" method="get" action="/search_results">
