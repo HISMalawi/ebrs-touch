@@ -54,6 +54,7 @@ begin
       require Rails.root.join('db','load_districts.rb')
       require Rails.root.join('db','load_tas_and_villages.rb')
       require Rails.root.join('db','load_health_facilities.rb')
+      require Rails.root.join('db','load_statuses.rb')
       create_user
     end
 rescue => e 
