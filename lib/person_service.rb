@@ -15,6 +15,7 @@ module PersonService
     first_name 			                  = params[:person][:first_name]
     last_name 			                  = params[:person][:last_name]
     middle_name 		                  = params[:person][:middle_name]
+    birthdate                         = params[:birthdate]
     place_of_birth		                = params[:person][:place_of_birth]
     hospital_of_birth	                =	params[:person][:hospital_of_birth]
     birth_district		                =	params[:person][:birth_district]
@@ -27,6 +28,8 @@ module PersonService
     registration_type 	              = params[:person][:registration_type]
     copy_mother_name                  = params[:person][:copy_mother_name]
     type_of_birth		                  = params[:person][:type_of_birth]
+
+    #raise birthdate.inspect
 
     ################################ mother details ###############################################
 
