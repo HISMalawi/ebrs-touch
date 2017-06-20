@@ -28,12 +28,14 @@
     }*/
 </style>
 
-<%= form_for :person do |f| %>
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 
     <fieldset>
+
       <legend><font size='5' style='border: 2px;'>Details of person</font></legend>
 
       <%= f.hidden_field :_rev rescue "" %>
+
       <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
 
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
