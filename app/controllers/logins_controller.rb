@@ -24,16 +24,16 @@ class LoginsController < ApplicationController
            redirect_to "/change_password"
          end
       else
-      
+
          if (Time.now.to_date - user.last_password_date.to_date).to_i >= 85 && (Time.now.to_date - user.last_password_date.to_date).to_i < 90
             flash[:info] = 'Your password will expire soon. Please change it.'
          end
-          
+
          redirect_to default_path and return if back_or_default.match(/login/)
 
          redirect_to back_or_default
-      end   
-      
+      end
+
     else
       flash[:error] = 'That username and/or password is not valid.'
       redirect_to "/login"
@@ -69,4 +69,3 @@ class LoginsController < ApplicationController
   end
 
 end
-

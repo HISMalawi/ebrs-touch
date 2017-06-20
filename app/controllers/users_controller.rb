@@ -85,9 +85,21 @@ class UsersController < ApplicationController
       person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
 
+=begin
       user_role = UserRole.create(role: params[:user]['user_role']['role'], level: 1, voided: 0)
 
       @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id:     	 user_role.user_role_id,  email: params[:user]['email'], person_id: core_person.person_id)
+=end
+
+    [['Administrator', 1], ['Nurse', 2], ['Midwife', 2], ['Data clerk', 3]].each do |r, l|
+	  Role.create(role: r, level: l)
+	end
+
+	role = Role.where(role:  params[:user]['user_role']['role']).first
+
+	@user = User.create(username: params[:user]['username'], password: params[:user]['password'], creator: 1, person_id: core_person.person_id, email: params[:user]['email'])
+
+	@user_role = UserRole.create(user_id: @user.id, role_id: role.id)
 
       respond_to do |format|
 
@@ -111,7 +123,7 @@ class UsersController < ApplicationController
     end
 
     if params[:user][:plain_password].present? && params[:user][:plain_password].length > 1
-      @user.update_attributes(password_hash: params[:user][:plain_password], 
+      @user.update_attributes(password_hash: params[:user][:plain_password],
         password_attempt: 0, last_password_date: Time.now)
     end
 
@@ -121,12 +133,12 @@ class UsersController < ApplicationController
 
         if params[:user][:person][:first_name].present? && params[:user][:person][:last_name].present?
           @user.core_person.person_name.update_attributes(voided: true, void_reason: 'Edited')
-          person_name = PersonName.create(person_id: @user.person_id, 
+          person_name = PersonName.create(person_id: @user.person_id,
             first_name: params[:user][:person][:first_name],
             last_name: params[:user][:person][:last_name])
-          
-          PersonNameCode.create(person_name_id: person_name.person_name_id, 
-            first_name_code: params[:user]['person']['first_name'].soundex, 
+
+          PersonNameCode.create(person_name_id: person_name.person_name_id,
+            first_name_code: params[:user]['person']['first_name'].soundex,
             last_name_code: params[:user]['person']['last_name'].soundex )
         end
 
@@ -212,8 +224,8 @@ class UsersController < ApplicationController
     if !user.nil?
       role = User.current.user_role.role.role.strip rescue nil
       if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
-        user.update_attributes(active: false, 
-          un_or_block_reason: params[:reason]) 
+        user.update_attributes(active: false,
+          un_or_block_reason: params[:reason])
       end
     end
 
@@ -229,8 +241,8 @@ class UsersController < ApplicationController
     if !user.nil?
       role = User.current.user_role.role.role.strip rescue nil
       if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
-        user.update_attributes(voided: true, 
-          :void_reason => "Removed from system by (user_id): #{User.current.id}") 
+        user.update_attributes(voided: true,
+          :void_reason => "Removed from system by (user_id): #{User.current.id}")
       end
     end
 
@@ -246,8 +258,8 @@ class UsersController < ApplicationController
     if !user.nil?
       role = User.current.user_role.role.role.strip rescue nil
       if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
-        user.update_attributes(active: true, 
-          :un_or_block_reason => params[:reason]) 
+        user.update_attributes(active: true,
+          :un_or_block_reason => params[:reason])
       end
     end
 
