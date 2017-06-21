@@ -23,9 +23,9 @@
         <td style="text-align: center;"><%= 'DC OPEN' %></td>
         <td>
           <table style="width: 100%; text-align: center; border-style: none;">
-            <tr>  
-              <td><button class="btn btn-info" onmousedown="javascript:alert();">
-                <%= image_tag "view.png", class: 'btn-images' %></button>
+            <tr>
+              <td><a class="btn btn-info" onmoufsedown="javascript:alert();" href="/person/<%= record.id %>?next_path=view_record">
+                <%= image_tag "view.png", class: 'btn-images' %></a>
               </td>
               <td><button class="btn btn-warning" onmousedown="javascript:alert();">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>

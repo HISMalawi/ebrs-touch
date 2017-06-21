@@ -68,6 +68,8 @@ Rails.application.routes.draw do
 
   get '/new_registration' => "dc#new_registration"
 
+  post "/person/:id" => "person#show", :defaults => { :next_path => "view_record"}
+
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}
   get '/get_first_names' => 'person#get_names', :defaults => {first_name: 'first_name'}
   get '/search_by_nationality' => 'person#get_nationality'
