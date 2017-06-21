@@ -159,6 +159,23 @@ module PersonService
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
           person_relationship_type_id: PersonRelationType.where(name: 'Child-Mother').first.id)
+
+
+            PersonAddress.create(person_id: core_person_mother.id,
+                           current_village: mother_foreigner_current_village,
+                           current_village_other: "",
+                           current_ta: mother_foreigner_current_ta,
+                           current_ta_other: "",
+                           current_district: mother_foreigner_current_district,
+                           current_district_other: "",
+                           home_village: mother_foreigner_home_villag,
+                           home_village_other: "",
+                           home_ta: mother_foreigner_home_ta,
+                           home_ta_other: "",
+                           home_district: mother_foreigner_current_district,
+                           home_district_other: "",
+                           citizenship: Location.where(name: mother_residental_country).first.location_id,
+                           residential_country: Location.where(name: mother_residental_country).first.location_id)
     end
 
     ################################### recording mother details (end)   ###############################################
@@ -183,6 +200,22 @@ module PersonService
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
           person_relationship_type_id: PersonRelationType.where(name: 'Child-Father').first.id)
+
+            PersonAddress.create(person_id: core_person_father.id,
+                           current_village: father_foreigner_current_village,
+                           current_village_other: "",
+                           current_ta: father_foreigner_current_ta,
+                           current_ta_other: "",
+                           current_district: father_foreigner_current_district,
+                           current_district_other: "",
+                           home_village: father_foreigner_home_villag,
+                           home_village_other: "",
+                           home_ta: father_foreigner_home_ta,
+                           home_ta_other: "",
+                           home_district: father_foreigner_current_district,
+                           home_district_other: "",
+                           citizenship: Location.where(name: father_residental_country).first.location_id,
+                           residential_country: Location.where(name: father_residental_country).first.location_id)
 
     end
     ################################### recording father details (end)   ###############################################
@@ -225,8 +258,46 @@ module PersonService
        
     end
 
-    ################################### recording informant details (end) ############################################
 
+          PersonAddress.create(person_id: core_person_informant.id,
+                           current_village: informant_current_village,
+                           current_village_other: "",
+                           current_ta: informant_current_ta,
+                           current_ta_other: "",
+                           current_district: informant_current_district,
+                           current_district_other: "",
+                           home_village: informant_current_village,
+                           home_village_other: "",
+                           home_ta: informant_current_ta,
+                           citizenship: Location.where(name: 'Malawi').first.location_id,
+                           residential_country: Location.where(name: 'Malawi').first.location_id)
+
+    ################################### recording informant details (end) ############################################
+    #################################### person status record ####################################################
+    
+    if(SETTINGS["application_mode"]== "DC") 
+
+      begin
+        PersonRecordStatus.create(status_id: Status.where(name: 'DC Active').status.id, person_id: core_person.id)
+      rescue 
+        
+      end
+       
+    else
+       begin
+         PersonRecordStatus.create(status_id: Status.where(name: 'DC Incomplete').status.id, person_id: core_person.id)
+       rescue 
+         
+       end
+     
+    end
+
+
+    #################################### Person status record (end) ##############################################
+    ####################################### person address details ###############################################
+        
+
+    ########################################Person address details(end) ###############################################
 
 
 
