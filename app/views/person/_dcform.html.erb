@@ -138,7 +138,7 @@
       <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
-        <input type="text" name="hospital_of_birth" id="person_hospital_of_birth" 
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                           class ="input_cell"
                           condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
                           tt_onUnload = "setDistrict('district');",
@@ -225,7 +225,7 @@
       <div class="field">
         <label for="person_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <input type="text" name="date_of_marriage"
+        <input type="text" name="person[date_of_marriage]"
                           id="person_date_of_marriage"
                           class="input_cell"
 													condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
@@ -587,13 +587,14 @@
           child</label>
         <br>
         <input type="text" name="number_of_children_born_alive_inclusive"
-                             class ="input_cell"
-                             fieldtype ="number"
-                             absolute_min =1
-                             max = 6
-                             absolute_max = 20
-                             tt_onLoad ="possiblepersonren(__$('person_type_of_birth'), __$('person_number_of_personren_born_alive_inclusive'))",
-                             tt_onUnload ="navigablefieldsets[parseInt(__$('textForperson_number_of_personren_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_personren_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_personren_born_alive_inclusive').value.trim())" id="person_number_of_children_born_alive_inclusive">
+               class ="input_cell"
+               fieldtype ="number"
+               absolute_min =1
+               max = 6
+               absolute_max = 20
+               tt_onLoad ="possiblechildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))",
+               tt_onUnload ="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+               id="person_number_of_children_born_alive_inclusive">
       </div>
 
 
@@ -1080,7 +1081,7 @@
       setTimeout("checkChanges('" + id + "')", 1000);
     }
 
-    function possiblepersonren(obj, tag){
+    function possiblechildren(obj, tag){
 
       // This function assigns limits to a target element based on type of birth
 

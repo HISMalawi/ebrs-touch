@@ -32,6 +32,7 @@ class PersonController < ApplicationController
 
     @mother = Person.find(mother_id)
     @mother_name = PersonName.find_by_person_id(mother_id)
+    @mother_address = PersonAddress.find_by_person_id(mother_id)
 
     @person_status = Status.find(@person_record_status.status_id).name.to_s.strip.upcase rescue nil
 
@@ -77,13 +78,13 @@ class PersonController < ApplicationController
                 "If yes, date of marriage" => "#{@birth_details.date_of_marriage rescue nil}"
             },
             {
-                "Court Order Attached?" => "#{@person.court_order_attached rescue nil}",
+                "Court Order Attached?" => "#{@birth_details.court_order_attached ? "Yes" : "No" rescue nil}",
                 "Parents Signed?" => "#{@person.parents_signed rescue nil}",
-                "Record Complete?" => "{ (record_complete?(@person) == false ? 'No' : 'Yes')}",
+                "Record Complete?" => "YES" #{ (record_complete?(@person) == false ? 'No' : 'Yes')}",
 
             },
             {
-                "Place where birth was recorded" => "@person.place_birth_was_recorded",
+                "Place where birth was recorded" => "", #@person.place_birth_was_recorded",
                 "Record Status" => "<div id='status'>#{@person_status rescue nil}</div>",
                 "Child Type" => "#{@person.relationship.titleize rescue nil}",
             }
@@ -98,21 +99,21 @@ class PersonController < ApplicationController
             },
             {
                 ["Date of birth", "mandatory"] => "#{@mother.birthdate rescue nil}",
-                "Nationality" => "#{@person.mother.citizenship rescue nil}",
+                "Nationality" => "#{Location.find(@mother_address.citizenship).name rescue nil}",
                 "ID Number" => "#{@person.mother.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{(@person.mother.current_district ||
+                "Physical Residential Address, District" => "#{(Location.find(@mother_address.current_district).name ||
                     @person.mother.foreigner_current_district) rescue nil}",
-                "T/A" => "#{(@person.mother.current_ta ||
+                "T/A" => "#{(Location.find(@mother_address.current_ta).name ||
                     @person.mother.foreigner_current_ta) rescue nil}",
-                "Village/Town" => "#{(@person.mother.current_village ||
+                "Village/Town" => "#{(Location.find(@mother_address.current_village).name||
                     @person.mother.foreigner_current_village) rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{@person.mother.home_village rescue nil}",
-                "T/A" => "#{@person.mother.home_ta rescue nil}",
-                "District" =>  "#{@person.mother.home_district rescue nil}"
+                "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
+                "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
+                "District" =>  "#{Location.find(@mother_address.home_district).name rescue nil}"
             },
             {
                 "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
@@ -159,11 +160,11 @@ class PersonController < ApplicationController
         "Details of Child's Informant" => [
             {
                 "First Name" => "#{@informant_name.first_name rescue nil}",
-                "Other Name" => "#{@informant_name.informant.middle_name rescue nil}",
-                "Family Name" => "#{@informant_name.informant.last_name rescue nil}"
+                "Other Name" => "#{@informant_name.middle_name rescue nil}",
+                "Family Name" => "#{@informant_name.last_name rescue nil}"
             },
             {
-                "Relationship to child" => "#{@person.informant.relationship_to_child rescue ""}",
+                "Relationship to child" => "#{PersonRelationType.find(PersonRelationship.find_by_person_b(@informant_id).person_relationship_type_id).name rescue ""}",
                 "ID Number" => "#{@person.informant.id_number rescue ""}"
             },
             {
@@ -187,7 +188,7 @@ class PersonController < ApplicationController
             }
         ]
     }
-      return
+    render :layout => "facility"
   end
 
   def records
@@ -202,15 +203,27 @@ class PersonController < ApplicationController
   end
 
   def new
-     @person = PersonName.new
+    if params[:id].blank?
+      @person = PersonName.new
 
-     @section = "New Person"
+      @section = "New Person"
+    else
+      @person = PersonBirthDetail.find_by_person_id(params[:id])
+      #raise params[:id].inspect
+    end
+
      render :layout => "touch"
   end
 
   def create
-    PersonService.create_record(params)
-    redirect_to '/'
+    type_of_birth = params[:person][:type_of_birth]
+    @person = PersonService.create_record(params)
+    if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
+      redirect_to "/person/new?id=#{@person.id}"
+    else
+      redirect_to '/'
+    end
+
   end
 
   #########################################################################

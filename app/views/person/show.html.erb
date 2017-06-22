@@ -1,4 +1,12 @@
-<style>
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <title>eBRS&nbsp;<%=application_mode.upcase%></title>
+  <%= stylesheet_link_tag 'application', media: 'all', 'styles' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= csrf_meta_tags %>
+
+  <style>
 
   .record td {
     font-size: 18px;
@@ -43,183 +51,143 @@
     margin-left: 1.5%;
   }
 </style>
+  </head>
+  <body>
 
-<% @record.each do |group, children| %>
+  <% @record.each do |group, person| %>
 
-    <% r = 0 %>
+      <% r = 0 %>
 
-    <fieldset>
-      <legend>
-        <%= group %>
-      </legend>
+      <fieldset>
+        <legend>
+          <%= group %>
+        </legend>
 
-      <table class="record" width="100%" cellpadding="10" cellspacing="0">
+        <table class="record" width="100%" cellpadding="10" cellspacing="0">
 
-        <% children.each do |child| %>
+          <% person.each do |child| %>
 
-            <% kids = child.keys %>
+              <% kids = child.keys %>
 
-            <tr>
+              <tr>
 
-              <% (0..(kids.length - 1)).each do |i| %>
+                <% (0..(kids.length - 1)).each do |i| %>
 
-                  <td align="right" style="border-right: 1px dotted #3465a4; <%= (r < children.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                    <% unless kids[i].kind_of?(Array) %>
-                        <strong><%= kids[i].html_safe %></strong>
-                    <% else %>
-                        <strong><%= kids[i].first.html_safe %><span style='color: red;'> *</span></strong>
-                    <% end %>
-                  </td>
+                    <td align="left" style="border-left: 1px solid #3465a4;
+                      <%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
+                      <% unless kids[i].kind_of?(Array) %>
+                          <span style="text-wrap: normal;width: '400px'"><strong><%= kids[i].html_safe %></strong></span>
+                      <% else %>
+                          <strong><%= kids[i].first.html_safe %><span style='color: red;'> *</span></strong>
+                      <% end %>
+                    </td>
 
-                  <td style="<%= (r < children.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>" id='<%=  kids[i].kind_of?(Array) ? "#{group.gsub(" ", "_").downcase}_#{kids[i].first.gsub(" ", "_").downcase}" : "#{group.gsub(" ", "_").downcase}_#{kids[i].gsub(" ", "_").downcase}"  %>'>
-                    <%= child[kids[i]].html_safe rescue nil %>
-                  </td>
+                    <td style="<%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>" id='<%=  kids[i].kind_of?(Array) ? "#{group.gsub(" ", "_").downcase}_#{kids[i].first.gsub(" ", "_").downcase}" : "#{group.gsub(" ", "_").downcase}_#{kids[i].gsub(" ", "_").downcase}"  %>'>
+                      : <%= child[kids[i]].html_safe rescue nil %>
+                    </td>
 
-              <% end %>
+                <% end %>
 
-              <% ((kids.length)..2).each do |i| %>
+                <% ((kids.length)..2).each do |i| %>
 
-                  <td align="right" style="border-right: 1px dotted #3465a4; <%= (r < children.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                    <strong>&nbsp;</strong>
-                  </td>
-                  <td style="<%= (r < children.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                    &nbsp;
-                  </td>
+                    <td align="right" style="border-right: 1px dotted #3465a4; <%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
+                      <strong>&nbsp;</strong>
+                    </td>
+                    <td style="<%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
+                      &nbsp;
+                    </td>
 
-              <% end %>
+                <% end %>
 
-            </tr>
+              </tr>
 
-            <% r += 1 %>
+              <% r += 1 %>
 
-        <% end %>
+          <% end %>
 
-      </table>
+        </table>
 
-    </fieldset>
+      </fieldset>
 
-<% end %>
-<fieldset>
+  <% end %>
+  <fieldset>
 
-</fieldset>
+  </fieldset>
 
-<!-- % if @person_status == "DC-ACTIVE" # &&  (User.current_user.activities_by_level("DC").include?("Check completeness") || User.current_user.activities_by_level("DC").include?("Approve a child record"))  %>
+  <!-- % if @person_status == "DC-ACTIVE" # &&  (User.current_user.activities_by_level("DC").include?("Check completeness") || User.current_user.activities_by_level("DC").include?("Approve a child record"))  %>
 
-    <!-- button id="btnViewComment"
-            class="blue"
-            style="position: absolute; right: 720px; bottom: 20px;"
-            onclick="viewComment()">View Comment</button>
+      <!-- button id="btnViewComment"
+              class="blue"
+              style="position: absolute; right: 720px; bottom: 20px;"
+              onclick="viewComment()">View Comment</button>
 
-<!-- % end  %>
-<!-- % if @person_status == "DC-ACTIVE" #&&
-    #User.current_user.activities_by_level("DC").include?("Check completeness") &&
-    #@child.request_status.to_s.strip.upcase == "ACTIVE"  && @child.approved == 'No'  %>
-    <!-- % #if @readonly == true % -->
-        <!-- button id="btnApprove"
-                class="orange"
-                style="position: absolute; right: 180px; bottom: 20px;">Check Completeness</button -->
-    <!-- % #else % -->
-        <!-- button id="btnApprove"
-                class="blue"
-                style="position: absolute; right: 180px; bottom: 20px;"
-                onclick="checkCompleteness()">Check Completeness</button>
-    <!-- % #end  % -->
+  <!-- % end  %>
+  <!-- % if @person_status == "DC-ACTIVE" #&&
+      #User.current_user.activities_by_level("DC").include?("Check completeness") &&
+      #@child.request_status.to_s.strip.upcase == "ACTIVE"  && @child.approved == 'No'  %>
+      <!-- % #if @readonly == true % -->
+  <!-- button id="btnApprove"
+          class="orange"
+          style="position: absolute; right: 180px; bottom: 20px;">Check Completeness</button -->
+  <!-- % #else % -->
+  <!-- button id="btnApprove"
+          class="blue"
+          style="position: absolute; right: 180px; bottom: 20px;"
+          onclick="checkCompleteness()">Check Completeness</button>
+<!-- % #end  % -->
 
-<!-- % end  %>
+  <!-- % end  %>
 
-<!-- % if @person_status == "DC-ACTIVE" #&&
-    #User.current_user.activities_by_level("DC").include?("Check completeness") &&
-    #(@child.request_status.to_s.strip.upcase == "IN-COMPLETE" || @child.request_status.to_s.strip.upcase == "PENDING" ) &&
-    #@child.approved == 'No'  %>
-    <!-- % if @readonly == true % -->
-        <!-- button id="btnApprove"
-                class="orange"
-                style="position: absolute; right: 180px; bottom: 20px;" >Check Completeness</button -->
-    <!-- % else % -->
-        <!-- button id="btnApprove"
-                class="blue"
-                style="position: absolute; right: 180px; bottom: 20px;"
-                onclick="checkCompleteness()">Check Completeness</button -->
-    <!-- % end  % -->
+  <!-- % if @person_status == "DC-ACTIVE" #&&
+      #User.current_user.activities_by_level("DC").include?("Check completeness") &&
+      #(@child.request_status.to_s.strip.upcase == "IN-COMPLETE" || @child.request_status.to_s.strip.upcase == "PENDING" ) &&
+      #@child.approved == 'No'  %>
+      <!-- % if @readonly == true % -->
+  <!-- button id="btnApprove"
+          class="orange"
+          style="position: absolute; right: 180px; bottom: 20px;" >Check Completeness</button -->
+  <!-- % else % -->
+  <!-- button id="btnApprove"
+          class="blue"
+          style="position: absolute; right: 180px; bottom: 20px;"
+          onclick="checkCompleteness()">Check Completeness</button -->
+  <!-- % end  % -->
 
-<!-- % end  % >
+  <!-- % end  % >
 
-<!-- % if @child.record_status.to_s.strip.upcase == "DC OPEN" &&
-    User.current_user.activities_by_level("DC").include?("Check completeness") &&
-    (@child.request_status.to_s.strip.upcase == "ACTIVE" ||
-        @child.request_status.to_s.strip.upcase != "IN-COMPLETE") &&
-    @child.request_status.to_s.strip.upcase != "PENDING" &&
-    @child.approved == 'No'  %>
+  <!-- % if @child.record_status.to_s.strip.upcase == "DC OPEN" &&
+      User.current_user.activities_by_level("DC").include?("Check completeness") &&
+      (@child.request_status.to_s.strip.upcase == "ACTIVE" ||
+          @child.request_status.to_s.strip.upcase != "IN-COMPLETE") &&
+      @child.request_status.to_s.strip.upcase != "PENDING" &&
+      @child.approved == 'No'  %>
 
-    <!-- % if @readonly == true %>
-        <button id="btnQuery"
-                class="orange"
-                style="position: absolute; right: 500px; bottom: 20px;"
-        >Mark Pending</button>
+      <!-- % if @readonly == true %>
+          <button id="btnQuery"
+                  class="orange"
+                  style="position: absolute; right: 500px; bottom: 20px;"
+          >Mark Pending</button>
 
-    <!-- % else %>
+      <!-- % else %>
 
-        <button id="btnQuery"
-                class="blue"
-                style="position: absolute; right: 500px; bottom: 20px;"
-                onclick="markPending()">Mark Pending</button>
+          <button id="btnQuery"
+                  class="blue"
+                  style="position: absolute; right: 500px; bottom: 20px;"
+                  onclick="markPending()">Mark Pending</button>
 
-    <!-- % end %>
-
-
-<!-- % end  %>
-
-<!-- % if (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
-    User.current_user.activities_by_level("DC").include?("Approve a child record") &&
-    (@child.request_status.to_s.strip.upcase == "COMPLETE" ||
-        @child.request_status.to_s.strip.upcase == 'REJECTED' ||
-        @child.request_status.to_s.strip.upcase == "GRANTED") &&
-    @child.approved == 'No' && record_complete?(@child) == true)  %>
+      <!-- % end %>
 
 
+  <!-- % end  %>
 
-    <!-- % if @readonly == true %>
-        <button id="btnApprove"
-                class="orange"
-                style="position: absolute; right: 160px; bottom: 20px;"
-                onclick="">Approve</button>
-
-        <button id="btnReject"
-                class="orange"
-                style="position: absolute; right: 306px; bottom: 20px;"
-                onclick="">Reject</button>
-
-    <!-- % else %>
-        <!-- % if @valid_ben %>
-            <button id="btnApprove"
-                    class="green"
-                    style="position: absolute; right: 160px; bottom: 20px;"
-                    onclick="approve();">Approve</button>
-
-            <button id="btnReject"
-                    class="blue"
-                    style="position: absolute; right: 306px; bottom: 20px;"
-                    onclick="reject()">Reject</button>
-
-        <!-- % else %>
-
-            <button id="btnApprove"
-                    class="red"
-                    style="position: absolute; right: 160px; bottom: 20px;"
-                    onclick=" ">Approve</button>
-
-            <button id="btnReject"
-                    class="red"
-                    style="position: absolute; right: 306px; bottom: 20px;"
-                    onclick="">Reject</button>
-
-        <!--% end %>
-    <!-- % end %>
-
-  <!-- % elsif (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
+  <!-- % if (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
       User.current_user.activities_by_level("DC").include?("Approve a child record") &&
-      (@child.request_status.to_s.strip.upcase == 'PENDING') &&
+      (@child.request_status.to_s.strip.upcase == "COMPLETE" ||
+          @child.request_status.to_s.strip.upcase == 'REJECTED' ||
+          @child.request_status.to_s.strip.upcase == "GRANTED") &&
       @child.approved == 'No' && record_complete?(@child) == true)  %>
+
+
 
       <!-- % if @readonly == true %>
           <button id="btnApprove"
@@ -227,61 +195,108 @@
                   style="position: absolute; right: 160px; bottom: 20px;"
                   onclick="">Approve</button>
 
+          <button id="btnReject"
+                  class="orange"
+                  style="position: absolute; right: 306px; bottom: 20px;"
+                  onclick="">Reject</button>
+
       <!-- % else %>
-          <button id="btnApprove"
-                  class="green"
-                  style="position: absolute; right: 160px; bottom: 20px;"
-                  onclick="approve();">Approve</button>
+          <!-- % if @valid_ben %>
+              <button id="btnApprove"
+                      class="green"
+                      style="position: absolute; right: 160px; bottom: 20px;"
+                      onclick="approve();">Approve</button>
+
+              <button id="btnReject"
+                      class="blue"
+                      style="position: absolute; right: 306px; bottom: 20px;"
+                      onclick="reject()">Reject</button>
+
+          <!-- % else %>
+
+              <button id="btnApprove"
+                      class="red"
+                      style="position: absolute; right: 160px; bottom: 20px;"
+                      onclick=" ">Approve</button>
+
+              <button id="btnReject"
+                      class="red"
+                      style="position: absolute; right: 306px; bottom: 20px;"
+                      onclick="">Reject</button>
+
+          <!--% end %>
       <!-- % end %>
 
-  <!-- % elsif @child.record_status.to_s.strip.upcase == "DC OPEN" &&
-      User.current_user.activities_by_level("DC").include?("Check completeness") &&
-      (@child.request_status.to_s.strip.upcase == "COMPLETE" || @child.request_status.to_s.strip.upcase == "REJECTED") &&
-      @child.approved == 'No' && record_complete?(@child) == false  %>
+    <!-- % elsif (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
+        User.current_user.activities_by_level("DC").include?("Approve a child record") &&
+        (@child.request_status.to_s.strip.upcase == 'PENDING') &&
+        @child.approved == 'No' && record_complete?(@child) == true)  %>
 
-      <!-- % if @readonly == true %>
-          <button id="btnApprove"
-                  class="orange"
-                  style="position: absolute; right: 160px; bottom: 20px;"
-                  onclick="">Check Completeness</button>
+        <!-- % if @readonly == true %>
+            <button id="btnApprove"
+                    class="orange"
+                    style="position: absolute; right: 160px; bottom: 20px;"
+                    onclick="">Approve</button>
 
-          <button id="btnQuery"
-                  class="orange"
-                  style="position: absolute; right: 525px; bottom: 20px;"
-                  onclick="">Mark Pending</button>
+        <!-- % else %>
+            <button id="btnApprove"
+                    class="green"
+                    style="position: absolute; right: 160px; bottom: 20px;"
+                    onclick="approve();">Approve</button>
+        <!-- % end %>
 
-      <!-- % else %>
-          <button id="btnApprove"
-                  class="blue"
-                  style="position: absolute; right: 160px; bottom: 20px;"
-                  onclick="checkChild();">Check Completeness</button -->
+    <!-- % elsif @child.record_status.to_s.strip.upcase == "DC OPEN" &&
+        User.current_user.activities_by_level("DC").include?("Check completeness") &&
+        (@child.request_status.to_s.strip.upcase == "COMPLETE" || @child.request_status.to_s.strip.upcase == "REJECTED") &&
+        @child.approved == 'No' && record_complete?(@child) == false  %>
 
-          <!-- button id="btnQuery"
-                  class="blue"
-                  style="position: absolute; right: 525px; bottom: 20px;"
-                  onclick="markPending()">Mark Pending</button -->
+        <!-- % if @readonly == true %>
+            <button id="btnApprove"
+                    class="orange"
+                    style="position: absolute; right: 160px; bottom: 20px;"
+                    onclick="">Check Completeness</button>
 
-      <!-- % end % -->
+            <button id="btnQuery"
+                    class="orange"
+                    style="position: absolute; right: 525px; bottom: 20px;"
+                    onclick="">Mark Pending</button>
+
+        <!-- % else %>
+            <button id="btnApprove"
+                    class="blue"
+                    style="position: absolute; right: 160px; bottom: 20px;"
+                    onclick="checkChild();">Check Completeness</button -->
+
+  <!-- button id="btnQuery"
+          class="blue"
+          style="position: absolute; right: 525px; bottom: 20px;"
+          onclick="markPending()">Mark Pending</button -->
+
+  <!-- % end % -->
 
   <!-- % elsif @child.record_status.to_s.strip.upcase == "PRINTED"% -->
-      <!-- % if @readonly == true % -->
-          <!-- button id="btnReopen"
-                  class="orange"
-                  style="position: absolute; right: 160px; bottom: 20px;"
-                  onclick="">Request Amendment</button -->
+  <!-- % if @readonly == true % -->
+  <!-- button id="btnReopen"
+          class="orange"
+          style="position: absolute; right: 160px; bottom: 20px;"
+          onclick="">Request Amendment</button -->
 
-      <!-- % else % -->
-          <!-- button id="btnReopen"
-                  class="green"
-                  style="position: absolute; right: 160px; bottom: 20px;"
-                  onclick="showMessages();">Request Amendment</button -->
+  <!-- % else % -->
+  <!-- button id="btnReopen"
+          class="green"
+          style="position: absolute; right: 160px; bottom: 20px;"
+          onclick="showMessages();">Request Amendment</button -->
 
-      <!-- % end % -->
+  <!-- % end % -->
 
 
   <!-- % elsif (User.current_user.activities_by_level("DC").include?("Approve a child record")) % -->
 
-      <!-- button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;" onclick="">Approve</button -->
+  <!-- button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;" onclick="">Approve</button -->
 
   <!-- % end % -->
+
+
+
+  </body>
 
