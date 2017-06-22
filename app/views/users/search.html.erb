@@ -28,81 +28,73 @@
 </style>
 
 <fieldset>
-  <form autocomplete="off">
-    <table cellpadding="5" width="90%" style="margin: auto; margin-top: 30px;">
-      <tr>
-        <td align="right">
-          Search for Username
-        </td>
-        <td>
-          :
-        </td>
-        <td>
-          <input type="text" class="input_cell" id="username" name="username" value="" style="width: 97%;"/>
-        </td>
-        <td>
-          <img src="<%= @search rescue nil %>" height="60" style="cursor: pointer; border-radius: 10px; padding: 5px; border: 1px solid #fff;"
-               onclick="checkPopUp();" onmouseover="this.style.border = '1px #ccc solid'; " onmouseout="this.style.border = '1px #fff solid'; "/>
-        </td>
-      </tr>
-      <tr>
-        <td align="right">
-          Username
-        </td>
-        <td>
-          :
-        </td>
-        <td>
-          <input type="text" class="input_cell" id="uname" name="uname" value="" style="width: 97%;" disabled/>
-        </td>
-      </tr>
-      <tr>
-        <td align="right">
-          First Name
-        </td>
-        <td>
-          :
-        </td>
-        <td>
-          <input type="text" class="input_cell" id="fname" name="fname" value="" style="width: 97%;" disabled/>
-        </td>
-      </tr>
-      <tr>
-        <td align="right">
-          Last Name
-        </td>
-        <td>
-          :
-        </td>
-        <td>
-          <input type="text" class="input_cell" id="lname" name="lname" value="" style="width: 97%;" disabled/>
-        </td>
-      </tr>
-      <tr>
-        <td align="right">
-          Role
-        </td>
-        <td>
-          :
-        </td>
-        <td>
-          <input type="text" class="input_cell" id="role" name="role" value="" style="width: 97%;" disabled/>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          &nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          &nbsp;
-        </td>
-      </tr>
-    </table>
-  </form>
 
-  <button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;">Edit</button>
+  <fieldset>
+    <form autocomplete="off">
+      <table cellpadding="5" width="90%" style="margin: auto; margin-top: 30px;">
+        <tr>
+          <td align="right">
+            Search for Username
+          </td>
+          <td>
+            :
+          </td>
+          <td>
+            <input type="text" class="input_cell" id="username" name="username" value="" style="width: 97%;" onclick="checkPopUp()"/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">
+            Username
+          </td>
+          <td>
+            :
+          </td>
+          <td>
+            <input type="text" class="input_cell" id="uname" name="uname" value="" style="width: 97%;" disabled/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">
+            First Name
+          </td>
+          <td>
+            :
+          </td>
+          <td>
+            <input type="text" class="input_cell" id="fname" name="fname" value="" style="width: 97%;" disabled/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">
+            Last Name
+          </td>
+          <td>
+            :
+          </td>
+          <td>
+            <input type="text" class="input_cell" id="lname" name="lname" value="" style="width: 97%;" disabled/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">
+            Role
+          </td>
+          <td>
+            :
+          </td>
+          <td>
+            <input type="text" class="input_cell" id="role" name="role" value="" style="width: 97%;" disabled/>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;">Edit</button>
+
+  </fieldset>
+
+  <fieldset></fieldset>
 
 </fieldset>
 
@@ -358,8 +350,5 @@
         }
 
     }
-
-    //showFixedKeyboard(__$("username"), __$("keyboard-container"));
-    //showKeyboard(__$("username"))
 
 </script>

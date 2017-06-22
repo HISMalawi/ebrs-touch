@@ -24,11 +24,17 @@
         <td style="text-align: left;"><%= names.last_name %></td>
         <td style="text-align: center;"><%= record.user_role.role.role %></td>
         <td style="text-align: center;">
-          <%if record.active == 1%>
+          <% if record.active == 1 || User.current.id == record.id%>
+          <a href="/block_user/<%=record.id%>">
+          <button class="btn btn-info" onclick = "return confirm('Are you sure you want to deactivate?')">
             <%= image_tag "tick.png", class: 'btn-images' %></button>
+           </a>
           <%else %>
+          <a href="/unblock_user/<%=record.id%>">
+          <button class="btn btn-info" onclick = "return confirm('Are you sure you want to activate?')">
             <%= image_tag "cancel.png", class: 'btn-images' %></button>
           <%end %>
+          </a>
         </td>
         <td>
           <table style="width: 100%; text-align: center; border-style: none;">
@@ -60,7 +66,7 @@
 </table>
 
 </div>
-
+<button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="window.location = '<%= new_user_path %>'">Add User</button>
 <script>
 
 $(document).ready(function() {

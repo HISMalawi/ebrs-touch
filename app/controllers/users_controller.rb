@@ -75,7 +75,6 @@ class UsersController < ApplicationController
   def create
 
       @targeturl = "/user"
-      #user = User.find(params[:user]['username'])
 
       #if user.present?
         #flash["notice"] = "User already already exists"
@@ -84,12 +83,6 @@ class UsersController < ApplicationController
       core_person = CorePerson.create(person_type_id: 1)
       person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
-
-=begin
-      user_role = UserRole.create(role: params[:user]['user_role']['role'], level: 1, voided: 0)
-
-      @user = User.create(username: params[:user]['username'], plain_password: params[:user]['plain_password'], location_id: 1, uuid: 1, user_role_id:     	 user_role.user_role_id,  email: params[:user]['email'], person_id: core_person.person_id)
-=end
 
     [['Administrator', 1], ['Nurse', 2], ['Midwife', 2], ['Data clerk', 3]].each do |r, l|
 	  Role.create(role: r, level: l)
@@ -165,7 +158,7 @@ class UsersController < ApplicationController
     	record = {
           	"username" => "#{user.username}",
           	"name" => "#{user.core_person.person_name.first_name} #{user.core_person.person_name.last_name}",
-          	#"role" => "#{user.user_role.role}",
+          	"role" => "#{user.user_role.role.role}",
           	"user_id" => "#{user.user_id}",
          	"active" => (user.active rescue false)
       	    	}
@@ -225,7 +218,7 @@ class UsersController < ApplicationController
       role = User.current.user_role.role.role.strip rescue nil
       if ((role.downcase.match(/Administrator/i) rescue false) ? true : false)
         user.update_attributes(active: false,
-          un_or_block_reason: params[:reason])
+          :un_or_block_reason => params[:reason])
       end
     end
 
@@ -282,30 +275,20 @@ class UsersController < ApplicationController
   def search_by_username
 
     #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("View Users"))
-
-    name = params[:id].strip rescue ""
+    @users = User.all
 
     results = []
 
-    if name.length > 1
-
-      users = User.by_username.key(name).limit(10).each
-
-    else
-
-      users = User.by_username.limit(10).each
-
-    end
-
-    users.each do |user|
+    @users.each do |user|
 
       next if user.username.strip.downcase == User.current.username.strip.downcase
 
       record = {
+          "user_id" => "#{user.id}",
           "username" => "#{user.username}",
           "fname" => "#{user.core_person.person_name.first_name}",
           "lname" => "#{user.core_person.person_name.last_name}",
-          "role" => "#{user.user_role.role}",
+          "role" => "#{user.user_role.role.role}",
           "active" => (user.active rescue false)
       }
 
@@ -335,7 +318,7 @@ class UsersController < ApplicationController
           "username" => "#{user.username}",
           "fname" => "#{user.core_person.person_name.first_name}",
           "lname" => "#{user.core_person.person_name.last_name}",
-          "role" => "#{user.user_role.role}",
+          "role" => "#{user.user_role.role.role}",
           "active" => (user.active rescue false)
       }
 
