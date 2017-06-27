@@ -6,7 +6,7 @@ module PersonService
     #raise params.inspect
 
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
-    desig              = params[:person][:informant][:designation] rescue nil
+    desig                             = params[:person][:informant][:designation] rescue nil
     birth_place_details_available     = params[:birth_place_details_available]
     parents_details_available         = params[:parents_details_available]
     biological_parents                = params[:biological_parents]
@@ -21,7 +21,6 @@ module PersonService
     birth_district		                =	params[:person][:birth_district]
     birth_weight		                  = params[:person][:birth_weight]
     acknowledgement_of_receipt_date	  = params[:person][:acknowledgement_of_receipt_date]
-
     gender 				      	            = params[:person][:gender]
     home_address_same_as_physical     = params[:person][:home_address_same_as_physical]
     same_address_with_mother	        = params[:person][:same_address_with_mother]
@@ -92,6 +91,7 @@ module PersonService
     parents_signed                    = params[:person][:parents_signed]
 
     parents_married_to_each_other	    =	params[:person][:parents_married_to_each_other]
+    date_of_marriage                  = params[:person][:date_of_marriage]
 
     month_prenatal_care_started               = params[:month_prenatal_care_started]
     number_of_prenatal_visits                 = params[:number_of_prenatal_visits]
@@ -102,7 +102,7 @@ module PersonService
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
-    person = Person.create(person_id: core_person.id, 
+    @person = Person.create(person_id: core_person.id,
       gender: gender.first, 
       birthdate: (birthdate.to_date rescue Date.today))
 
@@ -115,10 +115,10 @@ module PersonService
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
 
-    PersonBirthDetail.create(
+    @person_details = PersonBirthDetail.create(
       person_id:                                core_person.id,
-      place_of_birth:                           1,
-      birth_location_id:                        (Location.last.id),
+      place_of_birth:                           (Location.find_by_name(place_of_birth).id rescue 1),
+      birth_location_id:                        (Location.find_by_name(hospital_of_birth).id rescue 1),
       birth_weight:                             birth_weight,
       type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
       parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
@@ -159,6 +159,23 @@ module PersonService
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
           person_relationship_type_id: PersonRelationType.where(name: 'Child-Mother').first.id)
+
+
+            PersonAddress.create(person_id: core_person_mother.id,
+                           current_village: mother_foreigner_current_village,
+                           current_village_other: "",
+                           current_ta: mother_foreigner_current_ta,
+                           current_ta_other: "",
+                           current_district: mother_foreigner_current_district,
+                           current_district_other: "",
+                           home_village: mother_foreigner_home_villag,
+                           home_village_other: "",
+                           home_ta: mother_foreigner_home_ta,
+                           home_ta_other: "",
+                           home_district: mother_foreigner_current_district,
+                           home_district_other: "",
+                           citizenship: Location.where(name: mother_residental_country).first.location_id,
+                           residential_country: Location.where(name: mother_residental_country).first.location_id)
     end
 
     ################################### recording mother details (end)   ###############################################
@@ -183,6 +200,22 @@ module PersonService
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
           person_relationship_type_id: PersonRelationType.where(name: 'Child-Father').first.id)
+
+            PersonAddress.create(person_id: core_person_father.id,
+                           current_village: father_foreigner_current_village,
+                           current_village_other: "",
+                           current_ta: father_foreigner_current_ta,
+                           current_ta_other: "",
+                           current_district: father_foreigner_current_district,
+                           current_district_other: "",
+                           home_village: father_foreigner_home_villag,
+                           home_village_other: "",
+                           home_ta: father_foreigner_home_ta,
+                           home_ta_other: "",
+                           home_district: father_foreigner_current_district,
+                           home_district_other: "",
+                           citizenship: Location.where(name: father_residental_country).first.location_id,
+                           residential_country: Location.where(name: father_residental_country).first.location_id)
 
     end
     ################################### recording father details (end)   ###############################################
@@ -225,13 +258,50 @@ module PersonService
        
     end
 
+
+          PersonAddress.create(person_id: core_person_informant.id,
+                           current_village: (Location.find_by_name(informant_current_village).id rescue 1),
+                           current_village_other: "",
+                           current_ta: (Location.find_by_name(informant_current_ta).id rescue 1),
+                           current_ta_other: "",
+                           current_district: (Location.find_by_name(informant_current_district).id rescue 1),
+                           current_district_other: "",
+                           home_village: (Location.find_by_name(informant_current_village).id rescue 1),
+                           home_village_other: "",
+                           home_ta: (Location.find_by_name(informant_current_ta).id rescue 1),
+                           citizenship: Location.where(name: 'Malawi').first.location_id,
+                           residential_country: Location.where(name: 'Malawi').first.location_id)
+
     ################################### recording informant details (end) ############################################
-
-
-
-
+    #################################### person status record ####################################################
     
-    #raise "........... #{mother_residental_country}" 
+    if(SETTINGS["application_mode"]== "DC") 
+
+      begin
+        PersonRecordStatus.create(status_id: Status.where(name: 'DC Active').status.id, person_id: core_person.id)
+      rescue 
+        
+      end
+       
+    else
+       begin
+         PersonRecordStatus.create(status_id: Status.where(name: 'DC Incomplete').status.id, person_id: core_person.id)
+       rescue 
+         
+       end
+     
+    end
+
+
+    #################################### Person status record (end) ##############################################
+    ####################################### person address details ###############################################
+        
+
+    ########################################Person address details(end) ###############################################
+
+
+
+    return @person
   end
 
 end

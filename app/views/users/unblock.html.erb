@@ -27,6 +27,8 @@
 
 </style>
 
+<fieldset>
+
   <fieldset>
     <form autocomplete="off">
       <table cellpadding="5" width="90%" style="margin: auto; margin-top: 30px;">
@@ -37,14 +39,8 @@
           <td>
             :
           </td>
-          <td id="cursor_for_username" style="font-weight: bold; font-size: 28px;">
-          </td>
           <td>
-            <input type="text" class="input_cell" id="username" name="username" value="" style="width: 97%;" onclick="changeFocusToMe(this)" />
-          </td>
-          <td>
-            <img src="<%= @search rescue nil %>" height="60" style="cursor: pointer; border-radius: 10px; padding: 5px; border: 1px solid #fff;"
-                 onclick="checkPopUp();" onmouseover="this.style.border = '1px #ccc solid'; " onmouseout="this.style.border = '1px #fff solid'; "/>
+            <input type="text" class="input_cell" id="username" name="username" value="" style="width: 97%;" onclick="checkPopUp()"/>
           </td>
         </tr>
         <tr>
@@ -53,9 +49,6 @@
           </td>
           <td>
             :
-          </td>
-          <td style="font-weight: bold; font-size: 28px;">
-            &nbsp;
           </td>
           <td>
             <input type="text" class="input_cell" id="uname" name="uname" value="" style="width: 97%;" disabled/>
@@ -68,9 +61,6 @@
           <td>
             :
           </td>
-          <td style="font-weight: bold; font-size: 28px;">
-            &nbsp;
-          </td>
           <td>
             <input type="text" class="input_cell" id="fname" name="fname" value="" style="width: 97%;" disabled/>
           </td>
@@ -81,9 +71,6 @@
           </td>
           <td>
             :
-          </td>
-          <td style="font-weight: bold; font-size: 28px;">
-            &nbsp;
           </td>
           <td>
             <input type="text" class="input_cell" id="lname" name="lname" value="" style="width: 97%;" disabled/>
@@ -96,9 +83,6 @@
           <td>
             :
           </td>
-          <td style="font-weight: bold; font-size: 28px;">
-            &nbsp;
-          </td>
           <td>
             <input type="text" class="input_cell" id="role" name="role" value="" style="width: 97%;" disabled/>
           </td>
@@ -110,9 +94,6 @@
           <td>
             :
           </td>
-          <td id="cursor_for_reason" style="font-weight: bold; font-size: 28px;">
-            &nbsp;
-          </td>
           <td>
             <input type="text" class="input_cell" id="reason" name="reason" value="" style="width: 97%;" onclick="changeFocusToMe(this)" />
           </td>
@@ -120,11 +101,13 @@
       </table>
     </form>
 
-    <button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;">Unblock User</button>
+    <button id="btnAction" class="gray" style="position: absolute; right: 160px; bottom: 20px;">Un-Block User</button>
 
   </fieldset>
 
-  <div id="cursor" style="color: red;">*</div>
+  <fieldset></fieldset>
+
+</fieldset>
 
 <script>
 
@@ -163,7 +146,7 @@
 
         } else {
 
-            ajaxTasks("false");
+            ajaxTasks();
 
         }
 
@@ -175,16 +158,7 @@
 
         var name = __$("username").value.trim();
 
-        var url;
-
-        if(arguments[0] == undefined) {
-
-             url = "/search_by_username/" + name ;
-
-        }else{
-
-             url = "/search_by_active?status=" + arguments[0] ;
-        }
+        var url = "/search_by_username/" + name;
 
         var httpRequest = new XMLHttpRequest();
         httpRequest.onreadystatechange = function () {
@@ -344,13 +318,13 @@
 
                     if(__$("reason").value.trim().length == 0){
 
-                        showMsg("Please enter reason for blocking!");
+                        showMsg("Please enter reason for unblocking!");
 
                         __$("reason").focus();
 
                     } else {
 
-                        window.location = "/unblock_user/" + users[pos]["username"];
+                        window.location = "/unblock_user/" + users[pos]["user_id"];
 
                     }
 
@@ -416,13 +390,10 @@
 
             }
 
-            //showFixedKeyboard(control, __$("keyboard-container"));
             showKeyboard(control)
 
         }
 
     }
-
-    //changeFocusToMe(__$("username"));
 
 </script>

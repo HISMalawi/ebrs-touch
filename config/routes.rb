@@ -48,6 +48,8 @@ Rails.application.routes.draw do
 
   get "/search_by_name" => "person#search_by_name"
 
+  get "/search_by_username" => "users#search_by_username"
+
   get "/set_context/:id" => "logins#set_context"
 
   get "/edit_account" => "users#edit_account"
@@ -67,6 +69,8 @@ Rails.application.routes.draw do
   ########################### (create record form) routes
 
   get '/new_registration' => "dc#new_registration"
+
+  post "/person/:id" => "person#show", :defaults => { :next_path => "view_record"}
 
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}
   get '/get_first_names' => 'person#get_names', :defaults => {first_name: 'first_name'}

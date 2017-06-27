@@ -82,7 +82,7 @@
 
         <button class="red" style="position: absolute; right: 30px; bottom: 20px; cursor: pointer;
                 border: 1px solid #fff; padding: 5px; border-radius: 50px; padding-top: 7px;"
-                onmousedown="window.location = '<%= (!@targeturl.blank? ? "#{@targeturl}" : "/view") %>'">
+                onmousedown="window.location = '<%= (!@targeturl.blank? ? "#{@targeturl}" : "/records/:status") %>'">
           <%= (!@targettext.blank? ? @targettext : "Finish") %>
         </button>
 

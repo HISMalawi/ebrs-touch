@@ -165,7 +165,7 @@
        <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
-        <input type="text" name="hospital_of_birth" id="person_hospital_of_birth" 
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                           class ="input_cell"
                           condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
                           tt_onUnload = "setDistrict('district');",
