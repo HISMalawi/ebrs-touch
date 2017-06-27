@@ -48,6 +48,8 @@ Rails.application.routes.draw do
 
   get "/search_by_name" => "person#search_by_name"
 
+  get "/search_by_username" => "users#search_by_username"
+
   get "/set_context/:id" => "logins#set_context"
 
   get "/edit_account" => "users#edit_account"
