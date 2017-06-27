@@ -28,7 +28,7 @@
     }*/
 </style>
 
-<%= form_for :person do |f| %>
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
@@ -52,27 +52,27 @@
        <!-- %= f.hidden_field :multiple_birth_id %-->
        <input type="hidden" name="registration_type" id="registration_type" />
 
-       <input id="person_relationship" name="child[relationship]" value="normal" type="hidden"/>
+       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
       
        <input name="relationship" value="normal" type="hidden"/>
       
 
-       <input type="hidden" id="person_mother_last_name" name="child[mother][last_name]" value="<%= @person[:mother][:last_name] rescue nil %>" />
-       <input type="hidden" id="person_mother_first_name"  name="child[mother][first_name]" value="<%= @person[:mother][:first_name] rescue nil %>" />
-       <input type="hidden" id="person_mother_middle_name"  name="child[mother][middle_name]" value="<%= @person[:mother][:middle_name] rescue nil %>" />
-       <input type="hidden" id="person_mother_id_number" name="child[mother][id_number]" value="<%= @person[:mother][:id_number] rescue nil %>" />
+       <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= @person[:mother][:last_name] rescue nil %>" />
+       <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" value="<%= @person[:mother][:first_name] rescue nil %>" />
+       <input type="hidden" id="person_mother_middle_name"  name="person[mother][middle_name]" value="<%= @person[:mother][:middle_name] rescue nil %>" />
+       <input type="hidden" id="person_mother_id_number" name="person[mother][id_number]" value="<%= @person[:mother][:id_number] rescue nil %>" />
 
-       <input type="hidden" id="person_mother_birthdate" name="child[mother][birthdate]" value="<%= @person[:mother][:birthdate] rescue nil %>" />
-       <input type="hidden" id="person_mother_birthdate_estimated" name="child[mother][birthdate_estimated]" value="<%= @person[:mother][:birthdate_estimated] rescue nil %>" />
-       <input type="hidden" id="person_mother_citizenship" name="child[mother][citizenship]" value="<%= @person[:mother][:citizenship] rescue nil %>" />
-       <input type="hidden" id="person_mother_current_district" name="child[mother][current_district]" value="<%= @person[:mother][:current_district] rescue nil %>" />
-       <input type="hidden" id="person_mother_current_ta" name="child[mother][current_ta]" value="<%= @person[:mother][:current_ta] rescue nil %>" />
-       <input type="hidden" id="person_mother_current_village" name="child[mother][current_village]" value="<%= @person[:mother][:current_village] rescue nil %>" />
-       <input type="hidden" id="person_mother_residential_country" name="child[mother][residential_country]" value="<%= @person[:mother][:residential_country] rescue nil %>" />
+       <input type="hidden" id="person_mother_birthdate" name="person[mother][birthdate]" value="<%= @person[:mother][:birthdate] rescue nil %>" />
+       <input type="hidden" id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" value="<%= @person[:mother][:birthdate_estimated] rescue nil %>" />
+       <input type="hidden" id="person_mother_citizenship" name="person[mother][citizenship]" value="<%= @person[:mother][:citizenship] rescue nil %>" />
+       <input type="hidden" id="person_mother_current_district" name="person[mother][current_district]" value="<%= @person[:mother][:current_district] rescue nil %>" />
+       <input type="hidden" id="person_mother_current_ta" name="person[mother][current_ta]" value="<%= @person[:mother][:current_ta] rescue nil %>" />
+       <input type="hidden" id="person_mother_current_village" name="person[mother][current_village]" value="<%= @person[:mother][:current_village] rescue nil %>" />
+       <input type="hidden" id="person_mother_residential_country" name="person[mother][residential_country]" value="<%= @person[:mother][:residential_country] rescue nil %>" />
 
-       <input type="hidden" id="person_mother_home_district" name="child[mother][home_district]" value="<%= @person[:mother][:home_district] rescue nil %>" />
-       <input type="hidden" id="person_mother_home_ta" name="child[mother][home_ta]" value="<%= @person[:mother][:home_ta] rescue nil %>" />
-       <input type="hidden" id="person_mother_home_village" name="child[mother][home_village]" value="<%= @person[:mother][:home_village] rescue nil %>" />
+       <input type="hidden" id="person_mother_home_district" name="person[mother][home_district]" value="<%= @person[:mother][:home_district] rescue nil %>" />
+       <input type="hidden" id="person_mother_home_ta" name="person[mother][home_ta]" value="<%= @person[:mother][:home_ta] rescue nil %>" />
+       <input type="hidden" id="person_mother_home_village" name="person[mother][home_village]" value="<%= @person[:mother][:home_village] rescue nil %>" />
 
 
 
@@ -86,57 +86,60 @@
 
        <%= f.hidden_field :level_of_education  %> <!-- @person[:level_of_education] -->
 
-       <input type="hidden" id="person_father_last_name"  name="child[father][last_name]" value="<%= @person[:father][:last_name] rescue nil %>" />
-       <input type="hidden" id="person_father_first_name"  name="child[father][first_name]" value="<%= @person[:father][:first_name] rescue nil %>" />
-       <input type="hidden" id="person_father_middle_name"  name="child[father][middle_name]" value="<%= @person[:father][:middle_name] rescue nil %>" />
-       <input type="hidden" id="person_father_id_number" name="child[father][id_number]" value="<%= @person[:father][:id_number] rescue nil %>" />
+       <input type="hidden" id="person_father_last_name"  name="person[father][last_name]" value="<%= @person[:father][:last_name] rescue nil %>" />
+       <input type="hidden" id="person_father_first_name"  name="person[father][first_name]" value="<%= @person[:father][:first_name] rescue nil %>" />
+       <input type="hidden" id="person_father_middle_name"  name="person[father][middle_name]" value="<%= @person[:father][:middle_name] rescue nil %>" />
+       <input type="hidden" id="person_father_id_number" name="person[father][id_number]" value="<%= @person[:father][:id_number] rescue nil %>" />
 
-       <input type="hidden" id="person_father_birthdate" name="child[father][birthdate]" value="<%= @person[:father][:birthdate] rescue nil %>" />
-       <input type="hidden" id="person_father_birthdate_estimated" name="child[father][birthdate_estimated]" value="<%= @person[:father][:birthdate_estimated] rescue nil %>" />
-       <input type="hidden" id="person_father_citizenship" name="child[father][citizenship]" value="<%= @person[:father][:citizenship] rescue nil %>" />
-       <input type="hidden" id="person_father_current_district" name="child[father][current_district]" value="<%= @person[:father][:current_district] rescue nil %>" />
-       <input type="hidden" id="person_father_current_ta" name="child[father][current_ta]" value="<%= @person[:father][:current_ta] rescue nil %>" />
-       <input type="hidden" id="person_father_current_village" name="child[father][current_village]" value="<%= @person[:father][:current_village] rescue nil %>" />
-       <input type="hidden" id="person_father_residential_country" name="child[father][residential_country]" value="<%= @person[:father][:residential_country] rescue nil %>" />
+       <input type="hidden" id="person_father_birthdate" name="person[father][birthdate]" value="<%= @person[:father][:birthdate] rescue nil %>" />
+       <input type="hidden" id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" value="<%= @person[:father][:birthdate_estimated] rescue nil %>" />
+       <input type="hidden" id="person_father_citizenship" name="person[father][citizenship]" value="<%= @person[:father][:citizenship] rescue nil %>" />
+       <input type="hidden" id="person_father_current_district" name="person[father][current_district]" value="<%= @person[:father][:current_district] rescue nil %>" />
+       <input type="hidden" id="person_father_current_ta" name="person[father][current_ta]" value="<%= @person[:father][:current_ta] rescue nil %>" />
+       <input type="hidden" id="person_father_current_village" name="person[father][current_village]" value="<%= @person[:father][:current_village] rescue nil %>" />
+       <input type="hidden" id="person_father_residential_country" name="person[father][residential_country]" value="<%= @person[:father][:residential_country] rescue nil %>" />
 
-       <input type="hidden" id="person_father_home_district" name="child[father][home_district]" value="<%= @person[:father][:home_district] rescue nil %>" />
-       <input type="hidden" id="person_father_home_ta" name="child[father][home_ta]" value="<%= @person[:father][:home_ta] rescue nil %>" />
-       <input type="hidden" id="person_father_home_village" name="child[father][home_village]" value="<%= @person[:father][:home_village] rescue nil %>" />
+       <input type="hidden" id="person_father_home_district" name="person[father][home_district]" value="<%= @person[:father][:home_district] rescue nil %>" />
+       <input type="hidden" id="person_father_home_ta" name="person[father][home_ta]" value="<%= @person[:father][:home_ta] rescue nil %>" />
+       <input type="hidden" id="person_father_home_village" name="person[father][home_village]" value="<%= @person[:father][:home_village] rescue nil %>" />
 
-       <input type="hidden" id="person_informant_last_name" name="child[informant][last_name]" value="<%= @person[:informant][:last_name] rescue nil %>" />
-       <input type="hidden" id="person_informant_first_name" name="child[informant][first_name]" value="<%= @person[:informant][:first_name] rescue nil %>" />
-       <input type="hidden" id="person_informant_middle_name" name="child[informant][middle_name]" value="<%= @person[:informant][:middle_name] rescue nil %>" />
-       <input type="hidden" id="person_informant_id_number" name="child[informant][id_number]" value="<%= @person[:informant][:id_number] rescue nil %>" />
+       <input type="hidden" id="person_informant_last_name" name="person[informant][last_name]" value="<%= @person[:informant][:last_name] rescue nil %>" />
+       <input type="hidden" id="person_informant_first_name" name="person[informant][first_name]" value="<%= @person[:informant][:first_name] rescue nil %>" />
+       <input type="hidden" id="person_informant_middle_name" name="person[informant][middle_name]" value="<%= @person[:informant][:middle_name] rescue nil %>" />
+       <input type="hidden" id="person_informant_id_number" name="person[informant][id_number]" value="<%= @person[:informant][:id_number] rescue nil %>" />
 
-       <input type="hidden" id="person_informant_relationship_to_child" name="child[informant][relationship_to_child]" value="<%= @person[:informant][:relationship_to_child] rescue nil %>" />
+       <input type="hidden" id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" value="<%= @person[:informant][:relationship_to_child] rescue nil %>" />
 
-       <input type="hidden" id="person_informant_current_district" name="child[informant][current_district]" value="<%= @person[:informant][:current_district] rescue nil %>" />
+       <input type="hidden" id="person_informant_current_district" name="person[informant][current_district]" value="<%= @person[:informant][:current_district] rescue nil %>" />
 
-       <input type="hidden" id="person_informant_current_ta" name="child[informant][current_ta]" value="<%= @person[:informant][:current_ta] rescue nil %>" />
+       <input type="hidden" id="person_informant_current_ta" name="person[informant][current_ta]" value="<%= @person[:informant][:current_ta] rescue nil %>" />
 
-       <input type="hidden" id="person_informant_current_village" name="child[informant][current_village]" value="<%= @person[:informant][:current_village] rescue nil %>" />
-       <input type="hidden" id="person_informant_addressline1 " name="child[informant][addressline1 ]" value="<%= @person[:informant][:addressline1] rescue nil %>" />
-       <input type="hidden" id="person_informant_addressline2" name="child[informant][addressline2]" value="<%= @person[:informant][:addressline2] rescue nil %>" />
-       <input type="hidden" id="person_informant_city" name="child[informant][city]" value="<%= @person[:informant][:city] rescue nil %>" />
-       <input type="hidden" id="person_informant_phone_number" name="child[informant][phone_number]" value="<%= @person[:informant][:phone_number] rescue nil %>" />
+       <input type="hidden" id="person_informant_current_village" name="person[informant][current_village]" value="<%= @person[:informant][:current_village] rescue nil %>" />
+       <input type="hidden" id="person_informant_addressline1 " name="person[informant][addressline1 ]" value="<%= @person[:informant][:addressline1] rescue nil %>" />
+       <input type="hidden" id="person_informant_addressline2" name="person[informant][addressline2]" value="<%= @person[:informant][:addressline2] rescue nil %>" />
+       <input type="hidden" id="person_informant_city" name="person[informant][city]" value="<%= @person[:informant][:city] rescue nil %>" />
+       <input type="hidden" id="person_informant_phone_number" name="person[informant][phone_number]" value="<%= @person[:informant][:phone_number] rescue nil %>" />
 
        <!-- %= f.hidden_field :record_status  % -->
        <!-- %= f.hidden_field :form_signed  % --> <!-- @person[:form_signed] -->
-
       <div class="field">
         <label for="person_last_name">Surname</label>
         <br>
-        <%= (f.text_field :last_name, :ajaxURL => "/get_last_names", :class => "input_cell") rescue "" %>
+        <input type="text" name="person[last_name]" ajaxURL = "/get_last_names" class = "input_cell" id="person_last_name">
       </div>
+
       <div class="field">
-        <%= f.label :first_name %>
+        <label for="person_first_name">First name</label>
         <br>
-        <%= (f.text_field :first_name, :ajaxURL => "/get_first_names",  :class => "input_cell", :tt_onUnload => "updateRegistrationType()") rescue "" %>
+        <input type="text" name="person[first_name]" ajaxURL = "/get_first_names" class = "input_cell" id="person_first_name"
+               tt_onUnload ="" >
       </div>
+
       <div class="field">
-        <label for="person_middle_name">Other Names</label>
+        <label for="person_middle_name">Other names</label>
         <br>
-        <%= (f.text_field :middle_name, :ajaxURL => "/get_first_names", :class => "input_cell", :optional => :true) rescue "" %>
+        <input type="text" name="person[middle_name]" ajaxURL = "/get_first_names" class = "input_cell" id="person_middle_name"
+               optional = true >
       </div>
 
     </fieldset>
@@ -154,7 +157,7 @@
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
-        <select id="person_gender" name="child[gender]" class="input_cell">
+        <select id="person_gender" name="person[gender]" class="input_cell">
           <option></option>
           <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
           <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
@@ -196,7 +199,7 @@
       <div class="field">
         <%= f.label :mode_of_delivery %>
         <br>
-        <select id="person_mode_of_delivery" name="child[mode_of_delivery]" class="input_cell" optional="true">
+        <select id="person_mode_of_delivery" name="person[mode_of_delivery]" class="input_cell" optional="true">
           <option></option>
           <option <%= ((@person[:mode_of_delivery] rescue nil) == "SVD" ? "selected" : "") %> >SVD</option>
           <option <%= ((@person[:mode_of_delivery] rescue nil) == "Vacuum Extraction" ? "selected" : "") %> >Vacuum Extraction</option>
@@ -209,7 +212,7 @@
       <!--div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="child[type_of_birth]" class="input_cell" optional="true" >
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true" >
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
