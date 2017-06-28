@@ -18,14 +18,15 @@ def manage_cases
   @section = "Manage Cases"
   @targeturl = "/"
   @targettext = "Home"
-
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
   render :layout => "facility"
 end
 
 def manage_requests
   @icoFolder = folder
   @section = "Manage Ammnendments"
+  @targeturl = "/"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
   render :layout => "facility"
@@ -33,9 +34,10 @@ end
 
 def manage_duplicates_menu
   @icoFolder = folder
+  @section = "Manage Duplicates"
+  @targeturl = "/"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
-  @section = "Manage Duplicates"
   render :layout => "facility"
 end
 

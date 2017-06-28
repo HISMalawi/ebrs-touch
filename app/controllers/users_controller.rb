@@ -84,15 +84,12 @@ class UsersController < ApplicationController
       person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
 
-    [['Administrator', 1], ['Nurse', 2], ['Midwife', 2], ['Data clerk', 3]].each do |r, l|
-	  Role.create(role: r, level: l)
-	end
 
-	role = Role.where(role:  params[:user]['user_role']['role']).first
+      role = Role.where(role:  params[:user]['user_role']['role']).first
 
-	@user = User.create(username: params[:user]['username'], password: params[:user]['password'], creator: 1, person_id: core_person.person_id, email: params[:user]['email'])
+      @user = User.create(username: params[:user]['username'], password: params[:user]['password'], creator: 1, person_id: core_person.person_id, email: params[:user]['email'])
 
-	@user_role = UserRole.create(user_id: @user.id, role_id: role.id)
+      @user_role = UserRole.create(user_id: @user.id, role_id: role.id)
 
       respond_to do |format|
 
