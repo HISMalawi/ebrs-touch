@@ -78,7 +78,7 @@ class UsersController < ApplicationController
 
   #Creates A New User
   def create
-
+  
       @targeturl = "/user"
 
       #if user.present?
@@ -86,15 +86,27 @@ class UsersController < ApplicationController
          #redirect_to "/user/new" and return
       #end
       core_person = CorePerson.create(person_type_id: 1)
-      person_name = PersonName.create(person_id: core_person.person_id, first_name: params[:user]['person']['first_name'], last_name: params[:user]['person']['last_name'] )
-      person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, first_name_code: params[:user]['person']['first_name'].soundex, last_name_code: params[:user]['person']['last_name'].soundex )
+      person_name = PersonName.create(person_id: core_person.person_id, 
+                                      first_name: params[:user]['person']['first_name'], 
+                                      last_name: params[:user]['person']['last_name'])
 
+      person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, 
+                                               first_name_code: params[:user]['person']['first_name'].soundex, 
+                                               last_name_code: params[:user]['person']['last_name'].soundex)
 
-      role = Role.where(role:  params[:user]['user_role']['role']).first
+      role = Role.where("role = ? AND level = ?", 
+                        params[:user]['user_role']['role'], 
+                        application_mode == "DC" ? "DC" : "FC").first
 
-      @user = User.create(username: params[:user]['username'], password: params[:user]['password'], creator: 1, person_id: core_person.person_id, email: params[:user]['email'])
+      @user = User.create(username: params[:user]['username'], 
+                          password: params[:user]['password'], 
+                          creator: User.current.user_id, 
+                          person_id: core_person.person_id,
+                          last_password_date: Time.now, 
+                          email: params[:user]['email'])
 
-      @user_role = UserRole.create(user_id: @user.id, role_id: role.id)
+      @user_role = UserRole.create(user_id: @user.id, 
+                                   role_id: role.id)
 
       respond_to do |format|
 
