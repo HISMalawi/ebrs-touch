@@ -281,19 +281,12 @@ module PersonService
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
-       
-<<<<<<< HEAD
+
     end
          #informant_current_village.inspect
 
           PersonAddress.create(person_id: core_person_informant.id,
                            current_village: Location.where(name: informant_current_village).first.location_id,
-=======
-    end
-
-          PersonAddress.create(person_id: informant_id,
-                           current_village: (Location.find_by_name(informant_current_village).id rescue 1),
->>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
                            current_village_other: "",
                            current_ta: Location.where(name: informant_current_ta).first.location_id,
                            current_ta_other: "",
