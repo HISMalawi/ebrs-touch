@@ -7,6 +7,7 @@ class PersonBirthDetail < ActiveRecord::Base
     has_one :location, foreign_key: "location_id"
     has_one :level_of_education, foreign_key: "level_of_education_id"
     has_one :guardianship, foreign_key: ":guardianship_id"
-    has_one :mode_of_delivery, foreign_key: "mode_of_delivery"
+    has_one :mode_of_delivery, foreign_key: "mode_of_delivery_id"
+    has_one :birth_registration_type, foreign_key: "birth_registration_type_id"
     has_one :person_type_of_birth, foreign_key: "person_type_of_birth_id"
 end

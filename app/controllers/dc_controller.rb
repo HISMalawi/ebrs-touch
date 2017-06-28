@@ -12,6 +12,33 @@ def new_registration
 
     render :layout => "touch"
 
-  end
+end
+
+def manage_cases
+  @icoFolder = folder
+  @section = "Manage Cases"
+  @targeturl = "/"
+  @targettext = "Home"
+
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+  render :layout => "facility"
+end
+
+def manage_requests
+  @icoFolder = folder
+  @section = "Manage Ammnendments"
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+  render :layout => "facility"
+end
+
+def manage_duplicates_menu
+  @icoFolder = folder
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+  redirect_to "/" and return if !has_role("Manage duplicates")
+
+  @section = "Manage Duplicates"
+  render :layout => "facility"
+end
 
 end

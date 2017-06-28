@@ -1,273 +1,474 @@
+<script type="text/javascript" src="assets/showSubMenu.js"></script>
+
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
-  <!-- % if User.current_user.activities_by_level("Facility").include?("Register a record") % -->
-      <div class="button" onmousedown="window.location = '<%=application_mode == 'DC' ? '/new_registration' : new_person_path %>'" tag=0>
 
-        <!--div>
-          <form id="barcodescan" method="get" action="/search_results">
-            <input id="targetbarcode" type="hidden" value="" name="barcode">
-          </form>
-          <input type="text" id="barcodei"/>
-        </div-->
+<% if @folders.include?("Register Child") %>
 
-        <table style="text-align: left;">
-          <tr>
-            <td rowspan="2">
-              <img src="<%= @icoFolder %>" height="60"/>
-            </td>
-            <td style="height: 30px;">
-              Register Child
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: 11px; font-style: italic;">
-              Register child at <%=application_mode == 'DC' ? application_mode : application_mode.downcase %>.
-            </td>
-          </tr>
-        </table>
-      </div>
-  <!-- % #end % -->
+    <div class="button parent_menu" onclick="window.location = '/new_registration'" tag=0>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Register Child
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Register child record at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("View a record") % -->
-      <div class="button" onmousedown="window.location = '/records/DC OPEN'" tag=1>
-        <table style="text-align: left;">
-          <tr>
-            <td rowspan="2">
-              <img src="<%= @icoFolder %>" height="60"/>
-            </td>
-            <td style="height: 30px;">
-              View Records
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: 11px; font-style: italic;">
-              View records that are still accessible at <%=application_mode == 'DC' ? application_mode : application_mode.downcase %>.
-            </td>
-          </tr>
-        </table>
-      </div>
-  <!-- % #end % -->
-    <!-- % if User.current_user.activities_by_level("Facility").include?("View a record") % -->
-      <div class="button" onmousedown="window.location = '/view_sync'" tag=1>
-        <table style="text-align: left;">
-          <tr>
-            <td rowspan="2">
-              <img src="<%= @icoFolder %>" height="60"/>
-            </td>
-            <td style="height: 30px;">
-              View Synced Records
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: 11px; font-style: italic;">
-              View records that has been sent to DC.
-            </td>
-          </tr>
-        </table>
-      </div>
-  <!-- % #end % -->
-<!--
-  <div class="button" onmousedown="window.location = '/search'" tag=2>
+<% end %>
+
+<% if @folders.include?("Manage Cases")%>
+
+    <div class="button parent_menu" onclick="window.location = '/manage_cases'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Manage Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View cases that are still accessible at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("View Records") %>
+
+    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_cases'" tag=0 title="View Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Active Records
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View records that came through this office.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("View Records") %>
+    <% if @folders.include?("Search Cases")%>
+        <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/search_cases'" tag=0 title="Search Cases">
+          <table style="text-align: left;">
+            <tr>
+              <td rowspan="2">
+                <img src="<%= @icoFolder %>" height="60"/>
+              </td>
+              <td style="height: 30px;">
+                Search Cases
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 11px; font-style: italic;">
+                Search for cases that came through this office
+              </td>
+            </tr>
+          </table>
+        </div>
+    <% end %>
+
+    <% if @folders.include?("Approved By ADR")%>
+        <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_approved_cases'" tag=0 title="View Approved Cases">
+          <table style="text-align: left;">
+            <tr>
+              <td rowspan="2">
+                <img src="<%= @icoFolder %>" height="60"/>
+              </td>
+              <td style="height: 30px;">
+                Approved By ADR
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 11px; font-style: italic;">
+                View approved records that came through this office.
+              </td>
+            </tr>
+          </table>
+        </div>
+    <% end %>
+
+
+    <% if @folders.include?("View Rejected Cases")%>
+
+        <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_rejected_cases'" tag=0 title="View Rejected Cases">
+          <table style="text-align: left;">
+            <tr>
+              <td rowspan="2">
+                <img src="<%= @icoFolder %>" height="60"/>
+              </td>
+              <td style="height: 30px;">
+                View Rejected Cases
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 11px; font-style: italic;">
+                View records which have been rejected at HQ.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+    <% end %>
+
+<% end %>
+
+<% if @folders.include?("View Closed Cases") %>
+
+    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_closed_cases'" tag=0 title="View Closed Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Closed Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View records whose certificates have been printed.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("View Voided Cases") %>
+
+    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_voided_cases'" tag=0 title="View Voided Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Voided Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View voided records.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("Dispatched Certificates") %>
+
+    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_dispatched_cases'" tag=0 title="View Dispatched Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Dispatched
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View records whose certificates have been dispatched.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if @folders.include?("View Synced Records") %>
+    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/dc/sync'" tag=0 title="Synchronize with HQ">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Sync
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Synchronizing data with HQ from this office.
+          </td>
+        </tr>
+      </table>
+    </div>
+<%end %>
+
+<% if @folders.include?("Ammendment Requests") %>
+
+    <div class="button parent_menu" onclick="window.location = '/manage_requests'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Ammendment Requests
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View cases that are still accessible at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if @folders.include?("Request Change") %>
+
+    <div style="display:none" class="button child_menu manage_requests_child" onclick="window.location = '/request_change'" tag=0 title="Request change">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Request Change
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("View Requests") %>
+
+    <div style="display:none" class="button child_menu manage_requests_child" onclick="window.location = '/view_requests'" tag=0 title="View Requests">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Requests
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<!--<div class="button parent_menu" onclick="window.location = '/request_change'" tag=2>
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
           <img src="<%= @icoFolder %>" height="60"/>
         </td>
         <td style="height: 30px;">
-          Edit Record
+          Request Change
         </td>
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          Edit child record still accessible at facility.
+          Request case re-opening at NRB HQ to edit closed case.
         </td>
       </tr>
     </table>
   </div>
-//-->
-  <div class="button" onmousedown="window.location = 'reports/index';" tag=5>
+
+  <div class="button parent_menu" onclick="window.location = '/search_case'" tag=3>
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
           <img src="<%= @icoFolder %>" height="60"/>
         </td>
         <td style="height: 30px;">
-          Reports
+          Edit Case
         </td>
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          View reports at <%=application_mode == 'DC' ? application_mode : application_mode.downcase %>.
+          Edit open case at DC's office.
         </td>
       </tr>
     </table>
-  </div>
+  </div-->
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("Activate User") or
-          User.current_user.activities_by_level("Facility").include?("Deactivate User") or
-          User.current_user.activities_by_level("Facility").include?("Create User") or
-          User.current_user.activities_by_level("Facility").include?("Update User") % -->
-
-  <div class="button" onclick="window.location = '/users'" tag=7>
+<!--<div class="button parent_menu" onclick="window.location = '/view_requests'" tag=4>
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
           <img src="<%= @icoFolder %>" height="60"/>
         </td>
         <td style="height: 30px;">
-          Manage Users
+          View Requests
         </td>
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          Manage system users at <%=application_mode == 'DC' ? application_mode : application_mode.downcase %>.
+          View change requests made at DC's office.
         </td>
       </tr>
     </table>
-  </div>
+  </div>-->
+<% if  @folders.include?("Manage Duplicates") %>
+    <div class="button parent_menu"  onclick="window.location = '/manage_duplicates_menu'" tag=4>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Manage Duplicates
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Manage duplicate records.
+          </td>
+        </tr>
+      </table>
+    </div>
 
-  <!-- % end % -->
+<% end %>
 
-  <!-- % if User.current_user.activities_by_level("Facility").include?("Change own password") % -->
-      <div class="button" onmousedown="window.location = '/users/my_account';" tag=8>
-        <table style="text-align: left;">
-          <tr>
-            <td rowspan="2">
-              <img src="<%= @icoFolder %>" height="60"/>
-            </td>
-            <td style="height: 30px;">
-              My Account
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: 11px; font-style: italic;">
-              Manage current local user account.
-            </td>
-          </tr>
-        </table>
-      </div>
-  <!-- % end % -->
+<% if  @folders.include?("Manage Duplicates") %>
+
+    <div style="display:none" class="button child_menu manage_duplicates"  onclick="window.location = '/view_duplicates'" tag=0>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Resolve Potential Duplicates
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Manage potential duplicate records.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if  @folders.include?("Manage Duplicates") %>
+    <div style="display:none" class="button child_menu manage_duplicates"  onclick="window.location = '/view_resolved_duplicates'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Resolved Duplicates
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View records marked as duplicate.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+<% if @folders.include?("Search Cases") %>
+    <div class="button child_menu manage_cases" onclick="window.location = '/search_cases?redirect_page=search'" tag=0 title="Search Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Search Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Search for cases that came through this office
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if @folders.include?('Reports')%>
+    <div class="button parent_menu" onclick="window.location='/reports/index'" tag=5>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Reports
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View reports at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if @folders.include?("Manage Users")%>
+
+    <div class="button parent_menu" onclick="window.location = '/users'" tag=6>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Manage Users
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Manage system users at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+<% if @folders.include?("Change Own Password") %>
+
+    <div class="button parent_menu" onclick="window.location = '/my_account';" tag=7>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            My Account
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Manage current local user account.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
 
 </div>
-
-<script>
-
-    // var bcode = addTextbox("barcode", __$("targetbarcode"), triggerPost("barcodescan", "targetbarcode"));
-
-    // bcode.style.border = "none";
-
-    // bcode.focus();
-
-
-    function hasChanged() {
-
-        barcodei = document.getElementById("barcodei");
-        if (barcodei.getAttribute("target")) {
-
-            barcodei.getAttribute("target").value = barcodei.value;
-
-        }
-    }
-
-    function triggerPost(id, vid) {
-
-        identifier = document.getElementById(id)
-        videntifier = document.getElementById(vid)
-
-
-        if (identifier && videntifier && videntifier.value.trim().match(/\$/)) {
-
-            videntifier.value = videntifier.value.trim().replace(/\$/, "");
-
-            identifier.submit();
-
-        }
-
-        setTimeout("triggerPost('" + id + "', '" + vid + "')", 500);
-
-    }
-
-    function addTextbox(boxType, target, callback) {
-
-        if (boxType == undefined) {
-
-            if (__$(target)) {
-
-                if (__$(target).type != undefined && __$(target).type.toLowerCase() == "password") {
-
-                    ackoxType = "password";
-
-                } else if (__$(target).type != undefined && __$(target).type.toLowerCase() == "barcode") {
-
-                    boxType = "barcode";
-
-                } else if (__$(target).type != undefined && __$(target).type.toLowerCase() == "number") {
-
-                    boxType = "number";
-
-                } else {
-
-                    boxType = "text";
-
-                }
-
-            } else {
-
-                boxType = "text";
-
-            }
-
-        }
-
-        var txt = document.getElementById("barcodei");
-
-        txt.style.fontSize = "1.2em";
-        txt.style.padding = "10px";
-        txt.style.border = "1px solid #3465a4";
-        txt.style.borderRadius = "10px";
-        txt.style.width = "98.5%";
-        txt.style.margin = "auto";
-        txt.setAttribute("target", target.id);
-        txt.setAttribute("fieldtype", boxType.toLowerCase());
-
-        txt.onchange = function () {
-            if (__$(this.getAttribute("target"))) {
-                __$(this.getAttribute("target")).value = this.value;
-            }
-        }
-
-        txt.onkeyup = function () {
-            if (__$(this.getAttribute("target"))) {
-                __$(this.getAttribute("target")).value = this.value;
-            }
-        }
-
-        switch (boxType.toLowerCase()) {
-            case "password":
-                txt.setAttribute("type", "password");
-
-                break;
-            case "number":
-                txt.setAttribute("type", "number");
-
-                break;
-            case "barcode":
-
-                if (callback != undefined) {
-                    // eval(callback);
-
-                    txt.setAttribute("callback", callback);
-
-                }
-
-            default:
-                txt.setAttribute("type", "text");
-
-                break;
-        }
-
-        return txt;
-
-    }
-
-</script>
-
