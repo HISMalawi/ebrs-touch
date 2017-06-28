@@ -58,10 +58,10 @@ module PersonService
 
     ########################### father details ########################################
 
-<<<<<<< HEAD
+ 
     informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
     informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
-=======
+
       father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
       father_residential_country        = params[:person][:father][:residential_country]
       father_foreigner_current_district = params[:person][:father][:foreigner_current_district]
@@ -82,7 +82,7 @@ module PersonService
 
 
     ######################### father details (end) #################################
->>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
+
 
     informant_last_name               = params[:person][:informant][:last_name]
     informant_first_name              = params[:person][:informant][:first_name]
@@ -106,11 +106,7 @@ module PersonService
     informant_addressline2            = params[:person][:informant][:addressline2]
     informant_phone_number            = params[:person][:informant][:phone_number]
     informant_form_signed             = params[:person][:form_signed]
-<<<<<<< HEAD
-=======
-    informant_same_as_mother          = params[:informant_same_as_mother]
-    informant_same_as_father          = params[:informant_same_as_father]
->>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
+
 
 
      #raise informant_current_ta.inspect
