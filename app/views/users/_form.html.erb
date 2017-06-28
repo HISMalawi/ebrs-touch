@@ -49,29 +49,29 @@
 
         </tr>
 
-        <%= f.fields_for :person do |i| %>
         <tr>
           <td align="right">
-             <%= i.label :first_name %>
+             <%= f.label :first_name %>
           </td>
           <td>
             :
           </td>
           <td>
-            <%= i.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true %>
+            <%= f.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true %>
           </td>
         </tr>
+       
         <tr>
           <td align="right">
-            <%= i.label :last_name %>
+            <%= f.label :last_name %>
           </td>
           <td>
             :
           </td>
           <td>
-            <%= i.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true %>
+            <%= f.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true %>
           </td>
-           <% end %>
+      
         </tr>
 
 	<%= f.fields_for :user_role do |i| %>
