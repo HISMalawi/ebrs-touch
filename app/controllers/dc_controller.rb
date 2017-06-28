@@ -11,7 +11,6 @@ def new_registration
     @form_action = "/person/new"
 
     render :layout => "touch"
-
 end
 
 def manage_cases
@@ -35,7 +34,6 @@ end
 def manage_duplicates_menu
   @icoFolder = folder
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
-  redirect_to "/" and return if !has_role("Manage duplicates")
 
   @section = "Manage Duplicates"
   render :layout => "facility"

@@ -87,13 +87,8 @@ Rails.application.routes.draw do
   ########################### (create record form) routes end
 
   get '/manage_cases' => "dc#manage_cases"
-
-
-
-
-
-
-
+  get '/manage_requests' => "dc#manage_requests"
+  get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
 
 
   resources :person
