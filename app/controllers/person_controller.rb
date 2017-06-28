@@ -366,6 +366,7 @@ class PersonController < ApplicationController
   def view_complete_cases
     @states = ["DC-COMPLETE"]
     @title = "Complete Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
 

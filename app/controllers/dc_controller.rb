@@ -17,7 +17,6 @@ def manage_cases
   @icoFolder = folder
   @section = "Manage Cases"
   @targeturl = "/"
-  @targettext = "Home"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
   render :layout => "facility"
@@ -25,7 +24,7 @@ end
 
 def manage_requests
   @icoFolder = folder
-  @section = "Manage Ammnendments"
+  @section = "Manage Ammendments"
   @targeturl = "/"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 

@@ -66,6 +66,8 @@ module PersonService
       father_residential_country        = params[:person][:father][:residential_country]
       father_foreigner_current_district = params[:person][:father][:foreigner_current_district]
       father_foreigner_current_village  = params[:person][:father][:foreigner_current_village]
+      father_foreigner_current_ta       = params[:person][:father][:foreigner_current_ta]
+      father_residental_country         = params[:person][:father][:residential_country]
       father_foreigner_home_village     = params[:person][:father][:foreigner_home_village]
       father_foreigner_home_ta          = params[:person][:father][:foreigner_home_ta]
       father_lastname                   = params[:person][:father][:last_name]
@@ -137,10 +139,10 @@ module PersonService
       first_name_code: first_name.soundex,
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
-
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      place_of_birth:                           1,
+      birth_registration_type_id:               BirthRegistrationType.find_by_name(params['relationship']).id,
+      place_of_birth:                           Location.find_by_name(params[:person][:place_of_birth]).id,
       birth_location_id:                        (Location.last.id),
       birth_weight:                             birth_weight,
       type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
@@ -181,7 +183,7 @@ module PersonService
           middle_name_code: (mother_middle_name.soundex rescue nil))
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-          person_relationship_type_id: PersonRelationType.where(name: 'Child-Mother').first.id)
+          person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
 
 
             PersonAddress.create(person_id: core_person_mother.id,
@@ -223,7 +225,7 @@ module PersonService
           middle_name_code: (father_middlename.soundex rescue nil))
 
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
-          person_relationship_type_id: PersonRelationType.where(name: 'Child-Father').first.id)
+          person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
             PersonAddress.create(person_id: core_person_father.id,
                            current_village: father_foreigner_current_village,
@@ -301,21 +303,11 @@ module PersonService
     ################################### recording informant details (end) ############################################
     #################################### person status record ####################################################
     
-    if(SETTINGS["application_mode"]== "DC") 
-
-      begin
-        PersonRecordStatus.create(status_id: Status.where(name: 'DC Active').status.id, person_id: core_person.id)
-      rescue 
-        
-      end
-       
+    if(SETTINGS["application_mode"]== "DC")
+         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
     else
-       begin
-         PersonRecordStatus.create(status_id: Status.where(name: 'DC Incomplete').status.id, person_id: core_person.id)
-       rescue 
-         
-       end
-     
+         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
+
     end
 
     #################################### Person status record (end) ##############################################
@@ -330,7 +322,7 @@ module PersonService
 
   def self.mother(person_id)
     result = nil
-    relationship_type = PersonRelationType.find_by_name("Child-Mother").id
+    relationship_type = PersonRelationType.find_by_name("Mother").id
     relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
     if !relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b)
@@ -341,7 +333,7 @@ module PersonService
 
   def self.father(person_id)
     result = nil
-    relationship_type = PersonRelationType.find_by_name("Child-Father").id
+    relationship_type = PersonRelationType.find_by_name("Father").id
     relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
     if !relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b)
@@ -370,22 +362,20 @@ module PersonService
     )
 
     results = []
-    actions =  ActionMatrix(User.current.user_role.role.role, states)
     main.each do |data|
 
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
 
-      name = (data['first_name'] + " #{data['middle_name']} " + data['last_name']).gsub(/\s+/, ' ')
-      mother_name = (mother['first_name'] + " #{mother['middle_name']} " + mother['last_name']).gsub(/\s+/, ' ')
-      father_name = (father['first_name'] + " #{father['middle_name']} " + father['last_name']).gsub(/\s+/, ' ')
+      name          = (data['first_name'] + " #{data['middle_name']} " + data['last_name']).gsub(/\s+/, ' ')
+      mother_name   = (mother['first_name'] + " #{mother['middle_name']} " + mother['last_name']).gsub(/\s+/, ' ')
+      father_name   = (father['first_name'] + " #{father['middle_name']} " + father['last_name']).gsub(/\s+/, ' ')
 
       results << {
-          'first_name' => name,
-          'father_name' => father_name,
-          'mother_name' => mother_name,
+          'first_name'        => name,
+          'father_name'       => father_name,
+          'mother_name'       => mother_name,
           'date_of_reporting' => data['created_at'].to_date.strftime("%d/%b/%Y"),
-          'actions' => actions
       }
     end
   end
