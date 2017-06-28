@@ -328,6 +328,28 @@ module PersonService
 
   end
 
+  def self.mother(person_id)
+    result = nil
+    relationship_type = PersonRelationType.find_by_name("Child-Mother").id
+    relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
+    if !relationship.blank?
+      result = PersonName.where(:person_id => relationship.person_b)
+    end
+
+    result
+  end
+
+  def self.father(person_id)
+    result = nil
+    relationship_type = PersonRelationType.find_by_name("Child-Father").id
+    relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
+    if !relationship.blank?
+      result = PersonName.where(:person_id => relationship.person_b)
+    end
+
+    result
+  end
+
   def self.query_for_display(states)
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
     person_type = PersonType.where(name: 'Client').first
@@ -348,14 +370,22 @@ module PersonService
     )
 
     results = []
+    actions =  ActionMatrix(User.current.user_role.role.role, states)
     main.each do |data|
-      middle_name = params[:middle_name]
+
+      mother = self.mother(data.person_id)
+      father = self.father(data.person_id)
+
+      name = (data['first_name'] + " #{data['middle_name']} " + data['last_name']).gsub(/\s+/, ' ')
+      mother_name = (mother['first_name'] + " #{mother['middle_name']} " + mother['last_name']).gsub(/\s+/, ' ')
+      father_name = (father['first_name'] + " #{father['middle_name']} " + father['last_name']).gsub(/\s+/, ' ')
+
       results << {
-          'first_name' => (params['first_name'] + ' ' +  + params['last_name']),
-          'father_name' => '',
-          'mother_name' => '',
-          'date_of_reporting' => '',
-          'actions' => ActionMatrix(User.current.user_role.role.role, states)
+          'first_name' => name,
+          'father_name' => father_name,
+          'mother_name' => mother_name,
+          'date_of_reporting' => data['created_at'].to_date.strftime("%d/%b/%Y"),
+          'actions' => actions
       }
     end
   end
