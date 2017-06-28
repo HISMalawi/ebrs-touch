@@ -51,7 +51,12 @@ class UsersController < ApplicationController
     @section = "Create User"
 
     @targeturl = "/users"
-
+    if application_mode == "DC"
+       @roles = Role.where(level: "DC").map(&:role)
+    else
+       @roles = Role.where(level: "FC").map(&:role)
+    end  
+    
     render :layout => "touch"
 
   end
