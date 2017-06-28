@@ -1,7 +1,7 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
-    
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
     render :layout => 'facility'
@@ -24,8 +24,12 @@ class PersonController < ApplicationController
     mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
     father_id = PersonRelationship.find(:conditions => ["person_a = ? and person_relationship_type_id = ?", params[:id], person_father_id]).person_b rescue nil
 
+    
 
     @person_name = PersonName.find_by_person_id(params[:id])
+
+    
+
     @person = Person.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     @person_record_status = PersonRecordStatus.find_by_person_id(params[:id])
@@ -209,6 +213,7 @@ class PersonController < ApplicationController
       @section = "New Person"
     else
       @person = PersonBirthDetail.find_by_person_id(params[:id])
+      @person_name = PersonName.find_by_person_id(params[:id])
       #raise params[:id].inspect
     end
 
@@ -342,22 +347,26 @@ class PersonController < ApplicationController
   end
 
 
-    def get_hospital
-    
-    nationality_tag = LocationTag.where(name: 'Health facility').first
-    data = []
-    Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
-      "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
-      ON location.location_id = m.location_id").order('name ASC').map do |l|
-      data << l.name
-    end
-    
-    if data.present?
-      render text: data.compact.uniq.join("\n") and return
-    else
-      render text: "" and return
-    end
+  def get_hospital
+  
+  nationality_tag = LocationTag.where(name: 'Health facility').first
+  data = []
+  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
+    "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
+    ON location.location_id = m.location_id").order('name ASC').map do |l|
+    data << l.name
   end
+  
+  if data.present?
+    render text: data.compact.uniq.join("\n") and return
+  else
+    render text: "" and return
+  end
+ end
+
+ def view_sync
+     render :layout => "facility"
+ end  
 
   #########################################################################
 

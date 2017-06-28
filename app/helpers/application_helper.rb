@@ -12,4 +12,12 @@ module ApplicationHelper
     return User.current.preferred_keyboard
   end
 
+  def facility_name
+    return Location.find(SETTINGS['facility_id']).name rescue nil
+  end
+
+  def district_name
+    return Location.find(SETTINGS['district_id']).name rescue nil    
+  end
+
 end
