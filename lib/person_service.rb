@@ -306,7 +306,7 @@ module PersonService
     if(SETTINGS["application_mode"]== "DC")
          PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
     else
-         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
+         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Complete').last.id, person_id: core_person.id)
 
     end
 
