@@ -142,6 +142,8 @@ ActiveRecord::Schema.define(version: 1) do
     t.string   "home_district_other",    limit: 255
     t.integer  "citizenship",            limit: 4,   null: false
     t.integer  "residential_country",    limit: 4,   null: false
+    t.string   "address_line_1",         limit: 255
+    t.string   "address_line_2",         limit: 255
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
   end
