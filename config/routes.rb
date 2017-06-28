@@ -82,6 +82,7 @@ Rails.application.routes.draw do
   get '/search_by_hospital' => 'person#get_hospital'
   ########################### (create record form) routes end
 
+  get '/manage_cases' => "dc#manage_cases"
 
 
 

@@ -1,7 +1,7 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
-    
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
     render :layout => 'facility'

@@ -1,6 +1,6 @@
 class ActionMatrix
 
-  def self.read(role, states = [])
+  def self.read_actions(role, states = [])
 		states = states.collect{|s| s.strip.upcase}
 		role = role.strip.upcase
 
@@ -40,13 +40,39 @@ class ActionMatrix
 				return {
 					"code" => n,
 					"desc" => row[1],
-					"button_name" => row[2],
-					"ajax_route" => row[3],
-					"route" => row[4],
-          "popup" => row[5],
-          "class" => row[6]
+					"button_name" => row[2]
 				}
 			end
 		end		
-	end
+  end
+
+  def self.read_folders(role)
+    csv = CSV.read("#{Rails.root}/app/assets/data/action_matrix.csv").entries
+    found = false
+    folders = []
+    index = -1
+
+    csv.each_with_index do |row, i|
+      if row[0] == "Root Folder Privileges"
+        found = true
+        next
+      end
+
+      if found && row[0] == "Folder/Role"
+        roles = row.collect{|r| r.upcase.strip}
+        index = roles.index(role.upcase.strip)
+      end
+
+      if found && SETTINGS['enable_role_privileges'].to_s == 'false' && !row[0].blank? && Rails.env.to_s == 'development'
+        folders << row[0]
+      elsif index > -1 && !row[index].blank? && row[index].to_s == 'Y'
+        folders << row[0]
+      end
+
+      break if row[0] && row[0].strip.upcase == "END ROOT FOLDER PRIVILEGES"
+    end
+
+    (folders - ["Folder/Role", "END ROOT FOLDER PRIVILEGES"])
+  end
+
 end

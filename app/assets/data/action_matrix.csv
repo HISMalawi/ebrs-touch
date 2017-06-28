@@ -1,68 +1,76 @@
-,Nurse/Midwife,Data Clerk ,Logistics Officer ,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,System Administrator,coder
-NEW,,,"1,2",3,1,,2,,,
-DC COMPLETE,,,,"3,4",,,,,,
-DC PENDING,,,1,,,,,,,
-DC AMEND,,,,"3,23",,"28,15",,,,
-DC REJECTED,,,1,,,,,,,
-DC POTENTIAL DUPLICATE,,,,"5,8,24",,,,,,
-DC DUPLICATE,,,,9,,,,,,
-HQ REJECTED,,,,3,,,,,,
-DC REPRINT,,,,,,"15,31",,,,
-DC APPROVED,,,,,1,,,,,27
-DC REAPPROVED,,,,,,1,,,,27
-HQ APPROVED,,,,,,,"17,18",,,27
-HQ REAPPROVED,,,,,,,,,,27
-HQ COMPLETE,,,,,,,25,,,27
-HQ PRINT,,,,,,,"17,18",,,27
-HQ CLOSED,,,,23,,,"19,26",21,,27
-HQ DISPATCHED,,,,23,,,,,,27
-HQ REJECTED,,,,3,,,,,,27
-HQ POTENTIAL DUPLICATE,,,,,7,5,,,,27
-HQ DUPLICATE,,,,,,8,5,,,27
-HQ INCOMPLETE,,,,,,,14,,,27
-HQ POTENTIAL INCOMPLETE,,,,,,13,,,,27
-HQ CONFIRMED INCOMPLETE,,,,,,15,,,,27
-HQ CONFLICT,,,,,,,"22,21,8",,,27
-HQ REPRINT,,,,,,,,"17,18",,27
-HQ AMMEND,,,,,,,,,,
-HQ PRINT AMEND,,,,,,,"17,18,29",,,27
-HQ REPRINT REQUEST,,,,,,,"17,18,30",,,27
-HQ REOPENED,,,,,,15,,,,
-HQ REJECTED REPRINT,,,,,,"15",,,,
-HQ REJECTED AMEND,,,,,,"15",,,,
-,,,,,,,,,,
-END,,,,,,,,,,
-Action Codes,Description,Button Name,ajax_route,Route,popup,Btn Class,,,"
-",
-1,Check for completeness and Duplicate,Check completeness,,,completeness,Btn-success,,,,
-2,Mark pending,Mark Pending,,,,,,,,
-3,Approve record ok,Approve,,,,Btn-success,,,,
-4,Reject for editing,Reject,,,,Btn-danger,,,,
-5,Manage Duplicates,Manage duplicates,,/manage_duplicates?next_status=,,Btn-warning,,,,
-6,Mark Potential Duplicate,,,,,,,,,
-7,Mark Duplicate,Manage duplicates,,,,,,,,
-8,Confirm duplicate,Manage Duplicates,,/manage_duplicates?next_status=,,Btn-warning,,,,
-9,Void Record,Void,/ajax_change_status?next_status=HQ-VOIDED&comment=HQ-AVOIDED,,,Btn-danger,,,,
-10,Re-Reapprove record ok,Re-approve,/ajax_change_status?next_status=HQ-REAPPROVED&comment=HQ-REAPPROVED,,,Btn-success,,,,
-11,Approve for printing ,Approve,,,,,,,,
-12,Mark potential incomplete,,,,,,,,,
-13,Mark incomplete,Check Completeness,,,completeness,Btn-success,,,,
-14,Confirm incomplete,Check Completeness,,,completeness,Btn-success,,,,
-15,Reject - resend to DC,Reject/Return to DC,/ajax_change_status?next_status=HQ-REJECTED&comment=HQ-REJECTED,,,Btn-danger,,,,
-16,Approve for reprinting,Approve,,,,,,,,
-17,Print,,,,printers,Btn-primary,,,,
-18,Preview,Preview,,/print_preview?next_status=,,Btn-success,,,,
-19,Re-open,Re-Open,/ajax_change_status?next_status=HQ-REOPENED&comment=HQ-REOPEN,,,,,,,
-20,Request ammendment,Request ammendment,/ajax_change_status?next_status=HQ-AMMEND&comment=HQ-AMMEND,,,,,,,
-21,Scan for reprinting,,,,,,,,,
-22,Reprint,Reprint,,/print_preview?next_status=,,,,,,
-23,Request ammendment,Request ammendment,,,,,,,,
-24,Reject duplicate,,,,,,,,,
-25,Approve printing,Approve,/ajax_change_status?next_status=HQ-PRINT,,,btn-success,,,,
-26,Dispatch certifcates,Dispatch,/ajax_change_status?next_status=HQ-DISPATCHED,,,Btn-success,,,,
-27,Enter cause of death,Cause of death,,,,,,,,
-28,Approve Amendment,Approve Amendment,/ajax_change_status?next_status=HQ-PRINT AMEND,,,Btn-success,,,,
-29,Reject Amendment,Reject Amendment,/ajax_change_status?next_status=HQ-REJECTED AMEND,,,Btn-danger,,,,
-30,Reject re-print,Reject re-print,/ajax_change_status?next_status=HQ-REJECTED REPRINT,,,Btn-danger,,,,
-31,Approve re-print,Approve re-print,/ajax_change_status?next_status=HQ-REPRINT REQUEST,,,Btn-success,,,,
-END CODES,,,,,,,,,,
+,Nurse,Midwife,Data Clerk,Logistics Officer,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
+DC-ACTIVE,,,,,,,,,
+FC-POTENTIAL DUPLICATE,,,,,,,,,
+DC-INCOMPLETE,,,,,,,,,
+DC-COMPLETE,,,,,,,,,
+DC-DUPLICATE,,,,,,,,,
+HQ-ACTIVE,,,,,,,,,
+HQ-RE-APPROVED,,,,,,,,,
+DC-VOIDED,,,,,,,,,
+DC-ASK,,,,,,,,,
+DC-VOIDED,,,,,,,,,
+DC-POTENTIAL DUPLICATE,,,,,,,,,
+HQ-VOIDED,,,,,,,,,
+HQ-GRANTED,,,,,,,,,
+HQ-REJECTED,,,,,,,,,
+HQ-PRINTED,,,,,,,,,
+HQ-DISPATCHED,,,,,,,,,
+HQ-CAN-PRINT,,,,,,,,,
+HQ-CAN-REJECT,,,,,,,,,
+HQ-APPROVED,,,,,,,,,
+HQ-CONFLICT-TBA,,,,,,,,,
+HQ-POTENTIAL DUPLICATE-TBA,,,,,,,,,
+HQ-CAN-VOID,,,,,,,,,
+HQ-INCOMPLETE,,,,,,,,,
+HQ-RE-PRINT,,,,,,,,,
+HQ-CAN-RE-PRINT,,,,,,,,,
+HQ-VOIDED,,,,,,,,,
+DC-GRANTED,,,,,,,,,
+DC-REJECTED,,,,,,,,,
+HQ-POTENTIAL DUPLICATE-TBA,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+END,,,,,,,,,
+Action Code,Description,Button Name,,,,,,,"
+"
+1,Check for completeness and Duplicate,Check Completeness,,,,,,,
+2,Mark record as pending,Mark Pending,,,,,,,
+3,Approve current record,Approve,,,,,,,
+4,Reject for editing,Reject,,,,,,,
+5,Manage associated duplicates,Manage Duplicates,,,,,,,
+6,View comments,View Comments,,,,,,,
+7,Void current record,Void,,,,,,,
+8,Print record,Print,,,,,,,
+9,Dispatch record to district,Dispatch,,,,,,,
+10,Re-print current record,Re-print,,,,,,,
+END CODES,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+Root Folder Privileges,,,,,,,,,
+Folder/Role,Nurse,Midwife,Data Clerk,Logistics Officer,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
+Register Child,Y,Y,Y,,,,,,Y
+View Records,Y,Y,Y,Y,Y,Y,Y,Y,
+View Synced Records,Y,Y,Y,Y,Y,Y,Y,Y,
+Reports,Y,Y,Y,Y,Y,Y,Y,Y,Y
+Manage Users,,,,,,,,,Y
+Change Own Password,Y,Y,Y,Y,Y,Y,Y,Y,Y
+Manage Cases,Y,Y,Y,Y,Y,Y,Y,Y,Y
+Search Cases,Y,Y,Y,Y,Y,Y,Y,Y,
+View Closed Cases,,,,Y,Y,Y,Y,Y,
+View Voided Records,,,,Y,Y,Y,Y,Y,
+Dispatched Certificates,,,,Y,Y,Y,Y,Y,
+Ammendment Requests,,,,Y,Y,Y,Y,Y,
+Request Change,,,,Y,Y,Y,Y,Y,
+View Requests,,,,Y,Y,Y,Y,Y,
+Manage Duplicates,,,,Y,,Y,Y,Y,
+Resolve Potential Duplicates,,,,Y,Y,Y,Y,Y,
+View Resolved Duplicates,,,,Y,Y,Y,Y,Y,
+View Rejected Cases,,,,Y,Y,Y,Y,Y,
+Approved By ADR,,,,Y,Y,Y,Y,Y,
+Active Records,,,,Y,Y,Y,Y,Y,
+Complete Cases from LO,,,,,,,,,
+Pending Cases,,,,,,,,,
+View Printed Records,,,,,,,,,
+,,,,,,,,,
+END ROOT FOLDER PRIVILEGES,,,,,,,,,
