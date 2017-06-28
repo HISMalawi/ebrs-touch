@@ -287,7 +287,7 @@ module PersonService
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
        
 <<<<<<< HEAD
-    end 
+    end
          #informant_current_village.inspect
 
           PersonAddress.create(person_id: core_person_informant.id,
@@ -338,7 +338,7 @@ module PersonService
 
 
 
-    
+
     
     return @person
 

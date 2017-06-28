@@ -1,7 +1,7 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
-    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
     render :layout => 'facility'
@@ -24,12 +24,8 @@ class PersonController < ApplicationController
     mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
     father_id = PersonRelationship.find(:conditions => ["person_a = ? and person_relationship_type_id = ?", params[:id], person_father_id]).person_b rescue nil
 
-    
 
     @person_name = PersonName.find_by_person_id(params[:id])
-
-    
-
     @person = Person.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     @person_record_status = PersonRecordStatus.find_by_person_id(params[:id])
@@ -197,12 +193,12 @@ class PersonController < ApplicationController
 
   def records
     person_type = PersonType.where(name: 'Client').first
-    @records = Person.where("p.person_type_id = ?", 
+    @records = Person.where("p.person_type_id = ?",
       person_type.id).joins("INNER JOIN core_person p ON person.person_id = p.person_id
-      INNER JOIN person_name n 
+      INNER JOIN person_name n
       ON n.person_id = p.person_id").group('n.person_id').select("person.*, n.*").order('p.created_at DESC')
-      
-         
+
+
     render :layout => 'data_table'
   end
 
@@ -212,8 +208,7 @@ class PersonController < ApplicationController
 
       @section = "New Person"
     else
-      @person = PersonBirthDetail.find_by_person_id(params[:id])
-      @person_name = PersonName.find_by_person_id(params[:id])
+      @person = PersonBirthDetail[:id])
       #raise params[:id].inspect
     end
 
@@ -364,9 +359,18 @@ class PersonController < ApplicationController
   end
  end
 
- def view_sync
+  def view_sync
      render :layout => "facility"
- end  
+  end
+
+  def view_complete_cases
+    @states = ["DC-COMPLETE"]
+    @title = "Complete Cases"
+
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "records", :layout => "facility"
+  end
 
   #########################################################################
 
