@@ -89,7 +89,7 @@ Rails.application.routes.draw do
   get '/manage_cases' => "dc#manage_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
-
+  get "/view_complete_cases" => "person#view_complete_cases"
 
   resources :person
 
