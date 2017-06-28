@@ -328,8 +328,8 @@ module PersonService
 
   end
 
-  def query_for_display(states)
-    state_ids = states.collect{|s| Status.find_by_status(s).id} + [-1]
+  def self.query_for_display(states)
+    state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
     person_type = PersonType.where(name: 'Client').first
 
     main = Person.find_by_sql(
@@ -337,7 +337,7 @@ module PersonService
           "SELECT * FROM person p
             INNER JOIN core_person cp ON p.person_id = cp.person_id
             INNER JOIN person_name n ON p.person_id = n.person_id
-            INNER JOIN person_record_status prs ON p.person_id = prs.person_id AND prs.voided = 0
+            INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND prs.voided = 0
             INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
           WHERE prs.status_id IN (#{state_ids.join(', ')})
             AND cp.person_type_id = #{person_type.id}

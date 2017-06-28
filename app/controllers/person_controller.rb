@@ -369,7 +369,7 @@ class PersonController < ApplicationController
 
     @records = PersonService.query_for_display(@states)
 
-    render :template => "records", :layout => "facility"
+    render :template => "person/records", :layout => "facility"
   end
 
   #########################################################################
