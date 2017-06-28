@@ -35,6 +35,15 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
   add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
 
+  create_table "couchdb_changes", primary_key: "couchdb_change_id", force: :cascade do |t|
+    t.integer  "last_seq",   limit: 4, null: false
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
+
+  add_index "couchdb_changes", ["couchdb_change_id"], name: "couchdb_change_id_UNIQUE", unique: true, using: :btree
+  add_index "couchdb_changes", ["last_seq"], name: "last_seq_UNIQUE", unique: true, using: :btree
+
   create_table "identifier_allocation_queue", primary_key: "identifier_allocation_queue_id", force: :cascade do |t|
     t.integer  "person_id",       limit: 4,               null: false
     t.string   "identifier_type", limit: 225,             null: false

@@ -56,13 +56,15 @@ class ApplicationController < ActionController::Base
   def check_if_logged_in
     application_mode = SETTINGS['application_mode']
     
+    location = Location.find(SETTINGS['location_id'])
+
     if application_mode == 'DC'
-      Location.current_district         =  Location.find(SETTINGS['district_id'])
-      Location.current                  =  Location.find(SETTINGS['district_id'])
+      Location.current_district = location
     else
-      Location.current_health_facility  =  Location.find(SETTINGS['facility_id'])
-      Location.current                  =  Location.find(SETTINGS['facility_id'])
+      Location.current_health_facility = location
     end
+
+    Location.current = location
 
     if session[:user_id].blank?
       if request.filtered_parameters["action"] == 'create' and request.filtered_parameters["controller"] == 'logins'
