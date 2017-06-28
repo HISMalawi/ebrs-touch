@@ -58,8 +58,31 @@ module PersonService
 
     ########################### father details ########################################
 
+<<<<<<< HEAD
     informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
     informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
+=======
+      father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
+      father_residential_country        = params[:person][:father][:residential_country]
+      father_foreigner_current_district = params[:person][:father][:foreigner_current_district]
+      father_foreigner_current_village  = params[:person][:father][:foreigner_current_village]
+      father_foreigner_home_village     = params[:person][:father][:foreigner_home_village]
+      father_foreigner_home_ta          = params[:person][:father][:foreigner_home_ta]
+      father_lastname                   = params[:person][:father][:last_name]
+      father_firstname                  = params[:person][:father][:first_name]
+      father_middlename                 = params[:person][:father][:middle_name]
+      father_birthdate                  = params[:person][:father][:birthdate]
+      father_citizenship                = params[:person][:father][:citizenship]
+      father_current_district           = params[:person][:father][:current_district]
+      father_current_ta                 = params[:person][:father][:current_ta]
+      father_current_village            = params[:person][:father][:current_village]
+      father_home_district              = params[:person][:father][:home_district]
+      father_home_ta                    = params[:person][:father][:home_ta]
+      father_home_village               = params[:person][:father][:home_village]
+
+
+    ######################### father details (end) #################################
+>>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
 
     informant_last_name               = params[:person][:informant][:last_name]
     informant_first_name              = params[:person][:informant][:first_name]
@@ -83,6 +106,11 @@ module PersonService
     informant_addressline2            = params[:person][:informant][:addressline2]
     informant_phone_number            = params[:person][:informant][:phone_number]
     informant_form_signed             = params[:person][:form_signed]
+<<<<<<< HEAD
+=======
+    informant_same_as_mother          = params[:informant_same_as_mother]
+    informant_same_as_father          = params[:informant_same_as_father]
+>>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
 
 
      #raise informant_current_ta.inspect
@@ -139,7 +167,7 @@ module PersonService
 
     ################################### recording mother details (start) ###############################################
 
-    if (parents_details_available == "Both" || parents_details_available == "Mother")
+    if (parents_details_available == "Both" || parents_details_available == "Mother" || !mother_birthdate.blank?)
 
       core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
 
@@ -167,7 +195,7 @@ module PersonService
                            current_ta_other: "",
                            current_district: mother_foreigner_current_district,
                            current_district_other: "",
-                           home_village: mother_foreigner_home_villag,
+                           home_village: mother_foreigner_home_village,
                            home_village_other: "",
                            home_ta: mother_foreigner_home_ta,
                            home_ta_other: "",
@@ -180,7 +208,8 @@ module PersonService
     ################################### recording mother details (end)   ###############################################
 
     ################################### recording father details (start) ###############################################
-    if(details_of_father_known == "Yes" || parents_details_available == "Both" || parents_details_available == "Father")
+    if(details_of_father_known == "Yes" || parents_details_available == "Both" ||
+        parents_details_available == "Father" || !father_birthdate.blank?)
 
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
@@ -207,7 +236,7 @@ module PersonService
                            current_ta_other: "",
                            current_district: father_foreigner_current_district,
                            current_district_other: "",
-                           home_village: father_foreigner_home_villag,
+                           home_village: father_foreigner_home_village,
                            home_village_other: "",
                            home_ta: father_foreigner_home_ta,
                            home_ta_other: "",
@@ -225,16 +254,16 @@ module PersonService
 
         PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
         person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
-        
+        informant_id = core_person_mother.id
     elsif (informant_same_as_father == "Yes")
 
         PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
         person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
-
+        informant_id = core_person_father.id
     else
 
       core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
-
+      informant_id = core_person_informant.id
       person_informant = Person.create(person_id: core_person_informant.id,
           gender: "N/A",
           birthdate: ("1900-01-01".to_date))
@@ -257,11 +286,18 @@ module PersonService
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
        
+<<<<<<< HEAD
     end 
          #informant_current_village.inspect
 
           PersonAddress.create(person_id: core_person_informant.id,
                            current_village: Location.where(name: informant_current_village).first.location_id,
+=======
+    end
+
+          PersonAddress.create(person_id: informant_id,
+                           current_village: (Location.find_by_name(informant_current_village).id rescue 1),
+>>>>>>> 7824503cd150d1a8920a5f75ad414741b8175145
                            current_village_other: "",
                            current_ta: Location.where(name: informant_current_ta).first.location_id,
                            current_ta_other: "",

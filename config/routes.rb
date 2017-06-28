@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'reports/index'
+
   get 'users/index'
 
   root 'person#index'
@@ -66,6 +68,8 @@ Rails.application.routes.draw do
 
   get 'records/:status' => 'person#records'
 
+  get "view_sync" =>"person#view_sync"
+  
   ########################### (create record form) routes
 
   get '/new_registration' => "dc#new_registration"
@@ -82,13 +86,9 @@ Rails.application.routes.draw do
   get '/search_by_hospital' => 'person#get_hospital'
   ########################### (create record form) routes end
 
-
-
-
-
-
-
-
+  get '/manage_cases' => "dc#manage_cases"
+  get '/manage_requests' => "dc#manage_requests"
+  get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
 
 
   resources :person

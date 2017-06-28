@@ -1,8 +1,8 @@
 class PersonController < ApplicationController
   def index
     @icoFolder = icoFolder("icoFolder")
-    
-    @targeturl = "/login"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+    @targeturl = "/logout"
     @targettext = "Logout"
     render :layout => 'facility'
   end
@@ -347,22 +347,26 @@ class PersonController < ApplicationController
   end
 
 
-    def get_hospital
-    
-    nationality_tag = LocationTag.where(name: 'Health facility').first
-    data = []
-    Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
-      "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
-      ON location.location_id = m.location_id").order('name ASC').map do |l|
-      data << l.name
-    end
-    
-    if data.present?
-      render text: data.compact.uniq.join("\n") and return
-    else
-      render text: "" and return
-    end
+  def get_hospital
+  
+  nationality_tag = LocationTag.where(name: 'Health facility').first
+  data = []
+  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
+    "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
+    ON location.location_id = m.location_id").order('name ASC').map do |l|
+    data << l.name
   end
+  
+  if data.present?
+    render text: data.compact.uniq.join("\n") and return
+  else
+    render text: "" and return
+  end
+ end
+
+ def view_sync
+     render :layout => "facility"
+ end  
 
   #########################################################################
 
