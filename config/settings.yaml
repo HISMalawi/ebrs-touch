@@ -1,3 +1,0 @@
-application_mode: FC #FC | DC
-facility_id: #if applicaion_mode FC
-district_code: #if application_mode is DC
