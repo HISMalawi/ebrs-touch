@@ -124,8 +124,9 @@
        <!-- %= f.hidden_field :form_signed  % --> <!-- @person[:form_signed] -->
       <div class="field">
         <label for="person_last_name">Surname</label>
+          
         <br>
-        <input type="text" name="person[last_name]" ajaxURL = "/get_last_names" class = "input_cell" id="person_last_name">
+        <input type="text" name="person[last_name]" tt_onUnload =""  ajaxURL = "/get_last_names" class ="input_cell" id="person_last_name" value="<%= @person_name.last_name %>">
       </div>
 
       <div class="field">
@@ -169,29 +170,29 @@
         <br>
         <% if @prev_person_weight.present? %>
             <%= (f.text_field :birth_weight,
-            									:value => "",
-            									:placeholder => "0.000",
-            									:class => "input_cell",
-            									:fieldtype => "decimal",
-            									:regex => '^\d+\.\d{3}$',
-            									:regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) or truncate the weight for you?",
-            									:absolute_min => 0.7 ,
-            									:absolute_max => 6,
-        			 								:min => 2.5,
-        			 								:max => 4 ) %>
+                              :value => "",
+                              :placeholder => "0.000",
+                              :class => "input_cell",
+                              :fieldtype => "decimal",
+                              :regex => '^\d+\.\d{3}$',
+                              :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) or truncate the weight for you?",
+                              :absolute_min => 0.7 ,
+                              :absolute_max => 6,
+                              :min => 2.5,
+                              :max => 4 ) %>
         <% else %>
-        			 <%= (f.text_field :birth_weight,
-        			 									 :value => "",
-        			 									 :placeholder => "0.000",
-        			 									 :class => "input_cell",
-        			 									 :fieldtype => "decimal",
-        			 									 :regex => '^\d+\.\d{3}$',
-        			 									 :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) truncate the weight for you?",
-        			 									 :absolute_min => 0.7 ,
-        			 									 :absolute_max => 6,
-        			 									 :min => 2.5,
-        			 									 :max => 4,
-        			 									 :optional => :true) %>
+               <%= (f.text_field :birth_weight,
+                                 :value => "",
+                                 :placeholder => "0.000",
+                                 :class => "input_cell",
+                                 :fieldtype => "decimal",
+                                 :regex => '^\d+\.\d{3}$',
+                                 :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) truncate the weight for you?",
+                                 :absolute_min => 0.7 ,
+                                 :absolute_max => 6,
+                                 :min => 2.5,
+                                 :max => 4,
+                                 :optional => :true) %>
 
         <% end %>
       </div>
@@ -484,9 +485,9 @@
 
   showMessage();
 
-		function  showMessage() {
+    function  showMessage() {
 
-				<% if @person.errors.any?
+        <% if @person.errors.any?
           errors = []
           errors << "<p>" + pluralize(@person.errors.count, "error") + " occured while saving this record:</p>"
            @person.errors.full_messages.each do |message|

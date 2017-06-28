@@ -24,8 +24,12 @@ class PersonController < ApplicationController
     mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
     father_id = PersonRelationship.find(:conditions => ["person_a = ? and person_relationship_type_id = ?", params[:id], person_father_id]).person_b rescue nil
 
+    
 
     @person_name = PersonName.find_by_person_id(params[:id])
+
+    
+
     @person = Person.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     @person_record_status = PersonRecordStatus.find_by_person_id(params[:id])
@@ -209,6 +213,7 @@ class PersonController < ApplicationController
       @section = "New Person"
     else
       @person = PersonBirthDetail.find_by_person_id(params[:id])
+      @person_name = PersonName.find_by_person_id(params[:id])
       #raise params[:id].inspect
     end
 

@@ -3,10 +3,10 @@ module PersonService
 	require 'json'
 
   def self.create_record(params)
-    #raise params.inspect
+    # => raise params.inspect
 
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
-    desig                             = params[:person][:informant][:designation] rescue nil
+    desig              = params[:person][:informant][:designation] rescue nil
     birth_place_details_available     = params[:birth_place_details_available]
     parents_details_available         = params[:parents_details_available]
     biological_parents                = params[:biological_parents]
@@ -14,6 +14,9 @@ module PersonService
 
     first_name 			                  = params[:person][:first_name]
     last_name 			                  = params[:person][:last_name]
+
+    #raise last_name.inspect
+
     middle_name 		                  = params[:person][:middle_name]
     birthdate                         = params[:birthdate]
     place_of_birth		                = params[:person][:place_of_birth]
@@ -21,6 +24,7 @@ module PersonService
     birth_district		                =	params[:person][:birth_district]
     birth_weight		                  = params[:person][:birth_weight]
     acknowledgement_of_receipt_date	  = params[:person][:acknowledgement_of_receipt_date]
+
     gender 				      	            = params[:person][:gender]
     home_address_same_as_physical     = params[:person][:home_address_same_as_physical]
     same_address_with_mother	        = params[:person][:same_address_with_mother]
@@ -54,22 +58,8 @@ module PersonService
 
     ########################### father details ########################################
 
-      father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
-      father_residential_country        = params[:person][:father][:residential_country]
-      father_lastname                   = params[:person][:father][:last_name]
-      father_firstname                  = params[:person][:father][:first_name]
-      father_middlename                 = params[:person][:father][:middle_name]
-      father_birthdate                  = params[:person][:father][:birthdate]
-      father_citizenship                = params[:person][:father][:citizenship]
-      father_current_district           = params[:person][:father][:current_district]
-      father_current_ta                 = params[:person][:father][:current_ta]
-      father_current_village            = params[:person][:father][:current_village]
-      father_home_district              = params[:person][:father][:home_district]
-      father_home_ta                    = params[:person][:father][:home_ta]
-      father_home_village               = params[:person][:father][:home_village]
-
-
-    ######################### father details (end) #################################
+    informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
+    informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
 
     informant_last_name               = params[:person][:informant][:last_name]
     informant_first_name              = params[:person][:informant][:first_name]
@@ -81,17 +71,26 @@ module PersonService
     informant_addressline1            = params[:person][:informant][:addressline1]
     informant_addressline2            = params[:person][:informant][:addressline2]
     informant_phone_number            = params[:person][:informant][:phone_number]
+     
+    informant_last_name               = params[:person][:informant][:last_name]
+    informant_first_name              = params[:person][:informant][:first_name]
+    informant_middle_name             = params[:person][:informant][:middle_name]
+    informant_relationship_to_child   = params[:person][:informant][:relationship_to_child]
+    informant_current_district        = params[:person][:informant][:current_district]
+    informant_current_ta              = params[:person][:informant][:current_ta]
+    informant_current_village         = params[:person][:informant][:current_village]
+    informant_addressline1            = params[:person][:informant][:addressline1]
+    informant_addressline2            = params[:person][:informant][:addressline2]
+    informant_phone_number            = params[:person][:informant][:phone_number]
     informant_form_signed             = params[:person][:form_signed]
-    informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
-    informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
 
 
+     #raise informant_current_ta.inspect
 
     court_order_attached	            =	params[:person][:court_order_attached]
     parents_signed                    = params[:person][:parents_signed]
 
     parents_married_to_each_other	    =	params[:person][:parents_married_to_each_other]
-    date_of_marriage                  = params[:person][:date_of_marriage]
 
     month_prenatal_care_started               = params[:month_prenatal_care_started]
     number_of_prenatal_visits                 = params[:number_of_prenatal_visits]
@@ -102,7 +101,7 @@ module PersonService
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
-    @person = Person.create(person_id: core_person.id,
+    @person = Person.create(person_id: core_person.id, 
       gender: gender.first, 
       birthdate: (birthdate.to_date rescue Date.today))
 
@@ -115,10 +114,10 @@ module PersonService
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
 
-    @person_details = PersonBirthDetail.create(
+    PersonBirthDetail.create(
       person_id:                                core_person.id,
-      place_of_birth:                           (Location.find_by_name(place_of_birth).id rescue 1),
-      birth_location_id:                        (Location.find_by_name(hospital_of_birth).id rescue 1),
+      place_of_birth:                           1,
+      birth_location_id:                        (Location.last.id),
       birth_weight:                             birth_weight,
       type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
       parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
@@ -240,6 +239,8 @@ module PersonService
           gender: "N/A",
           birthdate: ("1900-01-01".to_date))
 
+      #raise informant_first_name.inspect
+
       person_name_informant = PersonName.create(first_name: informant_first_name,
           middle_name: (informant_middle_name rescue nil),
           last_name: informant_last_name, person_id: core_person_informant.id)
@@ -256,19 +257,19 @@ module PersonService
       PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
        
-    end
-
+    end 
+         #informant_current_village.inspect
 
           PersonAddress.create(person_id: core_person_informant.id,
-                           current_village: (Location.find_by_name(informant_current_village).id rescue 1),
+                           current_village: Location.where(name: informant_current_village).first.location_id,
                            current_village_other: "",
-                           current_ta: (Location.find_by_name(informant_current_ta).id rescue 1),
+                           current_ta: Location.where(name: informant_current_ta).first.location_id,
                            current_ta_other: "",
-                           current_district: (Location.find_by_name(informant_current_district).id rescue 1),
+                           current_district: Location.find_by_name(informant_current_district).location_id,
                            current_district_other: "",
-                           home_village: (Location.find_by_name(informant_current_village).id rescue 1),
+                           home_village: Location.where(name:informant_current_village).first.location_id,
                            home_village_other: "",
-                           home_ta: (Location.find_by_name(informant_current_ta).id rescue 1),
+                           home_ta: Location.where(name:informant_current_ta).first.location_id,
                            citizenship: Location.where(name: 'Malawi').first.location_id,
                            residential_country: Location.where(name: 'Malawi').first.location_id)
 
@@ -301,7 +302,10 @@ module PersonService
 
 
 
+    
+    
     return @person
+
   end
 
 end
