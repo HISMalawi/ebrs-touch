@@ -1,0 +1,46 @@
+<script type="text/javascript" src="assets/showSubMenu.js"></script>
+
+<div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
+
+
+<% if  @folders.include?("Resolve Potential Duplicates") %>
+  
+  <div class="button child_menu manage_duplicates"  onclick="window.location = '/view_duplicates'" tag=0>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          Resolve Potential Duplicates
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+         Records marked as duplicates.
+        </td>
+      </tr>
+    </table>
+  </div>
+<% end %>  
+
+<% if  @folders.include?("Voided Duplicate Cases") %>
+  <div class="button child_menu manage_duplicates"  onclick="window.location = '/view_resolved_duplicates'" tag=1>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/>
+        </td>
+        <td style="height: 30px;">
+          Voided Duplicate Cases
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          Confirmed duplicates.
+        </td>
+      </tr>
+    </table>
+  </div>
+<% end %> 
+</div> 
