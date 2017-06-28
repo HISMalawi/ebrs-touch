@@ -1,9 +1,12 @@
-Administrator
-Nurse
-Midwife
-Data Clerk
-Logistics Officer
-ADR
-Data Supervisor
-Data Manager
-Quality Supervisor
+Administrator,FC
+Data Clerk,FC
+Nurse/Midwife,FC
+Data Clerk,DC
+Logistics Officer,DC
+ADR,DC
+Administrator,DC
+Data Checking Clerk,HQ
+Data Supervisor,HQ
+Data Manager,HQ
+Quality Supervisor,HQ
+Administrator,HQ
