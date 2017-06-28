@@ -211,6 +211,7 @@ class PersonController < ApplicationController
       @section = "New Person"
     else
       @person = PersonBirthDetail.find_by_person_id(params[:id])
+      @person_name = PersonName.find_by_person_name_id(params[:id])
       #raise params[:id].inspect
     end
 
