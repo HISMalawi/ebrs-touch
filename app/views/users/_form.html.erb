@@ -75,7 +75,6 @@
         </tr>
 
 	<%= f.fields_for :user_role do |i| %>
-	<% @roles = Role.all.map(&:role) %>
         <tr>
           <td align="right">
             <%= i.label :role %>
