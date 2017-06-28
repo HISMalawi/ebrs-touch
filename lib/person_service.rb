@@ -318,19 +318,46 @@ module PersonService
      
     end
 
-
     #################################### Person status record (end) ##############################################
     ####################################### person address details ###############################################
         
 
     ########################################Person address details(end) ###############################################
 
-
-
-
-    
     return @person
 
+  end
+
+  def query_for_display(states)
+    state_ids = states.collect{|s| Status.find_by_status(s).id} + [-1]
+    person_type = PersonType.where(name: 'Client').first
+
+    main = Person.find_by_sql(
+        [
+          "SELECT * FROM person p
+            INNER JOIN core_person cp ON p.person_id = cp.person_id
+            INNER JOIN person_name n ON p.person_id = n.person_id
+            INNER JOIN person_record_status prs ON p.person_id = prs.person_id AND prs.voided = 0
+            INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
+          WHERE prs.status_id IN (#{state_ids.join(', ')})
+            AND cp.person_type_id = #{person_type.id}
+          GROUP BY p.person_id
+          ORDER BY p.updated_at DESC
+           "
+        ]
+    )
+
+    results = []
+    main.each do |data|
+      middle_name = params[:middle_name]
+      results << {
+          'first_name' => (params['first_name'] + ' ' +  + params['last_name']),
+          'father_name' => '',
+          'mother_name' => '',
+          'date_of_reporting' => '',
+          'actions' => ActionMatrix(User.current.user_role.role.role, states)
+      }
+    end
   end
 
 end
