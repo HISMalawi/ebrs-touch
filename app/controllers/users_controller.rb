@@ -51,6 +51,7 @@ class UsersController < ApplicationController
     @section = "Create User"
 
     @targeturl = "/users"
+
     if application_mode == "DC"
        @roles = Role.where(level: "DC").map(&:role)
     else
@@ -67,10 +68,16 @@ class UsersController < ApplicationController
     #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Update User"))
 
     @user = User.find(params[:id])
-
+  
     @section = "Edit User"
 
     @targeturl = "/view_users"
+
+    if application_mode == "DC"
+       @roles = Role.where(level: "DC").map(&:role)
+    else
+       @roles = Role.where(level: "FC").map(&:role)
+    end  
 
     render :layout => "touch"
 
@@ -87,12 +94,12 @@ class UsersController < ApplicationController
       #end
       core_person = CorePerson.create(person_type_id: 1)
       person_name = PersonName.create(person_id: core_person.person_id, 
-                                      first_name: params[:user]['person']['first_name'], 
-                                      last_name: params[:user]['person']['last_name'])
+                                      first_name: params[:user][:first_name], 
+                                      last_name: params[:user][:last_name])
 
       person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, 
-                                               first_name_code: params[:user]['person']['first_name'].soundex, 
-                                               last_name_code: params[:user]['person']['last_name'].soundex)
+                                               first_name_code: params[:user][:first_name].soundex, 
+                                               last_name_code: params[:user][:last_name].soundex)
 
       role = Role.where("role = ? AND level = ?", 
                         params[:user]['user_role']['role'], 
@@ -121,8 +128,9 @@ class UsersController < ApplicationController
   end
 
   def update
-    @user = User.find(params[:id])
 
+    @user = User.find(params[:id])
+     
     if request.referrer.match('edit_account')
       @user.preferred_keyboard = params[:user][:preferred_keyboard]
       @user.save!
@@ -137,16 +145,16 @@ class UsersController < ApplicationController
     respond_to do |format|
       role = User.current.user_role.role.role
       if ((role.strip.downcase.match(/Administrator/i) rescue false) ? true : false) and @user.update_attributes(user_params)
-
-        if params[:user][:person][:first_name].present? && params[:user][:person][:last_name].present?
+  
+        if params[:user][:first_name].present? && params[:user][:last_name].present?
           @user.core_person.person_name.update_attributes(voided: true, void_reason: 'Edited')
           person_name = PersonName.create(person_id: @user.person_id,
-            first_name: params[:user][:person][:first_name],
-            last_name: params[:user][:person][:last_name])
+            first_name: params[:user][:first_name],
+            last_name: params[:user][:last_name])
 
           PersonNameCode.create(person_name_id: person_name.person_name_id,
-            first_name_code: params[:user]['person']['first_name'].soundex,
-            last_name_code: params[:user]['person']['last_name'].soundex )
+            first_name_code: params[:user][:first_name].soundex,
+            last_name_code: params[:user][:last_name].soundex )
         end
 
         if @user.present?
@@ -405,7 +413,7 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:username, :active, :create_at, :creator, :email, :first_name, :last_name, :notify, :plain_password, :role, :updated_at, :_rev)
+    params.require(:user).permit(:username, :active, :create_at, :creator, :email, :notify, :plain_password, :updated_at)
   end
 
   def check_if_user_admin
