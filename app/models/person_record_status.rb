@@ -5,4 +5,12 @@ class PersonRecordStatus < ActiveRecord::Base
 
     belongs_to :person, foreign_key: "person_id"
     belongs_to :status, foreign_key: "status_id"
+
+  def self.new_record_state(person_id, state, change_reason)
+    state_id = Status.where(:name => state).first.id
+    self.create(
+        person_id: person_id,
+        status_id: state_id
+    )
+  end
 end

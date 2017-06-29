@@ -71,4 +71,70 @@ end
 
   end
 
+  def incomplete_case
+    PersonRecordStatus.new_record_state(params[:id], 'DC-INCOMPLETE', params[:reason])
+
+    flash[:info] = "Record is not complete"
+    if User.current.user_role.role.role.downcase == 'adr'
+      redirect_to "/view_complete_cases"
+    else
+      redirect_to "/view_incomplete_cases"
+    end
+  end
+
+def approve
+
+  @child = Person.find(params[:id])
+
+  if PersonService.record_complete?(@child) == false
+    flash[:info] = "Record is not complete"
+    redirect_to "/incomplete_case_comment?id=#{@child.id}" && return
+  end
+
+
+  months_gone = (Date.today.year * 12 + Date.today.month) - (@child.acknowledgement_of_receipt_date.to_date.year * 12 + @child.acknowledgement_of_receipt_date.to_date.month)
+  old_state = @child.request_status.to_s.strip.upcase
+  if @child.district_id_number.blank?
+
+    result = false
+
+    while !result do
+
+      result = DistrictNumber.assign_district_number(@child, application_codes("district").to_s, Date.today.year, current_user.id)
+
+      break if result
+
+      sleep 1
+
+    end
+
+    if result == false
+      flash[:info] = "Record has not been approved"
+    else
+      flash[:info] = "Record has been approved"
+      Audit.create(record_id: @child.id, audit_type: "Audit", level: "Child", reason: "Approved child record")
+      checkCreatedSync(params[:id], "HQ OPEN", @child.request_status)
+    end
+  else
+    if @child.request_status.upcase == 'REJECTED'
+
+      @child.update_attributes({:approved => 'Yes',
+                                :record_status => "HQ OPEN",
+                                :approved_by => current_user.id,
+                                :request_status => 'RE-APPROVED',
+                                :approved_at => Time.now()})
+
+      Audit.create(record_id: @child.id, audit_type: "Audit", level: "Child", reason: "Re-approved child record")
+      flash[:info] = "Record has been re-approved"
+      checkCreatedSync(params[:id], "HQ OPEN", "RE-APPROVED")
+
+    end
+  end
+
+
+  redirect_to "/#{params[:next_path]}" and return unless params[:next_path].blank?
+  redirect_to "/view_pending_cases" and return if old_state == "PENDING"
+  redirect_to "/view_complete_cases"
+end
+
 end
