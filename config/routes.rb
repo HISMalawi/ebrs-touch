@@ -90,8 +90,11 @@ Rails.application.routes.draw do
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
   get "/view_complete_cases" => "person#view_complete_cases"
-  get "/incomplete_case_comment" => "dc#incomplete_case_comment"
+  get "/view_incomplete_cases" => "person#view_incomplete_cases"
+
+  get "/incomplete_case_comment/:id" => "dc#incomplete_case_comment"
   get "/complete_case_comment/:id" => "dc#complete_case_comment"
+  get "/incomplete_case" => "dc#incomplete_case"
 
   resources :person
 

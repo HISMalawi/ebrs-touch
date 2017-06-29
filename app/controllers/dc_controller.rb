@@ -71,4 +71,15 @@ end
 
   end
 
+  def incomplete_case
+    PersonRecordStatus.new_record_state(params[:id], 'DC-INCOMPLETE', params[:reason])
+
+    flash[:info] = "Record is not complete"
+    if User.current.user_role.role.role.downcase == 'adr'
+      redirect_to "/view_complete_cases"
+    else
+      redirect_to "/view_incomplete_cases"
+    end
+  end
+
 end

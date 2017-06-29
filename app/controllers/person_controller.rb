@@ -384,7 +384,25 @@ class PersonController < ApplicationController
   end
 
   def view_complete_cases
-    @states = ["DC-COMPLETE"]
+    @states = ["DC-COMPLETE", "DC-ACTIVE"]
+    @title = "Complete Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_incomplete_cases
+    @states = ["DC-INCOMPLETE"]
+    @title = "Complete Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_active_cases
+    @states = ["DC-ACTIVE"]
     @title = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
