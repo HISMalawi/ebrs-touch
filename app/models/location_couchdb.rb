@@ -10,6 +10,7 @@ class LocationCouchdb < CouchRest::Model::Base
   property :latitude, String
   property :longitude, String
   property :county_district, String
+  property :parent_location, Integer
   
   property :creator, Integer
   property :voided, TrueClass, :default => false
