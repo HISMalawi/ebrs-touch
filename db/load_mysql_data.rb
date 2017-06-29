@@ -1,3 +1,16 @@
+puts "Init Couchdb (indexing) ...."
+PersonTypeOfBirthsCouchdb.count
+StatusCouchdb.count
+PersonRelationshipTypesCouchdb.count
+PersonAttributeTypesCouchdb.count
+ModeOfDeliveryCouchdb.count
+LocationTagMapCouchdb.count
+LocationCouchdb.count
+LocationTagCouchdb.count
+LevelOfEducationCouchdb.count
+BirthRegistrationTypeCouchdb.count
+puts "Init Couchdb (indexing) done ...."
+
 =begin
 birth_registration_types = BirthRegistrationType.all
 birth_registration_types.each do |birth_registration_type|
@@ -13,6 +26,7 @@ birth_registration_type_couchdbs.each do |birth_registration_type_couchdb|
   birth_registration_type.birth_registration_type_id = birth_registration_type_couchdb.birth_registration_type_id
   birth_registration_type.name = birth_registration_type_couchdb.name
   birth_registration_type.save
+  puts "Loading BirthRegistrationType: #{birth_registration_type.name}"
 end
 
 
@@ -32,6 +46,27 @@ level_of_education_couchdbs.each do |level_of_education_couchdb|
   education_level.level_of_education_id = level_of_education_couchdb.level_of_education_id
   education_level.name = level_of_education_couchdb.name
   education_level.save
+  puts "Loading LevelOfEducation: #{education_level.name}"
+end
+
+=begin
+location_tags = LocationTag.all
+location_tags.each do |location_tag|
+  location_tag_couch_db = LocationTagCouchdb.new
+  location_tag_couch_db.location_tag_id = location_tag.location_tag_id
+  location_tag_couch_db.name = location_tag.name
+  location_tag_couch_db.description = location_tag.description
+  location_tag_couch_db.save
+end
+=end
+location_tag_couch_dbs = LocationTagCouchdb.all
+location_tag_couch_dbs.each do |location_tag_couch_db|
+  location_tag = LocationTag.new
+  location_tag.location_tag_id = location_tag_couch_db.location_tag_id
+  location_tag.name = location_tag_couch_db.name
+  location_tag.description = location_tag_couch_db.description
+  location_tag.save
+  puts "Loading LocationTag: #{location_tag.name}"
 end
 
 =begin
@@ -66,27 +101,13 @@ location_couchdbs.each do |location_couchdb|
   location.longitude = location_couchdb.longitude
   location.county_district = location_couchdb.county_district
   location.creator = location_couchdb.creator
+  location.parent_location = location_couchdb.parent_location
   location.changed_by = location_couchdb.changed_by
   location.changed_at = location_couchdb.changed_at
+  location.voided = location_couchdb.voided
+  location.date_voided = location_couchdb.date_voided
   location.save
-end
-=begin
-location_tags = LocationTag.all
-location_tags.each do |location_tag|
-  location_tag_couch_db = LocationTagCouchdb.new
-  location_tag_couch_db.location_tag_id = location_tag.location_tag_id
-  location_tag_couch_db.name = location_tag.name
-  location_tag_couch_db.description = location_tag.description
-  location_tag_couch_db.save
-end
-=end
-location_tag_couch_dbs = LocationTagCouchdb.all
-location_tag_couch_dbs.each do |location_tag_couch_db|
-  location_tag = LocationTag.new
-  location_tag.location_tag_id = location_tag_couch_db.location_tag_id
-  location_tag.name = location_tag_couch_db.name
-  location_tag.description = location_tag_couch_db.description
-  location_tag.save
+  puts "Loading Location: #{location.name}"
 end
 
 =begin
@@ -101,10 +122,12 @@ end
 
 location_tag_map_couch_dbs = LocationTagMapCouchdb.all
 location_tag_map_couch_dbs.each do |location_tag_map_couch_db|
+  puts "Location ID: #{location_tag_map_couch_db.location_id}, Location_tag_id: #{location_tag_map_couch_db.location_tag_id}"
   location_tag_map = LocationTagMap.new
   location_tag_map.location_id = location_tag_map_couch_db.location_id
   location_tag_map.location_tag_id = location_tag_map_couch_db.location_tag_id
   location_tag_map.save
+  #puts "Loading LocationTagMap: #{location_tag_map.location_id}"
 end
 
 =begin
@@ -125,6 +148,7 @@ mode_of_delivery_couch_dbs.each do |mode_of_delivery_couch_db|
   delivery_mode.name = mode_of_delivery_couch_db.name
   delivery_mode.description = mode_of_delivery_couch_db.description
   delivery_mode.description.save
+  puts "Loading ModeOfDelivery: #{delivery_mode.name}"
 end
 
 =begin
@@ -145,6 +169,7 @@ person_attribute_type_couch_dbs.each do |person_attribute_type_couch_db|
   person_attribute_type.name = person_attribute_type_couch_db.name
   person_attribute_type.description = person_attribute_type_couch_db.description
   person_attribute_type.save
+  puts "Loading PersonAttributeType: #{person_attribute_type.name}"
 end
 
 =begin
@@ -166,6 +191,7 @@ person_relationship_type_couch_dbs.each do |person_relationship_type_couch_db|
   person_relationship_type.name = person_relationship_type_couch_db.name
   person_relationship_type.description = person_relationship_type_couch_db.description
   person_relationship_type.save
+  puts "Loading PersonRelationType: #{person_relationship_type.name}"
 end
 
 =begin
@@ -186,6 +212,7 @@ person_type_of_births_couch_dbs.each do |person_type_of_births_couch_db|
   person_type_of_birth.name = person_type_of_births_couch_db.name
   person_type_of_birth.description = person_type_of_births_couch_db.description
   person_type_of_birth.save
+  puts "Loading PersonTypeOfBirth: #{person_type_of_birth.name}"
 end
 
 =begin
@@ -206,4 +233,5 @@ status_couch_dbs.each do |status_couch_db|
   status.name = status_couch_db.name
   status.description = status_couch_db.description
   status.save
+  puts "Loading Status: #{status.name}"
 end
