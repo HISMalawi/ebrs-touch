@@ -43,20 +43,21 @@ end
 
 begin
     ActiveRecord::Base.transaction do
-      require Rails.root.join('db','load_person_types.rb')
-      require Rails.root.join('db','load_person_relationship_types.rb')
-      require Rails.root.join('db','load_delivery_modes.rb')
-      require Rails.root.join('db','load_level_of_education.rb')
-      require Rails.root.join('db','load_types_of_birth.rb')
-      require Rails.root.join('db','load_roles.rb')
-      require Rails.root.join('db','load_location_tags.rb')
-      require Rails.root.join('db','load_countries.rb')
-      require Rails.root.join('db','load_districts.rb')
-      require Rails.root.join('db','load_tas_and_villages.rb')
-      require Rails.root.join('db','load_health_facilities.rb')
-      require Rails.root.join('db','load_statuses.rb')
-      require Rails.root.join('db','load_birth_registration_types.rb')
-      require Rails.root.join('db','load_place_of_birth.rb')
+      #require Rails.root.join('db','load_person_types.rb')
+      #require Rails.root.join('db','load_person_relationship_types.rb')
+      #require Rails.root.join('db','load_delivery_modes.rb')
+      #require Rails.root.join('db','load_level_of_education.rb')
+      #require Rails.root.join('db','load_types_of_birth.rb')
+      #require Rails.root.join('db','load_roles.rb')
+      #require Rails.root.join('db','load_location_tags.rb')
+      #require Rails.root.join('db','load_countries.rb')
+      #require Rails.root.join('db','load_districts.rb')
+      #require Rails.root.join('db','load_tas_and_villages.rb')
+      #require Rails.root.join('db','load_health_facilities.rb')
+      #require Rails.root.join('db','load_statuses.rb')
+      #require Rails.root.join('db','load_birth_registration_types.rb')
+      #require Rails.root.join('db','load_place_of_birth.rb')
+      require Rails.root.join('db','load_mysql_data.rb')
       create_user
     end
 rescue => e 

@@ -16,6 +16,7 @@
 /tmp
 config/*.pem
 config/*.yml
+nbproject/
 *.lock
 *~
 .idea/*

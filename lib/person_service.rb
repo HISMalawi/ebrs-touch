@@ -139,11 +139,14 @@ module PersonService
       first_name_code: first_name.soundex,
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
+
+     
+
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      birth_registration_type_id:               BirthRegistrationType.find_by_name(params['relationship']).id,
-      place_of_birth:                           Location.find_by_name(params[:person][:place_of_birth]).id,
-      birth_location_id:                        (Location.last.id),
+      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
+      place_of_birth:                           Location.where(location_id: SETTINGS['location_id']).first.location_id,
+      birth_location_id:                        Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
       parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
@@ -160,7 +163,8 @@ module PersonService
       court_order_attached:                     (court_order_attached == 'No' ? 0 : 1),
       acknowledgement_of_receipt_date:          (acknowledgement_of_receipt_date.to_date rescue nil),
       facility_serial_number:                   nil,
-      adoption_court_order:                     0
+      adoption_court_order:                     0,
+
     )
 
     ################################### recording mother details (start) ###############################################

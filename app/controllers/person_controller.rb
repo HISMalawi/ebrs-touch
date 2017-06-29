@@ -1,10 +1,12 @@
 class PersonController < ApplicationController
   def index
+
     @icoFolder = icoFolder("icoFolder")
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
     render :layout => 'facility'
+    
   end
 
   def show
@@ -227,6 +229,7 @@ class PersonController < ApplicationController
       @section = "New Person"
     else
       @person = PersonBirthDetail.find_by_person_id(params[:id])
+      @person_name = PersonName.find_by_person_name_id(params[:id])
       #raise params[:id].inspect
     end
 

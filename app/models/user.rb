@@ -49,6 +49,14 @@ class User < ActiveRecord::Base
   def confirm_password
     password_hash
   end
+
+  def first_name
+     self.core_person.person_name.first_name rescue nil
+  end 
+
+  def last_name
+     self.core_person.person_name.last_name rescue nil
+  end   
   
   def create_audit
     #Audit.create(record_id: self.id, audit_type: "Audit", level: "User", reason: "Created user record")
