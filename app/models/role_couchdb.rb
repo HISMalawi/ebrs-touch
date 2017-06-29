@@ -2,7 +2,7 @@ require 'couchrest_model'
 class RoleCouchdb < CouchRest::Model::Base
   property :role_id, Integer
   property :role, String
-  property :level, Integer
+  property :level, String
 
   timestamps!
 
