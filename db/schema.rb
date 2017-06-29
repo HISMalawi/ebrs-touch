@@ -310,7 +310,7 @@ ActiveRecord::Schema.define(version: 1) do
 
   create_table "role", primary_key: "role_id", force: :cascade do |t|
     t.string  "role",  limit: 50, default: "", null: false
-    t.string "level", limit: 10
+    t.integer "level", limit: 4
   end
 
   add_index "role", ["role_id"], name: "fk_user_role_1_idx", using: :btree

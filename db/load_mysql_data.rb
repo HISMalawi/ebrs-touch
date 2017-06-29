@@ -35,6 +35,25 @@ level_of_education_couchdbs.each do |level_of_education_couchdb|
 end
 
 =begin
+location_tags = LocationTag.all
+location_tags.each do |location_tag|
+  location_tag_couch_db = LocationTagCouchdb.new
+  location_tag_couch_db.location_tag_id = location_tag.location_tag_id
+  location_tag_couch_db.name = location_tag.name
+  location_tag_couch_db.description = location_tag.description
+  location_tag_couch_db.save
+end
+=end
+location_tag_couch_dbs = LocationTagCouchdb.all
+location_tag_couch_dbs.each do |location_tag_couch_db|
+  location_tag = LocationTag.new
+  location_tag.location_tag_id = location_tag_couch_db.location_tag_id
+  location_tag.name = location_tag_couch_db.name
+  location_tag.description = location_tag_couch_db.description
+  location_tag.save
+end
+
+=begin
 locations = Location.all
 locations.each do |location|
   location_couchdb = LocationCouchdb.new
@@ -69,24 +88,6 @@ location_couchdbs.each do |location_couchdb|
   location.changed_by = location_couchdb.changed_by
   location.changed_at = location_couchdb.changed_at
   location.save
-end
-=begin
-location_tags = LocationTag.all
-location_tags.each do |location_tag|
-  location_tag_couch_db = LocationTagCouchdb.new
-  location_tag_couch_db.location_tag_id = location_tag.location_tag_id
-  location_tag_couch_db.name = location_tag.name
-  location_tag_couch_db.description = location_tag.description
-  location_tag_couch_db.save
-end
-=end
-location_tag_couch_dbs = LocationTagCouchdb.all
-location_tag_couch_dbs.each do |location_tag_couch_db|
-  location_tag = LocationTag.new
-  location_tag.location_tag_id = location_tag_couch_db.location_tag_id
-  location_tag.name = location_tag_couch_db.name
-  location_tag.description = location_tag_couch_db.description
-  location_tag.save
 end
 
 =begin
