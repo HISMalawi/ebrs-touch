@@ -385,4 +385,56 @@ module PersonService
     results
   end
 
+  def self.record_complete?(child)
+      name = PersonName.find_by_person_id(child.id)
+      pbs = PersonBirthDetail.find_by_person_id(child.id) rescue nil
+      birth_type = BirthRegistrationType.find(pbs.birth_registration_type_id).name rescue nil
+      mother_name = self.mother(child.id)
+      father_name = self.father(child.id)
+      complete = false
+
+      return false if pbs.blank?
+
+      if name.first_name.blank?
+        return complete
+      end
+
+      if name.last_name.blank?
+        return complete
+      end
+
+      if (child.birthdate.to_date.blank? rescue true)
+          return complete
+      end
+
+      if child.gender.blank? || child.gender == 'N/A'
+        return complete
+      end
+
+      if birth_type.downcase == "normal"
+
+        if mother_name.first_name.blank?
+          return complete
+        end
+
+        if mother_name.last_name.blank?
+          return complete
+        end
+
+      end
+
+      if pbs.parents_married_to_each_other.to_s == '1'
+        if father_name.first_name.blank?
+          return complete
+        end
+
+        if father_name.last_name.blank?
+          return complete
+        end
+      end
+
+      return true
+
+  end
+
 end
