@@ -204,7 +204,7 @@ module PersonService
                            home_district: mother_foreigner_current_district,
                            home_district_other: "",
                            citizenship: Location.where(name: mother_residental_country).first.location_id,
-                           residential_country: Location.where(name: mother_residental_country).first.location_id)
+                           residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
     end
 
     ################################### recording mother details (end)   ###############################################
@@ -245,7 +245,7 @@ module PersonService
                            home_district: father_foreigner_current_district,
                            home_district_other: "",
                            citizenship: Location.where(name: father_residental_country).first.location_id,
-                           residential_country: Location.where(name: father_residental_country).first.location_id)
+                           residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
 
     end
     ################################### recording father details (end)   ###############################################
@@ -326,10 +326,10 @@ module PersonService
 
   def self.mother(person_id)
     result = nil
-    relationship_type = PersonRelationType.find_by_name("Mother").id
-    relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
+    relationship_type = PersonRelationType.find_by_name("Mother")
+    relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
     if !relationship.blank?
-      result = PersonName.where(:person_id => relationship.person_b)
+      result = PersonName.where(:person_id => relationship.person_b).last
     end
 
     result
@@ -337,10 +337,10 @@ module PersonService
 
   def self.father(person_id)
     result = nil
-    relationship_type = PersonRelationType.find_by_name("Father").id
-    relationship = PersonRelationship.where(:person_a => person_id, :relationship_type => relationship_type.id)
+    relationship_type = PersonRelationType.find_by_name("Father")
+    relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
     if !relationship.blank?
-      result = PersonName.where(:person_id => relationship.person_b)
+      result = PersonName.where(:person_id => relationship.person_b).last
     end
 
     result
@@ -351,37 +351,38 @@ module PersonService
     person_type = PersonType.where(name: 'Client').first
 
     main = Person.find_by_sql(
-        [
-          "SELECT * FROM person p
+          "SELECT n.*, prs.status_id FROM person p
             INNER JOIN core_person cp ON p.person_id = cp.person_id
             INNER JOIN person_name n ON p.person_id = n.person_id
-            INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND prs.voided = 0
+            INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
             INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
           WHERE prs.status_id IN (#{state_ids.join(', ')})
             AND cp.person_type_id = #{person_type.id}
           GROUP BY p.person_id
           ORDER BY p.updated_at DESC
            "
-        ]
     )
 
     results = []
     main.each do |data|
-
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
 
-      name          = (data['first_name'] + " #{data['middle_name']} " + data['last_name']).gsub(/\s+/, ' ')
-      mother_name   = (mother['first_name'] + " #{mother['middle_name']} " + mother['last_name']).gsub(/\s+/, ' ')
-      father_name   = (father['first_name'] + " #{father['middle_name']} " + father['last_name']).gsub(/\s+/, ' ')
+      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}").gsub(/\s+/, ' ')
+      mother_name   = ("#{mother['first_name']} #{mother['middle_name']} #{mother['last_name']}").gsub(/\s+/, ' ')
+      father_name   = ("#{father['first_name']} #{father['middle_name']} #{father['last_name']}").gsub(/\s+/, ' ')
 
       results << {
-          'first_name'        => name,
+          'id' => data.person_id,
+          'name'        => name,
           'father_name'       => father_name,
           'mother_name'       => mother_name,
+          'status'            => Status.find(data.status_id).name, #.gsub(/DC\-|FC\-|HQ\-/, '')
           'date_of_reporting' => data['created_at'].to_date.strftime("%d/%b/%Y"),
       }
     end
+
+    results
   end
 
 end

@@ -4,5 +4,5 @@ class PersonRecordStatus < ActiveRecord::Base
     include EbrsAttribute
 
     belongs_to :person, foreign_key: "person_id"
-
+    belongs_to :status, foreign_key: "status_id"
 end
