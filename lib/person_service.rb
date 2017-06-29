@@ -51,16 +51,16 @@ module PersonService
       mother_foreigner_home_ta          = params[:person][:mother][:foreigner_home_ta]
       mother_estimated_dob	            =	params[:person][:mother][:birthdate_estimated]
 
-    mother_mode_of_delivery           = params[:person][:mode_of_delivery]
-    mother_level_of_education         = params[:person][:level_of_education]
+      mother_mode_of_delivery           = params[:person][:mode_of_delivery]
+      mother_level_of_education         = params[:person][:level_of_education]
 
     ################################ mother details (end) #######################################
 
     ########################### father details ########################################
 
  
-    informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
-    informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
+      informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
+      informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
 
       father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
       father_residential_country        = params[:person][:father][:residential_country]
@@ -289,7 +289,7 @@ module PersonService
           person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
     end
-         #informant_current_village.inspect
+          #informant_current_village.inspect
 
           PersonAddress.create(person_id: core_person_informant.id,
                            current_village: Location.where(name: informant_current_village).first.location_id,

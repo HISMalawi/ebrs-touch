@@ -1,7 +1,7 @@
 class DcController < ApplicationController
 
 def new_registration
-
+  raise application_mode.inspect
     @icoFolder = folder
 
     @section = "Register Person"

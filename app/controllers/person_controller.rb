@@ -205,6 +205,8 @@ class PersonController < ApplicationController
   end
 
   def new
+    
+
     if params[:id].blank?
       @person = PersonName.new
 

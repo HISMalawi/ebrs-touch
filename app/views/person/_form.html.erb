@@ -478,7 +478,7 @@
       <div class="field">
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
-        <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
+       <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
                 class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
       </div>
       <div class="field">
@@ -1078,12 +1078,15 @@
 
     function loadMothersDetails(){
 
+         console.log("Invoking the loadMother")
+
         if (__$("person_mother_first_name") && __$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
 
             __$("person_informant_first_name").value = __$("person_mother_first_name").value;
 
             __$("textForperson_informant_first_name").value = __$("person_mother_first_name").value;
-
+             
+             console.log("loadMothersDetails 1" + __$("person_informant_first_name").value)
         }
 
         if (__$("person_mother_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
