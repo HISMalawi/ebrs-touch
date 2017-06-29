@@ -1,4 +1,13 @@
-
+<style>
+    .action-buttons button , .action-buttons td {
+        margin: 0px;
+    }
+    .action-button {
+        margin: 0px;
+        padding: 0px;
+        height: 30px;
+    }
+</style>
 <div class='data-table-container'>
 
 <table id="example" class="display" cellspacing="0" width="100%">
@@ -9,7 +18,7 @@
       <% end %>
       <th style="text-align: left;min-width:16%;">Name</th>
       <th style="text-align: left;min-width:16%;">Mother's Details</th>
-      <th style="text-align: center; min-width:16%;">Father's Details</th>
+      <th style="text-align: left; min-width:16%;">Father's Details</th>
       <th style="text-align: center; min-width:16%;">Reporting Date</th>
       <th style="text-align: center;min-width: 10%;">Status</th>
       <th>&nbsp;</th>
@@ -21,20 +30,20 @@
           <td style="text-align: left;"><%= '' %></td>
         <% end %>
         <td style="text-align: left;"><%= record['name'] %></td>
-        <td style="text-align: left;">><%= record['mother_name'] %></td>
+        <td style="text-align: left;"><%= record['mother_name'] %></td>
         <td style="text-align: left;"><%= record['father_name'] %></td>
-        <td style="text-align: left;"><%= record['reporting_date'] %></td>
+        <td style="text-align: center;"><%= record['date_of_reporting'] %></td>
         <td style="text-align: center;"><%=  record['status']%></td>
-        <td>
-          <table style="width: 100%; text-align: center; border-style: none;">
+        <td style="background-color: white;">
+          <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
             <tr>
-              <td><a class="btn btn-info" onmoufsedown="javascript:alert();" href="/person/<%= record.id %>?next_path=view_record">
-                <%= image_tag "view.png", class: 'btn-images' %></a>
+              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.referrer%>'">
+                <%= image_tag "view.png", class: 'btn-images' %></button>
               </td>
-              <td><button class="btn btn-warning" onmousedown="javascript:alert();">
+              <td class="action-button"><button class="btn btn-warning" onmousedown="javascript:alert();">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>
                </td>
-              <td><button class="btn btn-success" onmousedown="javascript:alert();">
+              <td class="action-button"><button class="btn btn-success" onmousedown="javascript:alert();">
                 <%= image_tag "void.png", class: 'btn-images' %></button>
                </td>
             </tr>

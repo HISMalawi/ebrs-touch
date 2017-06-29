@@ -9,8 +9,10 @@ class PersonController < ApplicationController
 
   def show
 
-    person_mother_id = PersonRelationType.find_by_name("Child-Mother").id
-    person_father_id = PersonRelationType.find_by_name("Child-father").id
+    @targeturl = request.referrer
+    @section = "View Record"
+    person_mother_id = PersonRelationType.find_by_name("Mother").id
+    person_father_id = PersonRelationType.find_by_name("Father").id
     informant_type_id = PersonType.find_by_name("Informant").id
 
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
@@ -27,14 +29,17 @@ class PersonController < ApplicationController
 
     @person_name = PersonName.find_by_person_id(params[:id])
     @person = Person.find(params[:id])
+    @core_person = CorePerson.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     @person_record_status = PersonRecordStatus.find_by_person_id(params[:id])
+    @person_status = @person_record_status.status.name
+
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
 
     @mother = Person.find(mother_id)
     @mother_name = PersonName.find_by_person_id(mother_id)
     @mother_address = PersonAddress.find_by_person_id(mother_id)
 
-    @person_status = Status.find(@person_record_status.status_id).name.to_s.strip.upcase rescue nil
 
     @informant = Person.find(@informant_id)
     @informant_name = PersonName.find_by_person_id(@informant_id)
@@ -188,17 +193,30 @@ class PersonController < ApplicationController
             }
         ]
     }
+
+    @summaryHash = {
+      "Child Name" => "#{@person_name.first_name} #{@person_name.middle_name rescue nil} #{@person_name.last_name rescue nil}",
+      "Child Gender" => @person.gender,
+      "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
+      "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+      "Child's Mother " => "#{@mother_name.first_name rescue nil} #{@mother_name.middle_name rescue nil} #{@mother_name.last_name rescue nil}",
+      "Child's Father" =>  "#{@father_name.first_name rescue nil} #{@father_name.middle_name rescue nil} #{@father_name.last_name rescue nil}",
+      "Parents Married" => (@birth_details.parents_married_to_each_other == 1 ? 'Yes' : 'No'),
+      "Court order attached" => (@birth_details.court_order_attached == 1 ? 'Yes' : 'No'),
+      "Parents signed?" => ((@birth_details.parents_signed rescue -1) == 1 ? 'Yes' : 'No'),
+      "Delayed Registration" => ((@person.created_at.to_date - @person.birthdate.to_date).to_i > 42 ? 'Yes' : 'No')
+    }
+
+    if  (BirthRegistrationType.find(@person_details.birth_registration_type_id).name.upcase rescue nil) == 'ADOPTED'
+      @summaryHash["Adoptive Mother"] = nil
+      @summaryHash[ "Adoptive Father"] = nil
+      @summaryHash["Adoption Court Order"] = nil
+    end
+
     render :layout => "facility"
   end
 
   def records
-    person_type = PersonType.where(name: 'Client').first
-    @records = Person.where("p.person_type_id = ?",
-      person_type.id).joins("INNER JOIN core_person p ON person.person_id = p.person_id
-      INNER JOIN person_name n
-      ON n.person_id = p.person_id").group('n.person_id').select("person.*, n.*").order('p.created_at DESC')
-
-
     render :layout => 'data_table'
   end
 
@@ -341,7 +359,6 @@ class PersonController < ApplicationController
     end
   end
 
-
   def get_hospital
   
   nationality_tag = LocationTag.where(name: 'Health facility').first
@@ -369,8 +386,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
-
-    render :template => "person/records", :layout => "facility"
+    render :template => "person/records", :layout => "data_table"
   end
 
   #########################################################################

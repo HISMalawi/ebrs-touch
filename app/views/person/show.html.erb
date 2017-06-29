@@ -50,10 +50,71 @@
     border-radius: 50%;
     margin-left: 1.5%;
   }
+  #footerButtons{
+    margin-right: 0px !important;
+  }
+
+  #comment_popoup{
+      width: 45%;
+      height: 50%;
+      position: absolute;;
+      left: 25%;
+      top: 20%;
+      background: #eeeeef;
+      border-radius: 2%;
+      color: black;
+      box-shadow: 5px 5px 2px #888888;
+      visibility: hidden;
+  }
+  #title{
+      width: 98%;
+      margin:auto;
+      margin-top: 0.8%;
+      background: #345d8c;
+      font-size: 150%;
+      font-weight: bold;
+      color: #FFFFFF;
+      text-align: center;
+      padding-top: 2%;
+      padding-bottom: 2%;
+      border-top-right-radius: 7%;
+      border-top-left-radius: 7%;
+      border-bottom: 2px solid #d9d8d7;
+  }
+  #comment{
+      width: 98%;
+      height: 58%;
+      overflow-y: scroll;
+  }
+  #comment ul{
+      list-style-type: none;
+  }
+  #comment ul > li{
+      display: block;
+      background: #FFFFFF;
+      width:92%;
+      padding: 1.5%;
+      margin: auto;
+      margin-top: 0%;
+      border-radius: 3%;
+      padding-left: 2.5%;
+      border: 1px solid #d9d8d7;
+  }
+  #button{
+      width: 100%;
+      text-align: center;
+      padding: 5%;
+  }
 </style>
   </head>
   <body>
+  <div id="comment_popoup">
+    <div id="title">Record Comments</div>
+    <div id="comment">
 
+    </div>
+    <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
+  </div>
   <% @record.each do |group, person| %>
 
       <% r = 0 %>
@@ -113,19 +174,191 @@
   <fieldset>
 
   </fieldset>
+<div id="footerButtons" style="position: absolute; right:170px; width: 75%; bottom: 16.5px;padding: 0px;border: ">
+  <table style="padding: 0px; float: right;">
+    <tr>
 
-  <!-- % if @person_status == "DC-ACTIVE" # &&  (User.current_user.activities_by_level("DC").include?("Check completeness") || User.current_user.activities_by_level("DC").include?("Approve a child record"))  %>
+    <td>
+      <button id="btnViewComment"
+                 class="blue"
+                 style=""
+                 onclick="viewComment()">View Comment</button>
 
-      <!-- button id="btnViewComment"
-              class="blue"
-              style="position: absolute; right: 720px; bottom: 20px;"
-              onclick="viewComment()">View Comment</button>
+    </td>
+    <td>
+        <button id="btnReject"
+                class="red"
+                style=""
+                onclick="reject()">Reject</button>
+    </td>
+      <td style="display: nonde;">
+        <button id="btnComplete"
+                class="blue"
+                style=""
+                onclick="checkCompleteness()">Check Completeness</button>
+      </td>
+    <td style="display: nosne;">
+        <button id="btnApprove"
+                class="green"
+                style=""
+                onclick="approve();">Approve</button>
+    </td>
 
-  <!-- % end  %>
-  <!-- % if @person_status == "DC-ACTIVE" #&&
-      #User.current_user.activities_by_level("DC").include?("Check completeness") &&
-      #@child.request_status.to_s.strip.upcase == "ACTIVE"  && @child.approved == 'No'  %>
-      <!-- % #if @readonly == true % -->
+      <td style="display: nonse;">
+        <button id="btnQuery"
+                class="blue"
+                style=""
+                onclick="markPending();">Mark Pending</button>
+      </td>
+
+ </tr>
+</table>
+</div>
+
+  <script>
+
+      summaryHash = {};
+
+      <% @summaryHash.each do |k, v|%>
+        summaryHash['<%= k%>'] = '<%= (v.gsub(/\s+/, ' ').strip rescue v)%>';
+      <% end %>
+
+      console.log(summaryHash);
+      function checkCompleteness() {
+          $("#comment_popoup").css("visibility","hidden");
+
+          <%
+          if ['DC-ACTIVE'].include?(@person_status) %>
+            link = "window.location='/complete_case_comment/<%= params[:id] %>'";
+          <% end %>
+
+          submitSummary(link);
+      }
+
+      function submitSummary(action) {
+
+          showSpinner();
+
+          var msg = "";
+
+          var parent = document.createElement("div");
+
+          var div = document.createElement("div");
+          div.style.height = "380px";
+          div.style.width = "700px";
+
+          parent.appendChild(div);
+
+          var table = document.createElement("table");
+          table.style.width = "100%";
+
+          div.appendChild(table);
+
+          var tbody = document.createElement("tbody");
+
+          table.appendChild(tbody);
+
+          var keys = Object.keys(summaryHash);
+
+          for (var i = 0; i < keys.length; i++) {
+              var tr = document.createElement("tr");
+              tbody.appendChild(tr);
+              var td1 = document.createElement("th");
+              td1.align = "right";
+              td1.innerHTML = keys[i];
+              tr.appendChild(td1);
+              var td2 = document.createElement("td");
+              td2.innerHTML = ":";
+              tr.appendChild(td2);
+              var td3 = document.createElement("td");
+              var label =  summaryHash[keys[i]];
+
+
+              label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
+              if (label == '')
+                  label = "<span class='blank'>N/A</span>"
+              if (keys[i].match(/weight/i))
+                  label = label + " Kg"
+
+
+              td3.innerHTML = label;
+              tr.appendChild(td3);
+
+          }
+
+          var pos = checkCtrl(parent);
+
+          msg = parent.innerHTML;
+
+          hideSpinner();
+
+          var no_action = "window.location='/incomplete_case_comment/<%= params[:id] %>'";
+          showMsgForAction(msg, action, "600px", "Data Completeness Check", no_action);
+
+      }
+
+  function viewComment(){
+      showSpinner();
+
+      var msg = "";
+
+      var parent = document.createElement("div");
+
+      var div = document.createElement("div");
+      div.style.height = "300px";
+      div.style.width = "700px";
+
+
+
+      var table = document.createElement("table");
+      table.style.width = "100%";
+
+      div.appendChild(table);
+
+      var tbody = document.createElement("tbody");
+
+      table.appendChild(tbody);
+      jQuery.ajax({
+          type: "GET",
+          url: "/reasons_for_rejection/<%= @person.id %>",
+          data: "",
+          success: function(result){
+              $("#comment").empty();
+              if (result.trim() == "<ul></ul>")
+              {
+                  $("#comment").append("<ul><li>No comment(s) as of now </li></ul>");
+              }else {
+                  $("#comment").append(result);
+              }
+          }
+
+      });
+      parent.appendChild(div);
+      msg = parent.innerHTML;
+
+      hideSpinner();
+      $("#comment_popoup").css("visibility","visible");
+  }
+
+      function dismissComment(){
+          $("#comment_popoup").css("visibility","hidden");
+      }
+
+  </script>
+
+
+<!-- % if @person_status == "DC-ACTIVE" # &&  (User.current_user.activities_by_level("DC").include?("Check completeness") || User.current_user.activities_by_level("DC").include?("Approve a child record"))  %>
+
+  <!-- button id="btnViewComment"
+          class="blue"
+          style="position: absolute; right: 720px; bottom: 20px;"
+          onclick="viewComment()">View Comment</button>
+
+<!-- % end  %>
+<!-- % if @person_status == "DC-ACTIVE" #&&
+  #User.current_user.activities_by_level("DC").include?("Check completeness") &&
+  #@record.request_status.to_s.strip.upcase == "ACTIVE"  && @record.approved == 'No'  %>
+  <!-- % #if @readonly == true % -->
   <!-- button id="btnApprove"
           class="orange"
           style="position: absolute; right: 180px; bottom: 20px;">Check Completeness</button -->
@@ -140,8 +373,8 @@
 
   <!-- % if @person_status == "DC-ACTIVE" #&&
       #User.current_user.activities_by_level("DC").include?("Check completeness") &&
-      #(@child.request_status.to_s.strip.upcase == "IN-COMPLETE" || @child.request_status.to_s.strip.upcase == "PENDING" ) &&
-      #@child.approved == 'No'  %>
+      #(@record.request_status.to_s.strip.upcase == "IN-COMPLETE" || @record.request_status.to_s.strip.upcase == "PENDING" ) &&
+      #@record.approved == 'No'  %>
       <!-- % if @readonly == true % -->
   <!-- button id="btnApprove"
           class="orange"
@@ -155,12 +388,12 @@
 
   <!-- % end  % >
 
-  <!-- % if @child.record_status.to_s.strip.upcase == "DC OPEN" &&
+  <!-- % if @record.record_status.to_s.strip.upcase == "DC OPEN" &&
       User.current_user.activities_by_level("DC").include?("Check completeness") &&
-      (@child.request_status.to_s.strip.upcase == "ACTIVE" ||
-          @child.request_status.to_s.strip.upcase != "IN-COMPLETE") &&
-      @child.request_status.to_s.strip.upcase != "PENDING" &&
-      @child.approved == 'No'  %>
+      (@record.request_status.to_s.strip.upcase == "ACTIVE" ||
+          @record.request_status.to_s.strip.upcase != "IN-COMPLETE") &&
+      @record.request_status.to_s.strip.upcase != "PENDING" &&
+      @record.approved == 'No'  %>
 
       <!-- % if @readonly == true %>
           <button id="btnQuery"
@@ -180,12 +413,12 @@
 
   <!-- % end  %>
 
-  <!-- % if (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
+  <!-- % if (@record.record_status.to_s.strip.upcase == "DC OPEN" &&
       User.current_user.activities_by_level("DC").include?("Approve a child record") &&
-      (@child.request_status.to_s.strip.upcase == "COMPLETE" ||
-          @child.request_status.to_s.strip.upcase == 'REJECTED' ||
-          @child.request_status.to_s.strip.upcase == "GRANTED") &&
-      @child.approved == 'No' && record_complete?(@child) == true)  %>
+      (@record.request_status.to_s.strip.upcase == "COMPLETE" ||
+          @record.request_status.to_s.strip.upcase == 'REJECTED' ||
+          @record.request_status.to_s.strip.upcase == "GRANTED") &&
+      @record.approved == 'No' && record_complete?(@record) == true)  %>
 
 
 
@@ -227,10 +460,10 @@
           <!--% end %>
       <!-- % end %>
 
-    <!-- % elsif (@child.record_status.to_s.strip.upcase == "DC OPEN" &&
+    <!-- % elsif (@record.record_status.to_s.strip.upcase == "DC OPEN" &&
         User.current_user.activities_by_level("DC").include?("Approve a child record") &&
-        (@child.request_status.to_s.strip.upcase == 'PENDING') &&
-        @child.approved == 'No' && record_complete?(@child) == true)  %>
+        (@record.request_status.to_s.strip.upcase == 'PENDING') &&
+        @record.approved == 'No' && record_complete?(@record) == true)  %>
 
         <!-- % if @readonly == true %>
             <button id="btnApprove"
@@ -245,10 +478,10 @@
                     onclick="approve();">Approve</button>
         <!-- % end %>
 
-    <!-- % elsif @child.record_status.to_s.strip.upcase == "DC OPEN" &&
+    <!-- % elsif @record.record_status.to_s.strip.upcase == "DC OPEN" &&
         User.current_user.activities_by_level("DC").include?("Check completeness") &&
-        (@child.request_status.to_s.strip.upcase == "COMPLETE" || @child.request_status.to_s.strip.upcase == "REJECTED") &&
-        @child.approved == 'No' && record_complete?(@child) == false  %>
+        (@record.request_status.to_s.strip.upcase == "COMPLETE" || @record.request_status.to_s.strip.upcase == "REJECTED") &&
+        @record.approved == 'No' && record_complete?(@record) == false  %>
 
         <!-- % if @readonly == true %>
             <button id="btnApprove"
@@ -274,7 +507,7 @@
 
   <!-- % end % -->
 
-  <!-- % elsif @child.record_status.to_s.strip.upcase == "PRINTED"% -->
+  <!-- % elsif @record.record_status.to_s.strip.upcase == "PRINTED"% -->
   <!-- % if @readonly == true % -->
   <!-- button id="btnReopen"
           class="orange"
