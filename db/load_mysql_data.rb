@@ -243,7 +243,7 @@ person_types.each do |t|
   person_type = PersonType.create(
     person_type_id:   t.person_type_id,
     name:             t.name,
-    description:      t..description
+    description:      t.description
   )
   puts "Loading PersonType: #{person_type.name}"
 end
