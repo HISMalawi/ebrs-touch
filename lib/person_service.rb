@@ -146,7 +146,7 @@ module PersonService
 
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
+      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
       place_of_birth:                           Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_location_id:                        Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_weight:                             birth_weight,
@@ -474,7 +474,7 @@ module PersonService
       end
 
       if (child.birthdate.to_date.blank? rescue true)
-          return complete
+          return completegit
       end
 
       if child.gender.blank? || child.gender == 'N/A'
