@@ -5,6 +5,7 @@ module PersonService
   def self.create_record(params)
     
 
+
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
     desig              = params[:person][:informant][:designation] rescue nil
     birth_place_details_available     = params[:birth_place_details_available]
@@ -125,7 +126,7 @@ module PersonService
     number_of_children_born_still_alive       = params[:number_of_children_born_still_alive].to_i rescue 1
     details_of_father_known 	                = params[:details_of_father_known]
 
-    raise params.inspect
+    
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
@@ -146,7 +147,7 @@ module PersonService
 
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
+      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
       place_of_birth:                           Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_location_id:                        Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_weight:                             birth_weight,
@@ -170,72 +171,7 @@ module PersonService
     )
     
     ################################### recording mother details (start) ###############################################
-
-  if SETTINGS["application_mode"]=="FC" 
-
-      core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
-
-      person_mother = Person.create(person_id: core_person_mother.id,
-          gender: "F",
-          birthdate: (mother_birthdate.to_date rescue Date.today))
-
-      person_name_mother = PersonName.create(first_name: mother_first_name,
-          middle_name: mother_middle_name,
-          last_name: mother_last_name, person_id: core_person_mother.id)
-
-      PersonNameCode.create(person_name_id: person_name_mother.id,
-          first_name_code: mother_first_name.soundex,
-          last_name_code: mother_last_name.soundex,
-          middle_name_code: (mother_middle_name.soundex rescue nil))
-
-      PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-          person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
-
-
-      PersonAddress.create(person_id: core_person_mother.id,
-                           current_village: mother_foreigner_current_village,
-                           current_village_other: "",
-                           current_ta: mother_foreigner_current_ta,
-                           current_ta_other: "",
-                           current_district: mother_foreigner_current_district,
-                           current_district_other: "",
-                           home_village: mother_foreigner_home_village,
-                           home_village_other: "",
-                           home_ta: mother_foreigner_home_ta,
-                           home_ta_other: "",
-                           home_district: mother_foreigner_current_district,
-                           home_district_other: "",
-                           citizenship: Location.where(name: mother_residental_country).first.location_id,
-                           residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
-
-      if relationship_to_child == "Mother"
-
-        PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
-        informant_id = core_person_mother.id
-
-        PersonAddress.create(person_id: core_person_mother.id,
-                           current_village: Location.where(name: mother_current_village).first.location_id,
-                           current_village_other: "",
-                           current_ta: Location.where(name: mother_current_ta).first.location_id,
-                           current_ta_other: "",
-                           current_district: Location.find_by_name(mother_current_district).location_id,
-                           current_district_other: "",
-                           home_village: Location.where(name:mother_current_village).first.location_id,
-                           home_village_other: "",
-                           home_ta: Location.where(name:mother_current_ta).first.location_id,
-                           citizenship: Location.where(name: 'Malawi').first.location_id,
-                           residential_country: Location.where(name: 'Malawi').first.location_id)
-         
-      elsif relationship_to_child == "Father"
-          
-
-      end
-
-
-
-  else
-
+     
     if (parents_details_available == "Both" || parents_details_available == "Mother" || !mother_birthdate.blank?)
 
       core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
@@ -257,7 +193,7 @@ module PersonService
           person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
 
 
-      PersonAddress.create(person_id: core_person_mother.id,
+            PersonAddress.create(person_id: core_person_mother.id,
                            current_village: mother_foreigner_current_village,
                            current_village_other: "",
                            current_ta: mother_foreigner_current_ta,
@@ -386,11 +322,8 @@ module PersonService
         
 
     ########################################Person address details(end) ###############################################
-  end
 
     return @person
-
-
 
   end
 
@@ -474,7 +407,7 @@ module PersonService
       end
 
       if (child.birthdate.to_date.blank? rescue true)
-          return completegit
+          return complete
       end
 
       if child.gender.blank? || child.gender == 'N/A'
