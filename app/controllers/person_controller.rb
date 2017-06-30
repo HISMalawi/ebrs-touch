@@ -242,6 +242,7 @@ class PersonController < ApplicationController
     type_of_birth = params[:person][:type_of_birth]
     @person = PersonService.create_record(params)
     if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
+      #raise params.inspect
       redirect_to "/person/new?id=#{@person.id}"
     else
       redirect_to '/'

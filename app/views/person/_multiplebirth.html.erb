@@ -52,12 +52,13 @@
        <!-- %= f.hidden_field :multiple_birth_id %-->
        <input type="hidden" name="registration_type" id="registration_type" />
 
-       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
+       <input id="person_relationship" name="person[relationship]" valu%e="normal" type="hidden"/>
       
        <input name="relationship" value="normal" type="hidden"/>
-      
 
-       <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= @person[:mother][:last_name] rescue nil %>" />
+       
+      <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= @person_mother_last_name rescue nil %>" />
+
        <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" value="<%= @person[:mother][:first_name] rescue nil %>" />
        <input type="hidden" id="person_mother_middle_name"  name="person[mother][middle_name]" value="<%= @person[:mother][:middle_name] rescue nil %>" />
        <input type="hidden" id="person_mother_id_number" name="person[mother][id_number]" value="<%= @person[:mother][:id_number] rescue nil %>" />
