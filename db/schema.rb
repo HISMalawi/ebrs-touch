@@ -258,14 +258,16 @@ ActiveRecord::Schema.define(version: 1) do
   add_index "person_name_code", ["person_name_id"], name: "fk_person_name_code_1_idx", using: :btree
 
   create_table "person_record_statuses", primary_key: "person_record_status_id", force: :cascade do |t|
-    t.integer  "status_id",   limit: 4,   null: false
-    t.integer  "person_id",   limit: 4,   null: false
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+    t.integer  "status_id",   limit: 4,     null: false
+    t.integer  "person_id",   limit: 4,     null: false
+    t.integer  "creator",     limit: 4,     null: false
     t.integer  "voided",      limit: 1
     t.string   "void_reason", limit: 100
     t.integer  "voided_by",   limit: 4
     t.datetime "date_voided"
+    t.text     "comments",    limit: 65535
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
   add_index "person_record_statuses", ["person_id"], name: "fk_person_record_statuses_1_idx", using: :btree
