@@ -71,8 +71,8 @@ module PersonService
       father_residental_country         = params[:person][:father][:residential_country]
       father_foreigner_home_village     = params[:person][:father][:foreigner_home_village]
       father_foreigner_home_ta          = params[:person][:father][:foreigner_home_ta]
-      father_lastname                   = params[:person][:father][:last_name]
-      father_firstname                  = params[:person][:father][:first_name]
+      father_last_name                   = params[:person][:father][:last_name]
+      father_first_name                  = params[:person][:father][:first_name]
       father_middlename                 = params[:person][:father][:middle_name]
       father_birthdate                  = params[:person][:father][:birthdate]
       father_citizenship                = params[:person][:father][:citizenship]
@@ -97,17 +97,7 @@ module PersonService
     informant_addressline1            = params[:person][:informant][:addressline1]
     informant_addressline2            = params[:person][:informant][:addressline2]
     informant_phone_number            = params[:person][:informant][:phone_number]
-     
-    informant_last_name               = params[:person][:informant][:last_name]
-    informant_first_name              = params[:person][:informant][:first_name]
-    informant_middle_name             = params[:person][:informant][:middle_name]
-    informant_relationship_to_child   = params[:person][:informant][:relationship_to_child]
-    informant_current_district        = params[:person][:informant][:current_district]
-    informant_current_ta              = params[:person][:informant][:current_ta]
-    informant_current_village         = params[:person][:informant][:current_village]
-    informant_addressline1            = params[:person][:informant][:addressline1]
-    informant_addressline2            = params[:person][:informant][:addressline2]
-    informant_phone_number            = params[:person][:informant][:phone_number]
+
     informant_form_signed             = params[:person][:form_signed]
 
 
@@ -127,6 +117,11 @@ module PersonService
     details_of_father_known 	                = params[:details_of_father_known]
 
     
+  ################################################## Recording client details #####################################
+ 
+ if SETTINGS["application_mode"] == "FC"
+
+
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
@@ -169,163 +164,398 @@ module PersonService
       adoption_court_order:                     0,
 
     )
+
+
+
+############################################## Client details end ####################################################
+
+
+############################################# recording mother details ##############################################
+ 
+ if !mother_first_name.blank?
+
+ core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
+
+       person_mother = Person.create(person_id: core_person_mother.id,
+                    gender: "F",
+                    birthdate: (mother_birthdate.to_date rescue Date.today))
+
+       person_name_mother = PersonName.create(first_name: mother_first_name,
+                    middle_name: mother_middle_name,
+                    last_name: mother_last_name, person_id: core_person_mother.id)
+
+       PersonNameCode.create(person_name_id: person_name_mother.id,
+                    first_name_code: mother_first_name.soundex,
+                    last_name_code: mother_last_name.soundex,
+                    middle_name_code: (mother_middle_name.soundex rescue nil))
+
+       PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+                    person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+
+
+       PersonAddress.create(person_id: core_person_mother.id,
+                    current_village: mother_foreigner_current_village,
+                    current_village_other: "",
+                    current_ta: mother_foreigner_current_ta,
+                    current_ta_other: "",
+                    current_district: mother_foreigner_current_district,
+                    current_district_other: "",
+                    home_village: mother_foreigner_home_village,
+                    home_village_other: "",
+                    home_ta: mother_foreigner_home_ta,
+                    home_ta_other: "",
+                    home_district: mother_foreigner_current_district,
+                    home_district_other: "",
+                    citizenship: Location.where(name: mother_residental_country).first.location_id,
+                    residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
+
+
     
-    ################################### recording mother details (start) ###############################################
-     
-    if (parents_details_available == "Both" || parents_details_available == "Mother" || !mother_birthdate.blank?)
-
-      core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
-
-      person_mother = Person.create(person_id: core_person_mother.id,
-          gender: "F",
-          birthdate: (mother_birthdate.to_date rescue Date.today))
-
-      person_name_mother = PersonName.create(first_name: mother_first_name,
-          middle_name: mother_middle_name,
-          last_name: mother_last_name, person_id: core_person_mother.id)
-
-      PersonNameCode.create(person_name_id: person_name_mother.id,
-          first_name_code: mother_first_name.soundex,
-          last_name_code: mother_last_name.soundex,
-          middle_name_code: (mother_middle_name.soundex rescue nil))
-
-      PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-          person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+end
+#############################################################################################################################
 
 
-            PersonAddress.create(person_id: core_person_mother.id,
-                           current_village: mother_foreigner_current_village,
-                           current_village_other: "",
-                           current_ta: mother_foreigner_current_ta,
-                           current_ta_other: "",
-                           current_district: mother_foreigner_current_district,
-                           current_district_other: "",
-                           home_village: mother_foreigner_home_village,
-                           home_village_other: "",
-                           home_ta: mother_foreigner_home_ta,
-                           home_ta_other: "",
-                           home_district: mother_foreigner_current_district,
-                           home_district_other: "",
-                           citizenship: Location.where(name: mother_residental_country).first.location_id,
-                           residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
-    end
+########################################## Recording father details #################################################
+    if !father_first_name.blank?
 
-    ################################### recording mother details (end)   ###############################################
 
-    ################################### recording father details (start) ###############################################
-    if(details_of_father_known == "Yes" || parents_details_available == "Both" ||
-        parents_details_available == "Father" || !father_birthdate.blank?)
 
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
-      person_father = Person.create(person_id: core_person_father.id,
-          gender: "M",
-          birthdate: (father_birthdate.to_date rescue Date.today))
+            person_father = Person.create(person_id: core_person_father.id,
+                gender: "M",
+                birthdate: (father_birthdate.to_date rescue Date.today))
 
-      person_name_father = PersonName.create(first_name: father_firstname,
-          middle_name: (father_middlename rescue nil),
-          last_name: father_lastname, person_id: core_person_father.id)
+            person_name_father = PersonName.create(first_name: father_first_name,
+                middle_name: (father_middlename rescue nil),
+                last_name: father_last_name, person_id: core_person_father.id)
 
-      PersonNameCode.create(person_name_id: person_name_father.id,
-          first_name_code: father_firstname.soundex,
-          last_name_code: father_lastname.soundex,
-          middle_name_code: (father_middlename.soundex rescue nil))
+            PersonNameCode.create(person_name_id: person_name_father.id,
+                first_name_code: father_first_name.soundex,
+                last_name_code: father_last_name.soundex,
+                middle_name_code: (father_middlename.soundex rescue nil))
 
-      PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
-          person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+            PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+                person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
-            PersonAddress.create(person_id: core_person_father.id,
-                           current_village: father_foreigner_current_village,
-                           current_village_other: "",
-                           current_ta: father_foreigner_current_ta,
-                           current_ta_other: "",
-                           current_district: father_foreigner_current_district,
-                           current_district_other: "",
-                           home_village: father_foreigner_home_village,
-                           home_village_other: "",
-                           home_ta: father_foreigner_home_ta,
-                           home_ta_other: "",
-                           home_district: father_foreigner_current_district,
-                           home_district_other: "",
-                           citizenship: Location.where(name: father_residental_country).first.location_id,
-                           residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
+                  PersonAddress.create(person_id: core_person_father.id,
+                                 current_village: father_foreigner_current_village,
+                                 current_village_other: "",
+                                 current_ta: father_foreigner_current_ta,
+                                 current_ta_other: "",
+                                 current_district: father_foreigner_current_district,
+                                 current_district_other: "",
+                                 home_village: father_foreigner_home_village,
+                                 home_village_other: "",
+                                 home_ta: father_foreigner_home_ta,
+                                 home_ta_other: "",
+                                 home_district: father_foreigner_current_district,
+                                 home_district_other: "",
+                                 citizenship: Location.where(name: father_residental_country).first.location_id,
+                                 residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
 
+
+          
     end
-    ################################### recording father details (end)   ###############################################
-    
-    ################################### recording informant details (start) ############################################
+   ############################################# father details end ###########################################################
+
+   ######################################### Recording informant details #############################################
     
     if (informant_same_as_mother == "Yes")
 
-        PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
-        informant_id = core_person_mother.id
+       raise "informant same as mother? yes!".inspect
+
+              PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+              person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
+              informant_id = core_person_mother.id
+
+      PersonAddress.create(person_id: core_person_mother.id,
+                                 current_village: Location.where(name: mother_current_village).first.location_id,
+                                 current_village_other: "",
+                                 current_ta: Location.where(name: mother_current_ta).first.location_id,
+                                 current_ta_other: "",
+                                 current_district: Location.find_by_name(mother_current_district).location_id,
+                                 current_district_other: "",
+                                 home_village: Location.where(name:mother_current_village).first.location_id,
+                                 home_village_other: "",
+                                 home_ta: Location.where(name:mother_current_ta).first.location_id,
+                                 citizenship: Location.where(name: 'Malawi').first.location_id,
+                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+              
     elsif (informant_same_as_father == "Yes")
 
-        PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
-        informant_id = core_person_father.id
-    else
+              PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+              person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+              informant_id = core_person_father.id
 
-      core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
-      informant_id = core_person_informant.id
-      person_informant = Person.create(person_id: core_person_informant.id,
-          gender: "N/A",
-          birthdate: ("1900-01-01".to_date))
+          PersonAddress.create(person_id: core_person_father.id,
+                                 current_village: Location.where(name: father_current_village).first.location_id,
+                                 current_village_other: "",
+                                 current_ta: Location.where(name: father_current_ta).first.location_id,
+                                 current_ta_other: "",
+                                 current_district: Location.find_by_name(father_current_district).location_id,
+                                 current_district_other: "",
+                                 home_village: Location.where(name:father_current_village).first.location_id,
+                                 home_village_other: "",
+                                 home_ta: Location.where(name:father_current_ta).first.location_id,
+                                 citizenship: Location.where(name: 'Malawi').first.location_id,
+                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+          
+   elsif !informant_first_name.blank?
 
-      #raise informant_first_name.inspect
+            core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
+            informant_id = core_person_informant.id
+            person_informant = Person.create(person_id: core_person_informant.id,
+                gender: "N/A",
+                birthdate: ("1900-01-01".to_date))
 
-      person_name_informant = PersonName.create(first_name: informant_first_name,
-          middle_name: (informant_middle_name rescue nil),
-          last_name: informant_last_name, person_id: core_person_informant.id)
-      begin
+            #raise informant_first_name.inspect
 
-        PersonNameCode.create(person_name_id: person_name_informant.id,
-          first_name_code: informant_first_name.soundex,
-          last_name_code: informant_last_name.soundex,
-          middle_name_code: (informant_middle_name.soundex rescue nil))
-      rescue
+            person_name_informant = PersonName.create(first_name: informant_first_name,
+                middle_name: (informant_middle_name rescue nil),
+                last_name: informant_last_name, person_id: core_person_informant.id)
+            begin
 
-      end
+              PersonNameCode.create(person_name_id: person_name_informant.id,
+                first_name_code: informant_first_name.soundex,
+                last_name_code: informant_last_name.soundex,
+                middle_name_code: (informant_middle_name.soundex rescue nil))
+            rescue
 
-      PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
-          person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
+            end
 
-    end
-          informant_current_village.inspect
+            PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
+                person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
-          PersonAddress.create(person_id: core_person_informant.id,
-                           current_village: Location.where(name: informant_current_village).first.location_id,
-                           current_village_other: "",
-                           current_ta: Location.where(name: informant_current_ta).first.location_id,
-                           current_ta_other: "",
-                           current_district: Location.find_by_name(informant_current_district).location_id,
-                           current_district_other: "",
-                           home_village: Location.where(name:informant_current_village).first.location_id,
-                           home_village_other: "",
-                           home_ta: Location.where(name:informant_current_ta).first.location_id,
-                           citizenship: Location.where(name: 'Malawi').first.location_id,
-                           residential_country: Location.where(name: 'Malawi').first.location_id)
+            PersonAddress.create(person_id: core_person_informant.id,
+                                 current_village: Location.where(name: informant_current_village).first.location_id,
+                                 current_village_other: "",
+                                 current_ta: Location.where(name: informant_current_ta).first.location_id,
+                                 current_ta_other: "",
+                                 current_district: Location.find_by_name(informant_current_district).location_id,
+                                 current_district_other: "",
+                                 home_village: Location.where(name:informant_current_village).first.location_id,
+                                 home_village_other: "",
+                                 home_ta: Location.where(name:informant_current_ta).first.location_id,
+                                 citizenship: Location.where(name: 'Malawi').first.location_id,
+                                 residential_country: Location.where(name: 'Malawi').first.location_id)
 
-    ################################### recording informant details (end) ############################################
-    #################################### person status record ####################################################
+   end
+               
+
+
+
+   ############################################## Informant details end #############################################
+   
+   ############################################### Person record Status ###############################################
+
+    PersonRecordStatus.create(status_id: Status.where(name: 'DC-Complete').last.id, person_id: core_person.id)
+   
+   ####################################################################################################################  
+
+elsif SETTINGS["application_mode"] == "DC"
+
+  ################################################### Client details ############################################
+
+   core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
+
+    @person = Person.create(person_id: core_person.id, 
+      gender: gender.first, 
+      birthdate: (birthdate.to_date rescue Date.today))
+
+    person_name = PersonName.create(first_name: first_name, 
+      middle_name: middle_name,
+      last_name: last_name, person_id: core_person.id)
+
+    PersonNameCode.create(person_name_id: person_name.id,
+      first_name_code: first_name.soundex,
+      last_name_code: last_name.soundex,
+      middle_name_code: (middle_name.soundex rescue nil))
+
+     
+
+    PersonBirthDetail.create(
+      person_id:                                core_person.id,
+      birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
+      place_of_birth:                           Location.where(location_id: SETTINGS['location_id']).first.location_id,
+      birth_location_id:                        Location.where(location_id: SETTINGS['location_id']).first.location_id,
+      birth_weight:                             birth_weight,
+      type_of_birth:                            (PersonTypeOfBirth.where(name: type_of_birth).first.id rescue 1),
+      parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
+      date_of_marriage:                         (date_of_marriage.to_date rescue nil),
+      gestation_at_birth:                       (gestation_at_birth.to_f rescue nil),
+      number_of_prenatal_visits:                (number_of_prenatal_visits.to_i rescue nil),
+      month_prenatal_care_started:              (month_prenatal_care_started.to_i rescue nil),
+      mode_of_delivery_id:                      (ModeOfDelivery.where(name: mother_mode_of_delivery).first.id rescue 1),
+      number_of_children_born_alive_inclusive:  (number_of_children_born_alive_inclusive),
+      number_of_children_born_still_alive:      (number_of_children_born_still_alive),
+      level_of_education_id:                    (LevelOfEducation.where(name: mother_level_of_education).first.id rescue 1),
+      district_id_number:                       nil,     
+      national_serial_number:                   nil,
+      court_order_attached:                     (court_order_attached == 'No' ? 0 : 1),
+      acknowledgement_of_receipt_date:          (acknowledgement_of_receipt_date.to_date rescue nil),
+      facility_serial_number:                   nil,
+      adoption_court_order:                     0,
+
+    )
+
+############################################## Client details end ####################################################
+
+          ################################### recording mother details (start) ###############################################
+           
+          if (parents_details_available == "Both" || parents_details_available == "Mother" || !mother_birthdate.blank?)
+
+            core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
+
+            person_mother = Person.create(person_id: core_person_mother.id,
+                gender: "F",
+                birthdate: (mother_birthdate.to_date rescue Date.today))
+
+            person_name_mother = PersonName.create(first_name: mother_first_name,
+                middle_name: mother_middle_name,
+                last_name: mother_last_name, person_id: core_person_mother.id)
+
+            PersonNameCode.create(person_name_id: person_name_mother.id,
+                first_name_code: mother_first_name.soundex,
+                last_name_code: mother_last_name.soundex,
+                middle_name_code: (mother_middle_name.soundex rescue nil))
+
+            PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+                person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+
+
+                  PersonAddress.create(person_id: core_person_mother.id,
+                                 current_village: mother_foreigner_current_village,
+                                 current_village_other: "",
+                                 current_ta: mother_foreigner_current_ta,
+                                 current_ta_other: "",
+                                 current_district: mother_foreigner_current_district,
+                                 current_district_other: "",
+                                 home_village: mother_foreigner_home_village,
+                                 home_village_other: "",
+                                 home_ta: mother_foreigner_home_ta,
+                                 home_ta_other: "",
+                                 home_district: mother_foreigner_current_district,
+                                 home_district_other: "",
+                                 citizenship: Location.where(name: mother_residental_country).first.location_id,
+                                 residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
+          end
+
+          ################################### recording mother details (end)   ###############################################
+
+          ################################### recording father details (start) ###############################################
+          if(details_of_father_known == "Yes" || parents_details_available == "Both" ||
+              parents_details_available == "Father" || !father_birthdate.blank?)
+
+            core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
+
+            person_father = Person.create(person_id: core_person_father.id,
+                gender: "M",
+                birthdate: (father_birthdate.to_date rescue Date.today))
+
+            person_name_father = PersonName.create(first_name: father_first_name,
+                middle_name: (father_middlename rescue nil),
+                last_name: father_last_name, person_id: core_person_father.id)
+
+            PersonNameCode.create(person_name_id: person_name_father.id,
+                first_name_code: father_first_name.soundex,
+                last_name_code: father_last_name.soundex,
+                middle_name_code: (father_middlename.soundex rescue nil))
+
+            PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+                person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+
+                  PersonAddress.create(person_id: core_person_father.id,
+                                 current_village: father_foreigner_current_village,
+                                 current_village_other: "",
+                                 current_ta: father_foreigner_current_ta,
+                                 current_ta_other: "",
+                                 current_district: father_foreigner_current_district,
+                                 current_district_other: "",
+                                 home_village: father_foreigner_home_village,
+                                 home_village_other: "",
+                                 home_ta: father_foreigner_home_ta,
+                                 home_ta_other: "",
+                                 home_district: father_foreigner_current_district,
+                                 home_district_other: "",
+                                 citizenship: Location.where(name: father_residental_country).first.location_id,
+                                 residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
+
+          end
+          ################################### recording father details (end)   ###############################################
+          
+          ################################### recording informant details (start) ############################################
+          
+          if (informant_same_as_mother == "Yes")
+
+              PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
+              person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
+              informant_id = core_person_mother.id
+          elsif (informant_same_as_father == "Yes")
+
+              PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
+              person_relationship_type_id: PersonRelationType.where(name: 'Child-Informant').first.id)
+              informant_id = core_person_father.id
+          else
+
+            core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
+            informant_id = core_person_informant.id
+            person_informant = Person.create(person_id: core_person_informant.id,
+                gender: "N/A",
+                birthdate: ("1900-01-01".to_date))
+
+            #raise informant_first_name.inspect
+
+            person_name_informant = PersonName.create(first_name: informant_first_name,
+                middle_name: (informant_middle_name rescue nil),
+                last_name: informant_last_name, person_id: core_person_informant.id)
+            begin
+
+              PersonNameCode.create(person_name_id: person_name_informant.id,
+                first_name_code: informant_first_name.soundex,
+                last_name_code: informant_last_name.soundex,
+                middle_name_code: (informant_middle_name.soundex rescue nil))
+            rescue
+
+            end
+
+            PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
+                person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
+
+          end
+               
+
+                PersonAddress.create(person_id: core_person_informant.id,
+                                 current_village: Location.where(name: informant_current_village).first.location_id,
+                                 current_village_other: "",
+                                 current_ta: Location.where(name: informant_current_ta).first.location_id,
+                                 current_ta_other: "",
+                                 current_district: Location.find_by_name(informant_current_district).location_id,
+                                 current_district_other: "",
+                                 home_village: Location.where(name:informant_current_village).first.location_id,
+                                 home_village_other: "",
+                                 home_ta: Location.where(name:informant_current_ta).first.location_id,
+                                 citizenship: Location.where(name: 'Malawi').first.location_id,
+                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+
+          ################################### recording informant details (end) ############################################
+          #################################### person status record ####################################################
+          
+          
+               PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
     
-    if(SETTINGS["application_mode"]== "DC")
-         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
-    else
-         PersonRecordStatus.create(status_id: Status.where(name: 'DC-Complete').last.id, person_id: core_person.id)
-
-    end
-
-    #################################### Person status record (end) ##############################################
-    ####################################### person address details ###############################################
         
+          #################################### Person status record (end) ##############################################
+          ####################################### person address details ###############################################
+              
 
-    ########################################Person address details(end) ###############################################
-
+          ########################################Person address details(end) ###############################################
+   
+ end
+     
     return @person
 
-  end
+end
 
   def self.mother(person_id)
     result = nil

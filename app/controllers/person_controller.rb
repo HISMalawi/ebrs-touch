@@ -231,7 +231,7 @@ class PersonController < ApplicationController
       @section = "New Person"
     else
       @person = PersonBirthDetail.find_by_person_id(params[:id])
-      @person_name = PersonName.find_by_person_name_id(params[:id])
+      @person_name = PersonName.find_by_person_id(params[:id])
       #raise params[:id].inspect
     end
 
@@ -241,8 +241,10 @@ class PersonController < ApplicationController
   def create
     type_of_birth = params[:person][:type_of_birth]
     @person = PersonService.create_record(params)
+  
+
     if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
-      #raise params.inspect
+      
       redirect_to "/person/new?id=#{@person.id}"
     else
       redirect_to '/'
