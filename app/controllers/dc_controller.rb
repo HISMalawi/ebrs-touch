@@ -124,4 +124,16 @@ end
     end
   end
 
+  def comments
+    messages = PersonRecordStatus.where("person_id = #{params[:id]} AND COALESCE(comments, '') != '' ").order("created_at DESC")
+    msg ="<ul>"
+
+    messages.each do |message|
+      user = User.find(message.creator)
+      msg = "#{msg}<li>User: #{user.username},  Message: #{message.comments},  Date : #{message.created_at.strftime('%e/%b/%Y')}</li>"
+    end
+    msg = "#{msg}</ul>"
+    render :text => msg
+  end
+
 end

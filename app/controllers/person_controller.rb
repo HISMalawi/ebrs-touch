@@ -465,6 +465,15 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def view_approved_cases
+    @states = Status.where("name like 'HQ-%' ").map(&:name) - ["HQ-REJECTED"]
+    @section = "Approved Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
   def view_dispatched_cases
     @states = ["HQ-DISPATCHED"]
     @section = "Voided Cases"

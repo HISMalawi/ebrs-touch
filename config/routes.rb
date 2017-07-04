@@ -102,6 +102,7 @@ Rails.application.routes.draw do
   get "/reject_case" => "dc#reject_case"
 
   get "/view_cases" => "person#view_cases"
+  get "/view_approved_cases" => "person#view_approved_cases"
   get "/view_pending_cases" => "person#view_pending_cases"
   get "/view_rejected_cases" => "person#view_rejected_cases"
   get "/view_hq_rejected_cases" => "person#view_hq_rejected_cases"
@@ -110,6 +111,9 @@ Rails.application.routes.draw do
   get "/view_voided_cases" => "person#view_voided_cases"
   get "/view_dispatched_cases" => "person#view_dispatched_cases"
   get "/ajax_approve/:id" => "dc#ajax_approve"
+
+
+  get "/comments/:id" => 'dc#comments'
 
   resources :person
 

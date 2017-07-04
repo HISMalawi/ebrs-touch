@@ -38,6 +38,12 @@ class PersonRecordStatus < ActiveRecord::Base
       SELECT COUNT(*) c FROM person_record_statuses WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
     end
 
+    excluded_states = ['HQ-REJECTED'].collect{|s| Status.find_by_name(s).id}
+      included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
+
+    result['APPROVED BY ADR'] =  self.find_by_sql("
+      SELECT COUNT(*) c FROM person_record_statuses
+      WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')}) AND status_id IN (#{included_states.join(', ')})")[0]['c']
     result
   end
 end
