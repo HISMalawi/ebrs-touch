@@ -226,7 +226,7 @@
       console.log(summaryHash);
       function checkCompleteness() {
           $("#comment_popoup").css("visibility","hidden");
-
+          link = "window.location='/complete_case_comment/<%= params[:id] %>'";
           <%
           if ['DC-ACTIVE'].include?(@person_status) %>
             link = "window.location='/complete_case_comment/<%= params[:id] %>'";

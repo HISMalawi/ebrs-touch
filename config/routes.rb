@@ -95,6 +95,12 @@ Rails.application.routes.draw do
   get "/incomplete_case_comment/:id" => "dc#incomplete_case_comment"
   get "/complete_case_comment/:id" => "dc#complete_case_comment"
   get "/incomplete_case" => "dc#incomplete_case"
+  get "/view_cases" => "person#view_cases"
+  get "/view_pending_cases" => "person#view_pending_cases"
+  get "/view_rejected_cases" => "person#view_rejected_cases"
+  get "/view_printed_cases" => "person#view_printed_cases"
+  get "/view_voided_cases" => "person#view_voided_cases"
+  get "/view_dispatched_cases" => "person#view_dispatched_cases"
 
   resources :person
 

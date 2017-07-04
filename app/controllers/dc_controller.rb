@@ -54,20 +54,9 @@ end
 
   def complete_case_comment
 
-    @child_id = params[:id]
+    PersonRecordStatus.new_record_state(params[:id], 'DC-COMPLETE', params[:reason])
 
-    child = Child.find(@child_id)
-
-    if child.request_status == "ACTIVE"
-      redirect_to "/check_completeness/#{child.id}" and return
-    else
-      @form_action = "/check_completeness/#{@child_id}"
-
-      @section = "Completeness Comment"
-
-      render :layout => "touch"
-
-    end
+    redirect_to "/view_cases"
 
   end
 
@@ -78,7 +67,7 @@ end
     if User.current.user_role.role.role.downcase == 'adr'
       redirect_to "/view_complete_cases"
     else
-      redirect_to "/view_incomplete_cases"
+      redirect_to "/view_cases"
     end
   end
 

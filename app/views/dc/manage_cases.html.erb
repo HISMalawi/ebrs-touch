@@ -22,7 +22,33 @@
 				</table>
 			</div>
 			     
- <% elsif @folders.include?("Active Records") %>
+ <% end %>
+
+
+
+ <% if @folders.include?("View Incomplete Cases") %>
+
+    <div class="button child_menu manage_cases  " onclick="window.location = '/view_incomplete_cases'" tag=0 title="View Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Incomplete Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Records marked incomplete by LO.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+ <% if @folders.include?("Active Records") %>
 
     <div class="button child_menu manage_cases  " onclick="window.location = '/view_cases'" tag=0 title="View Cases">
       <table style="text-align: left;">
@@ -113,7 +139,7 @@
 
 <% if @folders.include?("View Printed Records") %>
 
-    <div class="button child_menu manage_cases" onclick="window.location = '/view_closed_cases'" tag=0 title="View Closed Cases">
+    <div class="button child_menu manage_cases" onclick="window.location = '/view_printed_cases'" tag=0 title="View Printed Cases">
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
@@ -147,7 +173,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            View voided cases.
+            Records voided at DC.
           </td>
         </tr>
       </table>
