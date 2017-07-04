@@ -1,0 +1,14 @@
+ <%= form_tag("#{@form_action}", method: "get") do %>
+ <input name="id" type="hidden" value="<%= @child.id %>">
+<fieldset>
+	 <legend><font size='5' style='border: 2px;'>Enter Reason for Rejecting Case</font></legend>
+	 <div class="field">
+	 		<label for="reason">Enter reason: </label>
+	 		<input id="reason" name="reason">
+	 </div>
+</fieldset>
+<% end %>
+<script type="text/javascript">
+	init();
+	$("#reason").css("height : 300px;")
+</script>

@@ -174,41 +174,44 @@
   <fieldset>
 
   </fieldset>
+
+  <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+  %>
 <div id="footerButtons" style="position: absolute; right:170px; width: 75%; bottom: 16.5px;padding: 0px;border: ">
   <table style="padding: 0px; float: right;">
     <tr>
 
-    <td>
+    <td id="View Comments" style="display:<%= display%>;">
       <button id="btnViewComment"
                  class="blue"
                  style=""
-                 onclick="viewComment()">View Comment</button>
+                 onclick="viewComment()">View Comments</button>
 
     </td>
-    <td>
+    <td id="Reject" style="display:<%= display%>;">
         <button id="btnReject"
                 class="red"
                 style=""
                 onclick="reject()">Reject</button>
     </td>
-      <td style="display: nonde;">
+      <td id="Check Completeness" style="display:<%= display%>;">
         <button id="btnComplete"
                 class="blue"
                 style=""
                 onclick="checkCompleteness()">Check Completeness</button>
       </td>
-    <td style="display: nosne;">
+    <td id="Approve" style="display:<%= display%>;">
         <button id="btnApprove"
                 class="green"
                 style=""
                 onclick="approve();">Approve</button>
     </td>
 
-      <td style="display: nonse;">
+      <td id="Mark Pending" style="display:<%= display%>;">
         <button id="btnQuery"
                 class="blue"
                 style=""
-                onclick="markPending();">Mark Pending</button>
+                onclick="pending();">Mark Pending</button>
       </td>
 
  </tr>
@@ -217,6 +220,11 @@
 
   <script>
 
+    <% (@actions || []).each do |action|
+      next if (SETTINGS['enable_role_privileges'] == false)
+    %>
+        __$('<%= action['button_name']%>').style.display = 'table-cell';
+    <% end %>
       summaryHash = {};
 
       <% @summaryHash.each do |k, v|%>
@@ -226,7 +234,7 @@
       console.log(summaryHash);
       function checkCompleteness() {
           $("#comment_popoup").css("visibility","hidden");
-
+          link = "window.location='/complete_case_comment/<%= params[:id] %>'";
           <%
           if ['DC-ACTIVE'].include?(@person_status) %>
             link = "window.location='/complete_case_comment/<%= params[:id] %>'";
@@ -318,9 +326,10 @@
       var tbody = document.createElement("tbody");
 
       table.appendChild(tbody);
+
       jQuery.ajax({
           type: "GET",
-          url: "/reasons_for_rejection/<%= @person.id %>",
+          url: "/comments/<%= @person.id %>",
           data: "",
           success: function(result){
               $("#comment").empty();
@@ -344,6 +353,27 @@
           $("#comment_popoup").css("visibility","hidden");
       }
 
+     function approve(){
+         jQuery.ajax({
+             type: "GET",
+             url: "/ajax_approve/<%= @person.id %>",
+             success: function(next_path){
+                window.location = next_path;
+             },
+             error: function(){
+                 alert("Something went wrong!");
+             }
+
+         });
+     }
+
+      function pending(){
+          window.location = "/pending_case_comment/<%= params[:id] %>";
+      }
+
+      function reject(){
+          window.location = "/reject_case_comment/<%= params[:id] %>";
+      }
   </script>
 
 

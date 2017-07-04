@@ -11,7 +11,11 @@ class PersonController < ApplicationController
 
   def show
 
-    @targeturl = request.referrer
+    if params[:next_path].blank?
+      @targeturl = request.referrer
+    else
+      @targeturl = params[:next_path]
+    end
     @section = "View Record"
     person_mother_id = PersonRelationType.find_by_name("Mother").id
     person_father_id = PersonRelationType.find_by_name("Father").id
@@ -26,20 +30,21 @@ class PersonController < ApplicationController
 
     person_mother_relation = PersonRelationship.find_by_sql(["select * from person_relationship where person_a = ? and person_relationship_type_id = ?",params[:id], person_mother_id])
     mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
-    father_id = PersonRelationship.find(:conditions => ["person_a = ? and person_relationship_type_id = ?", params[:id], person_father_id]).person_b rescue nil
-
+    father_id = PersonRelationship.where(person_a: params[:id],
+                                          person_relationship_type_id: person_father_id).first.person_b rescue nil
 
     @person_name = PersonName.find_by_person_id(params[:id])
     @person = Person.find(params[:id])
     @core_person = CorePerson.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
-    @person_record_status = PersonRecordStatus.find_by_person_id(params[:id])
+    @person_record_status = PersonRecordStatus.where(:person_id => params[:id]).last
     @person_status = @person_record_status.status.name
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
 
     @mother = Person.find(mother_id)
     @mother_name = PersonName.find_by_person_id(mother_id)
+    @father_name = PersonName.find_by_person_id(father_id)
     @mother_address = PersonAddress.find_by_person_id(mother_id)
 
 
@@ -198,7 +203,7 @@ class PersonController < ApplicationController
 
     @summaryHash = {
       "Child Name" => "#{@person_name.first_name} #{@person_name.middle_name rescue nil} #{@person_name.last_name rescue nil}",
-      "Child Gender" => @person.gender,
+      "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
       "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
       "Child's Mother " => "#{@mother_name.first_name rescue nil} #{@mother_name.middle_name rescue nil} #{@mother_name.last_name rescue nil}",
@@ -402,9 +407,18 @@ class PersonController < ApplicationController
      render :layout => "facility"
   end
 
+  def view_cases
+    @states = ["DC-ACTIVE"]
+    @section = "New Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
   def view_complete_cases
-    @states = ["DC-COMPLETE", "DC-ACTIVE"]
-    @title = "Complete Cases"
+    @states = ["DC-COMPLETE"]
+    @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
@@ -413,16 +427,70 @@ class PersonController < ApplicationController
 
   def view_incomplete_cases
     @states = ["DC-INCOMPLETE"]
-    @title = "Complete Cases"
+    @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
-  def view_active_cases
-    @states = ["DC-ACTIVE"]
-    @title = "Complete Cases"
+  def view_pending_cases
+    @states = ["DC-PENDING"]
+    @section = "Pending Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_rejected_cases
+    @states = ["DC-REJECTED"]
+    @section = "Rejected Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_hq_rejected_cases
+    @states = ["HQ-REJECTED"]
+    @section = "Rejected Cases at HQ"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_printed_cases
+    @states = ["HQ-PRINTED", 'HQ-DISPATCHED']
+    @section = "Printed Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_voided_cases
+    @states = ["DC-VOIDED"]
+    @section = "Voided Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_approved_cases
+    @states = Status.where("name like 'HQ-%' ").map(&:name) - ["HQ-REJECTED"]
+    @section = "Approved Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_dispatched_cases
+    @states = ["HQ-DISPATCHED"]
+    @section = "Voided Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
