@@ -208,7 +208,7 @@
         <button id="btnQuery"
                 class="blue"
                 style=""
-                onclick="markPending();">Mark Pending</button>
+                onclick="pending();">Mark Pending</button>
       </td>
 
  </tr>
@@ -344,6 +344,27 @@
           $("#comment_popoup").css("visibility","hidden");
       }
 
+     function approve(){
+         jQuery.ajax({
+             type: "GET",
+             url: "/ajax_approve/<%= @person.id %>",
+             success: function(next_path){
+                window.location = next_path;
+             },
+             error: function(){
+                 alert("Something went wrong!");
+             }
+
+         });
+     }
+
+      function pending(){
+          window.location = "/pending_case_comment/<%= params[:id] %>";
+      }
+
+      function reject(){
+          window.location = "/reject_case_comment/<%= params[:id] %>";
+      }
   </script>
 
 

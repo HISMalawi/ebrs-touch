@@ -1,3 +1,10 @@
+<style>
+    .count{
+        color: black;
+        font-size: 13px;
+        font-weight: bold;
+    }
+</style>
 <script type="text/javascript" src="assets/showSubMenu.js"></script>
 
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
@@ -9,7 +16,8 @@
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
-          <img src="<%= @icoFolder %>" height="60"/>
+          <img src="<%= @icoFolder %>" height="60"/> <br />
+          <span class="count"><%= @stats['DC-DUPLICATE']%></span>
         </td>
         <td style="height: 30px;">
           Resolve Potential Duplicates
@@ -29,7 +37,8 @@
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
-          <img src="<%= @icoFolder %>" height="60"/>
+          <img src="<%= @icoFolder %>" height="60"/><br />
+          <span class="count"><%= @stats['DC-VOIDED']%></span>
         </td>
         <td style="height: 30px;">
           Voided Duplicate Cases

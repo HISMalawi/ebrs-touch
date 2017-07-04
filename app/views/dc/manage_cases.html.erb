@@ -1,3 +1,10 @@
+<style>
+  .count{
+      color: black;
+      font-size: 13px;
+      font-weight: bold;
+  }
+</style>
 <script type="text/javascript" src="assets/showSubMenu.js"></script>
 
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
@@ -8,7 +15,8 @@
 				<table style="text-align: left;">
 					<tr>
 						<td rowspan="2">
-						  <img src="<%= @icoFolder %>" height="60"/>
+						  <img src="<%= @icoFolder %>" height="60"/>  <br />
+                          <span class="count"><%= @stats['DC-COMPLETE']%></span>
 						</td>
 						<td style="height: 30px;">
 						  Complete Cases from LO
@@ -32,7 +40,8 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['DC-INCOMPLETE']%></span>
           </td>
           <td style="height: 30px;">
             Incomplete Cases
@@ -54,10 +63,12 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['DC-ACTIVE']%></span>
           </td>
           <td style="height: 30px;">
             Active Records
+
           </td>
         </tr>
         <tr>
@@ -76,7 +87,8 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['HQ-ACTIVE']%></span>
           </td>
           <td style="height: 30px;">
             Approved by ADR
@@ -97,7 +109,8 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['DC-PENDING']%></span>
           </td>
           <td style="height: 30px;">
             Pending Cases
@@ -120,7 +133,31 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['DC-REJECTED']%></span>
+          </td>
+          <td style="height: 30px;">
+            Rejected Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Rejected by ADR
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("View HQ-Rejected Cases") %>
+
+    <div class="button child_menu manage_cases" onclick="window.location = '/view_hq_rejected_cases'" tag=0 title="View Rejected Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['HQ-REJECTED']%></span>
           </td>
           <td style="height: 30px;">
             Rejected at HQ
@@ -143,7 +180,8 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['HQ-PRINTED'] + @stats['HQ-DISPATCHED']%></span>
           </td>
           <td style="height: 30px;">
             View Printed Records 
@@ -165,7 +203,8 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/> <br />
+            <span class="count"><%= @stats['HQ-VOIDED']%></span>
           </td>
           <td style="height: 30px;">
             Voided cases
@@ -188,7 +227,9 @@
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"><%= @stats['HQ-DISPATCHED']%></span>
+
           </td>
           <td style="height: 30px;">
             Dispatched Certificates

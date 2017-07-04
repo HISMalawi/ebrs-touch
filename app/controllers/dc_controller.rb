@@ -1,7 +1,6 @@
 class DcController < ApplicationController
 
 def new_registration
-  raise application_mode.inspect
     @icoFolder = folder
 
     @section = "Register Person"
@@ -14,6 +13,7 @@ def new_registration
 end
 
 def manage_cases
+  @stats = PersonRecordStatus.stats
   @icoFolder = folder
   @section = "Manage Cases"
   @targeturl = "/"
@@ -23,6 +23,7 @@ def manage_cases
 end
 
 def manage_requests
+  @stats = PersonRecordStatus.stats
   @icoFolder = folder
   @section = "Manage Ammendments"
   @targeturl = "/"
@@ -32,6 +33,7 @@ def manage_requests
 end
 
 def manage_duplicates_menu
+  @stats = PersonRecordStatus.stats
   @icoFolder = folder
   @section = "Manage Duplicates"
   @targeturl = "/"
@@ -71,59 +73,55 @@ end
     end
   end
 
-def approve
+  def ajax_approve
+    @child = Person.find(params[:id])
+    @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
+    old_state = PersonRecordStatus.status(params[:id])
 
-  @child = Person.find(params[:id])
-
-  if PersonService.record_complete?(@child) == false
-    flash[:info] = "Record is not complete"
-    redirect_to "/incomplete_case_comment?id=#{@child.id}" && return
-  end
-
-
-  months_gone = (Date.today.year * 12 + Date.today.month) - (@child.acknowledgement_of_receipt_date.to_date.year * 12 + @child.acknowledgement_of_receipt_date.to_date.month)
-  old_state = @child.request_status.to_s.strip.upcase
-  if @child.district_id_number.blank?
-
-    result = false
-
-    while !result do
-
-      result = DistrictNumber.assign_district_number(@child, application_codes("district").to_s, Date.today.year, current_user.id)
-
-      break if result
-
-      sleep 1
-
-    end
-
-    if result == false
-      flash[:info] = "Record has not been approved"
+    if PersonService.record_complete?(@child) == false
+      flash[:info] = "Record is not complete"
     else
-      flash[:info] = "Record has been approved"
-      Audit.create(record_id: @child.id, audit_type: "Audit", level: "Child", reason: "Approved child record")
-      checkCreatedSync(params[:id], "HQ OPEN", @child.request_status)
+      PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
     end
-  else
-    if @child.request_status.upcase == 'REJECTED'
 
-      @child.update_attributes({:approved => 'Yes',
-                                :record_status => "HQ OPEN",
-                                :approved_by => current_user.id,
-                                :request_status => 'RE-APPROVED',
-                                :approved_at => Time.now()})
+    render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
+    render :text =>  "/view_complete_cases"
+  end
 
-      Audit.create(record_id: @child.id, audit_type: "Audit", level: "Child", reason: "Re-approved child record")
-      flash[:info] = "Record has been re-approved"
-      checkCreatedSync(params[:id], "HQ OPEN", "RE-APPROVED")
+  def pending_case_comment
+    @child = Person.find(params[:id])
+    @form_action = "/pending_case"
+    @section = "Reason for pending record"
 
+    render :layout => "touch"
+  end
+
+  def pending_case
+    PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
+
+    if User.current.user_role.role.role.downcase == 'adr'
+      redirect_to "/view_complete_cases"
+    else
+      redirect_to "/view_cases"
     end
   end
 
+  def reject_case_comment
+    @child = Person.find(params[:id])
+    @form_action = "/reject_case"
+    @section = "Reason for rejecting record"
 
-  redirect_to "/#{params[:next_path]}" and return unless params[:next_path].blank?
-  redirect_to "/view_pending_cases" and return if old_state == "PENDING"
-  redirect_to "/view_complete_cases"
-end
+    render :layout => "touch"
+  end
+
+  def reject_case
+    PersonRecordStatus.new_record_state(params[:id], 'DC-REJECTED', params[:reason])
+
+    if User.current.user_role.role.role.downcase == 'adr'
+      redirect_to "/view_complete_cases"
+    else
+      redirect_to "/view_cases"
+    end
+  end
 
 end

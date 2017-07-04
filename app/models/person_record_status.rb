@@ -26,4 +26,18 @@ class PersonRecordStatus < ActiveRecord::Base
         comments: change_reason
     )
   end
+
+  def self.status(person_id)
+    self.where(:person_id => person_id, :voided => 0).last.status.name
+  end
+
+  def self.stats
+    result = {}
+    Status.all.each do |status|
+      result[status.name] = self.find_by_sql("
+      SELECT COUNT(*) c FROM person_record_statuses WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
+    end
+
+    result
+  end
 end

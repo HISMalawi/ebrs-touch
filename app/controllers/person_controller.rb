@@ -438,6 +438,15 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def view_hq_rejected_cases
+    @states = ["HQ-REJECTED"]
+    @section = "Rejected Cases at HQ"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
   def view_printed_cases
     @states = ["HQ-PRINTED", 'HQ-DISPATCHED']
     @section = "Printed Cases"
