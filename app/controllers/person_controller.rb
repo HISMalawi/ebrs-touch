@@ -226,20 +226,34 @@ class PersonController < ApplicationController
     
 
     if params[:id].blank?
+      
       @person = PersonName.new
 
       @section = "New Person"
+
     else
+
       @person = PersonBirthDetail.find_by_person_id(params[:id])
       @person_name = PersonName.find_by_person_id(params[:id])
-      #raise params[:id].inspect
+
+      if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
+         @type_of_birth = "Second Twin"
+      elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
+         @type_of_birth = "Second Triplet"
+      elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 5
+         @type_of_birth = "Third Triplet"
+      end
+        
+        
     end
 
      render :layout => "touch"
   end
 
   def create
+
     type_of_birth = params[:person][:type_of_birth]
+
     @person = PersonService.create_record(params)
   
 

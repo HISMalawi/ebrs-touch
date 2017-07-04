@@ -32,9 +32,9 @@
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
-
+      
       <%= f.hidden_field :_rev rescue "" %>
-
+<input type="hidden" name="person[type_of_birth]" value="<%= @type_of_birth %>">
 
        <%= f.hidden_field :place_of_birth %> <!--@person[:place_of_birth] -->
        <%= f.hidden_field :birth_location_id %> <!--hospital_of_birth -->
@@ -48,8 +48,8 @@
        <%= f.hidden_field :court_order_attached  %> <!--person_court_order_attached -->
        <!-- %= f.hidden_field :parents_signed  % -->
        <%= f.hidden_field :acknowledgement_of_receipt_date %> <!--person_parents_signed -->
-       <%= f.hidden_field :type_of_birth %>
-       <!-- %= f.hidden_field :multiple_birth_id %-->
+       <!-- %= f.hidden_field :type_of_birth % -->
+       <!-- %= f.hidden_field :multiple_birth_id % -->
        <input type="hidden" name="registration_type" id="registration_type" />
 
        <input id="person_relationship" name="person[relationship]" valu%e="normal" type="hidden"/>

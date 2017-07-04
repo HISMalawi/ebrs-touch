@@ -1086,7 +1086,7 @@
 
             __$("textForperson_informant_first_name").value = __$("person_mother_first_name").value;
              
-             console.log("loadMothersDetails 1" + __$("person_informant_first_name").value)
+             console.log("loadMothersDetails 1 " + __$("person_informant_first_name").value)
         }
 
         if (__$("person_mother_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
@@ -1150,8 +1150,6 @@
     function unloadInformantsDetails(){
 
         if (__$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
-
-              console.log(__$("person_informant_first_name").value)
 
             __$("person_informant_first_name").value = "";
 
