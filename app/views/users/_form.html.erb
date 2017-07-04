@@ -84,7 +84,8 @@
           </td>
           <td>
             <%= i.select :role, options_for_select(@roles),
-              :class => "input_cell", 
+              :class => "input_cell",
+              :id => "role", 
               :placeholder => "Select Role", 
               :required => true %>
           </td>
