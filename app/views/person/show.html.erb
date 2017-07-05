@@ -223,7 +223,9 @@
     <% (@actions || []).each do |action|
       next if (SETTINGS['enable_role_privileges'] == false)
     %>
-        __$('<%= action['button_name']%>').style.display = 'table-cell';
+        if(__$('<%= action['button_name']%>')) {
+            __$('<%= action['button_name']%>').style.display = 'table-cell';
+        }
     <% end %>
       summaryHash = {};
 

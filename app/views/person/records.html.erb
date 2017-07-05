@@ -22,12 +22,14 @@
       <th style="text-align: center; min-width:16%;">Reporting Date</th>
       <th style="text-align: center;min-width: 10%;">Status</th>
       <th>&nbsp;</th>
-  </tr>
+    </tr>
   </thead>
-    <%(@records || []).each do |record|%>
+
+  <tbody>
+  <%(@records || []).each do |record|%>
       <tr>
         <% if (@display_ben rescue false) %>
-          <td style="text-align: left;"><%= '' %></td>
+            <td style="text-align: left;"><%= '' %></td>
         <% end %>
         <td style="text-align: left;"><%= record['name'] %></td>
         <td style="text-align: left;"><%= record['mother_name'] %></td>
@@ -35,29 +37,45 @@
         <td style="text-align: center;"><%= record['date_of_reporting'] %></td>
         <td style="text-align: center;"><%=  record['status']%></td>
         <td style="background-color: white;">
+
+          <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+          %>
+
           <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
             <tr>
-              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.referrer%>'">
+              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.path%>'">
                 <%= image_tag "view.png", class: 'btn-images' %></button>
               </td>
-              <td class="action-button"><button class="btn btn-warning" onmousedown="javascript:alert();">
+              <td class="Edit_Record"
+                  style="display:<%= display%>;"
+                  class="action-button"><button class="btn btn-warning" onmousedown="javascript:alert('link with Matthew');">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>
-               </td>
-              <td class="action-button"><button class="btn btn-success" onmousedown="javascript:alert();">
+              </td>
+              <td class="Void_Record"
+                  style="display:<%= display%>;"
+                  class="action-button"><button class="btn btn-success" onmousedown="javascript:alert();">
                 <%= image_tag "void.png", class: 'btn-images' %></button>
-               </td>
+              </td>
             </tr>
           </table>
         </td>
       </tr>
     <%end%>
-  <tbody>
   </tbody>
 </table>
 
 </div>
 
 <script>
+
+<%
+  (@actions || []).each do |action|
+  next if (SETTINGS['enable_role_privileges'] == false)
+%>
+    var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
+    $("." + clas).show();
+
+<% end %>
 
 $(document).ready(function() {
     $('#example').DataTable();

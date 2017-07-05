@@ -1,7 +1,7 @@
 ,Nurse,Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
-DC-ACTIVE,,,,"1,2",,,,,,"1, 2"
+DC-ACTIVE,,,,"1,2",,,,,,
 FC-POTENTIAL DUPLICATE,,,,,,,,,,
-DC-INCOMPLETE,,,,,,,,,,
+DC-INCOMPLETE,,,,11,,,,,,
 DC-COMPLETE,,,,,,,,,,
 DC-PENDING,,,,,,,,,,
 DC-DUPLICATE,,,,,,,,,,
@@ -45,7 +45,9 @@ Action Code,Description,Button Name,,,,,,,,"
 8,Print records,Print,,,,,,,,
 9,Dispatch record to district,Dispatch,,,,,,,,
 10,Re-print current record,Re-print,,,,,,,,
-11,Add comment to record,Add Comment,,,,,,,,
+11,Edit Record,Edit Record,,,,,,,,
+12,Void Record,Void Record,,,,,,,,
+,,,,,,,,,,
 END CODES,,,,,,,,,,
 ,,,,,,,,,,
 ,,,,,,,,,,
