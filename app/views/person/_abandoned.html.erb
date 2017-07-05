@@ -48,7 +48,7 @@
       
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => Location.current.district.id %>
+      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -881,7 +881,18 @@
       <div class="field">
         <label for="person_informant_current_district">District</label><br>
         <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district"
-                />
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);" optional="false"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_current_ta">T/A</label><br>
+        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>" class="input_cell" ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);" optional="false"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_current_village">Village</label><br>
+        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>" ajaxURL="/search_by_village" class="input_cell" optional="false"/>
       </div>
       
       <div class="field">
@@ -1805,12 +1816,12 @@
       
      if (place == 'district') {
      
-      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current.district.id %>" ;
+      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
      
     
      } else {
      
-       __$('person_birth_district').value = "<%= Location.current.district.id %>" ;
+       __$('person_birth_district').value = "<%= Location.current_district.id %>" ;
       
      }
     }
@@ -1820,7 +1831,7 @@
      
       if (handleDate(__$('person_birthdate').value.trim()) > startDate){
        
-         return false;
+         return true;
       
       } else {
       

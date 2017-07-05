@@ -50,7 +50,7 @@
 
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => "#{Location.current.district.id}" %>
+      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -1931,22 +1931,23 @@
 
      if (place == 'district') {
 
-      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current.district.id %>" ;
+      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district %>" ;
 
 
      } else {
 
-       __$('person_birth_district').value = "<%= Location.current.district.id %>" ;
+       __$('person_birth_district').value = "<%= Location.current_district %>" ;
 
      }
     }
 
     function beforeLiveDate(){
+
       startDate = new Date("8/1/2015");
 
       if (handleDate(__$('person_birthdate').value.trim()) > startDate){
 
-         return false;
+         return true;
 
       } else {
 

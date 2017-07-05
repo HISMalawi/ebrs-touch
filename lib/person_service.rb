@@ -371,13 +371,16 @@ elsif SETTINGS["application_mode"] == "DC"
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
  
-     
+     raise params.inspect
+
      loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
      loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
 
+     params
+
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      birth_registration_type_id:               BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
+      birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
       place_of_birth:                           Location.where(location_id: loc_id).first.location_id,
       birth_location_id:                        Location.where(name: hospital_of_birth).first.location_id,
       birth_weight:                             birth_weight,
