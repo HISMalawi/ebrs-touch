@@ -26,3 +26,4 @@ nbproject/
 passenger*
 *.swp
 /bin/schema.rb
+*.~*
