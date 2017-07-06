@@ -51,6 +51,9 @@ module PersonService
       mother_foreigner_home_village     = params[:person][:mother][:foreigner_home_village]
       mother_foreigner_home_ta          = params[:person][:mother][:foreigner_home_ta]
       mother_estimated_dob	            =	params[:person][:mother][:birthdate_estimated]
+      mother_current_district           = params[:person][:mother][:current_district]
+      mother_current_ta                 = params[:person][:mother][:current_ta]
+      mother_current_village            = params[:person][:mother][:current_village]
 
       mother_mode_of_delivery           = params[:person][:mode_of_delivery]
       mother_level_of_education         = params[:person][:level_of_education]
@@ -60,7 +63,7 @@ module PersonService
     ########################### father details ########################################
 
  
-      informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
+      informant_same_as_mother          = params[:informant_same_as_mother]
       informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
 
       father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
@@ -501,6 +504,8 @@ elsif SETTINGS["application_mode"] == "DC"
           
 ######################################### Recording informant details #############################################
     
+    
+
     if (informant_same_as_mother == "Yes")
 
        
@@ -568,6 +573,8 @@ elsif SETTINGS["application_mode"] == "DC"
 
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
+
+            raise informant_current_village.inspect
 
             PersonAddress.create(person_id: core_person_informant.id,
                                  current_village: Location.where(name: informant_current_village).first.location_id,
