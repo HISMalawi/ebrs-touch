@@ -265,8 +265,18 @@ class PersonController < ApplicationController
     if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
       
       redirect_to "/person/new?id=#{@person.id}"
+
     else
-      redirect_to '/'
+
+       if application_mode == 'Facility'
+
+          redirect_to '/records/DC-Complete'
+
+        else
+
+          redirect_to '/view_cases'
+
+        end
     end
 
   end

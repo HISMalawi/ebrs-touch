@@ -21,6 +21,7 @@ class ApplicationController < ActionController::Base
   end
 
   def application_mode
+    
     if SETTINGS['application_mode'] == 'FC'
       return 'Facility'
     else

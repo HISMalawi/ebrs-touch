@@ -152,7 +152,9 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <%= (f.text_field :birthdate, :class => "input_cell", :fieldtype => "date",
+        <%= (f.text_field :birthdate, 
+                          :class => "input_cell",
+                          :fieldtype => "date",
                           :absolute_min => @person.birthdate.to_date.advance(:days => -2).strftime('%Y/%m/%d'),
                           :absolute_max => @person.birthdate.to_date.advance(:days => 2).strftime('%Y/%m/%d')) rescue "" %>
         <%= f.hidden_field :birthdate_estimated rescue "" %>
