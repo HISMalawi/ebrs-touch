@@ -612,9 +612,14 @@ end
 
   def self.mother(person_id)
     result = nil
+    #raise person_id.inspect 
     relationship_type = PersonRelationType.find_by_name("Mother")
+    
+   # raise relationship_type.id.inspect 
+
     relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
-    if !relationship.blank?
+    #raise relationship.person_b.inspect 
+    unless relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b).last
     end
 
@@ -642,6 +647,7 @@ end
   end
 
   def self.query_for_display(states)
+
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
     person_type = PersonType.where(name: 'Client').first
 
@@ -659,13 +665,15 @@ end
     )
 
     results = []
+    #raise main.inspect
     main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
-
-      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}").gsub(/\s+/, ' ')
-      mother_name   = ("#{mother['first_name']} #{mother['middle_name']} #{mother['last_name']}").gsub(/\s+/, ' ')
-      father_name   = ("#{father['first_name']} #{father['middle_name']} #{father['last_name']}").gsub(/\s+/, ' ')
+      next if mother.blank?
+      next if mother.first_name.blank?
+      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
+      mother_name   = ("#{mother.first_name} #{mother.middle_name} #{mother.last_name}")
+      father_name   = ("#{father.first_name} #{father.middle_name} #{father.last_name}")
 
       results << {
           'id' => data.person_id,
@@ -678,6 +686,7 @@ end
     end
 
     results
+    
   end
 
   def self.record_complete?(child)

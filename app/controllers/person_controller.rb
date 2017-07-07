@@ -224,7 +224,15 @@ class PersonController < ApplicationController
   end
 
   def records
-    render :layout => 'data_table'
+
+    @states = ["DC-Active"]
+    @section = "New Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    
+    render :template => "person/records", :layout => "data_table"
+
   end
 
   def new

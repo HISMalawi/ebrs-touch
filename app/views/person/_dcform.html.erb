@@ -602,14 +602,11 @@
         <label for="person_number_of_children_born_still_alive">Number of Children born to the mother, and still
           living</label>
         <br>
-        <input type="text" name="number_of_children_born_still_alive"
-        					id = "person_number_of_children_born_still_alive"
-                            class = "input_cell"
-                            absolute_max = 20
-                            fieldtype = "number"
-                            absolute_min = 0
-                            max =6
-                            optional =true>
+        <input type="text" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive"
+                 class="input_cell" absolute_min="1" max="6" absolute_max="20"
+               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+                >
       </div>
 
 
