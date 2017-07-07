@@ -604,7 +604,7 @@
         <br>
         <input type="text" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive"
                  class="input_cell" absolute_min="1" max="6" absolute_max="20"
-               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+               tt_onLoad="possiblechildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
                 >
       </div>
