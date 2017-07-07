@@ -1,4 +1,36 @@
-== eBRS Facility 2.0
+== S Facility 2.0
+
+eBRS Facility with relational model.
+
+Requirements:
+
+* Ruby 2.1.2
+
+* Rails 4.2.6
+
+* Passenger 4.0.53
+
+* Ubuntu 14.04 LTS
+
+Setup:
+
+1. Clone the application from the github repository
+
+2. In config/ folder, copy and rename the following files
+    couchdb.yml.example rename to couchdb.yml
+    database.yml.example rename to database.yml
+    secrets.yml.example rename to secrets.yml
+    settings.yml.example rename to settings.yml
+
+   In couchdb.yml file add the parameters for the local couch database. Make sure the database name matches the one at HQ.
+   In database.yml, under development section add the database name for the MYSQL database for eBrs application
+
+3. Run bundle install --local or bundle install        
+
+4. Replicate the couch  database from HQ to your local couchdb
+
+5. Run bundle exec rake db:create db:schema:load db:seed
+~                                                         
 
 eBRS Facility with relational model.
 
