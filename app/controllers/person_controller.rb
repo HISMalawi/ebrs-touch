@@ -231,6 +231,7 @@ class PersonController < ApplicationController
 
     @records = PersonService.query_for_display(@states)
     
+    
     render :template => "person/records", :layout => "data_table"
 
   end
@@ -432,6 +433,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
+
     render :template => "person/records", :layout => "data_table"
   end
 

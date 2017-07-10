@@ -86,6 +86,7 @@ module PersonService
       father_home_ta                    = params[:person][:father][:home_ta]
       father_home_village               = params[:person][:father][:home_village]
 
+     
 
     ######################### father details (end) #################################
 
@@ -177,6 +178,7 @@ module PersonService
  
  if !mother_first_name.blank?
 
+  
  core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
 
        person_mother = Person.create(person_id: core_person_mother.id,
@@ -221,7 +223,7 @@ end
 ########################################## Recording father details #################################################
     if !father_first_name.blank?
 
-
+        
 
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
