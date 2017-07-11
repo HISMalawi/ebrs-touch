@@ -1,4 +1,4 @@
-== eBRS Facility 2.0
+== eBRS Touch
 
 eBRS Facility with relational model.
 
