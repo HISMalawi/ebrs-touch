@@ -225,7 +225,13 @@ class PersonController < ApplicationController
 
   def records
 
-    @states = ["DC-Active"]
+   if application_mode == 'Facility'
+      @states = ["DC-Complete"]
+   else
+      @states = ["DC-Active"]
+   end
+   
+
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 

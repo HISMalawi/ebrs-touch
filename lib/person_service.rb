@@ -653,6 +653,7 @@ end
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
     person_type = PersonType.where(name: 'Client').first
 
+
     main = Person.find_by_sql(
           "SELECT n.*, prs.status_id FROM person p
             INNER JOIN core_person cp ON p.person_id = cp.person_id
@@ -665,14 +666,16 @@ end
           ORDER BY p.updated_at DESC
            "
     )
+    
 
     results = []
-    #raise main.inspect
     main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       next if mother.blank?
       next if mother.first_name.blank?
+      next if father.blank?
+      next if father.first_name.blank?
       name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
       mother_name   = ("#{mother.first_name} #{mother.middle_name} #{mother.last_name}")
       father_name   = ("#{father.first_name} #{father.middle_name} #{father.last_name}")
@@ -688,7 +691,7 @@ end
     end
 
     results
-    
+
   end
 
   def self.record_complete?(child)
