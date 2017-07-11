@@ -1,6 +1,6 @@
-== S Facility 2.0
+== S Touch
 
-eBRS Facility with relational model.
+eBRS Touch with relational model.
 
 Requirements:
 
