@@ -798,12 +798,12 @@
 
       <div class="field">
         <label for="person_informant_last_name">Surname</label><br>
-        <input id="person_informant_last_name" name="person[informant][last_name]" type="text" value="<%= @person[:informant][:last_name] rescue nil %>" class="input_cell" optional="true"/>
+        <input id="person_informant_last_name" name="person[informant][last_name]" type="text" value="<%= @person[:informant][:last_name] rescue nil %>" class="input_cell" />
       </div>
 
       <div class="field">
         <label for="person_informant_first_name">First Name</label><br>
-        <input id="person_informant_first_name" name="person[informant][first_name]" type="text" value="<%= @person[:informant][:first_name] rescue nil %>" class="input_cell" optional="true"/>
+        <input id="person_informant_first_name" name="person[informant][first_name]" type="text" value="<%= @person[:informant][:first_name] rescue nil %>" class="input_cell" />
       </div>
 
       <div class="field">
@@ -824,7 +824,7 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_child">Relationship To Child</label><br>
-        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell" optional="true">
+        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell" >
           <option></option>
           <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
           <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
