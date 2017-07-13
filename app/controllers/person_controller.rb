@@ -224,7 +224,22 @@ class PersonController < ApplicationController
   end
 
   def records
-    render :layout => 'data_table'
+
+   if application_mode == 'Facility'
+      @states = ["DC-Complete"]
+   else
+      @states = ["DC-Active"]
+   end
+   
+
+    @section = "New Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    
+    
+    render :template => "person/records", :layout => "data_table"
+
   end
 
   def new
@@ -265,8 +280,18 @@ class PersonController < ApplicationController
     if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
       
       redirect_to "/person/new?id=#{@person.id}"
+
     else
-      redirect_to '/'
+
+       if application_mode == 'Facility'
+
+          redirect_to '/records/DC-Complete'
+
+        else
+
+          redirect_to '/view_cases'
+
+        end
     end
 
   end
@@ -388,8 +413,9 @@ class PersonController < ApplicationController
 
   def get_hospital
   
-  nationality_tag = LocationTag.where(name: 'Health facility').first
+  nationality_tag = LocationTag.where(name: 'Hospital').first
   data = []
+  
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
     ON location.location_id = m.location_id").order('name ASC').map do |l|
@@ -413,6 +439,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
+
     render :template => "person/records", :layout => "data_table"
   end
 

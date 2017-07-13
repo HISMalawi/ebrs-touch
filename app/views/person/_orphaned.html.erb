@@ -49,7 +49,7 @@
       
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => Location.current.district.id %>
+      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -82,15 +82,13 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="text" name="birthdate"
-               id="person_birthdate"
-               class = "input_cell"
-               fieldtype = "date"
-               absolute_min = "<%= Time.now.advance(:years => -100).strftime('%Y/%m/%d') %>"
-               min = "<%= Time.now.advance(:years => -16).strftime('%Y/%m/%d') %>"
-               absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
-               tt_onUnload = "recalculateDateValidations('c_dob')"
-        >
+          <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :fieldtype => "date",
+                          :absolute_min => Time.now.advance(:years => -100).strftime('%Y/%m/%d'),
+                          :min => Time.now.advance(:years => -16).strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
+                          :tt_onUnload => "recalculateDateValidations('c_dob')") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
 
@@ -1882,12 +1880,12 @@
       
      if (place == 'district') {
      
-      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current.district.id %>" ;
+      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
      
     
      } else {
      
-       __$('person_birth_district').value = "<%= Location.current.district.id %>" ;
+       __$('person_birth_district').value = "<%= Location.current_district.id %>" ;
       
      }
     }

@@ -51,6 +51,9 @@ module PersonService
       mother_foreigner_home_village     = params[:person][:mother][:foreigner_home_village]
       mother_foreigner_home_ta          = params[:person][:mother][:foreigner_home_ta]
       mother_estimated_dob	            =	params[:person][:mother][:birthdate_estimated]
+      mother_current_district           = params[:person][:mother][:current_district]
+      mother_current_ta                 = params[:person][:mother][:current_ta]
+      mother_current_village            = params[:person][:mother][:current_village]
 
       mother_mode_of_delivery           = params[:person][:mode_of_delivery]
       mother_level_of_education         = params[:person][:level_of_education]
@@ -60,7 +63,7 @@ module PersonService
     ########################### father details ########################################
 
  
-      informant_same_as_mother          = params[:person][:informant][:informant_same_as_mother]
+      informant_same_as_mother          = params[:informant_same_as_mother]
       informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
 
       father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
@@ -83,6 +86,7 @@ module PersonService
       father_home_ta                    = params[:person][:father][:home_ta]
       father_home_village               = params[:person][:father][:home_village]
 
+     
 
     ######################### father details (end) #################################
 
@@ -174,6 +178,7 @@ module PersonService
  
  if !mother_first_name.blank?
 
+  
  core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
 
        person_mother = Person.create(person_id: core_person_mother.id,
@@ -218,7 +223,7 @@ end
 ########################################## Recording father details #################################################
     if !father_first_name.blank?
 
-
+        
 
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
@@ -371,15 +376,27 @@ elsif SETTINGS["application_mode"] == "DC"
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
  
-     
+    
+    
      loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
      loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
+     
+    if hospital_of_birth.blank?
+
+       birth_location_id = Location.where(location_id: loc_id).first.location_id
+
+    else
+
+      birth_location_id = Location.where(name: hospital_of_birth).first.location_id
+
+    end
+    
 
     PersonBirthDetail.create(
       person_id:                                core_person.id,
-      birth_registration_type_id:               BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
+      birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
       place_of_birth:                           Location.where(location_id: loc_id).first.location_id,
-      birth_location_id:                        Location.where(name: hospital_of_birth).first.location_id,
+      birth_location_id:                        birth_location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
       parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
@@ -489,6 +506,8 @@ elsif SETTINGS["application_mode"] == "DC"
           
 ######################################### Recording informant details #############################################
     
+    
+
     if (informant_same_as_mother == "Yes")
 
        
@@ -557,6 +576,8 @@ elsif SETTINGS["application_mode"] == "DC"
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
+            raise informant_current_village.inspect
+
             PersonAddress.create(person_id: core_person_informant.id,
                                  current_village: Location.where(name: informant_current_village).first.location_id,
                                  current_village_other: "",
@@ -593,9 +614,14 @@ end
 
   def self.mother(person_id)
     result = nil
+    #raise person_id.inspect 
     relationship_type = PersonRelationType.find_by_name("Mother")
+    
+   # raise relationship_type.id.inspect 
+
     relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
-    if !relationship.blank?
+    #raise relationship.person_b.inspect 
+    unless relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b).last
     end
 
@@ -623,8 +649,10 @@ end
   end
 
   def self.query_for_display(states)
+
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
     person_type = PersonType.where(name: 'Client').first
+
 
     main = Person.find_by_sql(
           "SELECT n.*, prs.status_id FROM person p
@@ -638,15 +666,19 @@ end
           ORDER BY p.updated_at DESC
            "
     )
+    
 
     results = []
     main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
-
-      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}").gsub(/\s+/, ' ')
-      mother_name   = ("#{mother['first_name']} #{mother['middle_name']} #{mother['last_name']}").gsub(/\s+/, ' ')
-      father_name   = ("#{father['first_name']} #{father['middle_name']} #{father['last_name']}").gsub(/\s+/, ' ')
+      next if mother.blank?
+      next if mother.first_name.blank?
+      next if father.blank?
+      next if father.first_name.blank?
+      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
+      mother_name   = ("#{mother.first_name} #{mother.middle_name} #{mother.last_name}")
+      father_name   = ("#{father.first_name} #{father.middle_name} #{father.last_name}")
 
       results << {
           'id' => data.person_id,
@@ -659,6 +691,7 @@ end
     end
 
     results
+
   end
 
   def self.record_complete?(child)

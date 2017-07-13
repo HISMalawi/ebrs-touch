@@ -35,9 +35,9 @@
       <legend><font size='5' style=''>Details of Child</font></legend>
 
       <%= f.hidden_field :_rev rescue "" %>
-      <%= f.hidden_field :place_of_birth, :value => "Hospital" %>
+      <%= f.hidden_field :place_of_birth, :value => Location.where(location_id: SETTINGS['location_id']).first.name %>
       <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.id}"  %>
-      <%= f.hidden_field :birth_district, :value => "#{Location.current.district.id}" %>
+      <%= f.hidden_field :birth_district, :value => Location.current_health_facility.id %>
 
       <input id="person_original_surname" type="hidden"/>
 
@@ -73,16 +73,13 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-
-        <input type="text" name="birthdate"
-                           id="person_birthdate"
-                          class="input_cell"
-                          fieldtype="date"
-                          optional=true
-                          absolute_min="<% Date.today.strftime('%Y/%m/%d') %>"
-                          absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>"
-                          :tt_onUnload ="__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());">
-
+        <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :value => Date.today.strftime('%d/%b/%Y'),
+                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
+                          :fieldtype => "date",
+                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
 
@@ -527,7 +524,10 @@
           living</label>
         <br>
         <input type="text" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive"
-                class="input_cell" max="6" absolute_max="20" absolute_min="0" >
+                 class="input_cell" absolute_min="1" max="6" absolute_max="20"
+               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+                >
       </div>
 
 
@@ -798,12 +798,12 @@
 
       <div class="field">
         <label for="person_informant_last_name">Surname</label><br>
-        <input id="person_informant_last_name" name="person[informant][last_name]" type="text" value="<%= @person[:informant][:last_name] rescue nil %>" class="input_cell" optional="true"/>
+        <input id="person_informant_last_name" name="person[informant][last_name]" type="text" value="<%= @person[:informant][:last_name] rescue nil %>" class="input_cell" />
       </div>
 
       <div class="field">
         <label for="person_informant_first_name">First Name</label><br>
-        <input id="person_informant_first_name" name="person[informant][first_name]" type="text" value="<%= @person[:informant][:first_name] rescue nil %>" class="input_cell" optional="true"/>
+        <input id="person_informant_first_name" name="person[informant][first_name]" type="text" value="<%= @person[:informant][:first_name] rescue nil %>" class="input_cell" />
       </div>
 
       <div class="field">
@@ -824,7 +824,7 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_child">Relationship To Child</label><br>
-        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell" optional="true">
+        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell" >
           <option></option>
           <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
           <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
@@ -1708,11 +1708,28 @@
 
     init();
 
+    var full_place_of_birth;
+    
+
+    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+    {
+      full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"];
+
+    }
+      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+    {
+      full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+    }
+    else {
+
+      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+    }
+
     summaryHash = {
                     "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
                     "Child Gender" : ["person_gender"],
                     "Child Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : ["person_hospital_of_birth"],
+                    "Place of Birth" : ["person_place_of_birth"],
                     "Mother " : ["person_mother_first_name","person_mother_middle_name", "person_mother_last_name"],
                     "Father" : ["person_father_first_name", "person_father_middle_name", "person_father_last_name"],
                     "Parents Married to each Other?": ['person_parents_married_to_each_other'],
