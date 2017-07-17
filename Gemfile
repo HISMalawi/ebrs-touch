@@ -80,3 +80,5 @@ gem 'composite_primary_keys', '~> 8.0'
 
 gem 'sucker_punch', '~> 2.0'
 
+gem "faker", "~> 1.6.6"
+

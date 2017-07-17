@@ -5,4 +5,5 @@ require File.expand_path('../application', __FILE__)
 Rails.application.initialize!
 require "bantu_soundex"
 require "csv"
+require "simple_elastic_search"
 

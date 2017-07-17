@@ -5672,90 +5672,115 @@ function submitAfterSummary() {
      }*/
 
     showSpinner();
+    var duplicate_search = [
+                                        "person_first_name",
+                                        "person_last_name",
+                                        "person_middle_name",
+                                        "person_birth_district",
+                                        "person_birthdate",
+                                        "person_gender",
+                                        "person_mother_last_name",
+                                        "person_mother_first_name",
+                                        "person_mother_middle_name",
+                                        "person_father_first_name",
+                                        "person_father_last_name",
+                                        "person_father_middle_name"]
+    var data = {}
+    for(var i = 0 ; i < duplicate_search.length ; i++){
+            data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+    }
 
-    var msg = "";
+    $.getJSON("/search_similar_record",data,function(response){
+        if(response.response && response.response.length != 0 && false){
+            console.log(response);
+            return
+            hideSpinner();
+        }else{
+            var msg = "";
 
-    var parent = document.createElement("div");
+            var parent = document.createElement("div");
 
-    var div = document.createElement("div");
-    div.style.height = "300px";
-    div.style.overflow = "auto";
+            var div = document.createElement("div");
+            div.style.height = "300px";
+            div.style.overflow = "auto";
 
-    parent.appendChild(div);
+            parent.appendChild(div);
 
-    var table = document.createElement("table");
-    table.style.width = "100%";
+            var table = document.createElement("table");
+            table.style.width = "100%";
 
-    div.appendChild(table);
+            div.appendChild(table);
 
-    var tbody = document.createElement("tbody");
+            var tbody = document.createElement("tbody");
 
-    table.appendChild(tbody);
+            table.appendChild(tbody);
 
-    var keys = Object.keys(summaryHash);
+            var keys = Object.keys(summaryHash);
 
-    for (var i = 0; i < keys.length; i++) {
+            for (var i = 0; i < keys.length; i++) {
 
-        var tr = document.createElement("tr");
+                var tr = document.createElement("tr");
 
-        tbody.appendChild(tr);
+                tbody.appendChild(tr);
 
-        var td1 = document.createElement("th");
-        td1.align = "right";
-        td1.innerHTML = keys[i];
+                var td1 = document.createElement("th");
+                td1.align = "right";
+                td1.innerHTML = keys[i];
 
-        tr.appendChild(td1);
+                tr.appendChild(td1);
 
-        var td2 = document.createElement("td");
-        td2.innerHTML = ":";
+                var td2 = document.createElement("td");
+                td2.innerHTML = ":";
 
-        tr.appendChild(td2);
+                tr.appendChild(td2);
 
-        var td3 = document.createElement("td");
+                var td3 = document.createElement("td");
 
-        var label = "";
+                var label = "";
 
-        for (var j = 0; j < summaryHash[keys[i]].length; j++) {
+                for (var j = 0; j < summaryHash[keys[i]].length; j++) {
 
-            if (__$(summaryHash[keys[i]][j])) {
+                    if (__$(summaryHash[keys[i]][j])) {
 
-                if (label.trim().length > 0) {
+                        if (label.trim().length > 0) {
 
-                    label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
+                            label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
 
-                } else {
+                        } else {
 
-                    label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
+                            label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
+
+                        }
+
+                    }
 
                 }
 
+                label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
+
+                if (label == '')
+                  label = "<span class='blank'>N/A</span>"
+
+                if (keys[i].match(/weight/i))
+                  label = label + " Kg"
+
+                td3.innerHTML = label;
+
+                tr.appendChild(td3);
+
             }
 
+            var pos = checkCtrl(parent);
+
+            msg = parent.innerHTML;
+
+            var action = "document.forms[0].submit();";
+
+            hideSpinner();
+
+            showMsgForAction(msg, action, "600px", "Captured Data Summary");
         }
-
-        label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
-
-        if (label == '')
-          label = "<span class='blank'>N/A</span>"
-
-        if (keys[i].match(/weight/i))
-          label = label + " Kg"
-
-        td3.innerHTML = label;
-
-        tr.appendChild(td3);
-
-    }
-
-    var pos = checkCtrl(parent);
-
-    msg = parent.innerHTML;
-
-    var action = "document.forms[0].submit();";
-
-    hideSpinner();
-
-    showMsgForAction(msg, action, "600px", "Captured Data Summary");
+    });
 
 }
 

@@ -125,6 +125,8 @@ module PersonService
  
  if SETTINGS["application_mode"] == "FC"
 
+  ################################ Is record a duplicate ##########################################################
+  is_record_a_duplicate = params[:person][:diplicate] rescue nil
 
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
@@ -595,10 +597,16 @@ elsif SETTINGS["application_mode"] == "DC"
                
   ############################################## Informant details end #############################################
   ############################################## person status record ####################################################
+ if is_record_a_duplicate.present? 
+     if application_mode == 'Facility'
+      PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+    else
+       PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+    end
+ else
           
-          
-               PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
-    
+    PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
+ end   
         
   ############################################# Person status record (end) ##############################################
   ############################################### person address details ###############################################

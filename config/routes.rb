@@ -64,6 +64,8 @@ Rails.application.routes.draw do
 
   post 'person/create'
 
+  get '/search_similar_record' => "person#search_similar_record"
+
   post '/application/get_registration_type'
 
   get 'records/:status' => 'person#records'
