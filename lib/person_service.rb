@@ -383,7 +383,7 @@ elsif SETTINGS["application_mode"] == "DC"
      
     if hospital_of_birth.blank?
 
-       birth_location_id = self.is_num(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id
+       birth_location_id = self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id
 
     else
 
@@ -395,7 +395,7 @@ elsif SETTINGS["application_mode"] == "DC"
     PersonBirthDetail.create(
       person_id:                                core_person.id,
       birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
-      place_of_birth:                           self.is_num(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id,
+      place_of_birth:                           self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id,
       birth_location_id:                        birth_location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
