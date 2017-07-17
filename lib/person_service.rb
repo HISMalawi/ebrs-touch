@@ -383,7 +383,7 @@ elsif SETTINGS["application_mode"] == "DC"
      
     if hospital_of_birth.blank?
 
-       birth_location_id = Location.where(location_id: loc_id).first.location_id
+       birth_location_id = self.is_num(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id
 
     else
 
