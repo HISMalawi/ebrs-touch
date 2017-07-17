@@ -273,6 +273,19 @@ class PersonController < ApplicationController
   def create
 
     type_of_birth = params[:person][:type_of_birth]
+    
+     if type_of_birth == 'Twin'
+
+        type_of_birth = 'First Twin'
+        params[:person][:type_of_birth] = 'First Twin'
+
+     elsif type_of_birth == 'Tripplet'
+      
+         type_of_birth = 'First Tripplet'  
+         params[:person][:type_of_birth] = 'First Tripplet'                                         
+     end
+
+     
 
     @person = PersonService.create_record(params)
 
@@ -301,7 +314,7 @@ class PersonController < ApplicationController
     end
   
 
-    if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
+    if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
       
       redirect_to "/person/new?id=#{@person.id}"
 
