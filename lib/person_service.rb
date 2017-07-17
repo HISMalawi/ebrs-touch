@@ -142,7 +142,7 @@ module PersonService
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
 
-       
+
   
     PersonBirthDetail.create(
       person_id:                                core_person.id,
@@ -378,8 +378,8 @@ elsif SETTINGS["application_mode"] == "DC"
  
     
     
-     loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
-     loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
+     #loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
+     #loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
      
     if hospital_of_birth.blank?
 
@@ -395,7 +395,7 @@ elsif SETTINGS["application_mode"] == "DC"
     PersonBirthDetail.create(
       person_id:                                core_person.id,
       birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
-      place_of_birth:                           Location.where(location_id: loc_id).first.location_id,
+      place_of_birth:                           self.is_num(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id,
       birth_location_id:                        birth_location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
