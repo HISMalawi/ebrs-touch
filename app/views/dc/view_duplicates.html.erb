@@ -37,15 +37,9 @@
         <td style="background-color: white;">
           <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
             <tr>
-              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.referrer%>'">
+              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/potential/duplicate/<%= record['id']%>?next_path=/view_duplicates&index=0'">
                 <%= image_tag "view.png", class: 'btn-images' %></button>
               </td>
-              <td class="action-button"><button class="btn btn-warning" onmousedown="javascript:alert();">
-                <%= image_tag "edit.png", class: 'btn-images' %></button>
-               </td>
-              <td class="action-button"><button class="btn btn-success" onmousedown="javascript:alert();">
-                <%= image_tag "void.png", class: 'btn-images' %></button>
-               </td>
             </tr>
           </table>
         </td>

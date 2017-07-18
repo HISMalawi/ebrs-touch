@@ -42,7 +42,50 @@ def manage_duplicates_menu
   render :layout => "facility"
 end
 
-  def incomplete_case_comment
+def view_duplicates
+    @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE']
+    @section = "Potential Duplicates"
+   # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "dc/view_duplicates", :layout => "data_table"
+end
+
+def potential_duplicate
+  @section = "Resolve Duplicates"
+  @potential_duplicate =  person_details(params[:id])
+  potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last.duplicate_records
+  @similar_records = []
+  potential_records.each do |record|
+    @similar_records << person_details(record.person_id)
+  end
+  render :layout => "facility"
+end
+
+def add_duplicate_comment
+  render :layout => "touch"
+end
+
+def resolve_duplicate
+     potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i),:resolved => 0).last
+     if potential_records.present?
+        potential_records.resolved = 1
+        potential_records.decision = params[:decision]
+        potential_records.comment = params[:reason]
+        potential_records.save
+        if params[:decision] == "NOT DUPLICATE"
+           PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
+           redirect_to params[:next_path]
+        else
+           PersonRecordStatus.new_record_state(params[:id], 'DC-DUPLICATE', params[:reason])
+           redirect_to params[:next_path]
+        end
+       
+     end
+end
+
+def incomplete_case_comment
 
     @child_id = params[:id]
 

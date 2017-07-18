@@ -1,0 +1,593 @@
+
+<style>
+
+    .record th {
+        padding: 8px;
+        background-color: #666;
+        color: #eee;
+        text-align: center !important;
+    }
+    
+    .record .duplicate {
+     
+       background-color: #181818;
+       
+    }
+
+    .record td {
+        padding: 8px;
+    }
+    #comment_popoup{
+    width: 45%;
+    height: 50%;
+    position: absolute;;
+    left: 25%;
+    top: 20%;
+    background: #eeeeef;
+    border-radius: 2%;
+    color: black;
+    box-shadow: 5px 5px 2px #888888;
+    visibility: hidden;
+  }
+  #title{
+    width: 98%;
+    margin:auto;
+    margin-top: 0.8%;
+    background: #345d8c;
+    font-size: 150%;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-align: center;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    border-top-right-radius: 7%;
+    border-top-left-radius: 7%;
+    border-bottom: 2px solid #d9d8d7;
+  }
+  #comment{
+    width: 98%;
+    height: 58%;
+    overflow-y: scroll;
+  }
+  #comment ul{
+    list-style-type: none;
+  }
+  #comment ul > li{
+    display: block;
+    background: #FFFFFF;
+    width:92%;
+    padding: 1.5%;
+    margin: auto;
+    margin-top: 0%;
+    border-radius: 3%;
+    padding-left: 2.5%;
+    border: 1px solid #d9d8d7;
+  }
+  #button{
+    width: 100%;
+    text-align: center;
+    padding: 5%;
+  }
+
+</style>
+
+<div id="stats" style="width: 100%; overflow: auto; border-bottom: 1px solid #ccc;">
+
+<table class="record" style="width: 100%; margin-top: 10px;" border="1">
+<tr>
+  <th colspan='2' style="width: 49%;" class="duplicate">
+    Duplicate Record <i style="color: #999">(<%= @potential_duplicate[:status] %>)</i>
+  </th>
+  <td rowspan="17" style="border: none;">
+    &nbsp;
+  </td>
+  <th colspan='2' style="width: 49%;">
+    Existing Record <i style="color: #999">(<span id="status"><%= @similar_records[params[:index].to_i][:status] %></span>)</i>
+    <div style="float: right"><span id="childNumber"> <%= (params[:index].to_i + 1)%></span> / <%= @similar_records.count %></div>
+  </th>
+</tr>
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;" style="font-size: 12px; font-weight: bold;">
+    First Name
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:first_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    First Name
+  </td>
+  <td align="left" id="childFName">
+    	<%= @similar_records[params[:index].to_i][:first_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Middle Name
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:middle_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Middle Name
+  </td>
+  <td align="left" id="childOName">
+    	<%= @similar_records[params[:index].to_i][:middle_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Last Name
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:last_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Last Name
+  </td>
+  <td align="left" id="childLName">
+    <%= @similar_records[params[:index].to_i][:last_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Birth Entry Number
+  </td>
+  <td align="left">
+   		<%= @potential_duplicate[:birth_entry_number] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Birth Entry Number
+  </td>
+  <td align="left" id="dob">
+   		<%= @similar_records[params[:index].to_i][:birth_entry_number] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Registration Number
+  </td>
+  <td align="left">
+   	  <%= @potential_duplicate[:birth_registration_number] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Registration Number
+  </td>
+  <td align="left" id="dob">
+      <%= @similar_records[params[:index].to_i][:birth_registration_number] %>
+  </td>
+</tr>
+
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Date of Birth
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:birthdate].to_time.strftime("%d/%b/%Y") %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Date of Birth
+  </td>
+  <td align="left" id="dob">
+      <%= @similar_records[params[:index].to_i][:birthdate].to_time.strftime("%d/%b/%Y") %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Gender
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:gender] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Gender
+  </td>
+  <td align="left" id="gender">
+    	<%= @similar_records[params[:index].to_i][:gender] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Hospital of Birth
+  </td>
+  <td align="left">
+   		<%= @potential_duplicate[:hospital_of_birth] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Hospital of Birth
+  </td>
+  <td align="left" id="hospital">
+    	<%= @similar_records[params[:index].to_i][:hospital_of_birth] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Birth Address
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:birth_address] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Birth Address
+  </td>
+  <td align="left" id="birthAddress">
+    	<%= @similar_records[params[:index].to_i][:birth_address] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village of Birth
+  </td>
+  <td align="left">
+  	  <%= @potential_duplicate[:village_of_birth] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village of Birth
+  </td>
+  <td align="left" id="village">
+    <%= @similar_records[params[:index].to_i][:village_of_birth] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    T/A of Birth
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:ta_of_birth] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    T/A of Birth
+  </td>
+  <td align="left" id="ta">
+    	<%= @similar_records[params[:index].to_i][:ta_of_birth] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    District of Birth
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:district_of_birth] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    District of Birth
+  </td>
+  <td align="left" id="district">
+    	<%= @similar_records[params[:index].to_i][:district_of_birth] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother First Name
+  </td>
+  <td align="left">
+    <%= @potential_duplicate[:mother_first_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother First Name
+  </td>
+  <td align="left" id="motherFName">
+    	<%= @similar_records[params[:index].to_i][:mother_first_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother Middle Name
+  </td>
+  <td align="left">
+   		<%= @potential_duplicate[:mother_middle_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother Middle Name
+  </td>
+  <td align="left" id="motherMName">
+   		<%= @similar_records[params[:index].to_i][:mother_middle_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother Last Name
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:mother_last_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Mother Last Name
+  </td>
+  <td align="left" id="motherLName">
+    	<%= @similar_records[params[:index].to_i][:mother_last_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father First Name
+  </td>
+  <td align="left">
+   		<%= @potential_duplicate[:mother_first_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father First Name
+  </td>
+  <td align="left" id="fatherFName">
+    	<%= @similar_records[params[:index].to_i][:father_first_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father Middle Name
+  </td>
+  <td align="left">
+   	<%= @potential_duplicate[:mother_middle_name] %>
+  </td>
+  <td></td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father Middle Name
+  </td>
+  <td align="left" id="fatherMName">
+    	<%= @similar_records[params[:index].to_i][:father_middle_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father Last Name
+  </td>
+  <td align="left">
+   	 <%= @potential_duplicate[:mother_last_name] %>
+  </td>
+  <td></td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Father Last Name
+  </td>
+  <td align="left" id="fatherLName">
+    	<%= @similar_records[params[:index].to_i][:father_last_name] %>
+  </td>
+</tr>
+
+</table>
+
+</div>
+
+<button id="btnApprove"
+		      class="green"
+		      style="position: absolute; right: 450px; bottom: 20px;"
+		      onclick="resolveDuplicate();">Resolve</button>
+<button id="btnNext"
+        class='blue'
+        style="position: absolute; right: 160px; bottom: 20px;"
+        onclick="nextSimilar()">Next Similar Record</button>
+<script type="text/javascript">
+	var current_index = parseInt("<%= params[:index]%>");
+	function nextSimilar(){
+		current_index = (current_index + 1) % parseInt("<%= @similar_records.count %>");
+		var path = location.href.slice(0,location.href.length - 1) + current_index;
+		console.log(path);
+		window.location.href = path;
+	}
+
+	function resolveDuplicate(){
+		var noaction = "window.location.href='/add_duplicate_comment/<%=params[:id]%>?"+
+					 "decision=DUPLICATE&next_path=<%=params[:next_path]%>'";
+		var action = "window.location.href='/add_duplicate_comment/<%=params[:id]%>?"+
+					   "decision=NOT DUPLICATE&next_path=<%=params[:next_path]%>'"
+		showMsgForAction("Decision", action, "600px", "Resolve duplicate", noaction)
+	}
+
+	function showMsgForAction(msg, action, width, title, noAction) {
+
+        showShield(undefined, true);
+
+        if (!__$("shield")) {
+
+            showShield(undefined, true);
+
+        }
+
+        var popup = document.createElement("div");
+        popup.id = "popup";
+        popup.style.position = "absolute";
+        popup.style.minHeight = "140px";
+        popup.style.top = "20%";
+        popup.style.width = (width == undefined ? "330px" : width);
+        popup.style.left = ((window.innerWidth - 330) / 2) + "px";
+        popup.style.backgroundColor = "#eee";
+        popup.style.zIndex = 1300;
+        popup.style.border = "2px outset #eee";
+        popup.style.borderRadius = "8px";
+        popup.style.padding = "3px";
+
+        document.body.appendChild(popup);
+
+        var table = document.createElement("table");
+        table.width = "100%";
+        table.style.fontSize = "24px";
+
+        popup.appendChild(table);
+
+        var tbody = document.createElement("tbody");
+
+        table.appendChild(tbody);
+
+        var tr1 = document.createElement("tr");
+        tr1.id = "header_row";
+
+        tbody.appendChild(tr1);
+
+        var th = document.createElement("th");
+        th.innerHTML = (title == undefined ? "Info" : title);
+        th.style.backgroundColor = "#345d8c";
+        th.id = "header_data";
+        th.style.color = "#fff";
+        th.style.borderTopLeftRadius = "8px";
+        th.style.borderTopRightRadius = "8px";
+        th.style.border = "1px outset #23538a !important";
+        th.colSpan = "3";
+        th.style.padding = "5px";
+        th.style.fontSize = "16px";
+        th.style.textAlign = "center";
+
+        tr1.appendChild(th);
+
+        var tr2 = document.createElement("tr");
+        tr2.id = "content_row";
+
+        tbody.appendChild(tr2);
+
+        var td1_1 = document.createElement("td");
+        td1_1.id = "content_data";
+        td1_1.colSpan = "3";
+        td1_1.style.padding = "5px";
+        td1_1.style.paddingTop = "5px";
+        td1_1.style.paddingBottom = "5px";
+        td1_1.align = "center";
+        td1_1.innerHTML = msg;
+        td1_1.style.lineHeight = "120%";
+        td1_1.style.fontSize = "20px";
+
+        tr2.appendChild(td1_1);
+
+        var tr3 = document.createElement("tr");
+        tr3.id = "footer_row";
+
+        tbody.appendChild(tr3);
+
+        var td2_1 = document.createElement("td");
+        td2_1.align = "center";
+        td2_1.style.padding = "10px";
+
+        tr3.appendChild(td2_1);
+
+        var td2_2 = document.createElement("td");
+        td2_2.id = "footer_data";
+        td2_2.align = "center";
+        td2_2.style.padding = "10px";
+
+        tr3.appendChild(td2_2);
+
+        // font-size: 14px; min-width: 100px; min-height: 20px; padding: 6px;
+        // margin: 10px; margin-right: 0px; float: right; font-weight: bold !important;
+
+
+        var btnApprove = document.createElement("button");
+        btnApprove.className = "green";
+        btnApprove.innerHTML = "Record is not a duplicate";
+        btnApprove.id = "reject"
+        btnApprove.style.cursor = "pointer";
+        btnApprove.style.fontSize = "14px";
+        btnApprove.style.minWidth = "120px";
+        btnApprove.style.minHeight = "20px";
+        btnApprove.style.padding = "6px";
+        btnApprove.style.margin = "10px";
+        btnApprove.style.fontWeight = "bold !important";
+        btnApprove.setAttribute("act", 'true');
+
+        td2_2.appendChild(btnApprove);
+
+        var btnNo = document.createElement("button");
+        btnNo.className = "blue";
+        btnNo.innerHTML = "Record is a duplicate";
+        btnNo.id = "approve"
+        btnNo.style.cursor = "pointer";
+        btnNo.style.fontSize = "14px";
+        btnNo.style.minWidth = "120px";
+        btnNo.style.minHeight = "20px";
+        btnNo.style.padding = "6px";
+        btnNo.style.margin = "10px";
+        btnNo.style.fontWeight = "bold !important";
+
+        td2_2.appendChild(btnNo);
+
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "red";
+        btnCancel.innerHTML = "Cancel";
+        btnCancel.id = "cancel"
+        btnCancel.style.cursor = "pointer";
+        btnCancel.style.fontSize = "14px";
+        btnCancel.style.minWidth = "120px";
+        btnCancel.style.minHeight = "20px";
+        btnCancel.style.padding = "6px";
+        btnCancel.style.margin = "10px";
+        btnCancel.style.fontWeight = "bold !important";
+
+        td2_2.appendChild(btnCancel);
+
+        btnNo.onmousedown = function () {
+
+            if (__$("popup")) {
+
+                document.body.removeChild(__$("popup"));
+
+            }
+
+            if (__$("shield")) {
+
+                document.body.removeChild(__$("shield"));
+
+            }
+
+            if (noAction != undefined) {
+              //window.location = "/resolve_duplicate_comment?"+params;
+                eval(noAction);
+
+            }
+
+        }
+
+        btnApprove.onmousedown = function () {
+
+            if (this.getAttribute('act') == 'true') {
+               eval(action);
+            }
+        }
+
+        btnCancel.onmousedown = function() {
+
+            if (__$("popup")) {
+
+                document.body.removeChild(__$("popup"));
+
+            }
+
+            if (__$("shield")) {
+
+                document.body.removeChild(__$("shield"));
+
+            }
+        }
+        if (__$("popup")) {
+
+            var c = checkCtrl(__$("popup"));
+
+            // [w, h, t, l]
+
+            if (c[1] > 240) {
+
+                __$("popup").style.top = ((window.innerHeight / 2) - (c[1] / 2)) + "px";
+
+            }
+
+            if (c[0] > 330) {
+
+                __$("popup").style.left = ((window.innerWidth / 2) - (c[0] / 2)) + "px";
+
+            }
+
+        }
+
+    }
+</script>

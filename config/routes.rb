@@ -91,6 +91,11 @@ Rails.application.routes.draw do
   get '/manage_cases' => "dc#manage_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
+  get '/view_duplicates' => "dc#view_duplicates"
+  get "/potential/duplicate/:id" => "dc#potential_duplicate"
+  get "/add_duplicate_comment/:id" => "dc#add_duplicate_comment"
+  get "/resolve_duplicate" =>"dc#resolve_duplicate"
+  
   get "/view_complete_cases" => "person#view_complete_cases"
   get "/view_incomplete_cases" => "person#view_incomplete_cases"
 
