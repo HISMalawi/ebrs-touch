@@ -120,13 +120,11 @@ module PersonService
     number_of_children_born_still_alive       = params[:number_of_children_born_still_alive].to_i rescue 1
     details_of_father_known 	                = params[:details_of_father_known]
 
-    
+    ################################ Is record a duplicate ##########################################################
+    is_record_a_duplicate = params[:person][:duplicate] rescue nil
   ################################################## Recording client details #####################################
  
  if SETTINGS["application_mode"] == "FC"
-
-  ################################ Is record a duplicate ##########################################################
-  is_record_a_duplicate = params[:person][:diplicate] rescue nil
 
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
@@ -578,7 +576,7 @@ elsif SETTINGS["application_mode"] == "DC"
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
-            raise informant_current_village.inspect
+            #raise informant_current_village.inspect
 
             PersonAddress.create(person_id: core_person_informant.id,
                                  current_village: Location.where(name: informant_current_village).first.location_id,
@@ -598,10 +596,16 @@ elsif SETTINGS["application_mode"] == "DC"
   ############################################## Informant details end #############################################
   ############################################## person status record ####################################################
  if is_record_a_duplicate.present? 
-     if application_mode == 'Facility'
+    if SETTINGS["application_mode"] == "FC"
       PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
     else
-       PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+      PersonRecordStatus.create(status_id: Status.where(name: 'DC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+    end
+    potential_duplicate = PotentialDuplicate.create(person_id: core_person.id,created_at: (Time.now))
+    if potential_duplicate.present?
+         is_record_a_duplicate.split("|").each do |id|
+            potential_duplicate.create_duplicate(id)
+         end
     end
  else
           

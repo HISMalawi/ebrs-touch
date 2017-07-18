@@ -5663,6 +5663,123 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+function duplicatesPopup(people,checkbox){
+       if (__$("msg.shield")) {
+            document.body.removeChild(__$("msg.shield"));
+        }
+
+        var shield = document.createElement("div");
+        shield.style.position = "absolute";
+        shield.style.position = "absolute";
+        shield.style.top = "0px";
+        shield.style.left = "0px";
+        shield.style.width = "100%";
+        shield.style.height = "100%";
+        shield.id = "msg.shield";
+        shield.style.backgroundColor = "rgba(128,128,128,0.5)";
+        shield.style.zIndex = 1050;
+        document.body.appendChild(shield);
+
+        var width = 700;
+        var height = 500;
+
+        var div = document.createElement("div");
+        div.id = "msg.popup";
+        div.style.position = "absolute";
+        div.style.width = width + "px";
+        div.style.height = height + "px";
+        div.style.backgroundColor = "#ffffff";
+        div.style.borderRadius = "1px";
+        div.style.left = "calc(50% - " + (width / 2) + "px)";
+        div.style.top = "calc(50% - " + (height * 0.6) + "px)";
+        div.style.border = "1px outset #fff";
+        div.style.boxShadow = "5px 2px 5px 0px rgba(0,0,0,0.75)";
+        div.style.fontFamily = "arial, helvetica, sans-serif";
+        div.style.MozUserSelect = "none";
+
+        shield.appendChild(div);
+
+        var table = document.createElement("table");
+        table.style.marginTop = "0.5%";
+        table.style.border = "1px solid gray";
+        table.style.height = "400px";
+        table.style.width = "98%";
+        table.style.margin ="auto";
+        div.appendChild(table);
+
+        var tr = document.createElement("tr");
+        tr.style.height = "30px";
+        table.appendChild(tr);
+        var th =  document.createElement("th");
+        th.colSpan = "3";
+        th.style.padding = "0.8em";
+        th.style.color = "#ffffff";
+        th.style.fontSize = "1.2em";
+        th.style.backgroundColor = "#526a83";
+        th.innerHTML = "The record is potential duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
+        tr.appendChild(th);
+        if(people){
+            for(var i = 0; i < people.length ; i++){
+              var tr = document.createElement("tr");
+              table.appendChild(tr);
+              tr.style.height = "25px";
+              var td = document.createElement("td");
+              td.style.borderBottom = "1px dotted gray";
+              td.style.width = "5%";
+              td.style.padding = "0.5em";
+              td.innerHTML = (i + 1);
+
+              tr.appendChild(td);
+              var td = document.createElement("td");
+              td.style.padding = "0.5em";
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px dotted gray";
+              td.innerHTML =people[i]["_source"]["content"];
+              tr.appendChild(td);
+            }
+        }
+        var tr = document.createElement("tr");
+        table.appendChild(tr);
+
+        var footdiv = document.createElement("div");
+        footdiv.style.width = "100%";
+        footdiv.style.height = "25%";
+        footdiv.style.textAlign = "center";
+        div.appendChild(footdiv);
+
+        var cancel = document.createElement("button");
+        cancel.innerHTML = "Cancel";
+        cancel.className = "red";
+        cancel.id = "popup.cancel"
+        cancel.style.height = "40px";
+        cancel.style.width = "15%"
+        cancel.style.marginRight ="10%";
+        cancel.onclick = function () {
+           document.body.removeChild(shield);
+        }
+        footdiv.appendChild(cancel);
+
+        var ok = document.createElement("button");
+        ok.innerHTML = "Proceed";
+        ok.className = "blue";
+        ok.id = "popup.ok"
+        ok.style.height = "40px";
+        ok.style.width = "15%"
+        ok.onclick = function () {
+           ids = people.map(function(person){
+                return person["_id"]
+           }).join("|");
+           __$("person_duplicate").value = ids;
+           document.body.removeChild(shield);
+           document.forms[0].submit();
+        }
+        footdiv.appendChild(ok);
+
+
+
+
+}
+
 function submitAfterSummary() {
 
     /*summaryHash = {
@@ -5691,10 +5808,12 @@ function submitAfterSummary() {
     }
 
     $.getJSON("/search_similar_record",data,function(response){
-        if(response.response && response.response.length != 0 && false){
-            console.log(response);
-            return
+        if(response.response && response.response.length != 0){
+            
+            duplicatesPopup(response.response);
+
             hideSpinner();
+
         }else{
             var msg = "";
 
