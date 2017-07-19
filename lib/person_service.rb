@@ -120,11 +120,11 @@ module PersonService
     number_of_children_born_still_alive       = params[:number_of_children_born_still_alive].to_i rescue 1
     details_of_father_known 	                = params[:details_of_father_known]
 
-    
+    ################################ Is record a duplicate ##########################################################
+    is_record_a_duplicate = params[:person][:duplicate] rescue nil
   ################################################## Recording client details #####################################
  
  if SETTINGS["application_mode"] == "FC"
-
 
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
@@ -142,7 +142,7 @@ module PersonService
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
 
-       
+
   
     PersonBirthDetail.create(
       person_id:                                core_person.id,
@@ -378,12 +378,12 @@ elsif SETTINGS["application_mode"] == "DC"
  
     
     
-     loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
-     loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
+     #loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
+     #loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
      
     if hospital_of_birth.blank?
 
-       birth_location_id = Location.where(location_id: loc_id).first.location_id
+       birth_location_id = self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id
 
     else
 
@@ -395,7 +395,7 @@ elsif SETTINGS["application_mode"] == "DC"
     PersonBirthDetail.create(
       person_id:                                core_person.id,
       birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
-      place_of_birth:                           Location.where(location_id: loc_id).first.location_id,
+      place_of_birth:                           self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id,
       birth_location_id:                        birth_location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
@@ -576,7 +576,7 @@ elsif SETTINGS["application_mode"] == "DC"
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
-            raise informant_current_village.inspect
+            #raise informant_current_village.inspect
 
             PersonAddress.create(person_id: core_person_informant.id,
                                  current_village: Location.where(name: informant_current_village).first.location_id,
@@ -595,10 +595,22 @@ elsif SETTINGS["application_mode"] == "DC"
                
   ############################################## Informant details end #############################################
   ############################################## person status record ####################################################
+ if is_record_a_duplicate.present? 
+    if SETTINGS["application_mode"] == "FC"
+      PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+    else
+      PersonRecordStatus.create(status_id: Status.where(name: 'DC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+    end
+    potential_duplicate = PotentialDuplicate.create(person_id: core_person.id,created_at: (Time.now))
+    if potential_duplicate.present?
+         is_record_a_duplicate.split("|").each do |id|
+            potential_duplicate.create_duplicate(id)
+         end
+    end
+ else
           
-          
-               PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
-    
+    PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
+ end   
         
   ############################################# Person status record (end) ##############################################
   ############################################### person address details ###############################################
@@ -651,6 +663,7 @@ end
   def self.query_for_display(states)
 
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
+
     person_type = PersonType.where(name: 'Client').first
 
 
@@ -669,16 +682,18 @@ end
     
 
     results = []
+
     main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       next if mother.blank?
       next if mother.first_name.blank?
-      next if father.blank?
-      next if father.first_name.blank?
+      #The form treat Father as optional
+      #next if father.blank?
+      #next if father.first_name.blank?
       name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
       mother_name   = ("#{mother.first_name} #{mother.middle_name} #{mother.last_name}")
-      father_name   = ("#{father.first_name} #{father.middle_name} #{father.last_name}")
+      father_name   = ("#{father.first_name rescue ''} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
 
       results << {
           'id' => data.person_id,

@@ -273,11 +273,48 @@ class PersonController < ApplicationController
   def create
 
     type_of_birth = params[:person][:type_of_birth]
+    
+     if type_of_birth == 'Twin'
+
+        type_of_birth = 'First Twin'
+        params[:person][:type_of_birth] = 'First Twin'
+
+     elsif type_of_birth == 'Tripplet'
+      
+         type_of_birth = 'First Tripplet'  
+         params[:person][:type_of_birth] = 'First Tripplet'                                         
+     end
+
+     
 
     @person = PersonService.create_record(params)
+
+    if @person.present?
+      person = {}
+      person["id"] = @person.person_id
+      person["first_name"]= params[:person][:first_name]
+      person["last_name"] =  params[:person][:last_name]
+      person["middle_name"] = params[:person][:middle_name]
+      person["gender"] = params[:person][:gender]
+      person["birthdate"]= params[:person][:birthdate]
+      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
+      person["nationality"]=  params[:person][:mother][:citizenship]
+      person["place_of_birth"] = params[:person][:place_of_birth]
+      person["district"] = params[:person][:birth_district]
+      person["mother_first_name"]= params[:person][:mother][:first_name]
+      person["mother_last_name"] =  params[:person][:mother][:last_name]
+      person["mother_middle_name"] = params[:person][:mother][:middle_name]
+      person["father_first_name"]= params[:person][:father][:first_name]
+      person["father_last_name"] =  params[:person][:father][:last_name]
+      person["father_middle_name"] = params[:person][:father][:middle_name]
+
+      SimpleElasticSearch.add(person)
+    else
+
+    end
   
 
-    if ["Twin", "Triplet", "Second Triplet"].include?(type_of_birth.strip)
+    if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
       
       redirect_to "/person/new?id=#{@person.id}"
 
@@ -297,6 +334,38 @@ class PersonController < ApplicationController
   end
 
   #########################################################################
+  ############### Duplicate search with elastic search ####################
+ def search_similar_record
+
+      person = {
+                      "first_name"=>params[:first_name], 
+                      "last_name" => params[:last_name],
+                      "middle_name" => (params[:middle_name] rescue nil),
+                      "gender" => params[:gender],
+                      "district" => params[:birth_district],
+                      "birthdate"=> (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time),
+                      "mother_last_name" => (params[:mother_last_name] rescue nil),
+                      "mother_middle_name" => (params[:mother_middle_name] rescue nil),
+                      "mother_first_name" => (params[:mother_first_name] rescue nil),
+                      "father_last_name" => (params[:father_last_name] rescue nil),
+                      "father_middle_name" => (params[:father_middle_name] rescue nil),
+                      "father_last_name" => (params[:father_last_name] rescue nil)
+                  }
+
+      people = []
+      
+      results = SimpleElasticSearch.query_duplicate(person,SETTINGS['duplicate_precision'])
+
+      people = results
+
+      if people.count == 0
+
+        render :text => {:response => false}.to_json
+      else
+
+        render :text => {:response => people}.to_json
+      end 
+  end
   
   def get_names
     entry = params["search"].soundex

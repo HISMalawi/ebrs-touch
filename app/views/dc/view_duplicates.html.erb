@@ -1,0 +1,64 @@
+<style>
+    .action-buttons button , .action-buttons td {
+        margin: 0px;
+    }
+    .action-button {
+        margin: 0px;
+        padding: 0px;
+        height: 30px;
+    }
+</style>
+<div class='data-table-container'>
+
+<table id="example" class="display" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <% if (@display_ben rescue false) %>
+        <th style="text-align: left;">BEN</th>
+      <% end %>
+      <th style="text-align: left;min-width:16%;">Name</th>
+      <th style="text-align: left;min-width:16%;">Mother's Details</th>
+      <th style="text-align: left; min-width:16%;">Father's Details</th>
+      <th style="text-align: center; min-width:16%;">Reporting Date</th>
+      <th style="text-align: center;min-width: 10%;">Status</th>
+      <th>&nbsp;</th>
+  </tr>
+  </thead>
+    <%(@records || []).each do |record|%>
+      <tr>
+        <% if (@display_ben rescue false) %>
+          <td style="text-align: left;"><%= '' %></td>
+        <% end %>
+        <td style="text-align: left;"><%= record['name'] %></td>
+        <td style="text-align: left;"><%= record['mother_name'] %></td>
+        <td style="text-align: left;"><%= record['father_name'] %></td>
+        <td style="text-align: center;"><%= record['date_of_reporting'] %></td>
+        <td style="text-align: center;"><%=  record['status']%></td>
+        <td style="background-color: white;">
+          <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
+            <tr>
+              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/potential/duplicate/<%= record['id']%>?next_path=/view_duplicates&index=0'">
+                <%= image_tag "view.png", class: 'btn-images' %></button>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    <%end%>
+  <tbody>
+  </tbody>
+</table>
+
+</div>
+
+<script>
+
+$(document).ready(function() {
+    $('#example').DataTable({
+        "pageLength" : 5,
+        "lengthChange": false,
+        "bInfo": false
+    });
+} );
+
+</script>

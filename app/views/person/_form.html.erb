@@ -121,10 +121,10 @@
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "First Twin" ? "selected" : "") %> >Twin</option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
 
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >Triplet</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "First Triplet" ? "selected" : "") %> >Triplet</option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
 

@@ -5663,6 +5663,123 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+function duplicatesPopup(people,checkbox){
+       if (__$("msg.shield")) {
+            document.body.removeChild(__$("msg.shield"));
+        }
+
+        var shield = document.createElement("div");
+        shield.style.position = "absolute";
+        shield.style.position = "absolute";
+        shield.style.top = "0px";
+        shield.style.left = "0px";
+        shield.style.width = "100%";
+        shield.style.height = "100%";
+        shield.id = "msg.shield";
+        shield.style.backgroundColor = "rgba(128,128,128,0.5)";
+        shield.style.zIndex = 1050;
+        document.body.appendChild(shield);
+
+        var width = 700;
+        var height = 500;
+
+        var div = document.createElement("div");
+        div.id = "msg.popup";
+        div.style.position = "absolute";
+        div.style.width = width + "px";
+        div.style.height = height + "px";
+        div.style.backgroundColor = "#ffffff";
+        div.style.borderRadius = "1px";
+        div.style.left = "calc(50% - " + (width / 2) + "px)";
+        div.style.top = "calc(50% - " + (height * 0.6) + "px)";
+        div.style.border = "1px outset #fff";
+        div.style.boxShadow = "5px 2px 5px 0px rgba(0,0,0,0.75)";
+        div.style.fontFamily = "arial, helvetica, sans-serif";
+        div.style.MozUserSelect = "none";
+
+        shield.appendChild(div);
+
+        var table = document.createElement("table");
+        table.style.marginTop = "0.5%";
+        table.style.border = "1px solid gray";
+        table.style.height = "400px";
+        table.style.width = "98%";
+        table.style.margin ="auto";
+        div.appendChild(table);
+
+        var tr = document.createElement("tr");
+        tr.style.height = "30px";
+        table.appendChild(tr);
+        var th =  document.createElement("th");
+        th.colSpan = "3";
+        th.style.padding = "0.8em";
+        th.style.color = "#ffffff";
+        th.style.fontSize = "1.2em";
+        th.style.backgroundColor = "#526a83";
+        th.innerHTML = "The record is potential duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
+        tr.appendChild(th);
+        if(people){
+            for(var i = 0; i < people.length ; i++){
+              var tr = document.createElement("tr");
+              table.appendChild(tr);
+              tr.style.height = "25px";
+              var td = document.createElement("td");
+              td.style.borderBottom = "1px dotted gray";
+              td.style.width = "5%";
+              td.style.padding = "0.5em";
+              td.innerHTML = (i + 1);
+
+              tr.appendChild(td);
+              var td = document.createElement("td");
+              td.style.padding = "0.5em";
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px dotted gray";
+              td.innerHTML =people[i]["_source"]["content"];
+              tr.appendChild(td);
+            }
+        }
+        var tr = document.createElement("tr");
+        table.appendChild(tr);
+
+        var footdiv = document.createElement("div");
+        footdiv.style.width = "100%";
+        footdiv.style.height = "25%";
+        footdiv.style.textAlign = "center";
+        div.appendChild(footdiv);
+
+        var cancel = document.createElement("button");
+        cancel.innerHTML = "Cancel";
+        cancel.className = "red";
+        cancel.id = "popup.cancel"
+        cancel.style.height = "40px";
+        cancel.style.width = "15%"
+        cancel.style.marginRight ="10%";
+        cancel.onclick = function () {
+           document.body.removeChild(shield);
+        }
+        footdiv.appendChild(cancel);
+
+        var ok = document.createElement("button");
+        ok.innerHTML = "Proceed";
+        ok.className = "blue";
+        ok.id = "popup.ok"
+        ok.style.height = "40px";
+        ok.style.width = "15%"
+        ok.onclick = function () {
+           ids = people.map(function(person){
+                return person["_id"]
+           }).join("|");
+           __$("person_duplicate").value = ids;
+           document.body.removeChild(shield);
+           document.forms[0].submit();
+        }
+        footdiv.appendChild(ok);
+
+
+
+
+}
+
 function submitAfterSummary() {
 
     /*summaryHash = {
@@ -5672,90 +5789,117 @@ function submitAfterSummary() {
      }*/
 
     showSpinner();
+    var duplicate_search = [
+                                        "person_first_name",
+                                        "person_last_name",
+                                        "person_middle_name",
+                                        "person_birth_district",
+                                        "person_birthdate",
+                                        "person_gender",
+                                        "person_mother_last_name",
+                                        "person_mother_first_name",
+                                        "person_mother_middle_name",
+                                        "person_father_first_name",
+                                        "person_father_last_name",
+                                        "person_father_middle_name"]
+    var data = {}
+    for(var i = 0 ; i < duplicate_search.length ; i++){
+            data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+    }
 
-    var msg = "";
+    $.getJSON("/search_similar_record",data,function(response){
+        if(response.response && response.response.length != 0){
+            
+            duplicatesPopup(response.response);
 
-    var parent = document.createElement("div");
+            hideSpinner();
 
-    var div = document.createElement("div");
-    div.style.height = "300px";
-    div.style.overflow = "auto";
+        }else{
+            var msg = "";
 
-    parent.appendChild(div);
+            var parent = document.createElement("div");
 
-    var table = document.createElement("table");
-    table.style.width = "100%";
+            var div = document.createElement("div");
+            div.style.height = "300px";
+            div.style.overflow = "auto";
 
-    div.appendChild(table);
+            parent.appendChild(div);
 
-    var tbody = document.createElement("tbody");
+            var table = document.createElement("table");
+            table.style.width = "100%";
 
-    table.appendChild(tbody);
+            div.appendChild(table);
 
-    var keys = Object.keys(summaryHash);
+            var tbody = document.createElement("tbody");
 
-    for (var i = 0; i < keys.length; i++) {
+            table.appendChild(tbody);
 
-        var tr = document.createElement("tr");
+            var keys = Object.keys(summaryHash);
 
-        tbody.appendChild(tr);
+            for (var i = 0; i < keys.length; i++) {
 
-        var td1 = document.createElement("th");
-        td1.align = "right";
-        td1.innerHTML = keys[i];
+                var tr = document.createElement("tr");
 
-        tr.appendChild(td1);
+                tbody.appendChild(tr);
 
-        var td2 = document.createElement("td");
-        td2.innerHTML = ":";
+                var td1 = document.createElement("th");
+                td1.align = "right";
+                td1.innerHTML = keys[i];
 
-        tr.appendChild(td2);
+                tr.appendChild(td1);
 
-        var td3 = document.createElement("td");
+                var td2 = document.createElement("td");
+                td2.innerHTML = ":";
 
-        var label = "";
+                tr.appendChild(td2);
 
-        for (var j = 0; j < summaryHash[keys[i]].length; j++) {
+                var td3 = document.createElement("td");
 
-            if (__$(summaryHash[keys[i]][j])) {
+                var label = "";
 
-                if (label.trim().length > 0) {
+                for (var j = 0; j < summaryHash[keys[i]].length; j++) {
 
-                    label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
+                    if (__$(summaryHash[keys[i]][j])) {
 
-                } else {
+                        if (label.trim().length > 0) {
 
-                    label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
+                            label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
+
+                        } else {
+
+                            label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
+
+                        }
+
+                    }
 
                 }
 
+                label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
+
+                if (label == '')
+                  label = "<span class='blank'>N/A</span>"
+
+                if (keys[i].match(/weight/i))
+                  label = label + " Kg"
+
+                td3.innerHTML = label;
+
+                tr.appendChild(td3);
+
             }
 
+            var pos = checkCtrl(parent);
+
+            msg = parent.innerHTML;
+
+            var action = "document.forms[0].submit();";
+
+            hideSpinner();
+
+            showMsgForAction(msg, action, "600px", "Captured Data Summary");
         }
-
-        label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
-
-        if (label == '')
-          label = "<span class='blank'>N/A</span>"
-
-        if (keys[i].match(/weight/i))
-          label = label + " Kg"
-
-        td3.innerHTML = label;
-
-        tr.appendChild(td3);
-
-    }
-
-    var pos = checkCtrl(parent);
-
-    msg = parent.innerHTML;
-
-    var action = "document.forms[0].submit();";
-
-    hideSpinner();
-
-    showMsgForAction(msg, action, "600px", "Captured Data Summary");
+    });
 
 }
 

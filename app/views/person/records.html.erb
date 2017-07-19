@@ -78,7 +78,11 @@
 <% end %>
 
 $(document).ready(function() {
-    $('#example').DataTable();
+    $('#example').DataTable({
+        "pageLength" : 5,
+        "lengthChange": false,
+        "bInfo": false
+    });
 } );
 
 </script>

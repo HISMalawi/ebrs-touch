@@ -1,3 +1,4 @@
 application_mode: FC #FC|DC
 location_id: #facility_id |district_id [location_id of the health facility or district_id in location table]
 enable_role_privileges: true # only works when in development mode
+duplicate_precision: 80
