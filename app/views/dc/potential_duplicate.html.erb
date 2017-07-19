@@ -367,6 +367,11 @@
 		      class="green"
 		      style="position: absolute; right: 450px; bottom: 20px;"
 		      onclick="resolveDuplicate();">Resolve</button>
+<%else%>
+	<button id="btnApprove"
+		      class="green"
+		      style="position: absolute; right: 450px; bottom: 20px;"
+		      onclick="viewComment()">View Comment</button>
 <%end%>
 <button id="btnNext"
         class='blue'
@@ -387,6 +392,10 @@
 		var action = "window.location.href='/add_duplicate_comment/<%=params[:id]%>?"+
 					   "decision=NOT DUPLICATE&next_path=<%=params[:next_path]%>'"
 		showMsgForAction("Decision", action, "600px", "Resolve duplicate", noaction)
+	}
+
+	function viewComment(){
+		showMsgPop("<%=  @potential_records.comment%>", "Comment","600px", null)
 	}
 
 	function showMsgForAction(msg, action, width, title, noAction) {
@@ -567,6 +576,156 @@
             if (__$("shield")) {
 
                 document.body.removeChild(__$("shield"));
+
+            }
+        }
+        if (__$("popup")) {
+
+            var c = checkCtrl(__$("popup"));
+
+            // [w, h, t, l]
+
+            if (c[1] > 240) {
+
+                __$("popup").style.top = ((window.innerHeight / 2) - (c[1] / 2)) + "px";
+
+            }
+
+            if (c[0] > 330) {
+
+                __$("popup").style.left = ((window.innerWidth / 2) - (c[0] / 2)) + "px";
+
+            }
+
+        }
+
+    }
+
+	function showMsgPop(msg,title,width,action) {
+
+        showShield(undefined, true);
+
+        if (!__$("shield")) {
+
+            showShield(undefined, true);
+
+        }
+
+        var popup = document.createElement("div");
+        popup.id = "popup";
+        popup.style.position = "absolute";
+        popup.style.minHeight = "140px";
+        popup.style.top = "20%";
+        popup.style.width = (width == undefined ? "330px" : width);
+        popup.style.left = ((window.innerWidth - 330) / 2) + "px";
+        popup.style.backgroundColor = "#eee";
+        popup.style.zIndex = 1300;
+        popup.style.border = "2px outset #eee";
+        popup.style.borderRadius = "8px";
+        popup.style.padding = "3px";
+
+        document.body.appendChild(popup);
+
+        var table = document.createElement("table");
+        table.width = "100%";
+        table.style.fontSize = "24px";
+
+        popup.appendChild(table);
+
+        var tbody = document.createElement("tbody");
+
+        table.appendChild(tbody);
+
+        var tr1 = document.createElement("tr");
+        tr1.id = "header_row";
+
+        tbody.appendChild(tr1);
+
+        var th = document.createElement("th");
+        th.innerHTML = (title == undefined ? "Info" : title);
+        th.style.backgroundColor = "#345d8c";
+        th.id = "header_data";
+        th.style.color = "#fff";
+        th.style.borderTopLeftRadius = "8px";
+        th.style.borderTopRightRadius = "8px";
+        th.style.border = "1px outset #23538a !important";
+        th.colSpan = "3";
+        th.style.padding = "5px";
+        th.style.fontSize = "16px";
+        th.style.textAlign = "center";
+
+        tr1.appendChild(th);
+
+        var tr2 = document.createElement("tr");
+        tr2.id = "content_row";
+
+        tbody.appendChild(tr2);
+
+        var td1_1 = document.createElement("td");
+        td1_1.id = "content_data";
+        td1_1.colSpan = "3";
+        td1_1.style.padding = "5px";
+        td1_1.style.paddingTop = "5px";
+        td1_1.style.paddingBottom = "5px";
+        td1_1.align = "center";
+        td1_1.innerHTML = msg;
+        td1_1.style.lineHeight = "120%";
+        td1_1.style.fontSize = "20px";
+
+        tr2.appendChild(td1_1);
+
+        var tr3 = document.createElement("tr");
+        tr3.id = "footer_row";
+
+        tbody.appendChild(tr3);
+
+        var td2_1 = document.createElement("td");
+        td2_1.align = "center";
+        td2_1.style.padding = "10px";
+
+        tr3.appendChild(td2_1);
+
+        var td2_2 = document.createElement("td");
+        td2_2.id = "footer_data";
+        td2_2.align = "center";
+        td2_2.style.padding = "10px";
+
+        tr3.appendChild(td2_2);
+
+        // font-size: 14px; min-width: 100px; min-height: 20px; padding: 6px;
+        // margin: 10px; margin-right: 0px; float: right; font-weight: bold !important;
+
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "blue";
+        btnCancel.innerHTML = "OK";
+        btnCancel.id = "cancel"
+        btnCancel.style.cursor = "pointer";
+        btnCancel.style.fontSize = "14px";
+        btnCancel.style.minWidth = "120px";
+        btnCancel.style.minHeight = "20px";
+        btnCancel.style.padding = "6px";
+        btnCancel.style.margin = "10px";
+        btnCancel.style.fontWeight = "bold !important";
+
+        td2_2.appendChild(btnCancel);
+
+        btnCancel.onmousedown = function() {
+
+            if (__$("popup")) {
+
+                document.body.removeChild(__$("popup"));
+
+            }
+
+            if (__$("shield")) {
+
+                document.body.removeChild(__$("shield"));
+
+            }
+
+            if (action != undefined) {
+              //window.location = "/resolve_duplicate_comment?"+params;
+                eval(noAction);
 
             }
         }

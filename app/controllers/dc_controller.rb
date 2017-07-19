@@ -55,9 +55,9 @@ end
 def potential_duplicate
   @section = "Resolve Duplicates"
   @potential_duplicate =  person_details(params[:id])
-  potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last.duplicate_records
+  @potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
   @similar_records = []
-  potential_records.each do |record|
+  @potential_records.duplicate_records.each do |record|
     @similar_records << person_details(record.person_id)
   end
   render :layout => "facility"
