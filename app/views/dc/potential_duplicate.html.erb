@@ -362,11 +362,12 @@
 </table>
 
 </div>
-
+<% if @potential_duplicate[:status] != "DC-DUPLICATE" %>
 <button id="btnApprove"
 		      class="green"
 		      style="position: absolute; right: 450px; bottom: 20px;"
 		      onclick="resolveDuplicate();">Resolve</button>
+<%end%>
 <button id="btnNext"
         class='blue'
         style="position: absolute; right: 160px; bottom: 20px;"

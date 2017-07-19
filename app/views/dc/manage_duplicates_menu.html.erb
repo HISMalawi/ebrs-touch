@@ -17,7 +17,7 @@
       <tr>
         <td rowspan="2">
           <img src="<%= @icoFolder %>" height="60"/> <br />
-          <span class="count"><%= @stats['DC-DUPLICATE']%></span>
+          <span class="count"><%= @stats['DC-POTENTIAL DUPLICATE']%></span>
         </td>
         <td style="height: 30px;">
           Resolve Potential Duplicates
@@ -33,12 +33,12 @@
 <% end %>  
 
 <% if  @folders.include?("Voided Duplicate Cases") %>
-  <div class="button child_menu manage_duplicates"  onclick="window.location = '/view_resolved_duplicates'" tag=1>
+  <div class="button child_menu manage_duplicates"  onclick="window.location = '/duplicates'" tag=1>
     <table style="text-align: left;">
       <tr>
         <td rowspan="2">
           <img src="<%= @icoFolder %>" height="60"/><br />
-          <span class="count"><%= @stats['DC-VOIDED']%></span>
+          <span class="count"><%= @stats['DC-DUPLICATE']%></span>
         </td>
         <td style="height: 30px;">
           Voided Duplicate Cases

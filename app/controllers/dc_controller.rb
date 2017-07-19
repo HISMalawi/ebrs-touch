@@ -85,6 +85,17 @@ def resolve_duplicate
      end
 end
 
+def duplicates
+    @states = ['DC-DUPLICATE']
+    @section = "Resolved Duplicates"
+   # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "dc/view_duplicates", :layout => "data_table"
+end
+
+
 def incomplete_case_comment
 
     @child_id = params[:id]
