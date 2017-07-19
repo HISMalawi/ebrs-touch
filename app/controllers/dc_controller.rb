@@ -55,9 +55,9 @@ end
 def potential_duplicate
   @section = "Resolve Duplicates"
   @potential_duplicate =  person_details(params[:id])
-  potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last.duplicate_records
+  @potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
   @similar_records = []
-  potential_records.each do |record|
+  @potential_records.duplicate_records.each do |record|
     @similar_records << person_details(record.person_id)
   end
   render :layout => "facility"
@@ -84,6 +84,17 @@ def resolve_duplicate
        
      end
 end
+
+def duplicates
+    @states = ['DC-DUPLICATE']
+    @section = "Resolved Duplicates"
+   # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "dc/view_duplicates", :layout => "data_table"
+end
+
 
 def incomplete_case_comment
 
