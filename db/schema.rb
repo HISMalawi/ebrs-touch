@@ -355,6 +355,30 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "created_at"
   end
 
+  ############################ Resoving Potential Duplicate tables ##########################################################
+
+  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
+    t.integer  "person_id", limit: 10, null: false
+    t.string   "resolved",      limit: 255, null: false
+    t.string   "decision",      limit: 255, null: false
+    t.string   "comment",      limit: 255, null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at"
+  end
+
+  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
+
+  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
+    t.integer  "person_id", limit: 4
+    t.string   "potential_duplicate_id",      limit: 4
+    t.datetime "created_at"
+  end
+
+  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
+  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+
+  ##########################################################################################################################
+
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree

@@ -591,7 +591,7 @@ elsif SETTINGS["application_mode"] == "DC"
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
                                  residential_country: Location.where(name: 'Malawi').first.location_id)
 
-   end
+  end
                
   ############################################## Informant details end #############################################
   ############################################## person status record ####################################################

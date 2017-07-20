@@ -43,7 +43,7 @@ def manage_duplicates_menu
 end
 
 def view_duplicates
-    @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE']
+    @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE']
     @section = "Potential Duplicates"
    # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
@@ -68,25 +68,30 @@ def add_duplicate_comment
 end
 
 def resolve_duplicate
-     potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i),:resolved => 0).last
+
+     potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
         potential_records.resolved = 1
         potential_records.decision = params[:decision]
         potential_records.comment = params[:reason]
+        potential_records.resolved_at = Time.now
         potential_records.save
+
+
         if params[:decision] == "NOT DUPLICATE"
            PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
            redirect_to params[:next_path]
         else
-           PersonRecordStatus.new_record_state(params[:id], 'DC-DUPLICATE', params[:reason])
+           PersonRecordStatus.new_record_state(params[:id], 'DC-VOIDED', params[:reason])
            redirect_to params[:next_path]
         end
-       
+    else
+      redirect_to params[:next_path]
      end
 end
 
 def duplicates
-    @states = ['DC-DUPLICATE']
+    @states = ['DC-VOIDED']
     @section = "Resolved Duplicates"
    # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
