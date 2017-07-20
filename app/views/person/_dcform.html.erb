@@ -1025,17 +1025,17 @@
         </select>
       </div>
 
-      <div class="field">
+       <div class="field">
         <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
         <br>
-        <input type="hidden" name="registration_type" id="registration_type">
+         <input type="hidden" name="registration_type" id="registration_type">
         <%= (f.text_field :acknowledgement_of_receipt_date,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onUnload => 'updateRegistrationType();setTimeout("checkValues()", 500)',
-                          :absolute_min => 'reportingDate()',
-                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+                          :tt_onUnload => 'updateRegistrationType()',
+                          :absolute_min => 'reportingDate();',
+                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>
 
       </div>
 
