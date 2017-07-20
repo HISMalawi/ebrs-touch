@@ -74,6 +74,7 @@ def resolve_duplicate
         potential_records.resolved = 1
         potential_records.decision = params[:decision]
         potential_records.comment = params[:reason]
+        potential_records.resolved_at = Time.now
         potential_records.save
 
 
