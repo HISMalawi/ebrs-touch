@@ -289,7 +289,7 @@ class PersonController < ApplicationController
 
     @person = PersonService.create_record(params)
 
-    if @person.present?
+    if @person.present? && SETTINGS['potential_search']
       person = {}
       person["id"] = @person.person_id
       person["first_name"]= params[:person][:first_name]
@@ -353,8 +353,12 @@ class PersonController < ApplicationController
                   }
 
       people = []
-      
-      results = SimpleElasticSearch.query_duplicate(person,SETTINGS['duplicate_precision'])
+
+      if SETTINGS['potential_search']
+        results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+      else
+        results = []
+      end
 
       people = results
 
