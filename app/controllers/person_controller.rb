@@ -43,13 +43,16 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
 
     @mother = Person.find(mother_id)
+    @father = Person.find(father_id)
     @mother_name = PersonName.find_by_person_id(mother_id)
     @father_name = PersonName.find_by_person_id(father_id)
     @mother_address = PersonAddress.find_by_person_id(mother_id)
+    @father_address = PersonAddress.find_by_person_id(father_id)
 
 
     @informant = Person.find(@informant_id)
     @informant_name = PersonName.find_by_person_id(@informant_id)
+    @informant_address = PersonName.find_by_person_id(@informant_id)
 
   #raise @informant.inspect
 
@@ -110,7 +113,7 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "mandatory"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                ["Date of birth", "mandatory"] => "#{@mother.birthdate rescue nil}",
+                ["Date of birth", "mandatory"] => "#{Person.find_by_person_id(mother_id).name rescue nil}",
                 "Nationality" => "#{Location.find(@mother_address.citizenship).name rescue nil}",
                 "ID Number" => "#{@person.mother.id_number rescue nil}"
             },
@@ -141,34 +144,33 @@ class PersonController < ApplicationController
                 "Level of education" => "#{LevelOfEducation.find(@birth_details.level_of_education_id).name rescue nil}"
             }
         ],
-=begin
-    r = {
+
         "Details of Child's Father" => [
             {
-                parents_married(@person, "First Name") => "#{@person.father.first_name rescue nil}",
-                "Other Name" => "#{@person.father.middle_name rescue nil}",
-                parents_married(@person, "Surname") => "#{@person.father.last_name rescue nil}"
+                parents_married(@birth_details.parents_married_to_each_other, "First Name") => "#{@father_name.first_name rescue nil}",
+                "Other Name" => "#{@father_name.middle_name rescue nil}",
+                parents_married(@birth_details.parents_married_to_each_other, "Surname") => "#{@father_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{@person.father.birthdate rescue nil}",
-                "Nationality" => "#{@person.father.citizenship rescue nil}",
-                "ID Number" => "#{@person.father.id_number rescue nil}"
+                "Date of birth" => "#{@father.birthdate rescue nil}",
+                "Nationality" => "#{Location.find(@father_address.citizenship).name rescue nil}",
+                "ID Number" => "#{@father.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{(@person.father.current_district ||
-                    @person.father.foreigner_current_district) rescue nil}",
+                "Physical Residential Address, District" => "#{(Location.find(@father_address.current_district).name ||
+                    @father.foreigner_current_district) rescue nil}",
                 "T/A" => "#{(@person.father.current_ta ||
                     @person.father.foreigner_current_ta) rescue nil}",
                 "Village/Town" => "#{(@person.father.current_village ||
                     @person.father.foreigner_current_village) rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{@person.father.home_village rescue nil}",
-                "T/A" => "#{@person.father.home_ta rescue nil}",
-                "District" =>  "#{@person.father.home_district rescue nil}"
+                "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
+                "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
+                "District" =>  "#{Location.find(@mother_address.home_ta).name rescue nil}"
             }
         ],
-=end
+
         "Details of Child's Informant" => [
             {
                 "First Name" => "#{@informant_name.first_name rescue nil}",
@@ -329,6 +331,16 @@ class PersonController < ApplicationController
           redirect_to '/view_cases'
 
         end
+    end
+
+  end
+
+  def parents_married(parents_married,value)
+    
+    if parents_married == 1
+        [value, "mandatory"]
+    else
+       return value
     end
 
   end
