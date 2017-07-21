@@ -353,8 +353,8 @@ end
    
    ############################################### Person record Status ###############################################
 
-    PersonRecordStatus.create(status_id: Status.where(name: 'DC-Complete').last.id, person_id: core_person.id)
-   
+   PersonRecordStatus.new_record_state(core_person.id, 'DC-COMPLETE')
+
    ####################################################################################################################  
 
 elsif SETTINGS["application_mode"] == "DC"
@@ -597,10 +597,11 @@ elsif SETTINGS["application_mode"] == "DC"
   ############################################## person status record ####################################################
  if is_record_a_duplicate.present? 
     if SETTINGS["application_mode"] == "FC"
-      PersonRecordStatus.create(status_id: Status.where(name: 'FC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+      PersonRecordStatus.new_record_state(core_person.id, 'FC-POTENTIAL DUPLICATE')
     else
-      PersonRecordStatus.create(status_id: Status.where(name: 'DC-POTENTIAL DUPLICATE').last.id, person_id: core_person.id)
+      PersonRecordStatus.new_record_state(core_person.id, 'DC-POTENTIAL DUPLICATE')
     end
+
     potential_duplicate = PotentialDuplicate.create(person_id: core_person.id,created_at: (Time.now))
     if potential_duplicate.present?
          is_record_a_duplicate.split("|").each do |id|
@@ -608,8 +609,7 @@ elsif SETTINGS["application_mode"] == "DC"
          end
     end
  else
-          
-    PersonRecordStatus.create(status_id: Status.where(name: 'DC-Active').last.id, person_id: core_person.id)
+    PersonRecordStatus.new_record_state(core_person.id, 'DC-ACTIVE')
  end   
         
   ############################################# Person status record (end) ##############################################
