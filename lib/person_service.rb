@@ -183,7 +183,7 @@ module PersonService
 
        person_mother = Person.create(person_id: core_person_mother.id,
                     gender: "F",
-                    birthdate: (mother_birthdate.to_date rescue Date.today))
+                    birthdate: (mother_birthdate.to_date rescue "1900-01-01".to_date))
 
        person_name_mother = PersonName.create(first_name: mother_first_name,
                     middle_name: mother_middle_name,
@@ -229,7 +229,7 @@ end
 
             person_father = Person.create(person_id: core_person_father.id,
                 gender: "M",
-                birthdate: (father_birthdate.to_date rescue Date.today))
+                birthdate: (father_birthdate.to_date rescue "1900-01-01".to_date))
 
             person_name_father = PersonName.create(first_name: father_first_name,
                 middle_name: (father_middlename rescue nil),
@@ -271,7 +271,7 @@ end
        
 
               PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-              person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+              person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_mother.id
 
       PersonAddress.create(person_id: core_person_mother.id,
@@ -290,7 +290,7 @@ end
     elsif (informant_same_as_father == "Yes")
 
               PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
-              person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+              person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_father.id
 
           PersonAddress.create(person_id: core_person_father.id,
@@ -358,6 +358,9 @@ end
    ####################################################################################################################  
 
 elsif SETTINGS["application_mode"] == "DC"
+
+   #raise params[:person][:mother][:current_district].inspect
+   #raise mother_current_district.inspect
 
   ################################################### Client details ############################################
 
@@ -427,7 +430,7 @@ elsif SETTINGS["application_mode"] == "DC"
 
             person_mother = Person.create(person_id: core_person_mother.id,
                 gender: "F",
-                birthdate: (mother_birthdate.to_date rescue Date.today))
+                birthdate: (mother_birthdate.to_date rescue "1900-01-01".to_date))
 
             person_name_mother = PersonName.create(first_name: mother_first_name,
                 middle_name: mother_middle_name,
@@ -443,17 +446,17 @@ elsif SETTINGS["application_mode"] == "DC"
 
 
                   PersonAddress.create(person_id: core_person_mother.id,
-                                 current_village: mother_foreigner_current_village,
+                                 current_village: mother_current_village,
                                  current_village_other: "",
-                                 current_ta: mother_foreigner_current_ta,
+                                 current_ta: mother_current_ta,
                                  current_ta_other: "",
-                                 current_district: mother_foreigner_current_district,
+                                 current_district: mother_current_district,
                                  current_district_other: "",
-                                 home_village: mother_foreigner_home_village,
+                                 home_village: mother_home_village,
                                  home_village_other: "",
-                                 home_ta: mother_foreigner_home_ta,
+                                 home_ta: mother_home_ta,
                                  home_ta_other: "",
-                                 home_district: mother_foreigner_current_district,
+                                 home_district: mother_current_district,
                                  home_district_other: "",
                                  citizenship: Location.where(name: mother_residental_country).first.location_id,
                                  residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
@@ -470,7 +473,7 @@ elsif SETTINGS["application_mode"] == "DC"
 
             person_father = Person.create(person_id: core_person_father.id,
                 gender: "M",
-                birthdate: (father_birthdate.to_date rescue Date.today))
+                birthdate: (father_birthdate.to_date rescue "1900-01-01".to_date))
 
             person_name_father = PersonName.create(first_name: father_first_name,
                 middle_name: (father_middlename rescue nil),
@@ -485,17 +488,17 @@ elsif SETTINGS["application_mode"] == "DC"
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
             PersonAddress.create(person_id: core_person_father.id,
-                                 current_village: father_foreigner_current_village,
+                                 current_village: father_current_village,
                                  current_village_other: "",
-                                 current_ta: father_foreigner_current_ta,
+                                 current_ta: father_current_ta,
                                  current_ta_other: "",
-                                 current_district: father_foreigner_current_district,
+                                 current_district: father_current_district,
                                  current_district_other: "",
-                                 home_village: father_foreigner_home_village,
+                                 home_village: father_home_village,
                                  home_village_other: "",
-                                 home_ta: father_foreigner_home_ta,
+                                 home_ta: father_home_ta,
                                  home_ta_other: "",
-                                 home_district: father_foreigner_current_district,
+                                 home_district: father_current_district,
                                  home_district_other: "",
                                  citizenship: Location.where(name: father_residental_country).first.location_id,
                                  residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
@@ -513,7 +516,7 @@ elsif SETTINGS["application_mode"] == "DC"
        
 
           PersonRelationship.create(person_a: core_person.id, person_b: core_person_mother.id,
-              person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+              person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_mother.id
 
           PersonAddress.create(person_id: core_person_mother.id,
@@ -532,7 +535,7 @@ elsif SETTINGS["application_mode"] == "DC"
     elsif (informant_same_as_father == "Yes")
 
           PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
-              person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+              person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_father.id
 
           PersonAddress.create(person_id: core_person_father.id,
