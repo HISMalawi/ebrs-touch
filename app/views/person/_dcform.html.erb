@@ -1033,7 +1033,7 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onUnload => 'updateRegistrationType();setTimeout("checkValues()", 500)',
+                          :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
 

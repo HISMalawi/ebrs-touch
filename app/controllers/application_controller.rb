@@ -113,7 +113,7 @@ class ApplicationController < ActionController::Base
     return person
     
   end
-
+  
   private
 
   def check_if_logged_in
