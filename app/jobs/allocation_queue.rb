@@ -3,9 +3,11 @@ class AllocationQueue
   workers 1
 
   def perform()
-    queue = IdentifierAllocationQueue.where(assigned: 0)
+    queue = [] #IdentifierAllocationQueue.where(assigned: 0)
 
-    SuckerPunch.logger.info "Approving for #{queue.count} record(s)"
+    if queue.length > 0
+      SuckerPunch.logger.info "Approving for #{queue.count} record(s)"
+    end
 
     begin
       (queue || []).each do |record|
