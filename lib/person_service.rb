@@ -4,7 +4,7 @@ module PersonService
 
   def self.create_record(params)
     
-
+      
 
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
     desig              = params[:person][:informant][:designation] rescue nil
@@ -285,7 +285,9 @@ end
                                  home_village_other: "",
                                  home_ta: Location.where(name:mother_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+                                 residential_country: Location.where(name: 'Malawi').first.location_id,
+                                 address_line_1: informant_addressline1,
+                                 address_line_2: informant_addressline2)
               
     elsif (informant_same_as_father == "Yes")
 
@@ -304,7 +306,9 @@ end
                                  home_village_other: "",
                                  home_ta: Location.where(name:father_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+                                 residential_country: Location.where(name: 'Malawi').first.location_id,
+                                 address_line_1: informant_addressline1,
+                                 address_line_2: informant_addressline2)
 
    elsif !informant_first_name.blank?
 
@@ -345,7 +349,9 @@ end
                                  home_village_other: "",
                                  home_ta: Location.where(name:informant_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+                                 residential_country: Location.where(name: 'Malawi').first.location_id,
+                                 address_line_1: informant_addressline1,
+                                 address_line_2: informant_addressline2)
 
    end
                
@@ -446,17 +452,17 @@ elsif SETTINGS["application_mode"] == "DC"
 
 
                   PersonAddress.create(person_id: core_person_mother.id,
-                                 current_village: mother_current_village,
+                                 current_village: Location.where(name: mother_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: mother_current_ta,
+                                 current_ta: Location.where(name: mother_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: mother_current_district,
+                                 current_district: Location.where(name: mother_current_district).first.location_id,
                                  current_district_other: "",
-                                 home_village: mother_home_village,
+                                 home_village: Location.where(name: mother_home_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: mother_home_ta,
+                                 home_ta: LOcation.where(name: mother_home_ta).first.location_id,
                                  home_ta_other: "",
-                                 home_district: mother_current_district,
+                                 home_district: Location.where(name: mother_current_district).first.location_id,
                                  home_district_other: "",
                                  citizenship: Location.where(name: mother_residental_country).first.location_id,
                                  residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
@@ -468,6 +474,9 @@ elsif SETTINGS["application_mode"] == "DC"
 
           if(details_of_father_known == "Yes" || parents_details_available == "Both" ||
               parents_details_available == "Father" || !father_birthdate.blank?)
+
+              #raise params[:person][:father].inspect
+              #raise father_home_village.inspect
 
             core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
@@ -487,21 +496,25 @@ elsif SETTINGS["application_mode"] == "DC"
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
-            PersonAddress.create(person_id: core_person_father.id,
-                                 current_village: father_current_village,
+
+            
+            record = PersonAddress.new(person_id: core_person_father.id,
+                                 current_village: Location.where(name: father_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: father_current_ta,
+                                 current_ta: Location.where(name: father_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: father_current_district,
+                                 current_district: Location.where(name: father_current_district).first.location_id,
                                  current_district_other: "",
-                                 home_village: father_home_village,
+                                 home_village: Location.where(name: father_home_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: father_home_ta,
+                                 home_ta: Location.where(name: father_home_ta).first.location_id,
                                  home_ta_other: "",
-                                 home_district: father_current_district,
+                                 home_district: Location.where(name: father_current_district).first.location_id,
                                  home_district_other: "",
                                  citizenship: Location.where(name: father_residental_country).first.location_id,
-                                 residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
+                                 residential_country: Location.where(name: father_residental_country).first.location_id)
+            record.save
+
 
           end
 
@@ -529,8 +542,10 @@ elsif SETTINGS["application_mode"] == "DC"
                                      home_village: Location.where(name:mother_current_village).first.location_id,
                                      home_village_other: "",
                                      home_ta: Location.where(name:mother_current_ta).first.location_id,
-                                     citizenship: Location.where(name: 'Malawi').first.location_id,
-                                     residential_country: Location.where(name: 'Malawi').first.location_id)
+                                     citizenship: Location.where(name: mother_residental_country).first.location_id,
+                                     residential_country: Location.where(name: mother_residental_country).first.location_id,
+                                     address_line_1: informant_addressline1,
+                                     address_line_2: informant_addressline2)
               
     elsif (informant_same_as_father == "Yes")
 
@@ -548,8 +563,10 @@ elsif SETTINGS["application_mode"] == "DC"
                                  home_village: Location.where(name:father_current_village).first.location_id,
                                  home_village_other: "",
                                  home_ta: Location.where(name:father_current_ta).first.location_id,
-                                 citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+                                 citizenship: Location.where(name: father_residental_country).first.location_id,
+                                 residential_country: Location.where(name: father_residental_country).first.location_id,
+                                 address_line_1: informant_addressline1,
+                                 address_line_2: informant_addressline2)
 
    elsif !informant_first_name.blank?
 
@@ -592,7 +609,9 @@ elsif SETTINGS["application_mode"] == "DC"
                                  home_village_other: "",
                                  home_ta: Location.where(name:informant_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id)
+                                 residential_country: Location.where(name: 'Malawi').first.location_id,
+                                 address_line_1: informant_addressline1,
+                                 address_line_2: informant_addressline2)
 
   end
                

@@ -21,13 +21,13 @@ class PersonController < ApplicationController
     person_father_id = PersonRelationType.find_by_name("Father").id
     informant_type_id = PersonType.find_by_name("Informant").id
 
+
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
-    @informant_id = CorePerson.find_by_sql(['select * from core_person
-                    where person_type_id = ?
-                    and person_id in (?)',informant_type_id, @relations]).map(&:person_id)
 
-    #raise @informant.inspect
-
+    
+    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b
+    
+    
     person_mother_relation = PersonRelationship.find_by_sql(["select * from person_relationship where person_a = ? and person_relationship_type_id = ?",params[:id], person_mother_id])
     mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
     father_id = PersonRelationship.where(person_a: params[:id],
@@ -52,7 +52,7 @@ class PersonController < ApplicationController
 
     @informant = Person.find(@informant_id)
     @informant_name = PersonName.find_by_person_id(@informant_id)
-    @informant_address = PersonName.find_by_person_id(@informant_id)
+    @informant_address = PersonAddress.find_by_person_id(@informant_id)
 
   #raise @informant.inspect
 
@@ -113,7 +113,7 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "mandatory"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                ["Date of birth", "mandatory"] => "#{Person.find_by_person_id(mother_id).name rescue nil}",
+                ["Date of birth", "mandatory"] => "#{Person.find_by_person_id(mother_id).birthdate rescue nil}",
                 "Nationality" => "#{Location.find(@mother_address.citizenship).name rescue nil}",
                 "ID Number" => "#{@person.mother.id_number rescue nil}"
             },
@@ -159,15 +159,15 @@ class PersonController < ApplicationController
             {
                 "Physical Residential Address, District" => "#{(Location.find(@father_address.current_district).name ||
                     @father.foreigner_current_district) rescue nil}",
-                "T/A" => "#{(@person.father.current_ta ||
+                "T/A" => "#{(@father_address.current_ta ||
                     @person.father.foreigner_current_ta) rescue nil}",
-                "Village/Town" => "#{(@person.father.current_village ||
+                "Village/Town" => "#{(@father_address.current_village ||
                     @person.father.foreigner_current_village) rescue nil}"
             },
             {
                 "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
                 "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@mother_address.home_ta).name rescue nil}"
+                "District" =>  "#{Location.find(@mother_address.current_district).name rescue nil}"
             }
         ],
 
@@ -182,14 +182,14 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@person.informant.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{@person.informant.current_district rescue nil}",
-                "T/A" => "#{@person.informant.current_ta rescue nil}",
-                "Village/Town" => "#{@person.informant.current_village rescue nil}"
+                "Physical Address, District" => "#{@informant_address.current_district rescue nil}",
+                "T/A" => "#{Location.find(@informant_address.current_ta).name rescue nil}",
+                "Village/Town" => "#{Location.find(@informant_address.current_village).name rescue nil}"
             },
             {
-                "Postal Address" => "#{@person.informant.addressline1 rescue nil}",
-                " " => "#{@person.informant.addressline2 rescue nil}",
-                "City" => "#{@person.informant.city rescue nil}"
+                "Postal Address" => "#{@informant_address.address_line_1 rescue nil}",
+                " " => "#{@informant_address.address_line_2 rescue nil}",
+                "City" => "#{Location.find(@informant_address.current_district).name rescue nil}"
             },
             {
                 "Phone Number" => "#{@person.informant.phone_number rescue ""}",
