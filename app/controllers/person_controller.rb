@@ -43,7 +43,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
 
     @mother = Person.find(mother_id)
-    @father = Person.find(father_id)
+    @father = Person.find(father_id) rescue nil
     @mother_name = PersonName.find_by_person_id(mother_id)
     @father_name = PersonName.find_by_person_id(father_id)
     @mother_address = PersonAddress.find_by_person_id(mother_id)
@@ -506,7 +506,7 @@ class PersonController < ApplicationController
 
   def get_hospital
   
-  nationality_tag = LocationTag.where(name: 'Hospital').first
+  nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
   
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
