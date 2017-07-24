@@ -348,14 +348,21 @@ class PersonController < ApplicationController
   #########################################################################
   ############### Duplicate search with elastic search ####################
  def search_similar_record
+    
+     if params[:twin_id].present? 
+        birthdate = Person.where(person_id: params[:twin_id]).first.birthdate.to_time.to_s.split(" ")[0]
+     else
+        birthdate = (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time)
+     end
 
+     
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
                       "middle_name" => (params[:middle_name] rescue nil),
                       "gender" => params[:gender],
                       "district" => params[:birth_district],
-                      "birthdate"=> (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time),
+                      "birthdate"=> birthdate,
                       "mother_last_name" => (params[:mother_last_name] rescue nil),
                       "mother_middle_name" => (params[:mother_middle_name] rescue nil),
                       "mother_first_name" => (params[:mother_first_name] rescue nil),
@@ -366,7 +373,7 @@ class PersonController < ApplicationController
 
       people = []
 
-      if SETTINGS['potential_search']
+      if SETTINGS['potential_search'] && !params[:type_of_birth].include?("Twin")
         results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
       else
         results = []

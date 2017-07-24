@@ -199,22 +199,22 @@ module PersonService
 
 
        PersonAddress.create(person_id: core_person_mother.id,
-                    current_village: mother_foreigner_current_village,
+                    current_village: Location.where(name: mother_current_village).first.location_id,
                     current_village_other: "",
-                    current_ta: mother_foreigner_current_ta,
+                    current_ta: Location.where(name: mother_current_ta).first.location_id,
                     current_ta_other: "",
-                    current_district: mother_foreigner_current_district,
+                    current_district: Location.where(name: mother_current_district).first.location_id,
                     current_district_other: "",
-                    home_village: mother_foreigner_home_village,
+                    home_village: Location.where(name: mother_home_village).first.location_id,
                     home_village_other: "",
-                    home_ta: mother_foreigner_home_ta,
+                    home_ta: Location.where(name: mother_home_ta).first.location_id,
                     home_ta_other: "",
-                    home_district: mother_foreigner_current_district,
+                    home_district: Location.where(name: mother_current_district).first.location_id,
                     home_district_other: "",
                     citizenship: Location.where(name: mother_residental_country).first.location_id,
                     residential_country: Location.where(name: mother_residental_country).first.location_id) rescue nil
 
-
+       
     
 end
 #############################################################################################################################
@@ -243,23 +243,23 @@ end
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
-            PersonAddress.create(person_id: core_person_father.id,
-                                 current_village: father_foreigner_current_village,
+            father_address_record = PersonAddress.new(person_id: core_person_father.id,
+                                 current_village: Location.where(name: father_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: father_foreigner_current_ta,
+                                 current_ta: Location.where(name: father_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: father_foreigner_current_district,
+                                 current_district: Location.where(name: father_current_district).first.location_id,
                                  current_district_other: "",
-                                 home_village: father_foreigner_home_village,
+                                 home_village: Location.where(name: father_home_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: father_foreigner_home_ta,
+                                 home_ta: Location.where(name: father_home_ta).first.location_id,
                                  home_ta_other: "",
-                                 home_district: father_foreigner_current_district,
+                                 home_district: Location.where(name: father_current_district).first.location_id,
                                  home_district_other: "",
                                  citizenship: Location.where(name: father_residental_country).first.location_id,
                                  residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
 
-
+           father_address_record.save
           
     end
    ############################################# father details end ###########################################################
@@ -385,10 +385,7 @@ elsif SETTINGS["application_mode"] == "DC"
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
  
-    
-    
-     #loc_tag_id = LocationTag.where(name: place_of_birth).first.location_tag_id
-     #loc_id = LocationTagMap.where(location_tag_id: loc_tag_id).first.location_id
+
      
     if hospital_of_birth.blank?
 
@@ -451,7 +448,7 @@ elsif SETTINGS["application_mode"] == "DC"
                 person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
 
 
-                  PersonAddress.create(person_id: core_person_mother.id,
+            PersonAddress.create(person_id: core_person_mother.id,
                                  current_village: Location.where(name: mother_current_village).first.location_id,
                                  current_village_other: "",
                                  current_ta: Location.where(name: mother_current_ta).first.location_id,
@@ -460,7 +457,7 @@ elsif SETTINGS["application_mode"] == "DC"
                                  current_district_other: "",
                                  home_village: Location.where(name: mother_home_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: LOcation.where(name: mother_home_ta).first.location_id,
+                                 home_ta: Location.where(name: mother_home_ta).first.location_id,
                                  home_ta_other: "",
                                  home_district: Location.where(name: mother_current_district).first.location_id,
                                  home_district_other: "",

@@ -5780,8 +5780,21 @@ function duplicatesPopup(people,checkbox){
 
 }
 
-function submitAfterSummary() {
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
 
+function submitAfterSummary() {
+    
     /*summaryHash = {
      "Child's Name" : ["child_first_name", "child_middle_name", "child_last_name"],
      "Mother's Name" : ["child_mother_first_name", "child_mother_middle_name", "child_mother_last_name"],
@@ -5789,6 +5802,8 @@ function submitAfterSummary() {
      }*/
 
     showSpinner();
+
+    
     var duplicate_search = [
                                         "person_first_name",
                                         "person_last_name",
@@ -5801,13 +5816,26 @@ function submitAfterSummary() {
                                         "person_mother_middle_name",
                                         "person_father_first_name",
                                         "person_father_last_name",
-                                        "person_father_middle_name"]
-    var data = {}
+                                        "person_father_middle_name",
+                                        "person_type_of_birth"]
+
+    var data = {"twin_id": getUrlVars()["id"]}
+
     for(var i = 0 ; i < duplicate_search.length ; i++){
-            data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+
+        if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
+             data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+         } else {
+
+         }
+           
     }
 
+    
+
     $.getJSON("/search_similar_record",data,function(response){
+
+        
         if(response.response && response.response.length != 0){
             
             duplicatesPopup(response.response);
