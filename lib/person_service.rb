@@ -4,7 +4,6 @@ module PersonService
 
   def self.create_record(params)
     
-      
 
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
     desig              = params[:person][:informant][:designation] rescue nil
@@ -64,7 +63,7 @@ module PersonService
 
  
       informant_same_as_mother          = params[:informant_same_as_mother]
-      informant_same_as_father          = params[:person][:informant][:informant_same_as_father]
+      informant_same_as_father          = params[:informant_same_as_father]
 
       father_birthdate_estimated        = params[:person][:father][:birthdate_estimated]
       father_residential_country        = params[:person][:father][:residential_country]
@@ -125,7 +124,7 @@ module PersonService
   ################################################## Recording client details #####################################
  
  if SETTINGS["application_mode"] == "FC"
-
+            
 
     core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
 
@@ -143,7 +142,8 @@ module PersonService
       middle_name_code: (middle_name.soundex rescue nil))
 
 
-  
+    
+
     PersonBirthDetail.create(
       person_id:                                core_person.id,
       birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
@@ -224,9 +224,13 @@ end
     if !father_first_name.blank?
 
         
-
+  
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
-
+            #raise .inspect
+            if father_birthdate.blank?
+              father_birthdate = "1900-01-01".to_date
+            end
+            #raise father_birthdate.to_time.to_s.split(" ")[0].inspect
             person_father = Person.create(person_id: core_person_father.id,
                 gender: "M",
                 birthdate: (father_birthdate.to_date rescue "1900-01-01".to_date))
@@ -243,21 +247,24 @@ end
             PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
+
+
+
             father_address_record = PersonAddress.new(person_id: core_person_father.id,
-                                 current_village: Location.where(name: father_current_village).first.location_id,
+                                 current_village: father_current_village == '' ? '' : Location.where(name: father_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: Location.where(name: father_current_ta).first.location_id,
+                                 current_ta: father_current_ta == '' ? '' : Location.where(name: father_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: Location.where(name: father_current_district).first.location_id,
+                                 current_district: father_current_district == '' ? '' : Location.where(name: father_current_district).first.location_id,
                                  current_district_other: "",
-                                 home_village: Location.where(name: father_home_village).first.location_id,
+                                 home_village: father_home_village == '' ? '' : Location.where(name: father_home_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: Location.where(name: father_home_ta).first.location_id,
+                                 home_ta: father_home_ta == '' ? '' : Location.where(name: father_home_ta).first.location_id,
                                  home_ta_other: "",
-                                 home_district: Location.where(name: father_current_district).first.location_id,
+                                 home_district: father_current_district == '' ? '' : Location.where(name: father_current_district).first.location_id,
                                  home_district_other: "",
-                                 citizenship: Location.where(name: father_residental_country).first.location_id,
-                                 residential_country: Location.where(name: father_residental_country).first.location_id) rescue nil
+                                 citizenship: father_residental_country == '' ? '' : Location.where(name: father_residental_country).first.location_id,
+                                 residential_country: father_residental_country == '' ? '' : Location.where(name: father_residental_country).first.location_id) rescue nil
 
            father_address_record.save
           
@@ -274,27 +281,36 @@ end
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_mother.id
 
+  ## here in this block of code, the assumption is that the address details for the mother have been saved since the
+  ## mother is the same as the informant, hence commenting the below code
+=begin
       PersonAddress.create(person_id: core_person_mother.id,
-                                 current_village: Location.where(name: mother_current_village).first.location_id,
+                                 current_village: mother_current_village == '' ? '' : Location.where(name: mother_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: Location.where(name: mother_current_ta).first.location_id,
+                                 current_ta: mother_current_ta == '' ? '' : Location.where(name: mother_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: Location.find_by_name(mother_current_district).location_id,
+                                 current_district: mother_current_district == '' ? '' : Location.find_by_name(mother_current_district).location_id,
                                  current_district_other: "",
-                                 home_village: Location.where(name:mother_current_village).first.location_id,
+                                 home_village: mother_current_village == '' ? '' : Location.where(name:mother_current_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: Location.where(name:mother_current_ta).first.location_id,
-                                 citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id,
+                                 home_ta: mother_current_ta == '' ? '' : Location.where(name:mother_current_ta).first.location_id,
+                                 citizenship: mother_residental_country == '' ? '' : Location.where(name: mother_residental_country).first.location_id,
+                                 residential_country: mother_residental_country == '' ? '' : Location.where(name: mother_residental_country).first.location_id,
                                  address_line_1: informant_addressline1,
                                  address_line_2: informant_addressline2)
+=end
               
     elsif (informant_same_as_father == "Yes")
+
+            
 
               PersonRelationship.create(person_a: core_person.id, person_b: core_person_father.id,
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_father.id
 
+   ## here in this block of code, the assumption is that the address details for the father have been saved since the
+   ## father is the same as the informant, hence commenting the below code
+=begin
           PersonAddress.create(person_id: core_person_father.id,
                                  current_village: Location.where(name: father_current_village).first.location_id,
                                  current_village_other: "",
@@ -309,6 +325,7 @@ end
                                  residential_country: Location.where(name: 'Malawi').first.location_id,
                                  address_line_1: informant_addressline1,
                                  address_line_2: informant_addressline2)
+=end 
 
    elsif !informant_first_name.blank?
 

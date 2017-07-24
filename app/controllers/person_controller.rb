@@ -54,7 +54,6 @@ class PersonController < ApplicationController
     @informant_name = PersonName.find_by_person_id(@informant_id)
     @informant_address = PersonAddress.find_by_person_id(@informant_id)
 
-  #raise @informant.inspect
 
     @record = {
         "Details of Child" => [
@@ -72,6 +71,7 @@ class PersonController < ApplicationController
                 ["Date of birth" , "mandatory"] => "#{@person.birthdate rescue nil}",
                 ["Sex", "mandatory"] => "#{@person.gender rescue nil}",
                 "Place of birth" => "#{Location.find(@birth_details.place_of_birth).name rescue nil}"
+                
             },
             {
                 "Name of Hospital" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
@@ -273,6 +273,7 @@ class PersonController < ApplicationController
   end
 
   def create
+       
 
     type_of_birth = params[:person][:type_of_birth]
     
@@ -281,10 +282,10 @@ class PersonController < ApplicationController
         type_of_birth = 'First Twin'
         params[:person][:type_of_birth] = 'First Twin'
 
-     elsif type_of_birth == 'Tripplet'
+     elsif type_of_birth == 'Triplet'
       
-         type_of_birth = 'First Tripplet'  
-         params[:person][:type_of_birth] = 'First Tripplet'                                         
+         type_of_birth = 'First Triplet'  
+         params[:person][:type_of_birth] = 'First Triplet'                                         
      end
 
      

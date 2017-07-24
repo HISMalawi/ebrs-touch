@@ -117,7 +117,7 @@
       <div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
@@ -1822,6 +1822,9 @@
 
     function checkWeddingDate( obj,parent)
     {
+
+       
+
         if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
         {
             var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())
