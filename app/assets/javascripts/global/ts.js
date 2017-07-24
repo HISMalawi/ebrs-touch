@@ -5835,7 +5835,7 @@ function submitAfterSummary() {
 
     $.getJSON("/search_similar_record",data,function(response){
 
-        alert("in response callback");
+        
         if(response.response && response.response.length != 0){
             
             duplicatesPopup(response.response);
