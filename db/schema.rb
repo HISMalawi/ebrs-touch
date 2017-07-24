@@ -48,7 +48,7 @@ ActiveRecord::Schema.define(version: 0) do
 
   create_table "identifier_allocation_queue", primary_key: "identifier_allocation_queue_id", force: :cascade do |t|
     t.integer  "person_id",       limit: 4,               null: false
-    t.string   "identifier_type", limit: 225,             null: false
+    t.integer  "person_identifier_type_id", limit: 4,             null: false
     t.integer  "assigned",        limit: 1,   default: 0, null: false
     t.integer  "creator",         limit: 4,               null: false
     t.string   "document_id", limit: 100
@@ -201,6 +201,32 @@ end
 
   add_index "person_attributes", ["person_attribute_type_id"], name: "fk_person_attributes_2_idx", using: :btree
   add_index "person_attributes", ["person_id"], name: "fk_person_attributes_1_idx", using: :btree
+
+  create_table "person_identifier_types", primary_key: "person_identifier_type_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,              null: false
+    t.string   "description", limit: 100
+    t.integer  "voided",      limit: 1,   default: 0, null: false
+    t.integer  "voided_by",   limit: 4
+    t.datetime "date_voided"
+    t.string   "document_id", limit: 100
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  create_table "person_identifiers", primary_key: "person_identifier_id", force: :cascade do |t|
+    t.integer  "person_id",                limit: 4,               null: false
+    t.integer  "person_identifier_type_id", limit: 4,               null: false
+    t.integer  "voided",                   limit: 1,   default: 0, null: false
+    t.string   "value",                    limit: 100,             null: false
+    t.integer  "voided_by",                limit: 4
+    t.datetime "date_voided"
+    t.string   "document_id", limit: 100
+    t.datetime "created_at",                                       null: false
+    t.datetime "updated_at",                                       null: false
+  end
+
+  add_index "person_identifiers", ["person_identifier_type_id"], name: "fk_person_identifiers_2_idx", using: :btree
+  add_index "person_identifiers", ["person_id"], name: "fk_person_identifiers_1_idx", using: :btree
 
   create_table "person_birth_details", primary_key: "person_birth_details_id", force: :cascade do |t|
     t.integer  "person_id",                               limit: 4,              null: false
@@ -380,12 +406,39 @@ end
     t.datetime "created_at"
   end
 
+  ############################ Resoving Potential Duplicate tables ##########################################################
+
+  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
+    t.integer  "person_id", limit: 4, null: false
+    t.string   "document_id", limit: 100
+    t.string   "resolved",      limit: 255, null: false
+    t.string   "decision",      limit: 255, null: false
+    t.string   "comment",      limit: 255, null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at"
+  end
+
+  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
+
+  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
+    t.integer  "person_id", limit: 4
+    t.integer   "potential_duplicate_id",      limit: 4
+    t.string   "document_id", limit: 100
+    t.datetime "created_at"
+  end
+
+  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
+  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+
+  ##########################################################################################################################
+
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
   add_foreign_key "identifier_allocation_queue", "core_person", column: "person_id", primary_key: "person_id", name: "fk_identifier_allocation_queue_1"
+  add_foreign_key "identifier_allocation_queue", "person_identifier_types", column: "person_identifier_type_id", primary_key: "person_identifier_type_id", name: "fk_identifier_allocation_queue_2"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
   add_foreign_key "location_tag_map", "location_tag", primary_key: "location_tag_id", name: "fk_location_tag_map_2"
   add_foreign_key "person", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_1"

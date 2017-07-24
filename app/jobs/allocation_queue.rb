@@ -3,7 +3,7 @@ class AllocationQueue
   workers 1
 
   def perform()
-    queue = [] #IdentifierAllocationQueue.where(assigned: 0)
+    queue = IdentifierAllocationQueue.where(assigned: 0)
 
     if queue.length > 0
       SuckerPunch.logger.info "Approving for #{queue.count} record(s)"
@@ -11,7 +11,7 @@ class AllocationQueue
 
     begin
       (queue || []).each do |record|
-        if record.identifier_type == 'BEN'
+        if record.person_identifier_type_id == PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id
           district_code = Location.current.district.code
           district_code_len = district_code.length
           year = Date.today.year
@@ -25,7 +25,7 @@ class AllocationQueue
           person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
           record.update_attributes(assigned: 1)
 
-        elsif record.identifier_type == 'BRN'
+        elsif record.person_identifier_type_id == 'BRN'
         end
       end 
     rescue 
