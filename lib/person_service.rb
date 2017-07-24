@@ -356,15 +356,15 @@ end
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
             PersonAddress.create(person_id: core_person_informant.id,
-                                 current_village: Location.where(name: informant_current_village).first.location_id,
+                                 current_village: informant_current_village == '' ? '' : Location.where(name: informant_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: Location.where(name: informant_current_ta).first.location_id,
+                                 current_ta: informant_current_ta == '' ? '' : Location.where(name: informant_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: Location.find_by_name(informant_current_district).location_id,
+                                 current_district: informant_current_district == '' ? '' : Location.find_by_name(informant_current_district).location_id,
                                  current_district_other: "",
-                                 home_village: Location.where(name:informant_current_village).first.location_id,
+                                 home_village: informant_current_village == '' ? '' : Location.where(name:informant_current_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: Location.where(name:informant_current_ta).first.location_id,
+                                 home_ta: informant_current_ta == '' ? '' : Location.where(name:informant_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
                                  residential_country: Location.where(name: 'Malawi').first.location_id,
                                  address_line_1: informant_addressline1,
@@ -546,6 +546,10 @@ elsif SETTINGS["application_mode"] == "DC"
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_mother.id
 
+           ## here in this block of code, the assumption is that the address details for the mother have been saved since the
+           ## motherther is the same as the informant, hence commenting the below code
+
+=begin
           PersonAddress.create(person_id: core_person_mother.id,
                                      current_village: Location.where(name: mother_current_village).first.location_id,
                                      current_village_other: "",
@@ -560,6 +564,7 @@ elsif SETTINGS["application_mode"] == "DC"
                                      residential_country: Location.where(name: mother_residental_country).first.location_id,
                                      address_line_1: informant_addressline1,
                                      address_line_2: informant_addressline2)
+=end
               
     elsif (informant_same_as_father == "Yes")
 
@@ -567,6 +572,10 @@ elsif SETTINGS["application_mode"] == "DC"
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_father.id
 
+           ## here in this block of code, the assumption is that the address details for the mother have been saved since the
+           ## motherther is the same as the informant, hence commenting the below code
+
+=begin
           PersonAddress.create(person_id: core_person_father.id,
                                  current_village: Location.where(name: father_current_village).first.location_id,
                                  current_village_other: "",
@@ -581,6 +590,7 @@ elsif SETTINGS["application_mode"] == "DC"
                                  residential_country: Location.where(name: father_residental_country).first.location_id,
                                  address_line_1: informant_addressline1,
                                  address_line_2: informant_addressline2)
+=end
 
    elsif !informant_first_name.blank?
 
@@ -613,15 +623,15 @@ elsif SETTINGS["application_mode"] == "DC"
             #raise informant_current_village.inspect
 
             PersonAddress.create(person_id: core_person_informant.id,
-                                 current_village: Location.where(name: informant_current_village).first.location_id,
+                                 current_village: informant_current_village == '' ? '' : Location.where(name: informant_current_village).first.location_id,
                                  current_village_other: "",
-                                 current_ta: Location.where(name: informant_current_ta).first.location_id,
+                                 current_ta: informant_current_ta == '' ? '' : Location.where(name: informant_current_ta).first.location_id,
                                  current_ta_other: "",
-                                 current_district: Location.find_by_name(informant_current_district).location_id,
+                                 current_district: informant_current_district == '' ? '' : Location.find_by_name(informant_current_district).location_id,
                                  current_district_other: "",
-                                 home_village: Location.where(name:informant_current_village).first.location_id,
+                                 home_village: informant_current_village == '' ? '' : Location.where(name:informant_current_village).first.location_id,
                                  home_village_other: "",
-                                 home_ta: Location.where(name:informant_current_ta).first.location_id,
+                                 home_ta: informant_current_ta == '' ? '' : Location.where(name:informant_current_ta).first.location_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
                                  residential_country: Location.where(name: 'Malawi').first.location_id,
                                  address_line_1: informant_addressline1,
