@@ -505,7 +505,7 @@ class PersonController < ApplicationController
 
   def get_hospital
   
-  nationality_tag = LocationTag.where(name: 'Hospital').first
+  nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
   
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
