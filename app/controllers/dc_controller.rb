@@ -155,6 +155,17 @@ def incomplete_case_comment
     render :text =>  "/view_complete_cases"
   end
 
+  ################################## Pending Cases actions ####################################################################
+  def manage_pending_cases
+    @stats = PersonRecordStatus.stats
+    @icoFolder = folder
+    @section = "Manage Pending Cases"
+    @targeturl = "/"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+    render :layout => "facility"
+  end
+
   def pending_case_comment
     @child = Person.find(params[:id])
     @form_action = "/pending_case"
@@ -173,6 +184,7 @@ def incomplete_case_comment
     end
   end
 
+  ############################################################################################################################
   def reject_case_comment
     @child = Person.find(params[:id])
     @form_action = "/reject_case"

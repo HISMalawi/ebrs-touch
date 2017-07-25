@@ -109,9 +109,13 @@ Rails.application.routes.draw do
   get "/pending_case" => "dc#pending_case"
   get "/reject_case" => "dc#reject_case"
 
+  ####################Pending cases routes ##################################
+  get "/dc/manage_pending_cases"
+  ###########################################################################
+
   ##############################Special Cases#################################
   get "/dc/special_cases"
-
+  ############################################################################
   get "/view_cases" => "person#view_cases"
   get "/view_approved_cases" => "person#view_approved_cases"
   get "/view_pending_cases" => "person#view_pending_cases"

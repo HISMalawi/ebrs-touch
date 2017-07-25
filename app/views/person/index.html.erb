@@ -135,7 +135,29 @@
             </tr>
           </table>
         </div>
-    <% end %>
+  <% end %>
+  <% if @folders.include?("Pending Cases") %>
+
+    <div class="button child_menu manage_cases" onclick="window.location = '/dc/manage_pending_cases'" tag=0 title="View Pending Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>  <br />
+            <span class="count"></span>
+          </td>
+          <td style="height: 30px;">
+            Pending Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Pending records menu i.e Marked as Pending.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>      
 
     <% if @folders.include?("Approved By ADR")%>
         <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_approved_cases'" tag=0 title="View Approved Cases">
