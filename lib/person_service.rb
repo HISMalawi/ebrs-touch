@@ -177,13 +177,16 @@ module PersonService
 ############################################# recording mother details ##############################################
  
  if !mother_first_name.blank?
-
+      
+            if mother_birthdate.blank?
+               mother_birthdate = "1900-01-01".to_date
+            end
   
- core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
+       core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
 
        person_mother = Person.create(person_id: core_person_mother.id,
                     gender: "F",
-                    birthdate: (mother_birthdate.to_date rescue "1900-01-01".to_date))
+                    birthdate: mother_birthdate.to_date.to_date)
 
        person_name_mother = PersonName.create(first_name: mother_first_name,
                     middle_name: mother_middle_name,
@@ -226,14 +229,14 @@ end
         
   
       core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
-            #raise .inspect
+            
             if father_birthdate.blank?
               father_birthdate = "1900-01-01".to_date
             end
-            #raise father_birthdate.to_time.to_s.split(" ")[0].inspect
+            
             person_father = Person.create(person_id: core_person_father.id,
                 gender: "M",
-                birthdate: (father_birthdate.to_date rescue "1900-01-01".to_date))
+                birthdate: father_birthdate.to_date)
 
             person_name_father = PersonName.create(first_name: father_first_name,
                 middle_name: (father_middlename rescue nil),
@@ -446,11 +449,15 @@ elsif SETTINGS["application_mode"] == "DC"
            
           if (parents_details_available == "Both" || parents_details_available == "Mother" || !mother_birthdate.blank?)
 
+            if mother_birthdate.blank?
+               mother_birthdate = "1900-01-01".to_date
+            end
+
             core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
 
             person_mother = Person.create(person_id: core_person_mother.id,
                 gender: "F",
-                birthdate: (mother_birthdate.to_date rescue "1900-01-01".to_date))
+                birthdate: mother_birthdate.to_date)
 
             person_name_mother = PersonName.create(first_name: mother_first_name,
                 middle_name: mother_middle_name,
@@ -489,14 +496,15 @@ elsif SETTINGS["application_mode"] == "DC"
           if(details_of_father_known == "Yes" || parents_details_available == "Both" ||
               parents_details_available == "Father" || !father_birthdate.blank?)
 
-              #raise params[:person][:father].inspect
-              #raise father_home_village.inspect
+            if father_birthdate.blank?
+              father_birthdate = "1900-01-01".to_date
+            end
 
             core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
 
             person_father = Person.create(person_id: core_person_father.id,
                 gender: "M",
-                birthdate: (father_birthdate.to_date rescue "1900-01-01".to_date))
+                birthdate: father_birthdate.to_date)
 
             person_name_father = PersonName.create(first_name: father_first_name,
                 middle_name: (father_middlename rescue nil),
