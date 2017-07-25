@@ -30,6 +30,26 @@
 
 <% end %>
 
+<% if @folders.include?("Search Cases") %>
+    <div class="button child_menu manage_cases" onclick="" tag=0 title="Search Cases">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Search Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Search for cases that came through this office
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
 <% if @folders.include?("Manage Cases")%>
 
     <div class="button parent_menu" onclick="window.location = '/manage_cases'" tag=1>
@@ -40,6 +60,28 @@
           </td>
           <td style="height: 30px;">
             Manage Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View cases that are still accessible at DC's office.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
+<% if @folders.include?("Special Cases")%>
+
+    <div class="button parent_menu" onclick="window.location = '/dc/special_cases'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Special cases
           </td>
         </tr>
         <tr>
@@ -234,7 +276,7 @@
             <img src="<%= @icoFolder %>" height="60"/>
           </td>
           <td style="height: 30px;">
-            Ammendment Requests
+            Ammendment Cases
           </td>
         </tr>
         <tr>
@@ -394,25 +436,7 @@
       </table>
     </div>
 <% end %>
-<% if @folders.include?("Search Cases") %>
-    <div class="button child_menu manage_cases" onclick="" tag=0 title="Search Cases">
-      <table style="text-align: left;">
-        <tr>
-          <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
-          </td>
-          <td style="height: 30px;">
-            Search Cases
-          </td>
-        </tr>
-        <tr>
-          <td style="font-size: 11px; font-style: italic;">
-            Search for cases that came through this office
-          </td>
-        </tr>
-      </table>
-    </div>
-<% end %>
+
 
 <% if @folders.include?('Reports')%>
     <div class="button parent_menu" onclick="window.location='/reports/index'" tag=5>

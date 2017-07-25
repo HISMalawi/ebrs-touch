@@ -25,7 +25,7 @@ end
 def manage_requests
   @stats = PersonRecordStatus.stats
   @icoFolder = folder
-  @section = "Manage Ammendments"
+  @section = "Ammendments"
   @targeturl = "/"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
@@ -203,4 +203,14 @@ def incomplete_case_comment
     render :text => msg
   end
 
+  #################### Actions for special Cases ####################################################################################
+  def special_cases
+    @stats = PersonRecordStatus.stats
+    @icoFolder = folder
+    @section = "Special Cases"
+    @targeturl = "/"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+    render :layout => "facility"
+  end
 end
