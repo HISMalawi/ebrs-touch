@@ -3,7 +3,7 @@ def start
   begin
       ActiveRecord::Base.transaction do
         require Rails.root.join('db','load_mysql_data.rb')
-        create_user
+        #create_user
       end
   rescue => e 
     puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
