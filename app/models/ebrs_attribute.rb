@@ -56,12 +56,14 @@ module EbrsAttribute
   def next_primary_key
     max = (ActiveRecord::Base.connection.select_all("SELECT MAX(#{self.class.primary_key}) FROM #{self.class.table_name}").last.values.last.to_i rescue 0)
     return (max + 1) unless ['person_id', 'user_id'].include?(self.class.primary_key)
-    max = SETTINGS['location_id'].ljust(5, '0') + ((max.to_s.split('')[5 .. 1000].join('').to_i rescue 0) + 1)
+    max = (SETTINGS['location_id'].ljust(5, '0') rescue 0) + ((max.to_s.split('')[5 .. 1000].join('').to_i rescue 0) + 1)
     max
   end
 
   def generate_key
-    eval("self.#{self.class.primary_key} = next_primary_key") if self.attributes[self.class.primary_key].blank?
+    if !self.class.primary_key.blank? && !self.class.primary_key.class.to_s.match('CompositePrimaryKeys')
+      eval("self.#{self.class.primary_key} = next_primary_key") if self.attributes[self.class.primary_key].blank?
+    end
   end
 
   def create_or_update_in_couch

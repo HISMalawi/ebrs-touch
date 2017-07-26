@@ -47,7 +47,7 @@ class Methods
     if !rows.blank?
       update_query = "UPDATE #{table} SET "
       data.each do |k, v|
-        if k.match(/updated_at|created_at|date/)
+        if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
 
