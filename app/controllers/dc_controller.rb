@@ -25,7 +25,7 @@ end
 def manage_requests
   @stats = PersonRecordStatus.stats
   @icoFolder = folder
-  @section = "Manage Ammendments"
+  @section = "Ammendments"
   @targeturl = "/"
   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
@@ -45,7 +45,7 @@ end
 def view_duplicates
     @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE']
     @section = "Potential Duplicates"
-   # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+   #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
 
@@ -140,11 +140,30 @@ def incomplete_case_comment
     if PersonService.record_complete?(@child) == false
       flash[:info] = "Record is not complete"
     else
-      PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
+      allocate_record = IdentifierAllocationQueue.new
+      allocate_record.person_id = params[:id].to_i
+      allocate_record.assigned = 0
+      allocate_record.creator = User.current.id
+      allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
+      allocate_record.created_at = Time.now
+      if allocate_record.save
+        PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
+      end
     end
 
     render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
     render :text =>  "/view_complete_cases"
+  end
+
+  ################################## Pending Cases actions ####################################################################
+  def manage_pending_cases
+    @stats = PersonRecordStatus.stats
+    @icoFolder = folder
+    @section = "Manage Pending Cases"
+    @targeturl = "/"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+    render :layout => "facility"
   end
 
   def pending_case_comment
@@ -165,6 +184,7 @@ def incomplete_case_comment
     end
   end
 
+  ############################################################################################################################
   def reject_case_comment
     @child = Person.find(params[:id])
     @form_action = "/reject_case"
@@ -195,4 +215,14 @@ def incomplete_case_comment
     render :text => msg
   end
 
+  #################### Actions for special Cases ####################################################################################
+  def special_cases
+    @stats = PersonRecordStatus.stats
+    @icoFolder = folder
+    @section = "Special Cases"
+    @targeturl = "/"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+    render :layout => "facility"
+  end
 end

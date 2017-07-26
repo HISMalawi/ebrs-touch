@@ -43,7 +43,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
 
     @mother = Person.find(mother_id)
-    @father = Person.find(father_id)
+    @father = Person.find(father_id) rescue nil
     @mother_name = PersonName.find_by_person_id(mother_id)
     @father_name = PersonName.find_by_person_id(father_id)
     @mother_address = PersonAddress.find_by_person_id(mother_id)
@@ -54,7 +54,6 @@ class PersonController < ApplicationController
     @informant_name = PersonName.find_by_person_id(@informant_id)
     @informant_address = PersonAddress.find_by_person_id(@informant_id)
 
-  #raise @informant.inspect
 
     @record = {
         "Details of Child" => [
@@ -72,6 +71,7 @@ class PersonController < ApplicationController
                 ["Date of birth" , "mandatory"] => "#{@person.birthdate rescue nil}",
                 ["Sex", "mandatory"] => "#{@person.gender rescue nil}",
                 "Place of birth" => "#{Location.find(@birth_details.place_of_birth).name rescue nil}"
+                
             },
             {
                 "Name of Hospital" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
@@ -273,6 +273,7 @@ class PersonController < ApplicationController
   end
 
   def create
+       
 
     type_of_birth = params[:person][:type_of_birth]
     
@@ -281,10 +282,10 @@ class PersonController < ApplicationController
         type_of_birth = 'First Twin'
         params[:person][:type_of_birth] = 'First Twin'
 
-     elsif type_of_birth == 'Tripplet'
+     elsif type_of_birth == 'Triplet'
       
-         type_of_birth = 'First Tripplet'  
-         params[:person][:type_of_birth] = 'First Tripplet'                                         
+         type_of_birth = 'First Triplet'  
+         params[:person][:type_of_birth] = 'First Triplet'                                         
      end
 
      
@@ -348,14 +349,21 @@ class PersonController < ApplicationController
   #########################################################################
   ############### Duplicate search with elastic search ####################
  def search_similar_record
+    
+     if params[:twin_id].present? 
+        birthdate = Person.where(person_id: params[:twin_id]).first.birthdate.to_time.to_s.split(" ")[0]
+     else
+        birthdate = (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time)
+     end
 
+     
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
                       "middle_name" => (params[:middle_name] rescue nil),
                       "gender" => params[:gender],
                       "district" => params[:birth_district],
-                      "birthdate"=> (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time),
+                      "birthdate"=> birthdate,
                       "mother_last_name" => (params[:mother_last_name] rescue nil),
                       "mother_middle_name" => (params[:mother_middle_name] rescue nil),
                       "mother_first_name" => (params[:mother_first_name] rescue nil),
@@ -366,7 +374,7 @@ class PersonController < ApplicationController
 
       people = []
 
-      if SETTINGS['potential_search']
+      if SETTINGS['potential_search'] && !params[:type_of_birth].include?("Twin")
         results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
       else
         results = []
@@ -498,7 +506,7 @@ class PersonController < ApplicationController
 
   def get_hospital
   
-  nationality_tag = LocationTag.where(name: 'Hospital').first
+  nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
   
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 

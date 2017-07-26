@@ -5,7 +5,7 @@
       font-weight: bold;
   }
 </style>
-<script type="text/javascript" src="assets/showSubMenu.js"></script>
+<script type="text/javascript" src="/assets/showSubMenu.js"></script>
 
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
 
@@ -103,7 +103,7 @@
     </div>
 <% end %>
 
-<% if @folders.include?("Pending Cases") %>
+<% if @folders.include?("Pending Cases") && false %>
 
     <div class="button child_menu manage_cases" onclick="window.location = '/view_pending_cases'" tag=0 title="View Pending Cases">
       <table style="text-align: left;">
@@ -160,7 +160,7 @@
             <span class="count"><%= @stats['HQ-REJECTED']%></span>
           </td>
           <td style="height: 30px;">
-            Rejected at HQ
+            Rejected from HQ
           </td>
         </tr>
         <tr>
@@ -232,7 +232,7 @@
 
           </td>
           <td style="height: 30px;">
-            Dispatched Certificates
+            Dispatched Records
           </td>
         </tr>
         <tr>
@@ -245,7 +245,7 @@
 
 <% end %>
 <% if @folders.include?("View Synced Records") %>
-      <div class="button child_menu manage_cases" onclick="window.location = '/dc/sync'" tag=0 title="Synchronize with HQ">
+      <div class="button child_menu manage_cases" onclick="" tag=0 title="Synchronize with HQ">
         <table style="text-align: left;">
           <tr>
             <td rowspan="2">
