@@ -56,8 +56,8 @@ class UsersController < ApplicationController
        @roles = Role.where(level: "DC").map(&:role)
     else
        @roles = Role.where(level: "FC").map(&:role)
-    end  
-    
+    end
+
     render :layout => "touch"
 
   end
@@ -68,7 +68,7 @@ class UsersController < ApplicationController
     #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Update User"))
 
     @user = User.find(params[:id])
-  
+
     @section = "Edit User"
 
     @targeturl = "/view_users"
@@ -77,7 +77,7 @@ class UsersController < ApplicationController
        @roles = Role.where(level: "DC").map(&:role)
     else
        @roles = Role.where(level: "FC").map(&:role)
-    end  
+    end
 
     render :layout => "touch"
 
@@ -85,52 +85,72 @@ class UsersController < ApplicationController
 
   #Creates A New User
   def create
-  
+	#raise params.inspect
       @targeturl = "/user"
+	@userz = params[:user][:username]
+	if @userz.length < 4
+		 flash[:notice] = 'Username too short'
+		 redirect_to :back
+		 return
 
-      #if user.present?
-        #flash["notice"] = "User already already exists"
-         #redirect_to "/user/new" and return
-      #end
-      core_person = CorePerson.create(person_type_id: 1)
-      person_name = PersonName.create(person_id: core_person.person_id, 
-                                      first_name: params[:user][:first_name], 
+	@existing_user = User.where(username: params[:user][:username]).first
+
+       	if @existing_user.present?
+	       	 flash[:notice] = 'Username already in use'
+		 redirect_to :back
+		 return
+
+	else if (params[:user][:password] != params[:user][:confirm_password])
+      		flash[:notice] = 'Password Mismatch'
+      		redirect_to :back
+     		 return
+
+	 else
+       		core_person = CorePerson.create(person_type_id: 1)
+      		person_name = PersonName.create(person_id: core_person.person_id,
+                                      first_name: params[:user][:first_name],
                                       last_name: params[:user][:last_name])
 
-      person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id, 
-                                               first_name_code: params[:user][:first_name].soundex, 
+      		person_name_code = PersonNameCode.create(person_name_id: person_name.person_name_id,
+                                               first_name_code: params[:user][:first_name].soundex,
                                                last_name_code: params[:user][:last_name].soundex)
 
-      role = Role.where("role = ? AND level = ?", 
-                        params[:user]['user_role']['role'], 
+      		role = Role.where("role = ? AND level = ?",
+                        params[:user]['user_role']['role'],
                         application_mode == "DC" ? "DC" : "FC").first
 
-      @user = User.create(username: params[:user]['username'], 
-                          password: params[:user]['password'], 
-                          creator: User.current.user_id, 
+      		@user = User.create(username: params[:user]['username'],
+                          password: params[:user]['password'],
+                          creator: User.current.user_id,
                           person_id: core_person.person_id,
-                          last_password_date: Time.now, 
+                          last_password_date: Time.now,
                           email: params[:user]['email'])
 
-      @user_role = UserRole.create(user_id: @user.id, 
+      		@user_role = UserRole.create(user_id: @user.id,
                                    role_id: role.id)
 
-      respond_to do |format|
+                 respond_to do |format|
 
-      if @user.present?
-        format.html { redirect_to @user, :notice => 'User was successfully created.' }
-        format.json { render :show, :status => :created, :location => @user }
-      else
-        format.html { render :new }
-        format.json { render :json => @user.errors, :status => :unprocessable_entity }
+
+
+		      if @user.present?
+			format.html { redirect_to @user, :notice => 'User was successfully created.' }
+			format.json { render :show, :status => :created, :location => @user }
+		      else
+			format.html { render :new }
+			format.json { render :json => @user.errors, :status => :unprocessable_entity }
+		      end
+      		end
+	   end
+         end
       end
-    end
+
   end
 
   def update
 
     @user = User.find(params[:id])
-     
+
     if request.referrer.match('edit_account')
       @user.preferred_keyboard = params[:user][:preferred_keyboard]
       @user.save!
@@ -145,7 +165,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       role = User.current.user_role.role.role
       if ((role.strip.downcase.match(/Administrator/i) rescue false) ? true : false) and @user.update_attributes(user_params)
-  
+
         if params[:user][:first_name].present? && params[:user][:last_name].present?
           @user.core_person.person_name.update_attributes(voided: true, void_reason: 'Edited')
           person_name = PersonName.create(person_id: @user.person_id,

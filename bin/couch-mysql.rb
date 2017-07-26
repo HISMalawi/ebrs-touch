@@ -38,10 +38,8 @@ class Methods
   def self.update_doc(doc)
     client = $client
     client.query("SET FOREIGN_KEY_CHECKS = 0")
-
     table = doc['type']
     doc_id = doc['document_id']
-
     return nil if doc_id.blank?
     rows = client.query("SELECT * FROM #{table} WHERE document_id = '#{doc_id}' LIMIT 1").each(:as => :hash)
     data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
@@ -49,7 +47,7 @@ class Methods
     if !rows.blank?
       update_query = "UPDATE #{table} SET "
       data.each do |k, v|
-        if k.match(/updated_at|created_at|date/)
+        if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
 
@@ -65,7 +63,7 @@ class Methods
 
       data.each do |k, v|
         
-        if k.match(/updated_at|created_at|date/)
+        if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
         keys << k
@@ -110,6 +108,9 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_addresses' do |doc|
+    output = Methods.update_doc(doc.document)
+  end
+  document 'type' => 'guardianship' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_attribute_types' do |doc|

@@ -448,7 +448,7 @@ class PersonController < ApplicationController
   def get_district
     nationality_tag = LocationTag.where(name: 'District').first
     data = []
-    Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
+    Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?",
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
       data << l.name
