@@ -621,6 +621,7 @@
         <input id="person_father_citizenship"
                name="person[father][citizenship]"
                type="text"
+               optional="true"
                value="<%= @person[:father][:citizenship] rescue nil %>"
                class="input_cell"
                condition="__$('parents_details_available').value.trim() == 'Father' || __$('parents_details_available').value.trim() == 'Both'"
