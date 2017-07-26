@@ -1,4 +1,4 @@
-<%= form_for(@user) do |f| %>
+<%= form_for(@user, :action => "submitForm()") do |f| %>
 
     <fieldset>
       <legend>
@@ -36,14 +36,9 @@
 
           <td>
             <% if request.path.match(/new/) %>
-
-                <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :textCase => "lower", :uniq_check => "/username_availability?search_str=" %>
-
+		<%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :textCase => "lower", :uniq_check => "/username_availability?search_str=" %>
             <%else %>
-
-
-                <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower" %>
-
+            <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower"%>
             <% end %>
           </td>
 
@@ -56,11 +51,15 @@
           <td>
             :
           </td>
+          <% if request.path.match(/new/) %>
           <td>
-            <%= f.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true %>
+            <%= f.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true%>
           </td>
+          <%else%>
+          <%= f.text_field :first_name, :class => "input_cell", :placeholder => "First Name", :required => true%>
+            <%end%>
         </tr>
-       
+
         <tr>
           <td align="right">
             <%= f.label :last_name %>
@@ -68,10 +67,15 @@
           <td>
             :
           </td>
+          <% if request.path.match(/new/) %>
           <td>
-            <%= f.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true %>
+            <%= f.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true%>
           </td>
-      
+          <%else%>
+          <%= f.text_field :last_name, :class => "input_cell", :placeholder => "Last Name", :required => true%>
+            <%end%>
+        </tr>
+
         </tr>
 
 	<%= f.fields_for :user_role do |i| %>
@@ -85,8 +89,8 @@
           <td>
             <%= i.select :role, options_for_select(@roles),
               :class => "input_cell",
-              :id => "role", 
-              :placeholder => "Select Role", 
+              :id => "role",
+              :placeholder => "Select Role",
               :required => true %>
           </td>
         </tr>
@@ -106,9 +110,8 @@
                                      :class => "input_cell",
                                      :placeholder => "Password",
                                      :required => true,
-                                     :textCase => "lower",
-                                     :absolute_min => 6,
-                										 :absolute_max => 20 %>
+                                     :textCase => "lower"
+                 %>
               </td>
             </tr>
 
@@ -120,7 +123,7 @@
                 :
               </td>
               <td>
-                <%= f.password_field :confirm_password, :class => "input_cell", :placeholder => "Confirm the password entered", :required => true, :textCase => "lower" %>
+                <%= f.password_field :confirm_password, :class => "input_cell", :placeholder => "Confirm the password entered", :required => true, :textCase => "lower"%>
               </td>
             </tr>
 
@@ -158,7 +161,7 @@
 <% end %>
 
 <!--button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="submitForm()">
-  <%#= request.path.match(/new/) ? "Save" : "Update" %> User
+  <%= request.path.match(/new/) ? "Save" : "Update" %> User
 </button-->
 
 <script>
@@ -170,27 +173,47 @@
             function submitForm() {
                 if (validateForm() && good) {
                     document.getElementsByTagName('form')[0].submit();
+                } else {
+                    return false;
                 }
             }
 
     function validateForm() {
-        username = document.getElementById('user_username');
-        first_name = document.getElementById('user_first_name');
-        last_name = document.getElementById('user_last_name');
-        user_role = document.getElementById('user_role');
-        password = document.getElementById('user_password');
-        password_confirm = document.getElementById('user_confirm_password');
+
+        username = document.getElementById('textForuser_username');
+        first_name = document.getElementById('textForuser_first_name');
+        last_name = document.getElementById('textForuser_last_name');
+        user_role = document.getElementById('textForuser_role_role');
+        password = document.getElementById('textForuser_password');
+        password_confirm = document.getElementById('textForuser_confirm_password');
 
         if (username.value == '') {
             showMsg("Please enter username ...");
             return false;
-        } else if (first_name.value == '') {
+        }
+          else if (username.value.length < 3) {
+           showMsg("Please username should be atleast four characters...");
+            return false;
+        }
+        else if (first_name.value == '') {
             showMsg("Please enter user first name ...");
             return false;
-        } else if (last_name.value == '') {
+        }
+         else if (first_name.value.length < 3) {
+           showMsg("Please first name should be atleast four characters...");
+            return false;
+        }
+
+        else if (last_name.value == '') {
             showMsg("Please enter user last name ...");
             return false;
-        } else if (password.value == '') {
+        }
+         else if (last_name.value.length < 3) {
+            showMsg("Please last name should be atleast four characters...");
+            return false;
+        }
+
+        else if (password.value == '') {
             showMsg("Please password ...");
             return false;
         } else if (password.value.length < 6) {
@@ -213,9 +236,9 @@
 
         clearTimeout(timerHnd);
 
-        username = document.getElementById('user_username').value;
+        username = document.getElementById('textForuser_username').value;
 
-        if (username == "Username" || username.trim().length == 0) {
+        if (username == "Username" || username.trim().length < 3) {
             timerHnd = setTimeout("checkUsername()", timeSpacing);
 
             return;
@@ -228,11 +251,11 @@
         }
         xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                var results = xmlhttp.responseText;
 
                 timerHnd = setTimeout("checkUsername()", timeSpacing);
 
                 if (results == 'undefined' || results == '' || results == '"not validate"') {
+                var results = xmlhttp.responseText;
                     return;
                 } else {
                     if (results == 'available') {
@@ -266,13 +289,13 @@
 
     <% if request.path.match(/new/) %>
 
-    // timerHnd = setTimeout("checkUsername()", timeSpacing);
+     timerHnd = setTimeout("checkUsername()", timeSpacing);
 
     <% else %>
 
-    if (document.getElementById("user_username")) {
+    if (document.getElementById("textForuser_username")) {
 
-        document.getElementById("user_username").disabled = true;
+        document.getElementById("textForuser_username").disabled = true;
 
     }
 
