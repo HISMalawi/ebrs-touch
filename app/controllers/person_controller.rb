@@ -23,7 +23,8 @@ class PersonController < ApplicationController
 
 
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
-
+    
+      #raise params[:id].inspect
     
     @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b
     
