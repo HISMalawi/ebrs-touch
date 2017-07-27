@@ -1,38 +1,10 @@
-
-SERVER = CouchRest.new
-configs = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
-DB = SERVER.database!("#{configs['prefix']}_#{configs['suffix']}")
-
-class Pusher < CouchRest::Document
-  use_database(DB)
-end
-
-module EbrsAttribute
-
-  def send_data(hash)
-    if !hash['document_id'].blank?
-      h = Pusher.database.get(hash['document_id'])
-      hash.keys.each do |k|
-        h[k] = hash[k]
-      end
-    else
-      h = Pusher.new(hash)
-    end
-
-    h.save
-    h['document_id'] = h.id
-    h.save
-
-    h.id
-  end
+module EbrsMetadata
 
   def self.included(base)
     base.class_eval do
       before_create :check_record_complteness_before_creating
       before_save :check_record_complteness_before_updating
       before_create :generate_key
-      #after_create :create_or_update_in_couch
-      after_save :create_or_update_in_couch
     end
   end
 
@@ -68,14 +40,4 @@ module EbrsAttribute
     end
   end
 
-  def create_or_update_in_couch
-    data = self
-    transformed_data = data.as_json
-    #transformed_data.delete("#{eval(data.class.name).primary_key}")
-    transformed_data['type'] = eval(data.class.name).table_name
-    doc_id = send_data(transformed_data)
-    if data.document_id.blank?
-      data.update_attributes(:document_id => doc_id)
-    end
-  end
 end

@@ -1,7 +1,7 @@
 class Location < ActiveRecord::Base
   self.table_name = :location
   self.primary_key = :location_id
-  include EbrsAttribute
+	include EbrsMetadata
 
 
   has_many  :users

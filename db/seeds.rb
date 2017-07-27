@@ -3,7 +3,6 @@ def start
   begin
       ActiveRecord::Base.transaction do
         create_user
-        require Rails.root.join('db','load_mysql_data.rb')
       end
   rescue => e 
     puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
@@ -28,7 +27,7 @@ def create_user
                                             last_name_code: 'Admin'.soundex )
 
   puts "Creating Role for User"
-  role = Role.where(role: 'Administrator').first
+  role = Role.where(role: 'Administrator', level: SETTINGS['application_mode']).first
 
   puts "Creating User"
   user = User.create!(username: 'admin', 
@@ -44,5 +43,4 @@ def create_user
   puts "Successfully created local System Administrator: your new username is: #{user.username}  and password: adminebrs"
 end
 
-#Right now everything will automatically load using couchdb sync via couch_tap change streaming
-#start
+start
