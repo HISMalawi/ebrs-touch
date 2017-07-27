@@ -1,3 +1,7 @@
+#Create couch DB
+h = Hallo.new
+h.save
+h.destroy
 
 def start
   begin

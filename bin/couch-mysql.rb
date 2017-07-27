@@ -83,25 +83,7 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
   database "#{mysql_adapter}://#{mysql_username}:#{mysql_password}@#{mysql_host}:#{mysql_port}/#{mysql_db}"
   #StatusCouchdb Document Type
 
-  document 'type' => 'birth_registration_type' do |doc|
-     output = Methods.update_doc(doc.document)
-  end
   document 'type' => 'core_person' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'level_of_education' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'location' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'location_tag' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'location_tag_map' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'mode_of_delivery' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person' do |doc|
@@ -111,9 +93,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'guardianship' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'person_attribute_types' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_attributes' do |doc|
@@ -128,43 +107,16 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
   document 'type' => 'person_name_code' do |doc|
     output = Methods.update_doc(doc.document)
   end
-  document 'type' => 'person_record_statuses' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
   document 'type' => 'person_relationship' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_identifiers' do |doc|
     output = Methods.update_doc(doc.document)
   end
-  document 'type' => 'person_identifier_types' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
   document 'type' => 'person_attributes' do |doc|
     output = Methods.update_doc(doc.document)
   end
-  document 'type' => 'person_attribute_types' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'person_relationship_types' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
   document 'type' => 'person_type' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'person_type_of_births' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'role' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'statuses' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'user_role' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'users' do |doc|
     output = Methods.update_doc(doc.document)
   end
 end
