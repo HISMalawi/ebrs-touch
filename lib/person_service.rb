@@ -389,8 +389,13 @@ elsif SETTINGS["application_mode"] == "DC"
    #raise mother_current_district.inspect
 
   ################################################### Client details ############################################
+   
+    #core_person = CorePerson.create(person_type_id: )
+    core_person = CorePerson.new
+    core_person.person_type_id = PersonType.where(name: 'Mother').first.id
+    core_person.save
 
-    core_person = CorePerson.create(person_type_id: PersonType.where(name: 'Client').first.id)
+    raise core_person.inspect
 
     @person = Person.create(person_id: core_person.id, 
       gender: gender.first, 
