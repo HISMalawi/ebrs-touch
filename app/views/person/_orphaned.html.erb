@@ -78,17 +78,18 @@
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
-
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-          <%= (f.text_field :birthdate,
-                          :class => "input_cell",
-                          :fieldtype => "date",
-                          :absolute_min => Time.now.advance(:years => -100).strftime('%Y/%m/%d'),
-                          :min => Time.now.advance(:years => -16).strftime('%Y/%m/%d'),
-                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
-                          :tt_onUnload => "recalculateDateValidations('c_dob')") rescue "" %>
+        <input type="text" name="birthdate"
+               id="person_birthdate"
+               class = "input_cell"
+               fieldtype = "date"
+               absolute_min = "<%= Time.now.advance(:years => -100).strftime('%Y/%m/%d') %>"
+               min = "<%= Time.now.advance(:years => -16).strftime('%Y/%m/%d') %>"
+               absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
+               tt_onUnload = "recalculateDateValidations('c_dob')"
+        >
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
 
@@ -118,18 +119,19 @@
       </div>
         
       
+      
       <div class="field">
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-        			 name="person[bd][holder]"
-        			 type="text"
-        			 condition="beforeLiveDate()"
-        			 value="<%= @person[:bd] rescue nil %>"
-        			 ajaxURL = "/search_by_district"
-        			 option = "true"	
+               name="person[bd][holder]"
+               type="text"
+               condition="beforeLiveDate()"
+               optional="true"
+               value="<%= @person[:bd] rescue nil %>"
+               ajaxURL = "/search_by_district"  
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
-        			 class="input_cell"
+               class="input_cell"
                 />
 
       </div>

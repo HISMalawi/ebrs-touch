@@ -16,11 +16,12 @@ class PersonController < ApplicationController
     else
       @targeturl = params[:next_path]
     end
+
     @section = "View Record"
     person_mother_id = PersonRelationType.find_by_name("Mother").id
     person_father_id = PersonRelationType.find_by_name("Father").id
     informant_type_id = PersonType.find_by_name("Informant").id
-
+    
 
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
 
@@ -239,6 +240,7 @@ class PersonController < ApplicationController
 
     @records = PersonService.query_for_display(@states)
     
+    raise @records.inspect
     
     render :template => "person/records", :layout => "data_table"
 
@@ -530,9 +532,9 @@ class PersonController < ApplicationController
     @states = ["DC-ACTIVE"]
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    
     @records = PersonService.query_for_display(@states)
-
+    
     render :template => "person/records", :layout => "data_table"
   end
 
