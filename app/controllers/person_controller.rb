@@ -26,6 +26,7 @@ class PersonController < ApplicationController
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
 
     
+
     @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b
     
     
@@ -534,7 +535,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     
     @records = PersonService.query_for_display(@states)
-    
+   
     render :template => "person/records", :layout => "data_table"
   end
 
