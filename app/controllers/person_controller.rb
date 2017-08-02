@@ -39,6 +39,7 @@ class PersonController < ApplicationController
     @person = Person.find(params[:id])
     @core_person = CorePerson.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
+    
     @person_record_status = PersonRecordStatus.where(:person_id => params[:id]).last
     @person_status = @person_record_status.status.name
 
@@ -205,6 +206,8 @@ class PersonController < ApplicationController
         ]
     }
 
+  
+
     @summaryHash = {
       "Child Name" => "#{@person_name.first_name} #{@person_name.middle_name rescue nil} #{@person_name.last_name rescue nil}",
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
@@ -259,7 +262,7 @@ class PersonController < ApplicationController
 
       @person = PersonBirthDetail.find_by_person_id(params[:id])
       @person_name = PersonName.find_by_person_id(params[:id])
-
+      
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
@@ -270,7 +273,7 @@ class PersonController < ApplicationController
         
         
     end
-
+     
      render :layout => "touch"
   end
 

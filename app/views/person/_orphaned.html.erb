@@ -126,7 +126,6 @@
                name="person[bd][holder]"
                type="text"
                condition="beforeLiveDate()"
-               optional="true"
                value="<%= @person[:bd] rescue nil %>"
                ajaxURL = "/search_by_district"  
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
@@ -681,7 +680,6 @@
         <input id="person_father_residential_country" 
                name="person[father][residential_country]" 
                type="text"
-               optional="true"
                value="<%= @person[:father][:residential_country] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_country"
          />
@@ -1687,6 +1685,7 @@
     }
 
     function removeMothersName(){
+
       if(__$("person_original_surname")) {
       __$("person_last_name").value = __$("person_original_surname").value;
 
@@ -1695,6 +1694,7 @@
 
 
     function setChildName() {
+
        __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
        }
 
@@ -1702,6 +1702,7 @@
 
 
     function clearRelated(){
+
       if (__$('del')){
       __$('del').onmousedown = function () {
 
@@ -1771,6 +1772,7 @@
     if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital') 
     {
     	full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+
     	  
     }
       else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
@@ -1895,7 +1897,7 @@
      
       if (handleDate(__$('person_birthdate').value.trim()) > startDate){
        
-         return false;
+         return true;
       
       } else {
       
