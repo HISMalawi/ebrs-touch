@@ -1278,7 +1278,7 @@ def self.create_normal_registration(params, core_person_id)
     ########################################### recording father details (start) ###############################################
    
    
-      if(params[:details_of_father_known] == "Yes" || params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father" || !params[:person][:father][:first_name].blank?)
+      if(params[:details_of_father_known] == "Yes" || params[:parents_details_available] == "Father" || !params[:person][:father][:first_name].blank?)
 
                 if  father_birthdate.blank?
                     father_birthdate = "1900-01-01".to_date
@@ -1303,26 +1303,7 @@ def self.create_normal_registration(params, core_person_id)
                     person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
 
 
-=begin
-                record = PersonAddress.new(person_id: core_person_father.id,
-                                     current_village: params[:person][:father][:current_village] == '' ? '' : Location.where(name: params[:person][:father][:current_village]).first.location_id,
-                                     current_village_other: "",
-                                     current_ta: params[:person][:father][:father_current_ta] == '' ? '' : Location.where(name: params[:person][:father][:father_current_ta]).first.location_id,
-                                     current_ta_other: "",
-                                     current_district: params[:person][:father][:current_district] == '' ? '' : Location.where(name: params[:person][:father][:current_district]).first.location_id,
-                                     current_district_other: "",
-                                     home_village: params[:person][:father][:home_village] == '' ? '' : Location.where(name: params[:person][:father][:home_village]).first.location_id,
-                                     home_village_other: "",
-                                     home_ta: params[:person][:father][:home_ta] == '' ? '' : Location.where(name: params[:person][:father][:home_ta]).first.location_id,
-                                     home_ta_other: "",
-                                     home_district: params[:person][:father][:current_district] == '' ? '' : Location.where(name: params[:person][:father][:current_district]).first.location_id,
-                                     home_district_other: "",
-                                     citizenship: params[:person][:father][:residental_country] == '' ? '' : Location.where(name: params[:person][:father][:residental_country]).first.location_id,
-                                     residential_country: params[:person][:father][:residental_country] == '' ? '' : Location.where(name: params[:person][:father][:residental_country]).first.location_id)
-                record.save
-=end
-           
-                PersonAddress.create(person_id: core_person_mother.id,
+                record = PersonAddress.create(person_id: core_person_father.id,
                             current_village: params[:person][:father][:current_village] == '' ? '' : Location.where(name: params[:person][:father][:current_village]).first.location_id,
                             current_village_other: "",
                             current_ta: params[:person][:father][:current_ta] == '' ? '' : Location.where(name: params[:person][:father][:current_ta]).first.location_id,
@@ -1335,7 +1316,11 @@ def self.create_normal_registration(params, core_person_id)
                             citizenship: Location.where(name: params[:person][:father][:residential_country]).first.location_id,
                             residential_country: Location.where(name: params[:person][:father][:residential_country]).first.location_id,
                             address_line_1: params[:person][:father][:addressline1],
-                            address_line_2: params[:person][:father][:addressline2])rescue nil
+                            address_line_2: params[:person][:father][:addressline2])
+
+               
+
+                record.save
 
 
       end
