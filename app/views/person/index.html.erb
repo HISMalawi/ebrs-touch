@@ -473,7 +473,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            View reports at DC's office.
+            View reports at <%= SETTINGS['application_mode']=="FC" ? "Facility" : "DC's office"%>.
           </td>
         </tr>
       </table>
@@ -494,7 +494,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            Manage system users at DC's office.
+            Manage system users at <%= SETTINGS['application_mode']=="FC" ? "Facility" : "DC's office" %>.
           </td>
         </tr>
       </table>

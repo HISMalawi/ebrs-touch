@@ -2662,7 +2662,8 @@
      if (place == 'district') {
      
       __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
-     
+       
+       console.log(__$('person_birth_district').val());
     
      } else {
      
