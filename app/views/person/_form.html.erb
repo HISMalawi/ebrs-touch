@@ -38,7 +38,7 @@
       <%= f.hidden_field :place_of_birth, :value => Location.where(location_id: SETTINGS['location_id']).first.name %>
       <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.id}"  %>
       <%= f.hidden_field :birth_district, :value => Location.current_health_facility.id %>
-
+ 
       <input id="person_original_surname" type="hidden"/>
 
 
