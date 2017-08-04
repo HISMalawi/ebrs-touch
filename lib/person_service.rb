@@ -148,7 +148,7 @@ module PersonService
     PersonBirthDetail.create(
       person_id:                                core_person.id,
       birth_registration_type_id:               SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id : BirthRegistrationType.where(name: params[:registration_type]).first.birth_registration_type_id,
-      place_of_birth:                           Location.where(location_id: SETTINGS['location_id']).first.location_id,
+      place_of_birth:                           Location.where(name: 'Hospital').first.location_id,
       birth_location_id:                        Location.where(location_id: SETTINGS['location_id']).first.location_id,
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
@@ -754,6 +754,60 @@ end
                                  address_line_2: params[:person][:informant][:addressline2])rescue nil
 
    end
+   
+
+   if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
+      
+
+      ##################################################################################################
+      ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
+      ########## associated with the second twin and /or  second and third tripplet.
+      ##################################################################################################
+
+          adoptive_father_relation_type_id = PersonRelationType.where(name: 'Adoptive-Father').first.person_relationship_type_id
+          adoptive_mother_relation_type_id = PersonRelationType.where(name: 'Adoptive-Mother').first.person_relationship_type_id
+          informant_relation_type_id = PersonRelationType.where(name: 'Informant').first.person_relationship_type_id
+
+          
+
+          person_relation_adoptive_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_adoptive_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_mother_relation_type_id).first.person_b rescue nil
+
+          person_relation_informant_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: informant_relation_type_id).first.person_b rescue nil
+
+          
+
+      if !person_relation_adoptive_father_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_father_id,
+                                    person_relationship_type_id: adoptive_father_relation_type_id)
+      end
+
+      if !person_relation_adoptive_mother_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_mother_id,
+                                    person_relationship_type_id: adoptive_mother_relation_type_id)
+         
+      end
+
+      if !person_relation_informant_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_informant_id,
+                                    person_relationship_type_id: informant_relation_type_id) 
+ 
+      end
+
+      ########################################################################################################
+      ############## id retrieval code end
+      ########################################################################################################
+
+   end
+   
 
    return nil
 
@@ -958,9 +1012,10 @@ end
 
       end
 
-    # consult what value person_relationship_type_id should have if the registration type is Abandoned and when both parent
-    # details are available
-
+    #consult what value person_relationship_type_id should have if the registration type is Abandoned and when both parent
+    #details are available. Also consider the variable of adoption certificate attached for a guardian to be a legal
+    #adoptive parent
+    
     PersonRelationship.create(person_a: core_person_id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
@@ -980,6 +1035,81 @@ end
                                  residential_country: Location.where(name: 'Malawi').first.location_id,
                                  address_line_1: informant_addressline1,
                                  address_line_2: informant_addressline2)rescue nil
+
+##################################################################################################################################################################       
+   
+   if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
+      
+
+      ##################################################################################################
+      ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
+      ########## associated with the second twin and /or second and third tripplet.
+      ##################################################################################################
+
+          father_relation_type_id = PersonRelationType.where(name: 'Father').first.person_relationship_type_id
+          mother_relation_type_id = PersonRelationType.where(name: 'Mother').first.person_relationship_type_id
+          adoptive_father_relation_type_id = PersonRelationType.where(name: 'Adoptive-Father').first.person_relationship_type_id
+          adoptive_mother_relation_type_id = PersonRelationType.where(name: 'Adoptive-Mother').first.person_relationship_type_id
+          informant_relation_type_id = PersonRelationType.where(name: 'Informant').first.person_relationship_type_id
+
+          person_relation_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: mother_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_adoptive_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_adoptive_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_mother_relation_type_id).first.person_b rescue nil
+
+          person_relation_informant_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: informant_relation_type_id).first.person_b rescue nil
+
+          
+
+      if !person_relation_father_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_father_id,
+                                    person_relationship_type_id: father_relation_type_id)
+      end
+
+      if !person_relation_mother_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_mother_id,
+                                    person_relationship_type_id: mother_relation_type_id)
+         
+      end
+
+      if !person_relation_adoptive_father_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_father_id,
+                                    person_relationship_type_id: adoptive_father_relation_type_id)
+      end
+
+      if !person_relation_adoptive_mother_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_mother_id,
+                                    person_relationship_type_id: adoptive_mother_relation_type_id)
+         
+      end
+
+      if !person_relation_informant_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_informant_id,
+                                    person_relationship_type_id: informant_relation_type_id) 
+ 
+      end
+
+      ########################################################################################################
+      ############## id retrieval code end
+      ########################################################################################################
+
+   end
 
     return nil
 
@@ -1198,6 +1328,67 @@ end
       PersonRelationship.create(person_a: core_person_id, person_b: core_person_mother.id,
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
 
+
+   end
+
+   if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
+      
+
+      ##################################################################################################
+      ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
+      ########## associated with the second twin and /or  second and third tripplet.
+      ##################################################################################################
+
+          father_relation_type_id = PersonRelationType.where(name: 'Father').first.person_relationship_type_id
+          mother_relation_type_id = PersonRelationType.where(name: 'Mother').first.person_relationship_type_id
+          adoptive_father_relation_type_id = PersonRelationType.where(name: 'Adoptive-Father').first.person_relationship_type_id
+          adoptive_mother_relation_type_id = PersonRelationType.where(name: 'Adoptive-Mother').first.person_relationship_type_id
+          informant_relation_type_id = PersonRelationType.where(name: 'Informant').first.person_relationship_type_id
+
+          person_relation_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: mother_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_adoptive_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_adoptive_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: adoptive_mother_relation_type_id).first.person_b rescue nil
+
+          person_relation_informant_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: informant_relation_type_id).first.person_b rescue nil
+
+          
+
+      if !person_relation_adoptive_father_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_father_id,
+                                    person_relationship_type_id: adoptive_father_relation_type_id)
+      end
+
+      if !person_relation_adoptive_mother_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_adoptive_mother_id,
+                                    person_relationship_type_id: adoptive_mother_relation_type_id)
+         
+      end
+
+      if !person_relation_informant_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_informant_id,
+                                    person_relationship_type_id: informant_relation_type_id) 
+ 
+      end
+
+      ########################################################################################################
+      ############## id retrieval code end
+      ########################################################################################################
+
    end
 
      return nil
@@ -1331,7 +1522,7 @@ def self.create_normal_registration(params, core_person_id)
 
   end
 
-    ############################################# recording father details (end)   ###############################################
+  ############################################# recording father details (end)   ###############################################
 
   ######################################### Recording informant details #############################################
 
@@ -1399,10 +1590,10 @@ def self.create_normal_registration(params, core_person_id)
    if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
       
 
-        ##################################################################################################
-        ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
-        ########## associated to the second twin and /or  third tripplet.
-        ##################################################################################################
+      ##################################################################################################
+      ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
+      ########## associated with the second twin and /or  second and third tripplet.
+      ##################################################################################################
 
           father_relation_type_id = PersonRelationType.where(name: 'Father').first.person_relationship_type_id
           mother_relation_type_id = PersonRelationType.where(name: 'Mother').first.person_relationship_type_id
@@ -1450,9 +1641,9 @@ def self.create_normal_registration(params, core_person_id)
  
       end
 
-        ########################################################################################################
-        ############## id retrieval code end
-        ########################################################################################################
+      ########################################################################################################
+      ############## id retrieval code end
+      ########################################################################################################
 
    end
 
