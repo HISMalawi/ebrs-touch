@@ -285,25 +285,6 @@ end
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_mother.id
 
-  ## here in this block of code, the assumption is that the address details for the mother have been saved since the
-  ## mother is the same as the informant, hence commenting the below code
-=begin
-      PersonAddress.create(person_id: core_person_mother.id,
-                                 current_village: mother_current_village == '' ? '' : Location.where(name: mother_current_village).first.location_id,
-                                 current_village_other: "",
-                                 current_ta: mother_current_ta == '' ? '' : Location.where(name: mother_current_ta).first.location_id,
-                                 current_ta_other: "",
-                                 current_district: mother_current_district == '' ? '' : Location.find_by_name(mother_current_district).location_id,
-                                 current_district_other: "",
-                                 home_village: mother_current_village == '' ? '' : Location.where(name:mother_current_village).first.location_id,
-                                 home_village_other: "",
-                                 home_ta: mother_current_ta == '' ? '' : Location.where(name:mother_current_ta).first.location_id,
-                                 citizenship: mother_residental_country == '' ? '' : Location.where(name: mother_residental_country).first.location_id,
-                                 residential_country: mother_residental_country == '' ? '' : Location.where(name: mother_residental_country).first.location_id,
-                                 address_line_1: informant_addressline1,
-                                 address_line_2: informant_addressline2)
-=end
-
     elsif (informant_same_as_father == "Yes")
 
 
@@ -312,24 +293,6 @@ end
               person_relationship_type_id: PersonRelationType.where(name: 'Informant').first.id)
               informant_id = core_person_father.id
 
-   ## here in this block of code, the assumption is that the address details for the father have been saved since the
-   ## father is the same as the informant, hence commenting the below code
-=begin
-          PersonAddress.create(person_id: core_person_father.id,
-                                 current_village: Location.where(name: father_current_village).first.location_id,
-                                 current_village_other: "",
-                                 current_ta: Location.where(name: father_current_ta).first.location_id,
-                                 current_ta_other: "",
-                                 current_district: Location.find_by_name(father_current_district).location_id,
-                                 current_district_other: "",
-                                 home_village: Location.where(name:father_current_village).first.location_id,
-                                 home_village_other: "",
-                                 home_ta: Location.where(name:father_current_ta).first.location_id,
-                                 citizenship: Location.where(name: 'Malawi').first.location_id,
-                                 residential_country: Location.where(name: 'Malawi').first.location_id,
-                                 address_line_1: informant_addressline1,
-                                 address_line_2: informant_addressline2)
-=end
 
    elsif !informant_first_name.blank?
 
@@ -377,7 +340,63 @@ end
    end
 
    ############################################## Informant details end #############################################
+   ##########################################################################################################################
+   ##########################################################################################################################
+   
+         
+   if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
+      
 
+      ##################################################################################################
+      ########## retrieve the id's for the relations of the first twin/tripplet. These ids will be 
+      ########## associated with the second twin and /or  second and third tripplet.
+      ##################################################################################################
+
+          father_relation_type_id = PersonRelationType.where(name: 'Father').first.person_relationship_type_id
+          mother_relation_type_id = PersonRelationType.where(name: 'Mother').first.person_relationship_type_id
+          informant_relation_type_id = PersonRelationType.where(name: 'Informant').first.person_relationship_type_id
+
+          person_relation_father_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: father_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_mother_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: mother_relation_type_id).first.person_b rescue nil
+
+
+          person_relation_informant_id = PersonRelationship.where(person_a: params[:person][:prev_child_id],
+                                      person_relationship_type_id: informant_relation_type_id).first.person_b rescue nil
+
+          
+     
+      if !person_relation_father_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_father_id,
+                                    person_relationship_type_id: father_relation_type_id)
+      end
+
+      if !person_relation_mother_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_mother_id,
+                                    person_relationship_type_id: mother_relation_type_id)
+         
+      end
+
+      if !person_relation_informant_id.blank?
+
+          PersonRelationship.create(person_a: core_person_id, person_b: person_relation_informant_id,
+                                    person_relationship_type_id: informant_relation_type_id) 
+ 
+      end
+
+      ########################################################################################################
+      ############## id retrieval code end
+      ########################################################################################################
+
+   end
+
+   ##########################################################################################################################
+   ##########################################################################################################################
    ############################################### Person record Status ###############################################
 
    PersonRecordStatus.new_record_state(core_person.id, 'DC-COMPLETE')
@@ -405,27 +424,20 @@ elsif SETTINGS["application_mode"] == "DC"
       last_name_code: last_name.soundex,
       middle_name_code: (middle_name.soundex rescue nil))
 
+  
+    if place_of_birth == 'Hospital'
 
+       birth_location_id = Location.where(name: 'hospital_of_birth').first.location_id
 
-    if hospital_of_birth.blank? && !place_of_birth.blank?
+    elsif (place_of_birth == 'Home')
 
-       birth_location_id = self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id
-    end
-
-    if hospital_of_birth.blank? && place_of_birth.blank?
-
-       birth_location_id = Location.where(name: 'Other').first.location_id
-       place_of_birth = 'Other'
+       birth_location_id = Location.where(name: params[:birth_village]).first.location_id
 
     else
-       
-       if self.is_num?(place_of_birth)
-         birth_location_id = place_of_birth
-       else
-        birth_location_id = Location.where(name: place_of_birth).first.location_id
-       end
 
+        birth_location_id = Location.where(name: params[:person][:bd][:holder]).first.location_id
     end
+
 
     if type_of_birth.blank?
 
@@ -439,6 +451,7 @@ elsif SETTINGS["application_mode"] == "DC"
       birth_registration_type_id:               BirthRegistrationType.where(name: params[:relationship]).first.birth_registration_type_id,
       place_of_birth:                           self.is_num?(place_of_birth) == true ? place_of_birth : Location.where(name: place_of_birth).first.location_id,
       birth_location_id:                        birth_location_id,
+      other_birth_location:                     params[:person][:other_birth_place_details] == '' ? nil : params[:person][:other_birth_place_details],
       birth_weight:                             birth_weight,
       type_of_birth:                            self.is_num?(type_of_birth) == true ? PersonTypeOfBirth.where(person_type_of_birth_id: type_of_birth).first.id : PersonTypeOfBirth.where(name: type_of_birth).first.id,
       parents_married_to_each_other:            (parents_married_to_each_other == 'No' ? 0 : 1),
