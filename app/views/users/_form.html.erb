@@ -1,4 +1,4 @@
-<%= form_for(@user, :action => "submitForm()") do |f| %>
+<%= form_for(@user) do |f| %>
 
     <fieldset>
       <legend>
@@ -87,7 +87,7 @@
             :
           </td>
           <td>
-            <%= i.select :role, options_for_select(@roles),
+            <%= i.select :role, options_for_select(@roles, (@role rescue nil)),
               :class => "input_cell",
               :id => "role",
               :placeholder => "Select Role",
@@ -160,9 +160,9 @@
 
 <% end %>
 
-<!--button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="submitForm()">
+<button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="submitForm()">
   <%= request.path.match(/new/) ? "Save" : "Update" %> User
-</button-->
+</button>
 
 <script>
 

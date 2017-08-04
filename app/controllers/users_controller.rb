@@ -74,10 +74,12 @@ class UsersController < ApplicationController
     @targeturl = "/view_users"
 
     if application_mode == "DC"
-       @roles = Role.where(level: "DC").map(&:role)
+       @roles = [''] + Role.where(level: "DC").map(&:role)
     else
-       @roles = Role.where(level: "FC").map(&:role)
+       @roles = [''] + Role.where(level: "FC").map(&:role)
     end
+
+    @role = @user.user_role.role.role
 
     render :layout => "touch"
 
@@ -151,6 +153,12 @@ class UsersController < ApplicationController
             last_name_code: params[:user][:last_name].soundex )
         end
 
+        if (params[:user][:user_role][:role].present? rescue false)
+            role=@user.user_role.update_attributes(
+                role_id: Role.where(role: params[:user][:user_role][:role]).last.id
+            )
+        end
+
         if @user.present?
           format.html { redirect_to @user, :notice => 'User was successfully updated.' }
           format.json { render :show, :status => :ok, :location => @user }
@@ -161,6 +169,7 @@ class UsersController < ApplicationController
       end
     end
   end
+
 
   #Displays All Users
   def query_users

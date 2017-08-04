@@ -1,4 +1,4 @@
-,Nurse,Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
+,TestRole,Nurse/Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
 DC-ACTIVE,,,,"1,2",3,,,,,"1, 2"
 FC-POTENTIAL DUPLICATE,,,,"1,2",3,,,,,
 DC-INCOMPLETE,,,,"11,6",,,,,,
@@ -50,7 +50,7 @@ END CODES,,,,,,,,,,
 ,,,,,,,,,,
 ,,,,,,,,,,
 Root Folder Privileges,,,,,,,,,,
-Folder/Role,Nurse,Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
+Folder/Role,TestRole,Nurse/Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
 Register Child,Y,Y,Y,,,,,,,
 View Records,Y,Y,Y,,Y,Y,,,,
 View Synced Records,Y,Y,Y,Y,Y,Y,,,,
