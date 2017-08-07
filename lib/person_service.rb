@@ -427,7 +427,7 @@ elsif SETTINGS["application_mode"] == "DC"
   
     if place_of_birth == 'Hospital'
 
-       birth_location_id = Location.where(name: 'hospital_of_birth').first.location_id
+       birth_location_id = Location.where(name: params[:person][:hospital_of_birth]).first.location_id
 
     elsif (place_of_birth == 'Home')
 

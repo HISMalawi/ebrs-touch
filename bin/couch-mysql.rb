@@ -51,7 +51,9 @@ class Methods
           v = v.to_datetime.to_s(:db) rescue v
         end
 
-        update_query += " #{k} = \"#{v}\", "
+        unless (['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null'))
+          update_query += " #{k} = \"#{v}\", "
+        end
       end
       update_query = update_query.strip.sub(/\,$/, '')
       update_query += " WHERE document_id = '#{doc_id}' "
@@ -62,7 +64,11 @@ class Methods
       values = []
 
       data.each do |k, v|
-        
+
+        if (['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null'))
+          next
+        end
+
         if k.match(/updated_at|created_at|changed_at|date/)
           v = v.to_datetime.to_s(:db) rescue v
         end
