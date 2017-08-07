@@ -17,7 +17,7 @@ module PersonService
     last_name                         = params[:person][:last_name]
 
     #raise last_name.inspect
-
+    date_of_marriage                  = params[:person][:date_of_marriage]
     middle_name                       = params[:person][:middle_name]
     birthdate                         = params[:birthdate]
     place_of_birth                    = params[:person][:place_of_birth]
