@@ -90,7 +90,7 @@ ActiveRecord::Schema.define(version: 0) do
     t.integer  "changed_by",      limit: 4
     t.datetime "changed_at"
     t.string   "document_id", limit: 100
-end
+  end
 
   add_index "location", ["changed_by"], name: "location_changed_by", using: :btree
   add_index "location", ["creator"], name: "user_who_created_location", using: :btree
@@ -253,6 +253,8 @@ end
     t.integer  "adoption_court_order",                    limit: 1,  default: 0, null: false
     t.integer  "birth_registration_type_id",              limit: 4,              null: false
     t.integer  "location_created_at",                     limit: 4
+    t.integer  "form_signed",                             limit: 1,  default: 0, null: false
+    t.date     "date_registered",                                                null: false
     t.string   "document_id", limit: 100
     t.datetime "created_at",                                                     null: false
     t.datetime "updated_at",                                                     null: false

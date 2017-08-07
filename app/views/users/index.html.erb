@@ -11,7 +11,7 @@
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          Add new system user at facility.
+          Add new system user at <%= SETTINGS['application_mode']== 'FC'? 'Facility' : 'DC'%>.
         </td>
       </tr>
     </table>
@@ -29,7 +29,7 @@
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          Revoke user access rights at facility.
+          Revoke user access rights at <%= SETTINGS['application_mode']== 'FC'? 'Facility' : 'DCs'%>.
         </td>
       </tr>
     </table>
@@ -47,7 +47,7 @@
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          Give back access rights to blocked user at facility.
+          Give back access rights to blocked user at <%= SETTINGS['application_mode']== 'FC'? 'Facility' : 'DC'%>.
         </td>
       </tr>
     </table>
@@ -65,7 +65,7 @@
       </tr>
       <tr>
         <td style="font-size: 11px; font-style: italic;">
-          View all users, their roles and access rights at facility.
+          View all users, their roles and access rights at <%= SETTINGS['application_mode']== 'FC'? 'Facility' : 'DC'%>.
         </td>
       </tr>
     </table>

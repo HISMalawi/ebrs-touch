@@ -26,7 +26,8 @@ class PersonController < ApplicationController
     @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
 
     
-    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b
+
+    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b 
     
     
     person_mother_relation = PersonRelationship.find_by_sql(["select * from person_relationship where person_a = ? and person_relationship_type_id = ?",params[:id], person_mother_id])
@@ -38,6 +39,7 @@ class PersonController < ApplicationController
     @person = Person.find(params[:id])
     @core_person = CorePerson.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
+    
     @person_record_status = PersonRecordStatus.where(:person_id => params[:id]).last
     @person_status = @person_record_status.status.name
 
@@ -55,7 +57,7 @@ class PersonController < ApplicationController
     @informant_name = PersonName.find_by_person_id(@informant_id)
     @informant_address = PersonAddress.find_by_person_id(@informant_id)
 
-
+    
     @record = {
         "Details of Child" => [
             {
@@ -80,7 +82,8 @@ class PersonController < ApplicationController
                 "Address" => "#{@person.birth_address rescue nil}"
             },
             {
-                "District" => "#{@person.birth_district rescue nil}",
+                #{}"District" => "#{@person.birth_district rescue nil}",
+                "District" => "#{Location.find(@mother_address.current_district).name rescue nil}",
                 "T/A" => "#{@person.birth_ta rescue nil}",
                 "Village" => "#{@person.birth_village rescue nil}"
             },
@@ -129,7 +132,7 @@ class PersonController < ApplicationController
             {
                 "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
                 "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@mother_address.home_district).name rescue nil}"
+                "District" =>  "#{Location.find(@mother_address.current_district).name rescue nil}"
             },
             {
                 "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
@@ -160,15 +163,15 @@ class PersonController < ApplicationController
             {
                 "Physical Residential Address, District" => "#{(Location.find(@father_address.current_district).name ||
                     @father.foreigner_current_district) rescue nil}",
-                "T/A" => "#{(@father_address.current_ta ||
+                "T/A" => "#{(Location.find(@father_address.current_ta).name ||
                     @person.father.foreigner_current_ta) rescue nil}",
-                "Village/Town" => "#{(@father_address.current_village ||
+                "Village/Town" => "#{(Location.find(@father_address.current_village).name ||
                     @person.father.foreigner_current_village) rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
-                "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@mother_address.current_district).name rescue nil}"
+                "Home Address, Village/Town" => "#{Location.find(@father_address.home_village).name rescue nil}",
+                "T/A" => "#{Location.find(@father_address.home_ta).name rescue nil}",
+                "District" =>  "#{Location.find(@father_address.current_district).name rescue nil}"
             }
         ],
 
@@ -183,7 +186,7 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@person.informant.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{@informant_address.current_district rescue nil}",
+                "Physical Address, District" => "#{Location.find(@informant_address.current_district).name rescue nil}",
                 "T/A" => "#{Location.find(@informant_address.current_ta).name rescue nil}",
                 "Village/Town" => "#{Location.find(@informant_address.current_village).name rescue nil}"
             },
@@ -203,6 +206,8 @@ class PersonController < ApplicationController
             }
         ]
     }
+
+  
 
     @summaryHash = {
       "Child Name" => "#{@person_name.first_name} #{@person_name.middle_name rescue nil} #{@person_name.last_name rescue nil}",
@@ -247,7 +252,8 @@ class PersonController < ApplicationController
 
   def new
     
-
+    $prev_child_id = params[:id]
+    
     if params[:id].blank?
       
       @person = PersonName.new
@@ -255,7 +261,7 @@ class PersonController < ApplicationController
       @section = "New Person"
 
     else
-
+      
       @person = PersonBirthDetail.find_by_person_id(params[:id])
       @person_name = PersonName.find_by_person_id(params[:id])
 
@@ -269,7 +275,7 @@ class PersonController < ApplicationController
         
         
     end
-
+     
      render :layout => "touch"
   end
 
@@ -533,7 +539,7 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     
     @records = PersonService.query_for_display(@states)
-    
+   
     render :template => "person/records", :layout => "data_table"
   end
 
