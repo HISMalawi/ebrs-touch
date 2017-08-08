@@ -7,7 +7,7 @@ require 'rails'
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
 
-couch_db_settings = db_settings["production"]
+couch_db_settings = db_settings[Rails.env]
 
 couch_protocol = couch_db_settings["protocol"]
 couch_username = couch_db_settings["username"]
@@ -19,7 +19,7 @@ couch_port = couch_db_settings["port"]
 
 couch_mysql_path = Dir.pwd + "/config/database.yml"
 db_settings = YAML.load_file(couch_mysql_path)
-mysql_db_settings = db_settings["production"]
+mysql_db_settings = db_settings[Rails.env]
 
 mysql_username = mysql_db_settings["username"]
 mysql_password = mysql_db_settings["password"]

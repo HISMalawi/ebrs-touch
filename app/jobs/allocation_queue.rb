@@ -4,7 +4,11 @@ class AllocationQueue
 
   def perform()
     ActiveRecord::Base.logger.level = 1
-    queue = IdentifierAllocationQueue.where(assigned: 0)
+    if SETTINGS['assign_ben']
+      queue = IdentifierAllocationQueue.where(assigned: 0)
+    else
+      queue = []
+    end
 
     if queue.length > 0
       SuckerPunch.logger.info "Approving for #{queue.count} record(s)"

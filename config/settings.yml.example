@@ -3,4 +3,5 @@ location_id: 356  #facility_id |district_id [location_id of the health facility 
 enable_role_privileges: true # only works when in development mode
 duplicate_precision: 80
 potential_search: false
-app_gate_url: 'http://localhost:3000'
+app_gate_url: nil
+assign_ben: true
