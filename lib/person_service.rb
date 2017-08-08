@@ -1562,7 +1562,7 @@ end
       end
 
 
-    PersonAddress.create(person_id: core_person_mother.id,
+    record = PersonAddress.new(person_id: core_person_mother.id,
                         current_village: current_village_id == nil ? '' : current_village_id,
                         current_village_other: "",
                         current_ta: current_ta_id == nil ? '' : current_ta_id,
@@ -1576,7 +1576,8 @@ end
                         home_district: params[:person][:foster_mother][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
                         home_district_other: "",
                         citizenship: Location.where(name: params[:person][:foster_mother][:residential_country]).first.location_id,
-                        residential_country: Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id) rescue nil
+                        residential_country: Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id)
+    record.save
 
     
 
