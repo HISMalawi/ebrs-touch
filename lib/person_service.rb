@@ -900,6 +900,7 @@ end
     mother_birthdate = params[:person][:mother][:birthdate]
     father_birthdate = params[:person][:father][:birthdate]
 
+
     if params[:parents_details_available] =='Mother'
 
 
@@ -1143,17 +1144,19 @@ end
 
    # finally create informant record
 
+
     core_person_informant = CorePerson.create(person_type_id: PersonType.where(name: 'Informant').first.id)
-            informant_id = core_person_informant.id
-            person_informant = Person.create(person_id: core_person_informant.id,
+            
+
+    person_informant = Person.create(person_id: core_person_informant.id,
                 gender: "N/A",
                 birthdate: ("1900-01-01".to_date))
 
-            #raise informant_first_name.inspect
 
     person_name_informant = PersonName.create(first_name: params[:person][:informant][:first_name],
                 middle_name: (params[:person][:informant][:middle_name] rescue nil),
                 last_name: params[:person][:informant][:last_name], person_id: core_person_informant.id)
+     
       begin
 
         PersonNameCode.create(person_name_id: person_name_informant.id,
@@ -1163,15 +1166,15 @@ end
       rescue
 
       end
-
+   
     #consult on what value person_relationship_type_id should have if the registration type is Abandoned and when both parent
     #details are available. Also consider the variable of adoption certificate attached for a guardian to be a legal
     #adoptive parent
     
-    PersonRelationship.create(person_a: core_person_id, person_b: core_person_informant.id,
+    person_relationship = PersonRelationship.create(person_a: core_person_id, person_b: core_person_informant.id,
                 person_relationship_type_id: PersonType.where(name: 'Informant').first.id)
 
-            #raise informant_current_village.inspect
+    
 =begin
     PersonAddress.create(person_id: core_person_informant.id,
                                  current_village: params[:person][:informant][:current_village] == '' ? '' : Location.where(name: params[:person][:informant][:current_village]).first.location_id,
@@ -1303,6 +1306,7 @@ end
 end
 
  def self.create_adopted_registration(params, core_person_id)
+  
 
       core_person_mother = nil
       core_person_father = nil
@@ -1475,27 +1479,6 @@ end
       PersonRelationship.create(person_a: core_person_id, person_b: core_person_father.id,
                     person_relationship_type_id: PersonRelationType.where(name: 'Adoptive-Father').first.id)
 
-
-=begin
-      record = PersonAddress.new(person_id: core_person_father.id,
-                                     current_village: params[:person][:foster_father][:current_village] == '' ? '' : Location.where(name: params[:person][:foster_father][:current_village]).first.location_id,
-                                     current_village_other: "",
-                                     current_ta: params[:person][:foster_father][:current_ta] == '' ? '' : Location.where(name: params[:person][:foster_father][:current_ta]).first.location_id,
-                                     current_ta_other: "",
-                                     current_district: params[:person][:foster_father][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_father][:current_district]).first.location_id,
-                                     current_district_other: "",
-                                     home_village: params[:person][:foster_father][:home_village] == '' ? '' : Location.where(name: params[:person][:foster_father][:home_village]).first.location_id,
-                                     home_village_other: "",
-                                     home_ta: params[:person][:foster_father][:home_ta] == '' ? '' : Location.where(name: params[:person][:foster_father][:home_ta]).first.location_id,
-                                     home_ta_other: "",
-                                     home_district: params[:person][:foster_father][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_father][:current_district]).first.location_id,
-                                     home_district_other: "",
-                                     citizenship: params[:person][:foster_father][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_father][:residental_country]).first.location_id,
-                                     residential_country: params[:person][:foster_father][:residental_country] == '' ? '' : Location.where(name: params[:person][:foster_father][:residental_country]).first.location_id)
-
-      record.save
-=end
-
       current_village_id = nil
       current_ta_id = nil
 
@@ -1542,44 +1525,24 @@ end
          mother_birthdate = "1900-01-01".to_date
       end
 
-    core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Adoptive-Father').first.id)
+    core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Adoptive-Mother').first.id)
 
-       person_mother = Person.create(person_id: core_person_mother.id,
+    person_mother = Person.create(person_id: core_person_mother.id,
                     gender: "M",
-                    birthdate: father_birthdate.to_date)
+                    birthdate: mother_birthdate.to_date)
 
-       person_name_mother = PersonName.create(first_name: params[:person][:foster_mother][:first_name],
+    person_name_mother = PersonName.create(first_name: params[:person][:foster_mother][:first_name],
                     middle_name: (params[:person][:foster_mother][:middlename] rescue nil),
                     last_name: params[:person][:foster_mother][:last_name], person_id: core_person_mother.id)
 
-       PersonNameCode.create(person_name_id: person_name_mother.id,
+    PersonNameCode.create(person_name_id: person_name_mother.id,
                     first_name_code: params[:person][:foster_mother][:first_name].soundex,
                     last_name_code: params[:person][:foster_mother][:last_name].soundex,
                     middle_name_code: (params[:person][:foster_mother][:middlename].soundex rescue nil))
 
-      PersonRelationship.create(person_a: core_person_id, person_b: core_person_mother.id,
-                    person_relationship_type_id: PersonRelationType.where(name: 'Adoptive-Father').first.id)
+    PersonRelationship.create(person_a: core_person_id, person_b: core_person_mother.id,
+                    person_relationship_type_id: PersonRelationType.where(name: 'Adoptive-Mother').first.id)
 
-
-=begin
-      record = PersonAddress.new(person_id: core_person_mother.id,
-                                     current_village: params[:person][:foster_mother][:current_village] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_village]).first.location_id,
-                                     current_village_other: "",
-                                     current_ta: params[:person][:foster_mother][:current_ta] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_ta]).first.location_id,
-                                     current_ta_other: "",
-                                     current_district: params[:person][:foster_mother][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
-                                     current_district_other: "",
-                                     home_village: params[:person][:foster_mother][:home_village] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_village]).first.location_id,
-                                     home_village_other: "",
-                                     home_ta: params[:person][:foster_mother][:home_ta] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_ta]).first.location_id,
-                                     home_ta_other: "",
-                                     home_district: params[:person][:foster_mother][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
-                                     home_district_other: "",
-                                     citizenship: params[:person][:foster_mother][:residental_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id,
-                                     residential_country: params[:person][:foster_mother][:residental_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id)
-
-      record.save
-=end
 
       current_village_id = nil
       current_ta_id = nil
@@ -1591,29 +1554,29 @@ end
 
       if !current_district.blank? && !current_village.blank? 
 
-         current_village_id = Location.where(name: current_district, name: current_village).first.location_id
+         current_village_id = Location.where(name: current_ta, name: current_village).first.location_id
          current_ta_id = Location.where(name: current_district, name: current_ta).first.location_id
 
       end
 
 
-    record = PersonAddress.create(person_id: core_person_mother.id,
-                                     current_village: current_village_id == nil ? '' : current_village_id,
-                                     current_village_other: "",
-                                     current_ta: current_ta_id == nil ? '' : current_ta_id,
-                                     current_ta_other: "",
-                                     current_district: current_district == '' ? '' : Location.where(name: current_district).first.location_id,
-                                     current_district_other: "",
-                                     home_village: params[:person][:foster_mother][:home_village] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_village]).first.location_id,
-                                     home_village_other: "",
-                                     home_ta: params[:person][:foster_mother][:home_ta] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_ta]).first.location_id,
-                                     home_ta_other: "",
-                                     home_district: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
-                                     home_district_other: "",
-                                     citizenship: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residential_country]).first.location_id,
-                                     residential_country: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id) rescue nil
+    PersonAddress.create(person_id: core_person_mother.id,
+                        current_village: current_village_id == nil ? '' : current_village_id,
+                        current_village_other: "",
+                        current_ta: current_ta_id == nil ? '' : current_ta_id,
+                        current_ta_other: "",
+                        current_district: current_district == '' ? '' : Location.where(name: current_district).first.location_id,
+                        current_district_other: "",
+                        home_village: params[:person][:foster_mother][:home_village] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_village]).first.location_id,
+                        home_village_other: "",
+                        home_ta: params[:person][:foster_mother][:home_ta] == '' ? '' : Location.where(name: params[:person][:foster_mother][:home_ta]).first.location_id,
+                        home_ta_other: "",
+                        home_district: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
+                        home_district_other: "",
+                        citizenship: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residential_country]).first.location_id,
+                        residential_country: params[:person][:foster_mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id) rescue nil
 
-    record.save
+    
 
       ## Creating informant record
 
@@ -1622,6 +1585,135 @@ end
 
 
    end
+
+#####################################################################################################################
+############ Biological Parents
+#####################################################################################################################
+  
+  if params[:biological_parents]== "Mother"
+
+     if mother_birthdate.blank?
+        mother_birthdate = "1900-01-01".to_date
+     end
+  
+     core_person_mother = CorePerson.create(person_type_id: PersonType.where(name: 'Mother').first.id)
+
+     person_mother = Person.create(person_id: core_person_mother.id,
+                    gender: "F",
+                    birthdate: mother_birthdate.to_date)
+
+     person_name_mother = PersonName.create(first_name: params[:person][:mother][:first_name],
+                    middle_name: params[:person][:mother][:middle_name],
+                    last_name: params[:person][:mother][:last_name], person_id: core_person_mother.id)
+
+     PersonNameCode.create(person_name_id: person_name_mother.id,
+                    first_name_code: params[:person][:mother][:first_name].soundex,
+                    last_name_code: params[:person][:mother][:last_name].soundex,
+                    middle_name_code: (params[:person][:mother][:middle_name].soundex rescue nil))
+
+     PersonRelationship.create(person_a: core_person_id, person_b: core_person_mother.id,
+                    person_relationship_type_id: PersonRelationType.where(name: 'Mother').first.id)
+
+
+      current_village_id = nil
+      current_ta_id = nil
+
+      current_district = params[:person][:mother][:current_district]
+      current_village = params[:person][:mother][:current_village]
+      current_ta = params[:person][:mother][:current_ta]
+
+
+      if !current_district.blank? && !current_village.blank? 
+
+         current_village_id = Location.where(name: current_village_id, name: current_ta).first.location_id
+         current_ta_id = Location.where(name: current_district, name: current_ta).first.location_id
+
+      end
+
+
+                PersonAddress.create(person_id: core_person_mother.id,
+                                     current_village: current_village_id == nil ? '' : current_village_id,
+                                     current_village_other: "",
+                                     current_ta: current_ta_id == nil ? '' : current_ta_id,
+                                     current_ta_other: "",
+                                     current_district: current_district == '' ? '' : Location.where(name: current_district).first.location_id,
+                                     current_district_other: "",
+                                     home_village: params[:person][:mother][:home_village] == '' ? '' : Location.where(name: params[:person][:mother][:home_village]).first.location_id,
+                                     home_village_other: "",
+                                     home_ta: params[:person][:mother][:home_ta] == '' ? '' : Location.where(name: params[:person][:mother][:home_ta]).first.location_id,
+                                     home_ta_other: "",
+                                     home_district: params[:person][:mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:mother][:current_district]).first.location_id,
+                                     home_district_other: "",
+                                     citizenship: params[:person][:mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:mother][:residential_country]).first.location_id,
+                                     residential_country: params[:person][:mother][:residential_country] == '' ? '' : Location.where(name: params[:person][:mother][:residential_country]).first.location_id) rescue nil
+
+
+         
+  else
+     
+     if father_birthdate.blank?
+        father_birthdate = "1900-01-01".to_date
+     end
+  
+     core_person_father = CorePerson.create(person_type_id: PersonType.where(name: 'Father').first.id)
+
+     person_father = Person.create(person_id: core_person_father.id,
+                    gender: "F",
+                    birthdate: father_birthdate.to_date)
+
+     person_name_father = PersonName.create(first_name: params[:person][:father][:first_name],
+                    middle_name: params[:person][:father][:middle_name],
+                    last_name: params[:person][:father][:last_name], person_id: core_person_father.id)
+
+     PersonNameCode.create(person_name_id: person_name_father.id,
+                    first_name_code: params[:person][:father][:first_name].soundex,
+                    last_name_code: params[:person][:father][:last_name].soundex,
+                    middle_name_code: (params[:person][:father][:middle_name].soundex rescue nil))
+
+     PersonRelationship.create(person_a: core_person_id, person_b: core_person_father.id,
+                    person_relationship_type_id: PersonRelationType.where(name: 'Father').first.id)
+
+
+      current_village_id = nil
+      current_ta_id = nil
+
+      current_district = params[:person][:father][:current_district]
+      current_village = params[:person][:father][:current_village]
+      current_ta = params[:person][:father][:current_ta]
+
+
+      if !current_district.blank? && !current_village.blank? 
+
+         current_village_id = Location.where(name: current_village_id, name: current_ta).first.location_id
+         current_ta_id = Location.where(name: current_district, name: current_ta).first.location_id
+
+      end
+
+
+                PersonAddress.create(person_id: core_person_father.id,
+                                     current_village: current_village_id == nil ? '' : current_village_id,
+                                     current_village_other: "",
+                                     current_ta: current_ta_id == nil ? '' : current_ta_id,
+                                     current_ta_other: "",
+                                     current_district: current_district == '' ? '' : Location.where(name: current_district).first.location_id,
+                                     current_district_other: "",
+                                     home_village: params[:person][:father][:home_village] == '' ? '' : Location.where(name: params[:person][:father][:home_village]).first.location_id,
+                                     home_village_other: "",
+                                     home_ta: params[:person][:father][:home_ta] == '' ? '' : Location.where(name: params[:person][:father][:home_ta]).first.location_id,
+                                     home_ta_other: "",
+                                     home_district: params[:person][:father][:residential_country] == '' ? '' : Location.where(name: params[:person][:father][:current_district]).first.location_id,
+                                     home_district_other: "",
+                                     citizenship: params[:person][:father][:residential_country] == '' ? '' : Location.where(name: params[:person][:father][:residential_country]).first.location_id,
+                                     residential_country: params[:person][:father][:residential_country] == '' ? '' : Location.where(name: params[:person][:father][:residential_country]).first.location_id) rescue nil
+
+     
+
+  end
+
+######################################################################################################################
+########### End of biological parents record saving
+######################################################################################################################
+
 
    if (params[:person][:type_of_birth] == "Second Twin" || params[:person][:type_of_birth] =="Second Triplet" || params[:person][:type_of_birth] == "Third Triplet")
       
@@ -1868,7 +1960,7 @@ def self.create_normal_registration(params, core_person_id)
 
             end     
             
-
+            
             record = PersonAddress.new(person_id: core_person_informant.id,
                                  current_village: current_village_id == nil ? nil : current_village_id,
                                  current_village_other: "",
@@ -1878,7 +1970,7 @@ def self.create_normal_registration(params, core_person_id)
                                  current_district_other: "",
                                  home_village: params[:person][:informant][:current_village] == '' ? '' : Location.where(name:params[:person][:informant][:current_village]).first.location_id,
                                  home_village_other: "",
-                                 home_ta: current_ta_id ta] == nil ? nil : current_ta_id,
+                                 home_ta: current_ta_id  == nil ? nil : current_ta_id,
                                  citizenship: Location.where(name: 'Malawi').first.location_id,
                                  residential_country: Location.where(name: 'Malawi').first.location_id,
                                  address_line_1: params[:person][:informant][:addressline1],
