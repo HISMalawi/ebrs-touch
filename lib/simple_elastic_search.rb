@@ -167,7 +167,7 @@ class SimpleElasticSearch
   end
 
   def self.query_duplicate_coded(person,precision)
-      content =  self.format_content(person)
+      content =  self.format_coded_content(person)
       query_string = "#{person["first_name"].soundex} #{person["last_name"].soundex} #{content}"
 
       potential_duplicates = []

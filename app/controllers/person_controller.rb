@@ -362,8 +362,6 @@ class PersonController < ApplicationController
      else
         birthdate = (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time)
      end
-
-     
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
@@ -381,8 +379,12 @@ class PersonController < ApplicationController
 
       people = []
 
-      if SETTINGS['potential_search'] && !params[:type_of_birth].include?("Twin")
-        results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+      if SETTINGS['potential_search']
+        if params[:type_of_birth] &&  params[:type_of_birth].include?("Twin")         
+          results = []
+        else
+          results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+        end
       else
         results = []
       end
