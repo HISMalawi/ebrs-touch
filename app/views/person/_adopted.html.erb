@@ -347,7 +347,6 @@
         			 type="text"
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
-        			 optional = "true"
         			 class="input_cell"
                tt_onUnload = "appendValue('person_mother_first_name');" />
 
@@ -357,7 +356,6 @@
         <label for="person_mother_first_name">First Name</label><br>
         <input id="person_mother_first_name" name="person[mother][first_name]"
         type="text"
-        optional = "true"
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
@@ -631,7 +629,6 @@
                type="text"
                value="<%= @person[:father][:last_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_last_name')"
-               optional = "true"
                ajaxURL = "/get_last_names"
                class="input_cell"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'" />
@@ -642,7 +639,6 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
-               optional = "true"
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
