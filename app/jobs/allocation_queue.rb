@@ -23,10 +23,11 @@ class AllocationQueue
           year = Date.today.year
           year_len = year.to_s.length
 
-          count = PersonBirthDetail.where("LEFT(district_id_number, #{district_code_len}) = '#{district_code}'
-            AND RIGHT(district_id_number, #{year_len}) = #{Date.today.year}").count
+          last = PersonBirthDetail.where("LEFT(district_id_number, #{district_code_len}) = '#{district_code}'
+            AND RIGHT(district_id_number, #{year_len}) = #{Date.today.year}").select(" MAX(SUBSTR(district_id_number,
+              #{(district_code_len + 2)}, 7)) AS last_num")[0]['last_num'] rescue 0
 
-          mid_number = (count + 1).to_s.rjust(7,'0')
+          mid_number = (last.to_i + 1).to_s.rjust(7,'0')
           person_birth_detail = PersonBirthDetail.where(person_id: record.person_id).first
           person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
           record.update_attributes(assigned: 1)
@@ -34,7 +35,7 @@ class AllocationQueue
         elsif record.person_identifier_type_id == 'BRN'
         end
       end 
-    rescue 
+    rescue
       AllocationQueue.perform_in(1.5)
     end
 
