@@ -1576,7 +1576,7 @@ end
                         home_district: params[:person][:foster_mother][:current_district] == '' ? '' : Location.where(name: params[:person][:foster_mother][:current_district]).first.location_id,
                         home_district_other: "",
                         citizenship: Location.where(name: params[:person][:foster_mother][:residential_country]).first.location_id,
-                        residential_country: Location.where(name: params[:person][:foster_mother][:residental_country]).first.location_id)
+                        residential_country: Location.where(name: params[:person][:foster_mother][:residential_country]).first.location_id)
     record.save
 
     
@@ -1777,7 +1777,13 @@ end
                 
   else
      
-     raise "Biological father details missing".inspect
+    ###########################################################################################################
+    ######### This section is for saving biological father as the sole
+    ######### parent for the child. As at the time of writing this remark (08/08/2017:16:47), no variables from input form 
+    ######### are defined for this. 
+    ######### NOTE: please consult for clarifications
+    ###########################################################################################################
+
        
      
 
