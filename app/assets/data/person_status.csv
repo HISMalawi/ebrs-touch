@@ -10,11 +10,13 @@ DC,VOIDED,CLOSED,DC-VOIDED,"A record that has been voided, final state"
 DC ,HQ OPEN,DC_ASK,DC-ASK,Deprecated
 DC,POTENTIAL-DUPLICATE,VOIDED,DC-VOIDED,A voided duplicate record at DC
 DC,DC OPEN,POTENTIAL DUPLICATE,DC-POTENTIAL DUPLICATE,A potential duplicate record at DC
+DC,,,DC-PENDING, A record to be reviewed by ADR
 HQ,VOIDED,CLOSED,HQ-VOIDED,A voided record at HQ
 HQ,HQ OPEN,GRANTED,HQ-GRANTED,Deprecated
 HQ,HQ OPEN,REJECTED,HQ-REJECTED,Deprecated
 HQ,PRINTED,CLOSED,HQ-PRINTED,A printed record at HQ
 HQ,PRINTED,DISPATCHED,HQ-DISPATCHED,A dispatched record at HQ
+HQ,HQ OPEN,COMPLETE,HQ-COMPLETE,A record that is ready for approved by DM
 HQ,HQ OPEN,CAN PRINT,HQ-CAN-PRINT,A record that is ready for printing at HQ
 HQ ,HQ OPEN,CAN REJECT,HQ-CAN-REJECT,"Record that can be rejected for editing, must be approved by supervisor for it to be fully rejected"
 HQ,HQ OPEN,APPROVED,HQ-APPROVED,"Record that has been approve at HQ, then it must be approved for printing and be on print queue"
