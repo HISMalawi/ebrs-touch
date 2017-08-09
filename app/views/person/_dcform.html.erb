@@ -50,8 +50,6 @@
 
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
-
       <div class="field">
         <label for="person_last_name">Surname</label>
         <br>
@@ -94,6 +92,8 @@
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
 
+        <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
+
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
@@ -124,7 +124,7 @@
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-        			 name="person[bd][holder]"
+        			 name="person[birth_district]"
         			 type="text"
         			 condition="beforeLiveDate()"
         			 value="<%= @person[:bd] rescue nil %>"
@@ -140,15 +140,15 @@
         <br>
         <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                           class ="input_cell"
-                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
-                          tt_onUnload = "setDistrict('district');",
+                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+                          tt_onUnload = "setDistrict('district'); "
                           ajaxURL = "/search_by_hospital" >
       </div>
 
       <div class="field">
         <label for="person_birth_ta">T/A</label>
         <br>
-        <input type="text" name="birth_ta" id="person_birth_ta"
+        <input type="text" name="person[birth_ta]" id="person_birth_ta"
                           class = "input_cell"
                           condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
                           ajaxURL = "/search_by_district"
@@ -158,7 +158,7 @@
       <div class="field">
         <label for="person_birth_village">Village</label>
         <br>
-        <input type="text" name="birth_village" class = "input_cell" 
+        <input type="text" name="person[birth_village]" class = "input_cell"
         id="person_birth_village"
         condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
         ajaxURL = "/search_by_village">
@@ -1930,6 +1930,11 @@
 
       __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district %>" ;
 
+         try{
+             __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
+         }catch(e){
+
+         }
 
      } else {
 
