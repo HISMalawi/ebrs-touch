@@ -41,7 +41,7 @@
        <!-- %= f.hidden_field :birth_address  %> <!--birth_address -->
        <!-- %= f.hidden_field :birth_district %> <!--birth_district -->
        <!-- %= f.hidden_field :birth_ta  %> <!--birth_ta -->
-       <!-- %= f.hidden_field :birth_village  %> <!--birth_village -->
+       <!-- %= f.hidden_field :birth_village  %> birth_village -->
        <!-- %= f.hidden_field :other_birth_place_details  %> <!--other_birth_place_details -->
        <%= f.hidden_field :parents_married_to_each_other  %> <!--@person[:parents_married_to_each_other] -->
        <%= f.hidden_field :date_of_marriage %> <!--date_of_marriage -->
@@ -50,6 +50,12 @@
        <%= f.hidden_field :acknowledgement_of_receipt_date %> <!--person_parents_signed -->
        <!-- %= f.hidden_field :type_of_birth % -->
        <!-- %= f.hidden_field :multiple_birth_id % -->
+
+     
+      <input type="hidden" id="person_prev_child_id" name="person[prev_child_id]" value="<%= $prev_child_id %>" class = "input_cell"/>
+      <input type="hidden" id="core_person_mother_id" name="person[core_person_mother_id]" value="<%= $core_person_mother_id rescue nil %>" />
+      <input type="hidden" id="core_person_informant_id" name="person[core_person_informant_id]" value="<%= @core_person_informant_id rescue nil %>" />
+
        <input type="hidden" name="registration_type" id="registration_type" />
 
        <input id="person_relationship" name="person[relationship]" valu%e="normal" type="hidden"/>

@@ -27,7 +27,7 @@ class PersonController < ApplicationController
 
     
 
-    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b rescue nil
+    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b 
     
     
     person_mother_relation = PersonRelationship.find_by_sql(["select * from person_relationship where person_a = ? and person_relationship_type_id = ?",params[:id], person_mother_id])
@@ -169,9 +169,9 @@ class PersonController < ApplicationController
                     @person.father.foreigner_current_village) rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
-                "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@mother_address.current_district).name rescue nil}"
+                "Home Address, Village/Town" => "#{Location.find(@father_address.home_village).name rescue nil}",
+                "T/A" => "#{Location.find(@father_address.home_ta).name rescue nil}",
+                "District" =>  "#{Location.find(@father_address.current_district).name rescue nil}"
             }
         ],
 
@@ -252,7 +252,8 @@ class PersonController < ApplicationController
 
   def new
     
-
+    $prev_child_id = params[:id]
+    
     if params[:id].blank?
       
       @person = PersonName.new
@@ -260,10 +261,10 @@ class PersonController < ApplicationController
       @section = "New Person"
 
     else
-
+      
       @person = PersonBirthDetail.find_by_person_id(params[:id])
       @person_name = PersonName.find_by_person_id(params[:id])
-      
+
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
@@ -361,8 +362,6 @@ class PersonController < ApplicationController
      else
         birthdate = (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time)
      end
-
-     
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
@@ -380,8 +379,12 @@ class PersonController < ApplicationController
 
       people = []
 
-      if SETTINGS['potential_search'] && !params[:type_of_birth].include?("Twin")
-        results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+      if SETTINGS['potential_search']
+        if params[:type_of_birth] &&  params[:type_of_birth].include?("Twin")         
+          results = []
+        else
+          results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+        end
       else
         results = []
       end
