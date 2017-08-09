@@ -41,10 +41,10 @@
 
       .btn-info {
       }
-      
+
       .btn-warning {
       }
-      
+
       .btn-success {
       }
 
@@ -59,13 +59,13 @@
   </style>
 
   <script>
-      
+
   </script>
 
-  <%=javascript_include_tag "DataTables/jquery" %>                          
+  <%=javascript_include_tag "DataTables/jquery" %>
   <%=javascript_include_tag "DataTables/jquery.dataTables.min" %>
 
-  <%= stylesheet_link_tag "DataTables/demo_table_jui" %>                                     
+  <%= stylesheet_link_tag "DataTables/demo_table_jui" %>
 
 </head>
 <body onload="resize()" onresize="resize()">
@@ -94,14 +94,15 @@
     </div>
     <div style="display: table-row;">
       <div style="display: table-cell;">
-
         <div id="display" style="width: 100%; height: 100%; border: none; overflow: auto;">
-          <%= yield %>
+            <%= yield %>
         </div>
 
       </div>
     </div>
+    <div>
     <div style="display: table-row;">
+
       <div style="display: table-cell; border-top: 1px solid #3465a4; height: 70px;">
 
         <div style="position: absolute; left: 20px; bottom: 15px; width: 570px; height: 80px; vertical-align: middle;">
@@ -119,9 +120,12 @@
                   border-radius: 60px; vertical-align: middle; text-align: center; position: absolute; z-index: 10;bottom: 5px;">
             <div style="position: absolute; left: 15px; bottom: 15px;  color: #fff; font-size: 18px;">
               <%=application_mode%>
+
             </div>
           </div>
+
         </div>
+
 
         <button class="red" style="position: absolute; right: 30px; bottom: 20px; cursor: pointer;
                 border: 1px solid #fff; padding: 5px; border-radius: 50px; padding-top: 7px;"

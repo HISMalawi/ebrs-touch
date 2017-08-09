@@ -41,6 +41,7 @@ class UsersController < ApplicationController
     @targeturl = "/users"
 
     render :layout => "data_table"
+
   end
 
   #Adds A New User
