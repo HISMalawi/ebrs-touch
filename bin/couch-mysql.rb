@@ -131,5 +131,8 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
   document 'type' => 'users' do |doc|
     output = Methods.update_doc(doc.document)
   end
+  document 'type' => 'user_role' do |doc|
+    output = Methods.update_doc(doc.document)
+  end
 end
 
