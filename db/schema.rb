@@ -432,6 +432,15 @@ ActiveRecord::Schema.define(version: 0) do
   add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
   add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
 
+  create_table "global_property", primary_key: "property", force: :cascade do |t|
+    t.string   "value", limit: 50,                  null: false
+    t.string   "uuid",  limit: 38,                  null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
+
   ##########################################################################################################################
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree

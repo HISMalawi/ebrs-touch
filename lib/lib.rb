@@ -287,7 +287,23 @@ module Lib
     details
   end
 
-  def self.workflow_init(person)
-    PersonRecordStatus.new_record_state(person.id, 'DC-ACTIVE')
+  def self.workflow_init(person,params)
+    is_record_a_duplicate = params[:person][:duplicate] rescue nil
+    if is_record_a_duplicate.present?
+        if SETTINGS["application_mode"] == "FC"
+          PersonRecordStatus.new_record_state(core_person.id, 'FC-POTENTIAL DUPLICATE')
+        else
+          PersonRecordStatus.new_record_state(core_person.id, 'DC-POTENTIAL DUPLICATE')
+        end
+
+        potential_duplicate = PotentialDuplicate.create(person_id: core_person.id,created_at: (Time.now))
+        if potential_duplicate.present?
+             is_record_a_duplicate.split("|").each do |id|
+                potential_duplicate.create_duplicate(id)
+             end
+        end
+    else
+        PersonRecordStatus.new_record_state(core_person.id, 'DC-ACTIVE')
+    end
   end
 end

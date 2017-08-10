@@ -9,7 +9,7 @@ module PersonService
     father                    = Lib.new_father(person, params)
     informant                 = Lib.new_informant(person, params)
     details                   = Lib.new_birth_details(person, params)
-    status                    = Lib.workflow_init(person)
+    status                    = Lib.workflow_init(person,params)
 
     return person;
 

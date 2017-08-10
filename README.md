@@ -9,8 +9,7 @@ Initial Setup Instructions
 2. Run bundle install --local
 3. Create the specified couch databases manually in couch db (This will later be removed; app to be doing this automatically)
 4. Run the following in the sequence provided
-	bundle exec rake db:create
-	bundle exec rake db:schema:load
+	bundle exec rake db:create db:schema:load
 
 4. Load the file using command while at root, put sql login details
     mysql -u user -p ebrs_sql < metadata.sql
