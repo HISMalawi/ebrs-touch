@@ -4,7 +4,14 @@ module PersonService
 
   def self.create_record(params)
 
-     
+    person                    = Lib.new_child(params)
+    mother                    = Lib.new_mother(person, params)
+    father                    = Lib.new_father(person, params)
+    informant                 = Lib.new_informant(person, params)
+    details                   = Lib.new_birth_details(person, params)
+    status                    = Lib.workflow_init(person)
+
+    return person;
 
     adoption_court_order              = params[:person][:adoption_court_order] rescue nil
     desig              = params[:person][:informant][:designation] rescue nil

@@ -34,6 +34,7 @@ def create_user
   role = Role.where(role: 'Administrator', level: SETTINGS['application_mode']).first
 
   puts "Creating User"
+  
   user = User.create!(username: "admin#{SETTINGS['location_id']}",
                       password_hash: 'adminebrs', 
                       creator: User.new.next_primary_key, last_password_date: Time.now().strftime('%Y-%m-%d %H:%M:%S'),
