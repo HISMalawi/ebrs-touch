@@ -38,11 +38,10 @@ class LoginsController < ApplicationController
          redirect_to back_or_default
       end
     end
-    flash[:error] = 'That username and/or password is not valid.'
-      	redirect_to "/login"
 
     end
-
+		flash[:error] = 'That username and/or password is not valid.'
+      	redirect_to "/login"
   end
 
   def logout
