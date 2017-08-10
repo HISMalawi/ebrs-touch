@@ -413,9 +413,9 @@ ActiveRecord::Schema.define(version: 0) do
   create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
     t.integer  "person_id", limit: 4, null: false
     t.string   "document_id", limit: 100
-    t.string   "resolved",      limit: 255, null: false
-    t.string   "decision",      limit: 255, null: false
-    t.string   "comment",      limit: 255, null: false
+    t.string   "resolved",    limit: 1,   default: 0,     null: false
+    t.string   "decision",    limit: 255
+    t.string   "comment",     limit: 255
     t.datetime "resolved_at"
     t.datetime "created_at"
   end
