@@ -68,14 +68,58 @@
 </div>
 <button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="window.location = '<%= new_user_path %>'">Add User</button>
 <script>
-
+var table ;
 $(document).ready(function() {
-    $('#example').DataTable( {
-   "pageLength": 4
-});
+    table = $('#example').DataTable( {
+           "pageLength": 4,
+           "processing": true,
+        });
+    var filter = __$("example_filter");
+    var search = filter.getElementsByTagName("input")[0];
+    search.setAttribute("onclick","changeFocusToMe(this)");
+    searchData(search)
+
+
 } );
 
+var search_value = ""
+
+function searchData(element){
+    if (element.value == 0 || search_value == element.value){
+        setTimeout(function(){
+            searchData(element);
+        },100)
+    }else{
+        search_value = element.value
+        table.search(search_value).draw() ;
+        setTimeout(function(){
+            searchData(element);
+        },100)
+    }
+}
 function dontVoid() {
     alert("You cant delete yourself!");
 }
+
+
+function changeFocusToMe(control){
+
+    if(control) {
+
+        if(__$("cursor_for_" + control.id)){
+
+            if(__$("cursor")){
+
+                __$("cursor_for_" + control.id).appendChild(__$("cursor"));
+
+            }
+
+        }
+
+        showKeyboard(control)
+
+        }
+
+    }
+
 </script>

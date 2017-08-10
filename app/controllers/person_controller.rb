@@ -514,11 +514,18 @@ class PersonController < ApplicationController
   end
 
   def get_hospital
-  
+  map =  {'Mzuzu City' => 'Mzimba',
+          'Lilongwe City' => 'Lilongwe',
+          'Zomba City' => 'Zomba',
+          'Blantyre City' => 'Blantyre'}
+
+  params[:district] =map[params[:district]] if   params[:district].match(/City$/)
+
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
-  
-  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
+  parent_location = Location.where(name: params[:district]).last.id rescue nil
+
+  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND parent_location = #{parent_location} AND m.location_tag_id = ?",
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
     ON location.location_id = m.location_id").order('name ASC').map do |l|
     data << l.name
