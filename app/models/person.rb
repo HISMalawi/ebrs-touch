@@ -17,9 +17,33 @@ class Person < ActiveRecord::Base
       result
     end
 
+    def adoptive_mother
+      result = nil
+      relationship_type = PersonRelationType.find_by_name("Adoptive-Mother")
+
+      relationship = PersonRelationship.where(:person_a => self.person_id, :person_relationship_type_id => relationship_type.id).last
+      unless relationship.blank?
+        result = Person.where(:person_id => relationship.person_b).last
+      end
+
+      result
+    end
+
     def father
       result = nil
       relationship_type = PersonRelationType.find_by_name("Father")
+
+      relationship = PersonRelationship.where(:person_a => self.person_id, :person_relationship_type_id => relationship_type.id).last
+      unless relationship.blank?
+        result = Person.where(:person_id => relationship.person_b).last
+      end
+
+      result
+    end
+
+    def adoptive_father
+      result = nil
+      relationship_type = PersonRelationType.find_by_name("Adoptive-Father")
 
       relationship = PersonRelationship.where(:person_a => self.person_id, :person_relationship_type_id => relationship_type.id).last
       unless relationship.blank?

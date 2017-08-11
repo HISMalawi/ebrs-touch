@@ -23,7 +23,7 @@ module Lib
     person
   end
 
-  def self.new_mother(person, params)
+  def self.new_mother(person, params,mother_type)
     mother = params[:person][:mother]
 
     if mother[:first_name].blank?
@@ -31,14 +31,14 @@ module Lib
     end
 
     core_person = CorePerson.create(
-        :person_type_id     => PersonType.where(name: 'Mother').last.id,
+        :person_type_id     => PersonType.where(name: mother_type).last.id,
     )
 
     mother[:citizenship] = 'Malawian' if mother[:citizenship].blank?
     mother_person = Person.create(
         :person_id          => core_person.id,
         :gender             => 'F',
-        :birthdate          => (mother[:birthdate].to_date rescue "1900-01-01"),
+        :birthdate          => ((mother[:birthdate].to_date.present? rescue false) ? mother[:birthdate].to_date : "1900-01-01"),
         :birthdate_estimated => ((mother[:birthdate].to_date.present? rescue false) ? 0 : 1)
     )
 
@@ -51,7 +51,7 @@ module Lib
 
     PersonRelationship.create(
         person_a: person.id, person_b: core_person.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Mother').last.id
+        person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
     )
 
     cur_district_id         = Location.locate_id_by_tag(mother[:current_district], 'District')
@@ -85,7 +85,7 @@ module Lib
     mother_person
   end
 
-  def self.new_father(person, params)
+  def self.new_father(person, params, father_type)
     father = params[:person][:father]
     father[:citizenship] = 'Malawian' if father[:citizenship].blank?
     father[:residential_country] = 'Malawi' if father[:residential_country].blank?
@@ -95,7 +95,7 @@ module Lib
     end
 
     core_person = CorePerson.create(
-        :person_type_id     => PersonType.where(name: 'Father').last.id,
+        :person_type_id     => PersonType.where(name: father_type).last.id,
     )
 
     father_person = Person.create(
@@ -114,7 +114,7 @@ module Lib
 
     PersonRelationship.create(
         person_a: person.id, person_b: core_person.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
+        person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
     )
 
     cur_district_id         = Location.locate_id_by_tag(father[:current_district], 'District')
@@ -149,6 +149,7 @@ module Lib
   end
 
   def self.new_informant(person, params)
+
     informant_person = nil; core_person = nil
 
     informant = params[:person][:informant]
@@ -156,9 +157,18 @@ module Lib
     informant[:residential_country] = 'Malawi' if informant[:residential_country].blank?
 
     if params[:informant_same_as_mother] == 'Yes'
-      informant_person = person.mother
+
+      if params[:relationship] == "orphaned" || params[:relationship] == "adopted"
+          informant_person = person.adoptive_mother
+      else
+         informant_person = person.mother
+      end
     elsif params[:informant_same_as_father] == 'Yes'
-      informant_person = person.father
+      if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+          informant_person = person.adoptive_father
+      else
+         informant_person = person.father
+      end
     else
 
       core_person = CorePerson.create(
@@ -279,6 +289,8 @@ module Lib
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
         form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
+        informant_relationship_to_person:          params[:person][:informant][:relationship_to_person],
+        other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person] == "Other" ? (params[:person][:informant][:other_relationship_to_child] rescue nil) : nil),
         acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
         location_created_at:                      SETTINGS['location_id'],
         date_registered:                          (Date.today.to_s)
@@ -288,22 +300,25 @@ module Lib
   end
 
   def self.workflow_init(person,params)
+    status = nil
     is_record_a_duplicate = params[:person][:duplicate] rescue nil
     if is_record_a_duplicate.present?
         if SETTINGS["application_mode"] == "FC"
-          PersonRecordStatus.new_record_state(core_person.id, 'FC-POTENTIAL DUPLICATE')
+          status = PersonRecordStatus.new_record_state(person.id, 'FC-POTENTIAL DUPLICATE')
         else
-          PersonRecordStatus.new_record_state(core_person.id, 'DC-POTENTIAL DUPLICATE')
+          status = PersonRecordStatus.new_record_state(person.id, 'DC-POTENTIAL DUPLICATE')
         end
 
-        potential_duplicate = PotentialDuplicate.create(person_id: core_person.id,created_at: (Time.now))
+        potential_duplicate = PotentialDuplicate.create(person_id: person.id,created_at: (Time.now))
         if potential_duplicate.present?
              is_record_a_duplicate.split("|").each do |id|
                 potential_duplicate.create_duplicate(id)
              end
         end
     else
-        PersonRecordStatus.new_record_state(core_person.id, 'DC-ACTIVE')
+       status =PersonRecordStatus.new_record_state(person.id, 'DC-ACTIVE')
     end
+    return status
   end
+  
 end

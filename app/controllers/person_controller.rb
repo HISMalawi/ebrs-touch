@@ -1,6 +1,6 @@
 class PersonController < ApplicationController
   def index
-
+    
     @icoFolder = icoFolder("icoFolder")
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
@@ -296,7 +296,7 @@ class PersonController < ApplicationController
      end
 
      
-
+    #raise params.inspect
     @person = PersonService.create_record(params)
 
     if @person.present? && SETTINGS['potential_search']
