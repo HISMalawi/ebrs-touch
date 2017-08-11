@@ -1,6 +1,6 @@
 class PersonController < ApplicationController
   def index
-    
+
     @icoFolder = icoFolder("icoFolder")
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
@@ -263,8 +263,8 @@ class PersonController < ApplicationController
     else
       
       @person = PersonBirthDetail.find_by_person_id(params[:id])
-      @person_name = PersonName.find_by_person_id(params[:id])
 
+      @person_name = PersonName.find_by_person_id(params[:id])
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
@@ -296,10 +296,11 @@ class PersonController < ApplicationController
      end
 
      
-    #raise params.inspect
     @person = PersonService.create_record(params)
 
-    if @person.present? && SETTINGS['potential_search']
+    #To be contued
+    if @person.present? && SETTINGS['potential_search'] && false
+
       person = {}
       person["id"] = @person.person_id
       person["first_name"]= params[:person][:first_name]
@@ -308,9 +309,10 @@ class PersonController < ApplicationController
       person["gender"] = params[:person][:gender]
       person["birthdate"]= params[:person][:birthdate]
       person["birthdate_estimated"] = params[:person][:birthdate_estimated]
-      person["nationality"]=  params[:person][:mother][:citizenship]
+      
       person["place_of_birth"] = params[:person][:place_of_birth]
       person["district"] = params[:person][:birth_district]
+      person["nationality"]=  params[:person][:mother][:citizenship]
       person["mother_first_name"]= params[:person][:mother][:first_name]
       person["mother_last_name"] =  params[:person][:mother][:last_name]
       person["mother_middle_name"] = params[:person][:mother][:middle_name]

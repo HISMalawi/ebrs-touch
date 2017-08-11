@@ -21,6 +21,7 @@ module PersonService
        father   = Lib.new_father(person, params,'Adoptive-Father')
        informant = Lib.new_informant(person, params)
     else 
+
     end
     details = Lib.new_birth_details(person, params)
     status = Lib.workflow_init(person,params)
