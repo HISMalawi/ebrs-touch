@@ -90,7 +90,7 @@ ActiveRecord::Schema.define(version: 0) do
     t.integer  "changed_by",      limit: 4
     t.datetime "changed_at"
     t.string   "document_id", limit: 100
-  end
+end
 
   add_index "location", ["changed_by"], name: "location_changed_by", using: :btree
   add_index "location", ["creator"], name: "user_who_created_location", using: :btree
@@ -254,6 +254,8 @@ ActiveRecord::Schema.define(version: 0) do
     t.integer  "birth_registration_type_id",              limit: 4,              null: false
     t.integer  "location_created_at",                     limit: 4
     t.integer  "form_signed",                             limit: 1,  default: 0, null: false
+    t.string   "informant_relationship_to_person"         limit: 255
+    t.string   "other_informant_relationship_to_person"   limit: 255
     t.date     "date_registered",                                                null: false
     t.string   "document_id", limit: 100
     t.datetime "created_at",                                                     null: false
@@ -413,9 +415,9 @@ ActiveRecord::Schema.define(version: 0) do
   create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
     t.integer  "person_id", limit: 4, null: false
     t.string   "document_id", limit: 100
-    t.string   "resolved",    limit: 1,   default: 0,     null: false
-    t.string   "decision",    limit: 255
-    t.string   "comment",     limit: 255
+    t.string   "resolved",      limit: 1,   default: 0,     null: false
+    t.string   "decision",      limit: 255
+    t.string   "comment",      limit: 255
     t.datetime "resolved_at"
     t.datetime "created_at"
   end
@@ -431,6 +433,16 @@ ActiveRecord::Schema.define(version: 0) do
 
   add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
   add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+
+
+  create_table "global_property", primary_key: "property", force: :cascade do |t|
+    t.string   "value", limit: 50,                  null: false
+    t.string   "uuid",  limit: 38,                  null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
 
   ##########################################################################################################################
 
