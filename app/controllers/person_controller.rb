@@ -61,8 +61,8 @@ class PersonController < ApplicationController
     @record = {
         "Details of Child" => [
             {
-                "Birth Entry Number" => "#{@person_details.district_id_number rescue nil}",
-                "Birth Registration Number" => "#{@person_name.national_serial_number rescue nil}"
+                "Birth Entry Number" => "#{@birth_details.district_id_number rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.national_serial_number rescue nil}"
             },
 
             {
@@ -197,7 +197,7 @@ class PersonController < ApplicationController
             },
             {
                 "Phone Number" => "#{@person.informant.phone_number rescue ""}",
-                "Informant Signed?" => "#{@person.form_signed rescue ""}"
+                "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
                 "Acknowledgement Date" => "#{@person.acknowledgement_of_receipt_date.strftime('%d/%b/%Y') rescue ""}",

@@ -55,4 +55,10 @@ class Person < ActiveRecord::Base
     def full_gender
       {'M' => 'Male', 'F' => 'Female'}[self.gender]
     end
+
+    def dob
+      if self.birthdate_estimated.to_s == 0 && self.birthdate != "1900-01-01"
+        return self.birthdate.to_date.strftime("%d/%b/%Y")
+      end
+    end
 end
