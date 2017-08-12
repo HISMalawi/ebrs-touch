@@ -34,7 +34,7 @@
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
       
       <%= f.hidden_field :_rev rescue "" %>
-<input type="hidden" name="person[type_of_birth]" id="person_type_of_birth" value="<%= @type_of_birth %>">
+      <input type="hidden" name="person[type_of_birth]" id="person_type_of_birth" value="<%= @type_of_birth %>">
 
        <%= f.hidden_field :place_of_birth %> <!--@person[:place_of_birth] -->
        <%= f.hidden_field :birth_location_id %> <!--hospital_of_birth -->
@@ -158,12 +158,8 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <%= (f.text_field :birthdate, 
-                          :class => "input_cell",
-                          :fieldtype => "date",
-                          :absolute_min => @person.birthdate.to_date.advance(:days => -2).strftime('%Y/%m/%d'),
-                          :absolute_max => @person.birthdate.to_date.advance(:days => 2).strftime('%Y/%m/%d')) rescue "" %>
-        <%= f.hidden_field :birthdate_estimated rescue "" %>
+        <input type="hidden" name="person[birthdate]" value = '<%= @person.core_person.person.birthdate %>'>
+        <input type="hidden" name="person[:birthdate_estimated]" value="<%= @person.core_person.person.birthdate_estimated %>">
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
