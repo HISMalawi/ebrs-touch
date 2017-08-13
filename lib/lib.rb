@@ -27,8 +27,12 @@ module Lib
     if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
-        mother = params[:person][:mother]
-
+       
+        if mother_type =="Adoptive-Mother"
+          mother = params[:person][:foster_mother]
+        else
+          mother = params[:person][:mother]
+        end
         if mother[:first_name].blank?
           return nil
         end
@@ -93,7 +97,11 @@ module Lib
     if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
-      father = params[:person][:father]
+      if father_type =="Adoptive-Father"
+        father = params[:person][:foster_father]
+      else
+        father = params[:person][:father]
+      end
       father[:citizenship] = 'Malawian' if father[:citizenship].blank?
       father[:residential_country] = 'Malawi' if father[:residential_country].blank?
 
@@ -251,7 +259,11 @@ module Lib
       place_of_birth_id = Location.where(name: 'Hospital').last.id
       location_id = SETTINGS['location_id']
     else
-      place_of_birth_id = Location.locate_id_by_tag(person[:place_of_birth], 'Place of Birth')
+      unless person[:place_of_birth].blank?
+        place_of_birth_id = Location.locate_id_by_tag(person[:place_of_birth], 'Place of Birth')
+      else
+        place_of_birth_id = Location.locate_id_by_tag("Other", 'Place of Birth')
+      end
 
       if person[:place_of_birth] == 'Home'
         district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
@@ -285,6 +297,7 @@ module Lib
     else
       type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
     end
+
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
@@ -300,8 +313,8 @@ module Lib
         number_of_prenatal_visits:                (params[:number_of_prenatal_visits].to_i rescue nil),
         month_prenatal_care_started:              (params[:month_prenatal_care_started].to_i rescue nil),
         mode_of_delivery_id:                      (ModeOfDelivery.where(name: person[:mode_of_delivery]).first.id rescue 1),
-        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue nil),
-        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue nil),
+        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue 1),
+        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue 1),
         level_of_education_id:                    (LevelOfEducation.where(name: person[:level_of_education]).last.id rescue 1),
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),

@@ -257,7 +257,8 @@ class PersonController < ApplicationController
   end
 
   def new
-    
+    @current_district = Location.current_district.name
+
     $prev_child_id = params[:id]
     
     if params[:id].blank?
@@ -286,7 +287,7 @@ class PersonController < ApplicationController
   end
 
   def create
-       
+    #raise params.inspect
 
     type_of_birth = params[:person][:type_of_birth]
     
