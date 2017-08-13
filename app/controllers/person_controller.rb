@@ -300,27 +300,7 @@ class PersonController < ApplicationController
 
     #To be contued
     if @person.present? && SETTINGS['potential_search'] && false
-
-      person = {}
-      person["id"] = @person.person_id
-      person["first_name"]= params[:person][:first_name]
-      person["last_name"] =  params[:person][:last_name]
-      person["middle_name"] = params[:person][:middle_name]
-      person["gender"] = params[:person][:gender]
-      person["birthdate"]= params[:person][:birthdate]
-      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
-      
-      person["place_of_birth"] = params[:person][:place_of_birth]
-      person["district"] = params[:person][:birth_district]
-      person["nationality"]=  params[:person][:mother][:citizenship]
-      person["mother_first_name"]= params[:person][:mother][:first_name]
-      person["mother_last_name"] =  params[:person][:mother][:last_name]
-      person["mother_middle_name"] = params[:person][:mother][:middle_name]
-      person["father_first_name"]= params[:person][:father][:first_name]
-      person["father_last_name"] =  params[:person][:father][:last_name]
-      person["father_middle_name"] = params[:person][:father][:middle_name]
-
-      SimpleElasticSearch.add(person)
+      SimpleElasticSearch.add(person_for_elastic_search(params))
     else
 
     end
@@ -343,6 +323,28 @@ class PersonController < ApplicationController
         end
     end
 
+  end
+
+  def person_for_elastic_search(params)
+      person = {}
+      person["id"] = @person.person_id
+      person["first_name"]= params[:person][:first_name]
+      person["last_name"] =  params[:person][:last_name]
+      person["middle_name"] = params[:person][:middle_name]
+      person["gender"] = params[:person][:gender]
+      person["birthdate"]= params[:person][:birthdate]
+      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
+      
+      person["place_of_birth"] = params[:person][:place_of_birth]
+      person["district"] = params[:person][:birth_district]
+      person["nationality"]=  params[:person][:mother][:citizenship]
+      person["mother_first_name"]= params[:person][:mother][:first_name]
+      person["mother_last_name"] =  params[:person][:mother][:last_name]
+      person["mother_middle_name"] = params[:person][:mother][:middle_name]
+      person["father_first_name"]= params[:person][:father][:first_name]
+      person["father_last_name"] =  params[:person][:father][:last_name]
+      person["father_middle_name"] = params[:person][:father][:middle_name]
+      return person
   end
 
   def parents_married(parents_married,value)
