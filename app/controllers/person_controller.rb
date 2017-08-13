@@ -348,18 +348,21 @@ class PersonController < ApplicationController
          else
            mother = prev_child.mother
          end
-         person["mother_first_name"] = mother.name.first_name rescue ""
-         person["mother_last_name"] =   mother.name.last_name rescue ""
-         person["mother_middle_name"] =  mother.name.first_name rescue ""
+         mother_name =  mother.person_names.first
+   
+         person["mother_first_name"] = mother_name.first_name rescue ""
+         person["mother_last_name"] =   mother_name.last_name rescue ""
+         person["mother_middle_name"] =  mother_name.first_name rescue ""
 
          if params[:relationship] == "opharned" || params[:relationship] == "adopted"
            father = prev_child.adoptive_father
          else
            father = prev_child.father
          end
-         person["father_first_name"] = father.name.first_name rescue ""
-         person["father_last_name"] =   father.name.last_name rescue ""
-         person["father_middle_name"] =  father.name.first_name rescue ""
+         father_name =  father.person_names.first
+         person["father_first_name"] = father_name.first_name rescue ""
+         person["father_last_name"] =   father_name.last_name rescue ""
+         person["father_middle_name"] = father_name.first_name rescue ""
 
          birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
          person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
