@@ -24,9 +24,7 @@ module Lib
   end
 
   def self.new_mother(person, params,mother_type)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      mother_person = Person.find(params[:person][:prev_child_id]).mother
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
         mother = params[:person][:mother]
@@ -92,9 +90,7 @@ module Lib
   end
 
   def self.new_father(person, params, father_type)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      father_person = Person.find(params[:person][:prev_child_id]).father
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
       father = params[:person][:father]
@@ -168,11 +164,8 @@ module Lib
     informant[:citizenship] = 'Malawian' if informant[:citizenship].blank?
     informant[:residential_country] = 'Malawi' if informant[:residential_country].blank?
 
-    if params[:person][:type_of_birth].to_s.include? "Twin"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       informant_person = Person.find(params[:person][:prev_child_id]).informant
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
-      informant_person = Person.find(params[:person][:prev_child_id]).informant
-
     elsif params[:informant_same_as_mother] == 'Yes'
 
       if params[:relationship] == "orphaned" || params[:relationship] == "adopted"
@@ -248,10 +241,8 @@ module Lib
   end
 
   def self.new_birth_details(person, params)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      return self.birth_details_multiple(person,params[:person][:prev_child_id].to_i)
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
-      return self.birth_details_multiple(person,params[:person][:prev_child_id].to_i)
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+      return self.birth_details_multiple(person,params)
     end
     person_id = person.id; place_of_birth_id = nil; location_id = nil; other_place_of_birth = nil
     person = params[:person]
@@ -295,6 +286,7 @@ module Lib
         birth_registration_type_id:               reg_type,
         place_of_birth:                           place_of_birth_id,
         birth_location_id:                        location_id,
+        district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             person[:birth_weight],
         type_of_birth:                            PersonTypeOfBirth.where(name: (person[:type_of_birth] || 'Other')).last.id,
@@ -321,13 +313,15 @@ module Lib
   
   end
 
-  def self.birth_details_multiple(person,prev_child_id)
-    prev_details = PersonBirthDetail.where(person_id: prev_child_id).first
+  def self.birth_details_multiple(person,params)
+    
+    prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_s).first
     prev_details_keys = prev_details.attributes.keys
-    prev_details_keys = prev_details_keys - ['person_id','person_birth_details_id']
+    prev_details_keys = prev_details_keys - ['person_id','person_birth_details_id',"birth_weight"]
 
     details = PersonBirthDetail.new
     details["person_id"] = person.id
+    details["birth_weight"] = params[:person][:birth_weight]
     prev_details_keys.each do |field|
         details[field] = prev_details[field]
     end
@@ -358,4 +352,15 @@ module Lib
     return status
   end
   
+  def self.is_twin_or_triplet(type_of_birth)
+    if type_of_birth == "Second Twin" 
+      return true 
+    elsif type_of_birth == "Second Triplet" 
+      return true 
+    elsif type_of_birth == "Third Triplet"
+      return true
+    else
+      return false
+    end
+  end
 end
