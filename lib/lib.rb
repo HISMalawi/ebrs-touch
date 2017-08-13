@@ -280,7 +280,11 @@ module Lib
 
     reg_type = SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id :
         BirthRegistrationType.where(name: params[:relationship]).last.birth_registration_type_id
-
+    unless person[:type_of_birth].blank?
+      type_of_birth_id = PersonTypeOfBirth.where(name: person[:type_of_birth]).last.id
+    else
+      type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
+    end
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
@@ -289,7 +293,7 @@ module Lib
         district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             person[:birth_weight],
-        type_of_birth:                            PersonTypeOfBirth.where(name: (person[:type_of_birth] || 'Other')).last.id,
+        type_of_birth:                            type_of_birth_id,
         parents_married_to_each_other:            (person[:parents_married_to_each_other] == 'No' ? 0 : 1),
         date_of_marriage:                         (person[:date_of_marriage].to_date.to_s rescue nil),
         gestation_at_birth:                       (params[:gestation_at_birth].to_f rescue nil),
