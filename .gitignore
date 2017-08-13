@@ -27,3 +27,5 @@ passenger*
 *.swp
 /bin/schema.rb
 *.~*
+public/sync_sentinel
+public/sentinel
