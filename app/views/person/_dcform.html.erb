@@ -37,10 +37,10 @@
       <%= f.hidden_field :_rev rescue "" %>
 
       <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
+      
+      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
 
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
-
-      <input name="relationship" value="normal" type="hidden"/>
 
       <% if flash[:error] == "Similar" %>
 
@@ -91,8 +91,7 @@
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
-
-        <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
+        <%= f.hidden_field :birth_district, :value => @current_district %>
 
       </div>
       <div class="field">

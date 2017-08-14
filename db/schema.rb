@@ -231,6 +231,7 @@ end
   create_table "person_birth_details", primary_key: "person_birth_details_id", force: :cascade do |t|
     t.integer  "person_id",                               limit: 4,              null: false
     t.integer  "place_of_birth",                          limit: 4,              null: false
+    t.integer  "district_of_birth",                       limit: 4,              null: false
     t.integer  "birth_location_id",                       limit: 4,              null: false
     t.string   "other_birth_location",                    limit: 45
     t.float    "birth_weight",                            limit: 24
@@ -254,8 +255,8 @@ end
     t.integer  "birth_registration_type_id",              limit: 4,              null: false
     t.integer  "location_created_at",                     limit: 4
     t.integer  "form_signed",                             limit: 1,  default: 0, null: false
-    t.string   "informant_relationship_to_person"         limit: 255
-    t.string   "other_informant_relationship_to_person"   limit: 255
+    t.string   "informant_relationship_to_person",         limit: 255
+    t.string   "other_informant_relationship_to_person",   limit: 255
     t.date     "date_registered",                                                null: false
     t.string   "document_id", limit: 100
     t.datetime "created_at",                                                     null: false

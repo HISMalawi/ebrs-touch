@@ -5,6 +5,11 @@ class Person < ActiveRecord::Base
     has_many :person_names
     include EbrsAttribute
 
+
+    def addresses
+      PersonAddress.where(person_id: self.id)
+    end
+
     def mother
       result = nil
       relationship_type = PersonRelationType.find_by_name("Mother")
@@ -78,5 +83,16 @@ class Person < ActiveRecord::Base
 
     def full_gender
       {'M' => 'Male', 'F' => 'Female'}[self.gender]
+    end
+
+    def dob
+      if self.birthdate_estimated.to_s == 0 && self.birthdate != "1900-01-01"
+        return self.birthdate.to_date.strftime("%d/%b/%Y")
+      end
+    end
+
+    def get_attribute(type)
+      type_id = PersonAttributeType.where(name: type).last.id rescue nil
+      PersonAttribute.where(person_id: self.person_id, person_attribute_type_id: type_id, voided: 0).last.value rescue nil
     end
 end

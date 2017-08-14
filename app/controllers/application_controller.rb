@@ -6,6 +6,18 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_if_logged_in, :except => ['login']
 
+  before_filter :check_last_sync_time
+
+  def check_last_sync_time
+    last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time
+    job_interval = 60
+    now = Time.now
+
+    if (now - last_run_time).to_f > 2*job_interval
+      SyncCheck.perform_in(2)
+    end
+  end
+
   def icoFolder(required_image)
 
      case required_image.downcase
@@ -124,6 +136,7 @@ class ApplicationController < ActionController::Base
     if application_mode == 'DC'
       Location.current_district = location
     else
+      Location.current_district = location.facility_district
       Location.current_health_facility = location
     end
 

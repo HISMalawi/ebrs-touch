@@ -5663,7 +5663,8 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-function duplicatesPopup(people,checkbox){
+function duplicatesPopup(data,checkbox){
+       var people = data.response
        if (__$("msg.shield")) {
             document.body.removeChild(__$("msg.shield"));
         }
@@ -5689,6 +5690,7 @@ function duplicatesPopup(people,checkbox){
         div.style.width = width + "px";
         div.style.height = height + "px";
         div.style.backgroundColor = "#ffffff";
+        div.style.overflowY = "scroll";
         div.style.borderRadius = "1px";
         div.style.left = "calc(50% - " + (width / 2) + "px)";
         div.style.top = "calc(50% - " + (height * 0.6) + "px)";
@@ -5770,6 +5772,8 @@ function duplicatesPopup(people,checkbox){
                 return person["_id"]
            }).join("|");
            __$("person_duplicate").value = ids;
+
+           __$("person_is_exact_duplicate").value = data.exact
            document.body.removeChild(shield);
            document.forms[0].submit();
         }
@@ -5817,7 +5821,8 @@ function submitAfterSummary() {
                                         "person_father_first_name",
                                         "person_father_last_name",
                                         "person_father_middle_name",
-                                        "person_type_of_birth"]
+                                        "person_type_of_birth",
+                                        "person_relationship"]
 
     var data = {"twin_id": getUrlVars()["id"]}
 
@@ -5838,7 +5843,7 @@ function submitAfterSummary() {
         
         if(response.response && response.response.length != 0){
             
-            duplicatesPopup(response.response);
+            duplicatesPopup(response);
 
             hideSpinner();
 

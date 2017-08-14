@@ -29,17 +29,18 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
-
+    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
+    <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
 
       <%= f.hidden_field :_rev rescue "" %>
       
       <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
+
+      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
       
       <input id="person_relationship" name="person[relationship]" value="orphaned" type="hidden"/>
-      
-      <input name="relationship" value="orphaned" type="hidden"/>
       
       <% if flash[:error] == "Similar" %>
       
@@ -49,7 +50,7 @@
       
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
+      <%= f.hidden_field :birth_district, :value => @current_district %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>

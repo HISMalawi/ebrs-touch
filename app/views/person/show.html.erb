@@ -115,62 +115,84 @@
     </div>
     <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
   </div>
-  <% @record.each do |group, person| %>
 
-      <% r = 0 %>
+  <table width="92%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
 
-      <fieldset>
-        <legend>
-          <%= group %>
-        </legend>
 
-        <table class="record" width="100%" cellpadding="10" cellspacing="0">
+    <% @record.each do |group, children| %>
 
-          <% person.each do |child| %>
+        <% r = 0 %>
 
-              <% kids = child.keys %>
+        <tr>
+          <td valign="top" style="font-size: 18px; text-align: left; padding: 10px;padding-top: 0px; background-color: lightsteelblue;
+                  border-bottom: 1px solid #ccc;">
+            <%= group %>
+          </td>
+        </tr>
+        <tr>
+          <td>
 
-              <tr>
 
-                <% (0..(kids.length - 1)).each do |i| %>
+            <table class="record" width="100%" cellpadding="10" cellspacing="0">
 
-                    <td align="left" style="border-left: 1px solid #3465a4;
-                      <%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                      <% unless kids[i].kind_of?(Array) %>
-                          <span style="text-wrap: normal;width: '400px'"><strong><%= kids[i].html_safe %></strong></span>
-                      <% else %>
-                          <strong><%= kids[i].first.html_safe %><span style='color: red;'> *</span></strong>
-                      <% end %>
-                    </td>
+              <% children.each do |child| %>
 
-                    <td style="<%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>" id='<%=  kids[i].kind_of?(Array) ? "#{group.gsub(" ", "_").downcase}_#{kids[i].first.gsub(" ", "_").downcase}" : "#{group.gsub(" ", "_").downcase}_#{kids[i].gsub(" ", "_").downcase}"  %>'>
-                      : <%= child[kids[i]].html_safe rescue nil %>
-                    </td>
+                  <% kids = child.keys %>
 
-                <% end %>
+                  <tr>
 
-                <% ((kids.length)..2).each do |i| %>
+                    <% (0..(kids.length - 1)).each do |i| %>
 
-                    <td align="right" style="border-right: 1px dotted #3465a4; <%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                      <strong>&nbsp;</strong>
-                    </td>
-                    <td style="<%= (r < person.length - 1 ? "border-bottom: 1px dotted #3465a4" : "") %>">
-                      &nbsp;
-                    </td>
+                        <td align="right" style="border-right: 1px solid #eee; <%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                          <% unless kids[i].kind_of?(Array) %>
+                              <strong style="color: #3465a4;;"><%= kids[i].html_safe %></strong>
+                          <% else %>
+                              <% if  kids[i].second == "mandatory" %>
+                                  <strong style="color: #3465a4;;"><%= kids[i].first %><span style='color: red;'> *</span></strong>
+                              <% elsif  kids[i].second == "sub" %>
+                                  <strong style="color:#3465a4;;"><%= kids[i].first %><br /><span style='color: grey;font-size: smaller; font-style: italic;'>(<%= (child[kids[i]] == "Yes" ? "Registered after 42 days of birth" : "Registered within 42 days of birth") rescue nil %>)</span>
+                              <% end %>
+                          <% end %>
+                        </td>
 
-                <% end %>
+                        <td style="<%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>" id='<%= kids[i].kind_of?(Array) ? "#{group.gsub(" ", "_").downcase}_#{kids[i].first.gsub(" ", "_").downcase}" : "#{group.gsub(" ", "_").downcase}_#{kids[i].gsub(" ", "_").downcase}" %>'>
+                          <%= child[kids[i]] rescue nil %>
+                        </td>
 
-              </tr>
+                    <% end %>
 
-              <% r += 1 %>
+                    <% ((kids.length)..2).each do |i| %>
 
-          <% end %>
+                        <td align="right" style="border-right: 1px solid #eee; <%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                          <strong>&nbsp;</strong>
+                        </td>
+                        <td style="<%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                          &nbsp;
+                        </td>
 
-        </table>
+                    <% end %>
 
-      </fieldset>
+                  </tr>
 
-  <% end %>
+                  <% r += 1 %>
+
+              <% end %>
+
+            </table>
+
+          </td>
+        </tr>
+
+    <% end %>
+
+    <tr>
+      <td style="border-top: 1px solid #ccc;">
+        &nbsp;
+      </td>
+    </tr>
+
+  </table>
+
   <fieldset>
 
   </fieldset>
@@ -233,7 +255,6 @@
         summaryHash['<%= k%>'] = '<%= (v.gsub(/\s+/, ' ').strip rescue v)%>';
       <% end %>
 
-      console.log(summaryHash);
       function checkCompleteness() {
           $("#comment_popoup").css("visibility","hidden");
           link = "window.location='/complete_case_comment/<%= params[:id] %>'";
