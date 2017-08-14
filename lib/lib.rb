@@ -176,13 +176,13 @@ module Lib
       informant_person = Person.find(params[:person][:prev_child_id]).informant
     elsif params[:informant_same_as_mother] == 'Yes'
 
-      if params[:relationship] == "adopted"
+      if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_mother
       else
          informant_person = person.mother
       end
     elsif params[:informant_same_as_father] == 'Yes'
-      if params[:relationship] == "adopted"
+      if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_father
       else
          informant_person = person.father
@@ -291,7 +291,7 @@ module Lib
     end
 
     reg_type = SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id :
-        BirthRegistrationType.where(name: params[:relationship]).last.birth_registration_type_id
+        BirthRegistrationType.where(name: params[:person][:relationship]).last.birth_registration_type_id
     unless person[:type_of_birth].blank?
       type_of_birth_id = PersonTypeOfBirth.where(name: person[:type_of_birth]).last.id
     else
