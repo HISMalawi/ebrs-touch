@@ -176,13 +176,13 @@ module Lib
       informant_person = Person.find(params[:person][:prev_child_id]).informant
     elsif params[:informant_same_as_mother] == 'Yes'
 
-      if params[:relationship] == "orphaned" || params[:relationship] == "adopted"
+      if params[:relationship] == "adopted"
           informant_person = person.adoptive_mother
       else
          informant_person = person.mother
       end
     elsif params[:informant_same_as_father] == 'Yes'
-      if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+      if params[:relationship] == "adopted"
           informant_person = person.adoptive_father
       else
          informant_person = person.father

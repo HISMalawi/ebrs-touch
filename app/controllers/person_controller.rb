@@ -438,7 +438,11 @@ class PersonController < ApplicationController
         if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
           results = []
         else
-          results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+          if params[:relationship] == "normal" || params[:relationship] == "adopted"
+              results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+          else
+              results = SimpleElasticSearch.query_duplicate_coded(person,"95")
+          end
         end
       else
         results = []
