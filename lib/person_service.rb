@@ -4,9 +4,9 @@ module PersonService
 
   def self.create_record(params)
     #raise params[:person].inspect
-    registration_type   = params[:relationship]
+    registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
-
+    
     case registration_type
     when "normal"       
        mother   = Lib.new_mother(person, params, 'Mother')
