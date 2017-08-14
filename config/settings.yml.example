@@ -3,3 +3,11 @@ location_id: 356  #facility_id |district_id [location_id of the health facility 
 enable_role_privileges: true # only works when in development mode
 duplicate_precision: 80
 potential_search: false
+app_gate_url: nil
+assign_ben: true
+sync_protocol: 'http'
+sync_host: 0.0.0.0:5984
+sync_database: 
+sync_username: 
+sync_password: 
+

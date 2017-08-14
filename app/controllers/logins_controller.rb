@@ -10,9 +10,11 @@ class LoginsController < ApplicationController
     username = params[:user][:username]
     password = params[:user][:password]
     user = User.get_active_user(username)
-	#raise user.inspect
+     #raise user.inspect
+
    if username.present? and password.present?
-    if user.active == 1 and user.password_matches?(password)
+    if user and user.password_matches?(password)
+
       login! user
 
       if (Time.now.to_date - user.last_password_date.to_date).to_i >= 90
@@ -36,18 +38,21 @@ class LoginsController < ApplicationController
          redirect_to back_or_default
       end
     end
-    else
-      flash[:error] = 'That username and/or password is not valid.'
-      redirect_to "/login"
-    end
 
+    end
+		flash[:error] = 'That username and/or password is not valid.'
+      	redirect_to "/login"
   end
 
   def logout
     # session[:touchcontext] = nil
     logout!
-    flash[:notice] = 'You have been logged out. Good Bye!'
-    redirect_to "/", referrer_param => referrer_path
+    if SETTINGS['app_gate_url'].present?
+      redirect_to SETTINGS['app_gate_url'].to_s
+    else
+      flash[:notice] = 'You have been logged out. Good Bye!'
+      redirect_to "/", referrer_param => referrer_path
+    end
   end
 
   def set_context

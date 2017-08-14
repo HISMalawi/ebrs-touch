@@ -23,49 +23,56 @@
         min-width: 100%;
     }
 
+
+
     /*input {
         min-width: 100%;
     }*/
 </style>
 
-<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+<%= form_for :person, url: {action: "update_person_property", params: {id: @person.id, field: @field}} do |f| %>
+      <% if params[:amend].present? && params[:amend]=="true" %>
+          <input type="hidden" name="amend" value="<%=params[:amend]%>">
+      <%end %>
+<%#=  raise @field.inspect  %>
+<%#= raise (["person_name_first_name","person_name_last_name","person_name_middle_name"].include? @field).inspect %>
+<% if ["person_name_first_name","person_name_last_name","person_name_middle_name"].include? @field %>
 
     <fieldset>
 
       <legend><font size='5' style=''>Details of Child</font></legend>
 
-      <%= f.hidden_field :_rev rescue "" %>
-      <%= f.hidden_field :place_of_birth, :value => Location.where(location_id: SETTINGS['location_id']).first.name %>
-      <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.name}"  %>
-      <%= f.hidden_field :birth_district, :value => Location.current_health_facility.id %>
- 
-      <input id="person_original_surname" type="hidden"/>
 
-
-      <div class="field">
-        <label for="person_last_name">Surname</label>
+       <div class="field">
+        <label for="person_name_last_name">Surname</label>
         <br>
-        <%= (f.text_field :last_name, :class => "input_cell", :ajaxURL => "/get_last_names",
-        :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
+        <input id="person_name_last_name" name="person[last_name]"
+        		class="input_cell" ajaxURL = "/get_last_names"
+        		value =  "<%= @person_name.last_name %>"/>
 
       </div>
       <div class="field">
-        <%= f.label :first_name %>
+      <label for="person_name_first_name">Firstname</label>
         <br>
 
-        <%= (f.text_field :first_name,
-        :class => "input_cell",
-        :ajaxURL => "/get_first_names",
-        :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
+        <input id="person_name_first_name"
+        		name="person[first_name]" class="input_cell"
+        		ajaxURL = "/get_first_names" value ="<%= @person_name.first_name %>"/>
 
       </div>
       <div class="field">
-        <label for="person_middle_name">Other Names</label>
+        <label for="person_name_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :optional => :true, :ajaxURL => "/get_first_names" ) rescue "" %>
+
+      <input id="person_name_middle_name" name="person[middle_name]"
+      	class="input_cell" optional = "true"
+      	ajaxURL = "/get_middle_names"
+      	value = "<%= @person_name.middle_name %>" />
+
       </div>
 
     </fieldset>
+    <% elsif ["date_of_birth","person_gender"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style=''>Details of Child: Continued..</font></legend>
@@ -73,27 +80,111 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <%= (f.text_field :birthdate,
-                          :class => "input_cell",
-                          :value => Date.today.strftime('%d/%b/%Y'),
-                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
-                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
-                          :fieldtype => "date",
-                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
-        <%= f.hidden_field :birthdate_estimated rescue "" %>
-
+        <input   id="person_birthdate"
+        		 name="person[birthdate]"
+        		 ajaxURL = "/get_birthdate"
+                 class="input_cell"
+                 fieldtype="date"
+                 optional=true
+                 absolute_min="<% Date.today.strftime('%Y/%m/%d') %>"
+                 absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>"
+                 value="<%= @person.birthdate %>"/>
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
-        <select id="person_gender" name="person[gender]" class="input_cell">
-          <option></option>
-          <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
-          <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
+
+        <select id="person_gender"
+        		name="person[gender]"
+        		ajaxURL = "/get_person_gender"
+        		value="<%= @person.gender %>"
+        		class="input_cell"
+          		<option> </option>
+          		<option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
+         		<option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
         </select>
       </div>
 
+      <% elsif ["place_of_birth","name_of_hospital","birth_address","birth_district","birth_ta","birth_village","other_birth_place_details"].include? @field  %>
+    <fieldset>
+      <legend>Details of Child (cont'd)</legend>
+
+      <div class="field">
+        <label for="person_place_of_birth">Place of birth</label><br>
+        <select id="person_place_of_birth"
+        		name="person[place_of_birth]"
+        		value="<%= @birth_details.place_of_birth %>"
+        		class="input_cell"
+        		condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital'"
+        	    ajaxURL = "/search_by_hospital"
+        		onchange="loadHealthFacility();">
+          <option></option>
+         	 	<option <%= ((@person[:place_of_birth] rescue nil) == "Home" ? "selected" : "") %> >Home</option>
+           		<option <%= ((@person[:place_of_birth] rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
+          		<option <%= ((@person[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_hospital_of_birth">Name of Hospital</label>
+        <br>
+        <input id="person_hospital_of_birth"
+        	   class = "input_cell"
+        	   value="<%= @birth_details.name_of_hospital %>"
+        	   condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital'"
+        	   ajaxURL = "/search_by_hospital"
+        	  />
+      </div>
+      <div class="field">
+        <label for="person_birth_address">Address</label>
+        <br>
+        <input id="person_birth_address"
+        	   class = "input_cell"
+        	   condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'") />
+      </div>
+      <div class="field">
+        <label for="person_birth_district">District</label>
+        <br>
+       <input id="person_birth_district"
+              class = "input_cell"  />
+      </div>
+      <div class="field">
+        <label for="person_birth_ta">T/A</label>
+        <br>
+    <input id="person_birth_ta"
+    	   class = "input_cell"
+    	   condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+    	   ajaxURL = "/search_by_ta"
+           tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);" />
+      </div>
+      <div class="field">
+        <label for="person_birth_village">Village</label>
+        <br>
+      <input id="person_birth_village"
+             class = "input_cell"
+             condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+             ajaxURL = "/search_by_village" />
+      </div>
+      <div class="field">
+        <label for="person_other_birth_place_details">Give Details</label>
+        <br>
+       <input id="person_other_birth_place_details"
+              class = "input_cell"
+              condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" />
+      </div>
+
+      <% if params[:amend].present? && params[:amend]=="true" %>
+
+          <input type="hidden" name="old_place_of_birth" value="<%=@person.place_of_birth%>">
+          <input type="hidden" name="old_hospital_of_birth" value="<%=@person.hospital_of_birth%>">
+          <input type="hidden" name="old_birth_address" value="<%=@person.birth_address%>">
+          <input type="hidden" name="old_birth_district" value="<%=@person.birth_district%>">
+          <input type="hidden" name="old_birth_ta" value="<%=@person.birth_ta%>">
+          <input type="hidden" name="old_birth_village" value="<%=@person.birth_village%>">
+          <input type="hidden" name="old_other_birth_place_details" value="<%=@person.other_birth_place_details%>">
+      <%end %>
     </fieldset>
+
+<% elsif ["person_birth_weight","person_type_of_birth","person_other_type_of_birth","person_parents_married_to_each_other","person_date_of_marriage"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style=''>Details of Child: Continued..</font></legend>
@@ -101,41 +192,52 @@
       <div class="field">
         <label for="person_birth_weight">Birth weight (in Kilogrammes)</label>
         <br>
-        <%= (f.text_field :birth_weight,
-                          :value => "",
-                          :placeholder => "0.000",
-                          :class => "input_cell",
-                          :fieldtype => "decimal",
-                          :regex => '^\d+\.\d{3}$',
-                          :regex_message => "Expecting baby weight to have 3 decimal places.\nAppend zero(s) to the weight for you?",
-                          :absolute_min => 0.7,
-                          :absolute_max => 6,
-                          :max => 4,
-                          :min => 2.5,
-                          :optional => true) %>
+
+       <input  id="birth_weight"
+       		   name="person[birth_weight]"
+       		   ajaxURL = "/get_birth_weight"
+               value ="<%= @person.birth_weight %>"
+               placeholder = "0.000"
+               class = "input_cell"
+               fieldtype="decimal"
+               regex = '^\d+\.\d{3}$'
+               regex_message = "Expecting baby weight to have 3 decimal places.\nAppend zero(s) to the weight for you?"
+               absolute_min = 0.7
+               absolute_max = 6
+               max = 4
+               min = 2.5
+               optional = true />
       </div>
       <div class="field">
-        <%= f.label :type_of_birth %>
+
+        <input 	id="person_type_of_birth"
+        		name="person[type_of_birth]"
+      			class="input_cell" optional = "true"
+      			ajaxURL = "/get_type_of_birth"
+      			value = "<%= @person.type_of_birth %>" />
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" >
-          <option></option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+          	<option></option>
+          	<option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
-          <option <%= ((@person[:type_of_birth] rescue nil) == "First Twin" ? "selected" : "") %> >Twin</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
+         	<option <%= ((@person[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
+         	<option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
 
-          <option <%= ((@person[:type_of_birth] rescue nil) == "First Triplet" ? "selected" : "") %> >Triplet</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
+         	<option <%= ((@person[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >Triplet</option>
+          	<option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
+          	<option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
 
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+          	<option <%= ((@person[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
       <div class="field">
         <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
         <br>
-        <%= (f.text_field :other_type_of_birth, :class => "input_cell", :condition => "__$('person_type_of_birth').value.trim() == 'Other'",:optional=>true) rescue ""  %>
-       </div>
+        <input id="other_type_of_birth"
+               name="person[other_type_of_birth]"
+               class = "input_cell"
+               ajaxURL = "/get_other_type_of_birth"
+      		   value = "<%= @person.other_type_of_birth %>" />
 
       <div class="field">
         <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
@@ -160,6 +262,8 @@
 
 
     </fieldset>
+
+    <% elsif ["person_court_order_attached","person_parents_signed"].include? @field  %>
 
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'No'">
       <legend><font size='5' style=''>Acknowledgment of Paternity: Child born out of wedlock</font></legend>
@@ -188,28 +292,28 @@
 
     <!-- Mother -->
 
+ <% elsif ["person_mother_last_name","person_mother_first_name","person_mother_middle_name","person_mother_id_number"].include? @field  %>
     <fieldset>
       <legend><font size='5' style=''>Details of Mother</font></legend>
 
       <div class="field">
         <label for="person_mother_last_name">Maiden Surname</label><br>
-        <input id="person_mother_last_name"
-        name="person[mother][last_name]" type="text"
-        value="<%= @person[:mother][:last_name] rescue nil %>"
-        ajaxURL = "/get_last_names"
-        class="input_cell"
-        tt_onUnload = "appendValue('person_mother_first_name'); setChildName()" />
-
-
+        <input  id="person_mother_last_name"
+				name="person[mother][last_name]" type="text"
+				value="<%= @person[:mother][:last_name] rescue nil %>"
+				ajaxURL = "/get_last_names"
+				class="input_cell" />
       </div>
 
       <div class="field">
         <label for="person_mother_first_name">First Name</label><br>
 
-        <input id="person_mother_first_name" name="person[mother][first_name]"
-               type="text" value="<%= @person[:mother][:first_name] rescue nil %>"
-               ajaxURL = "/get_first_names" class="input_cell"
-               tt_onUnload = "appendValue('person_mother_first_name')" />
+        <input id="person_mother_first_name"
+        	   name="person[mother][first_name]"
+               type="text"
+               value="<%= @person[:mother][:first_name] rescue nil %>"
+               ajaxURL = "/get_first_names"
+               class="input_cell" />
 
       </div>
 
@@ -226,62 +330,69 @@
 
       <div class="field">
         <label for="person_mother_id_number">ID Number</label><br>
-        <input id="person_mother_id_number" 
-               name="person[mother][id_number]" 
+        <input id="person_mother_id_number"
+               name="person[mother][id_number]"
                type="text"
-               condition="false" 
+               condition="false"
                value="<%= @person[:mother][:id_number] rescue nil %>"
-               class="input_cell" 
+               class="input_cell"
                optional="true" />
-
       </div>
-
-
-
     </fieldset>
 
-
+ <% elsif ["person_mother_birthdate","person_mother_citizenship","person_mother_local_residential_country"].include? @field  %>
     <fieldset>
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
 
       <div class="field">
         <label for="person_mother_birthdate">Date of Birth</label>
         <br>
+        <input id="person_mother_birthdate"
+               name="person[mother][birthdate]"
+               type="text"
+               value="<%= @person[:mother][:birthdate] rescue nil %>"
+               class="input_cell"
+               fieldtype="date"
+               optional="true" />
 
-        <input id="person_mother_birthdate" name="person[mother][birthdate]" type="text" value="<%= @person[:mother][:birthdate] rescue nil %>"
-                class="input_cell"
-                fieldtype="date"
-                tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother');"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
-                optional="true" />
-
-        <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
-
-
+        <input 	id="person_mother_birthdate_estimated"
+        		name="person[mother][birthdate_estimated]"
+        		type="hidden"/>
       </div>
 
       <div class="field">
         <label for="person_mother_citizenship">Nationality</label><br>
-        <input id="person_mother_citizenship" name="person[mother][citizenship]" type="text" value="<%= @person[:mother][:citizenship] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_nationality"/>
+        <input 	id="person_mother_citizenship"
+        		name="person[mother][citizenship]"
+        		type="text"
+        		value="<%= @person[:mother][:citizenship] rescue nil %>"
+               	class="input_cell"
+               	ajaxURL="/search_by_nationality"/>
       </div>
-      
+
       <div class="field">
         <label for="person_mother_local_residential_country">Country of Residence</label><br>
-        <input id="person_mother_local_residential_country" name="person[mother][residential_country]" type="text"
+        <input id="person_mother_local_residential_country"
+        	   name="person[mother][residential_country]"
+        	   type="text"
                value="<%= @person[:mother][:residential_country] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_country" />
+               class="input_cell"
+               ajaxURL="/search_by_country" />
       </div>
-
     </fieldset>
 
+ <% elsif ["person_mother_current_district","person_mother_current_ta","person_mother_current_village"].include? @field  %>
     <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'">
       <legend><font size='5' style=''>Details of Mother continued: Physical residential address</font></legend>
 
       <div class="field">
         <label for="person_mother_current_district">District</label><br>
-        <input id="person_mother_current_district" name="person[mother][current_district]" type="text" value="<%= @person[:mother][:current_district] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_district"
+        <input id="person_mother_current_district"
+               name="person[mother][current_district]"
+               type="text"
+               value="<%= @person[:mother][:current_district] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_district"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
                tt_onLoad="clearRelated()"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_current_ta').getAttribute('section'))][parseInt(__$('textForperson_mother_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_mother_current_district').value);" optional="true"/>
@@ -289,8 +400,12 @@
 
       <div class="field">
         <label for="person_mother_current_ta">T/A or Area of Residence</label><br>
-        <input id="person_mother_current_ta" name="person[mother][current_ta]" type="text" value="<%= @person[:mother][:current_ta] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_ta"
+        <input id="person_mother_current_ta"
+        	   name="person[mother][current_ta]"
+        	   type="text"
+        	   value="<%= @person[:mother][:current_ta] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_ta"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
                tt_onLoad="clearRelated()"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_current_village').getAttribute('section'))][parseInt(__$('textForperson_mother_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_mother_current_district').value + '&ta=' + __$('textForperson_mother_current_ta').value);" optional="true"/>
@@ -298,21 +413,25 @@
 
       <div class="field">
         <label for="person_mother_current_village">Village/Town</label><br>
-        <input id="person_mother_current_village" name="person[mother][current_village]" type="text" value="<%= @person[:mother][:current_village] rescue nil %>"
+        <input id="person_mother_current_village"
+        	   name="person[mother][current_village]"
+        	   type="text" value="<%= @person[:mother][:current_village] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
-        ajaxURL="/search_by_village" optional="true"/>
+        	   ajaxURL="/search_by_village"
+        	   optional="true"/>
       </div>
-
     </fieldset>
-
+ <% elsif ["person_mother_foreigner_current_district","person_mother_foreigner_current_village","person_mother_foreigner_current_ta"].include? @field  %>
      <fieldset condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'">
 
       <legend><font size='5' style=''>Details of Mother continued: Physical residential address</font></legend>
 
       <div class="field">
         <label for="person_mother_foreigner_current_district">District/State</label><br>
-        <input id="person_mother_foreigner_current_district" name="person[mother][foreigner_current_district]" type="text"
+        <input id="person_mother_foreigner_current_district"
+        	   name="person[mother][foreigner_current_district]"
+        	   type="text"
                value="<%= @person[:mother][:foreigner_current_district] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
@@ -324,8 +443,8 @@
         <label for="person_mother_foreigner_current_village">Village/Town</label><br>
         <input id="person_mother_foreigner_current_village"
                name="person[mother][foreigner_current_village]"
-         type="text"
-         value="<%= @person[:mother][:foreigner_current_village] rescue nil %>"
+               type="text"
+               value="<%= @person[:mother][:foreigner_current_village] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
                ajaxURL="/search_by_village" optional="true"/>
@@ -334,31 +453,27 @@
       <div class="field">
         <label for="person_mother_foreigner_current_ta">Address</label><br>
         <input id="person_mother_foreigner_current_ta"
-         name="person[mother][foreigner_current_ta]"
-         type="text"
+		       name="person[mother][foreigner_current_ta]"
+		       type="text"
                value="<%= @person[:mother][:foreigner_current_ta] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
                optional="true"/>
       </div>
-
-
-
     </fieldset>
 
-
+ <% elsif ["home_address_same_as_physical","person_mother_home_district","person_mother_home_ta","person_mother_home_village"].include? @field  %>
     <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian'">
       <legend><font size='5' style=''>Details of Mother continued: Home address</font></legend>
-
 
       <div class="field">
         <label for="home_address_same_as_physical">Home address same as the physical address?</label>
         <br>
         <select id="home_address_same_as_physical"
-    name="home_address_same_as_physical"
+    			name="home_address_same_as_physical"
                 condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
-    class="input_cell"
-          tt_onUnload="if(__$('textForhome_address_same_as_physical').value.trim() == 'Yes'){loadMothersAddress();} else {unloadMothersAddress();}" />
+    			class="input_cell"
+          		tt_onUnload="if(__$('textForhome_address_same_as_physical').value.trim() == 'Yes'){loadMothersAddress();} else {unloadMothersAddress();}" />
             <option></option>
             <option value="Yes" >Yes</option>
             <option value="No" >No</option>
@@ -367,27 +482,25 @@
 
       <div class="field">
         <label for="person_mother_home_district">District</label><br>
-        <input id="person_mother_home_district"
-         name="person[mother][home_district]"
-               condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
-         type="text"
-         value="<%= @person[:mother][:home_district] rescue nil %>"
-               class="input_cell"
-         ajaxURL="/search_by_district"
-         tt_onLoad="clearRelated()"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_ta').getAttribute('section'))][parseInt(__$('textForperson_mother_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_mother_home_district').value);" optional="true"/>
+        <input 	id="person_mother_home_district"
+         		name="person[mother][home_district]"
+               	condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+         		type="text"
+         		value="<%= @person[:mother][:home_district] rescue nil %>"
+               	class="input_cell"
+         		ajaxURL="/search_by_district"
+         		optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_mother_home_ta">T/A</label><br>
-        <input id="person_mother_home_ta"
-         name="person[mother][home_ta]"
-         condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
-         type="text"
-         value="<%= @person[:mother][:home_ta] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_ta"
-               tt_onLoad="clearRelated()"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_village').getAttribute('section'))][parseInt(__$('textForperson_mother_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_mother_home_district').value + '&ta=' + __$('textForperson_mother_home_ta').value);" optional="true"/>
+        <input 	 id="person_mother_home_ta"
+				 name="person[mother][home_ta]"
+				 condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+				 type="text"
+				 value="<%= @person[:mother][:home_ta] rescue nil %>"
+                 class="input_cell" ajaxURL="/search_by_ta"
+                 optional="true"/>
       </div>
 
       <div class="field">
@@ -404,7 +517,7 @@
 
     </fieldset>
 
-
+<% elsif ["foreigner_home_address_same_as_physical","person_mother_home_country","person_mother_foreigner_home_district", "person_mother_foreigner_home_village","person_mother_foreigner_home_ta"].include? @field  %>
      <fieldset condition="__$('person_mother_citizenship').value.trim() != 'Malawian'">
 
       <legend><font size='5' style=''>Details of Mother continued: Home address</font></legend>
@@ -413,10 +526,10 @@
         <label for="foreigner_home_address_same_as_physical">Home address same as the physical address?</label>
         <br>
         <select id="foreigner_home_address_same_as_physical"
-    name="home_address_same_as_physical"
+                name="home_address_same_as_physical"
                 condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
-    class="input_cell"
-          tt_onUnload="if(__$('textForforeigner_home_address_same_as_physical').value.trim() == 'Yes'){loadForeignMothersAddress();} else {unloadForeignMothersAddress();}" />
+                class="input_cell"
+          		tt_onUnload="if(__$('textForforeigner_home_address_same_as_physical').value.trim() == 'Yes'){loadForeignMothersAddress();} else {unloadForeignMothersAddress();}" />
             <option></option>
             <option value="Yes" >Yes</option>
             <option value="No" >No</option>
@@ -446,8 +559,8 @@
         <label for="person_mother_foreigner_home_village">Village/Town</label><br>
         <input id="person_mother_foreigner_home_village"
                name="person[mother][foreigner_home_village]"
-         type="text"
-         value="<%= @person[:mother][:foreigner_home_village] rescue nil %>"
+               type="text"
+        	   value="<%= @person[:mother][:foreigner_home_village] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
                ajaxURL="/search_by_village" optional="true"/>
@@ -456,18 +569,16 @@
       <div class="field">
         <label for="person_mother_foreigner_home_ta">Address</label><br>
         <input id="person_mother_foreigner_home_ta"
-         name="person[mother][foreigner_home_ta]"
-         type="text"
+         	   name="person[mother][foreigner_home_ta]"
+         	   type="text"
                value="<%= @person[:mother][:foreigner_home_ta] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
                optional="true"/>
       </div>
 
-
-
-    </fieldset>
-
+   </fieldset>
+<% elsif ["person_gestation_at_birth","person_number_of_prenatal_visits","person_month_prenatal_care_started"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
@@ -475,23 +586,38 @@
       <div class="field">
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
-       <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
-                class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
+       <input type="text"
+              fieldtype="number"
+              name="gestation_at_birth"
+              id="person_gestation_at_birth"
+              class="input_cell"
+              absolute_min="23" min="36"
+              absolute_max="45"
+              max="42" optional="true" >
       </div>
       <div class="field">
         <label for="person_number_of_prenatal_visits">Number of prenatal visits</label>
         <br>
-        <input type="text" fieldtype="number" name="number_of_prenatal_visits" id="person_number_of_prenatal_visits"
-                class="input_cell" min="3" absolute_min="0" max="6" absolute_max="12" optional="true" >
+        <input  type="text"
+        		fieldtype="number"
+        		name="number_of_prenatal_visits"
+        		id="person_number_of_prenatal_visits"
+                class="input_cell" min="3"
+                absolute_min="0" max="6" absolute_max="12" optional="true" />
       </div>
       <div class="field">
         <label for="person_month_prenatal_care_started">Month of pregnancy prenatal care started</label>
         <br>
-     <input type="text" fieldtype="number" name="month_prenatal_care_started" id="person_month_prenatal_care_started"
-               class="input_cell" min="3" absolute_min="1" max="6" absolute_max="10" optional="true">
+     	<input  id="person_month_prenatal_care_started"
+     			type="text"
+     			fieldtype="number"
+     			name="month_prenatal_care_started"
+                class="input_cell" min="3"
+                absolute_min="1" max="6"
+                absolute_max="10" optional="true" />
       </div>
       <div class="field">
-        <%= f.label :mode_of_delivery %>
+        <input id="mode_of_delivery" name="mode_of_delivery" class="input_cell" min="3" />
         <br>
         <select id="person_mode_of_delivery" name="person[mode_of_delivery]" class="input_cell" optional="true">
           <option></option>
@@ -502,20 +628,25 @@
           <option <%= ((@person[:mode_of_delivery] rescue nil) == "Caesarean Section" ? "selected" : "") %> >Caesarean Section</option>
         </select>
       </div>
-
       </fieldset>
 
+<% elsif ["person_number_of_children_born_alive_inclusive","person_number_of_children_born_still_alive","person_level_of_education","details_of_father_known"].include? @field  %>
       <fieldset>
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
       <div class="field">
         <label for="person_number_of_children_born_alive_inclusive">Number of children born to the mother, including this
           child</label>
         <br>
-        <input type="text" fieldtype="number" name="number_of_children_born_alive_inclusive" id="person_number_of_children_born_alive_inclusive"
-                class="input_cell" absolute_min="1" max="6" absolute_max="20"
-               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
-                >
+        <input  id="person_number_of_children_born_alive_inclusive"
+        		type="text"
+        		fieldtype="number"
+        		name="number_of_children_born_alive_inclusive"
+                class="input_cell"
+                absolute_min="1"
+                max="6" absolute_max="20"
+                tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+               />
       </div>
 
 
@@ -523,15 +654,13 @@
         <label for="person_number_of_children_born_still_alive">Number of children born to the mother, and still
           living</label>
         <br>
-        <input type="text" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive"
-                 class="input_cell" absolute_min="1" max="6" absolute_max="20"
-               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
-                >
+        <input id="person_number_of_children_born_still_alive"
+        	   type="text"
+        	   fieldtype="number"
+        	   name="number_of_children_born_still_alive"
+               class="input_cell"
+               max="6" absolute_max="20" absolute_min="0" />
       </div>
-
-
-
 
       <div class="field">
         <label for="person_level_of_education">Completed Level of education</label>
@@ -560,6 +689,10 @@
       </div>
 
     </fieldset>
+
+
+<% elsif ["person_father_last_name","person_father_first_name","person_father_middle_name","person_father_id_number"].include? @field  %>
+
 
     <fieldset condition="(__$('person_parents_married_to_each_other').value.trim() == 'Yes' ) || __$('details_of_father_known').value.trim() == 'Yes'">
       <legend><font size='5' style=''>Details of Father</font></legend>
@@ -615,14 +748,19 @@
 
     </fieldset>
 
+<% elsif ["person_father_birthdate","person_father_citizenship","person_father_residential_country"].include? @field  %>
+
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
+
       <legend><font size='5' style=''>Details of Father continued..</font></legend>
 
       <div class="field">
         <label for="person_father_birthdate">Date of Birth</label><br>
 
-        <input id="person_father_birthdate" name="person[father][birthdate]" type="text"
-         value="<%= @person[:father][:birthdate] rescue nil %>"
+        <input id="person_father_birthdate"
+		       name="person[father][birthdate]"
+		       type="text"
+               value="<%= @person[:father][:birthdate] rescue nil %>"
                class="input_cell"
                fieldtype="date"
                optional="true"
@@ -630,10 +768,10 @@
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
 
         <input id="person_father_birthdate_estimated"
-              name="person[father][birthdate_estimated]"
-              type="hidden"
-              condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
-              optional='true'/>
+               name="person[father][birthdate_estimated]"
+               type="hidden"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
+               optional='true'/>
 
       </div>
 
@@ -648,16 +786,21 @@
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                ajaxURL="/search_by_nationality" />
       </div>
-      
+
       <div class="field">
         <label for="person_father_residential_country">Country</label><br>
-        <input id="person_father_residential_country" name="person[father][residential_country]" type="text"
+        <input id="person_father_residential_country"
+               name="person[father][residential_country]"
+               type="text"
                value="<%= @person[:father][:residential_country] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_country"
+               class="input_cell" a
+               jaxURL="/search_by_country"
         />
       </div>
 
     </fieldset>
+
+<% elsif ["same_address_with_mother","person_father_current_district","person_father_current_ta","person_father_current_village"].include? @field  %>
 
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
       <legend><font size='5' style=''>Details of Father continued: Physical Residential Address</font></legend>
@@ -679,11 +822,16 @@
 
       <div class="field">
         <label for="person_father_current_district">District</label><br>
-        <input id="person_father_current_district" name="person[father][current_district]" type="text" value="<%= @person[:father][:current_district] rescue nil %>"
-               class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
-               ajaxURL="/search_by_district"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);" optional="true"/>
+        <input  id="person_father_current_district"
+				name="person[father][current_district]"
+				type="text"
+				value="<%= @person[:father][:current_district] rescue nil %>"
+                class="input_cell"
+                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
+                ajaxURL="/search_by_district"
+                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);"
+                optional="true"/>
+
       </div>
 
       <div class="field">
@@ -712,7 +860,11 @@
 
     </fieldset>
 
+
+<% elsif ["father_home_address_same_as_physical","person_father_home_district","person_father_current_ta","person_father_home_ta","person_father_home_village"].include? @field  %>
+
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
+
       <legend><font size='5' style=''>Details of Father continued: Home Address</font></legend>
 
       <div class="field">
@@ -768,6 +920,8 @@
 
     </fieldset>
 
+<% elsif ["informant_same_as_mother","informant_same_as_father","person_informant_last_name","person_informant_first_name","person_informant_middle_name","person_informant_id_number","person_informant_relationship_to_child"].include? @field  %>
+
     <fieldset>
       <legend><font size='5' style=''>Details of Informant</font></legend>
 
@@ -775,10 +929,13 @@
 
       <div class="field">
         <label for="informant_same_as_mother">Mother is informant?</label><br>
-        <select id="informant_same_as_mother" name="informant_same_as_mother" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_mother').value.trim() == 'Yes'){setTimeout(function(){loadMothersDetails()}, 60);} else {unloadInformantsDetails();}" >
-          <option></option>
-          <option value="Yes" >Yes</option>
-          <option value="No" >No</option>
+        <select id="informant_same_as_mother"
+				name="informant_same_as_mother"
+				class="input_cell"
+				tt_onUnload="if(__$('textForinformant_same_as_mother').value.trim() == 'Yes'){setTimeout(function(){loadMothersDetails()}, 60);} else {unloadInformantsDetails();}" >
+		      <option></option>
+		      <option value="Yes" >Yes</option>
+		      <option value="No" >No</option>
 
         </select>
 
@@ -798,82 +955,130 @@
 
       <div class="field">
         <label for="person_informant_last_name">Surname</label><br>
-        <input id="person_informant_last_name" name="person[informant][last_name]" type="text" value="<%= @person[:informant][:last_name] rescue nil %>" class="input_cell" />
+		    <input  id="person_informant_last_name"
+					name="person[informant][last_name]"
+					type="text"
+					value="<%= @person[:informant][:last_name] rescue nil %>"
+					class="input_cell"
+					optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_first_name">First Name</label><br>
-        <input id="person_informant_first_name" name="person[informant][first_name]" type="text" value="<%= @person[:informant][:first_name] rescue nil %>" class="input_cell" />
+        	<input 	id="person_informant_first_name"
+					name="person[informant][first_name]"
+					type="text"
+					value="<%= @person[:informant][:first_name] rescue nil %>"
+					class="input_cell"
+					optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_middle_name">Other Name</label><br>
-        <input id="person_informant_middle_name" name="person[informant][middle_name]" type="text" value="<%= @person[:informant][:middle_name] rescue nil %>"
-               class="input_cell" optional="true" />
+		    <input  id="person_informant_middle_name"
+					name="person[informant][middle_name]"
+					type="text"
+					value="<%= @person[:informant][:middle_name] rescue nil %>"
+					class="input_cell"
+					optional="true" />
       </div>
 
       <div class="field">
         <label for="person_informant_id_number">ID Number</label><br>
-        <input id="person_informant_id_number" 
-               name="person[informant][id_number]" 
-               type="text" 
-               value="<%= @person[:informant][:id_number] rescue nil %>"
-               condition="false"
-               class="input_cell" optional="true" />
+		    <input id="person_informant_id_number"
+		           name="person[informant][id_number]"
+		           type="text"
+		           value="<%= @person[:informant][:id_number] rescue nil %>"
+		           condition="false"
+		           class="input_cell" optional="true" />
       </div>
 
       <div class="field">
         <label for="person_informant_relationship_to_child">Relationship To Child</label><br>
-        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell" >
-          <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+		    <select id="person_informant_relationship_to_child"
+					name="person[informant][relationship_to_child]"
+					class="input_cell"
+					optional="true">
+          		<option></option>
+          		<option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> 							>Mother</option>
+          		<option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> 							>Father</option>
+          		<option<%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Brother/Sister" ? "selected" : "")%> 							>Brother/Sister</option>
+          		<option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> 							>Aunt/Uncle</option>
+         		 <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
+          		<option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          		<option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Other" ? "selected" : "") %> 				>Other</option>
         </select>
       </div>
 
     </fieldset>
+
+<% elsif ["person_informant_current_district","person_informant_current_ta","person_informant_current_village","person_informant_addressline1"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style=''>Details of  Informant continued: Address</font></legend>
 
       <div class="field">
         <label for="person_informant_current_district">District</label><br>
-        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>"
-               class="input_cell"  ajaxURL = "/search_by_district"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);"
+        <input  id="person_informant_current_district"
+				name="person[informant][current_district]"
+				type="text"
+				value="<%= @person[:informant][:current_district] rescue nil %>"
+                class="input_cell"
+                ajaxURL = "/search_by_district"
+                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);"
                optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_current_ta">T/A</label><br>
-        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_ta"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);"
+        <input  id="person_informant_current_ta"
+				name="person[informant][current_ta]"
+				type="text"
+				value="<%= @person[:informant][:current_ta] rescue nil %>"
+                class="input_cell"
+                ajaxURL="/search_by_ta"
+                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);"
                optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_current_village">Village</label><br>
-        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>"  ajaxURL="/search_by_village" class="input_cell" optional="true"/>
+		    <input  id="person_informant_current_village"
+					name="person[informant][current_village]"
+					type="text"
+					value="<%= @person[:informant][:current_village] rescue nil %>"
+					ajaxURL="/search_by_village"
+					class="input_cell"
+					optional="true"/>
       </div>
 
       <div class="field">
-        <label for="person_informant_addressline1">Postal Address</label><br>
-        <input id="person_informant_addressline1" name="person[informant][addressline1]" type="text" value="<%= @person[:informant][:addressline1] rescue nil %>" class="input_cell" placeholder= "e.g. P.O Box 31797 or Current Village" optional="true"/>
+        <label for="person_informant_addressline1">Postal Address</label>
+        <br>
+		    <input  id="person_informant_addressline1"
+					name="person[informant][addressline1]"
+					type="text"
+					value="<%= @person[:informant][:addressline1] rescue nil %>"
+					class="input_cell"
+					placeholder= "e.g. P.O Box 31797 or Current Village"
+					optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_addressline2"></label><br>
-        <input id="person_informant_addressline2" name="person[informant][addressline2]" type="text" value="<%= @person[:informant][:addressline2] rescue nil %>"
-               class="input_cell" optional="true" placeholder= "Lilongwe 3" optional="true" />
+		    <input  id="person_informant_addressline2"
+					name="person[informant][addressline2]"
+					type="text"
+					value="<%= @person[:informant][:addressline2] rescue nil %>"
+		            class="input_cell"
+		            optional="true"
+		            placeholder= "Lilongwe 3"
+		            optional="true" />
       </div>
-
       </fieldset>
+
+ <% elsif ["person_informant_phone_number","form_signed","person_acknowledgement_of_receipt_date","person_copy_mother_name"].include? @field  %>
+
       <fieldset>
       <legend><font size='5' style=''>Details of Informant continued.. </font></legend>
 
@@ -881,15 +1086,24 @@
 
         <label for="person_informant_phone_number">Phone Number</label><br>
 
-        <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
-               class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})$|N\/A' regex_message="Please enter a valid phone number" />
+		    <input  id="person_informant_phone_number"
+					name="person[informant][phone_number]"
+					type="text"
+					value="<%= @person[:informant][:phone_number] rescue nil %>"
+					class="input_cell"
+					optional='true'
+					fieldtype="decimal"
+					regex='^0(?=\d*$)(?:.{7}|.{9})$|N\/A'
+					regex_message="Please enter a valid phone number" />
 
       </div>
 
        <div class="field">
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
-        <select id="form_signed" name="person[form_signed]" class="input_cell">
+        <select id="form_signed"
+				name="person[form_signed]"
+				class="input_cell">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -900,13 +1114,13 @@
         <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
         <br>
          <input type="hidden" name="registration_type" id="registration_type">
-        <%= (f.text_field :acknowledgement_of_receipt_date,
-                          :class => "input_cell",
-                          :value => Date.today.strftime('%d/%b/%Y'),
-                          :fieldtype => "date",
-                          :tt_onUnload => 'updateRegistrationType()',
-                          :absolute_min => 'reportingDate();',
-                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>
+        <input id="acknowledgement_of_receipt_date"
+                          class = "input_cell"
+                          value = "Date.today.strftime('%d/%b/%Y')"
+                          fieldtype = "date"
+                          tt_onUnload = "updateRegistrationType()"
+                          absolute_min = "reportingDate();"
+                          absolute_max = "Date.today.strftime('%d/%b/%Y'))" />
 
       </div>
 
@@ -925,14 +1139,18 @@
 
     </fieldset>
 
-
+<% end %>
 
     <div class="actions">
       <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
     </div>
 <% end %>
 
+
+
+
 <script>
+
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
@@ -1085,8 +1303,8 @@
             __$("person_informant_first_name").value = __$("person_mother_first_name").value;
 
             __$("textForperson_informant_first_name").value = __$("person_mother_first_name").value;
-             
-             console.log("loadMothersDetails 1 " + __$("person_informant_first_name").value)
+
+             console.log("loadMothersDetails 1" + __$("person_informant_first_name").value)
         }
 
         if (__$("person_mother_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
@@ -1150,6 +1368,8 @@
     function unloadInformantsDetails(){
 
         if (__$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+              console.log(__$("person_informant_first_name").value)
 
             __$("person_informant_first_name").value = "";
 
@@ -1708,28 +1928,11 @@
 
     init();
 
-    var full_place_of_birth;
-    
-
-    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
-    {
-      full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"];
-
-    }
-      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
-    {
-      full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
-    }
-    else {
-
-      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-    }
-
     summaryHash = {
                     "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
                     "Child Gender" : ["person_gender"],
                     "Child Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : ["person_place_of_birth"],
+                    "Place of Birth" : ["person_hospital_of_birth"],
                     "Mother " : ["person_mother_first_name","person_mother_middle_name", "person_mother_last_name"],
                     "Father" : ["person_father_first_name", "person_father_middle_name", "person_father_last_name"],
                     "Parents Married to each Other?": ['person_parents_married_to_each_other'],
@@ -1822,9 +2025,6 @@
 
     function checkWeddingDate( obj,parent)
     {
-
-       
-
         if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
         {
             var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())

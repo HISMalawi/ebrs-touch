@@ -9,6 +9,22 @@ class PersonController < ApplicationController
     
   end
 
+  def loc(id, tag=nil)
+    tag_id = LocationTag.where(name: tag).last.id rescue nil
+    result = nil
+    if tag_id.blank?
+      result = Location.find(id).name rescue nil
+    else
+      tagmap = LocationTagMap.where(location_tag_id: tag_id, location_id: id).last rescue nil
+      if tagmap
+        result = Location.find(tagmap.location_id).name rescue nil
+      end
+    end
+
+    result
+  end
+
+
   def show
 
     if params[:next_path].blank?
@@ -18,97 +34,95 @@ class PersonController < ApplicationController
     end
 
     @section = "View Record"
-    person_mother_id = PersonRelationType.find_by_name("Mother").id
-    person_father_id = PersonRelationType.find_by_name("Father").id
-    informant_type_id = PersonType.find_by_name("Informant").id
-    
 
-    @relations = PersonRelationship.find_by_sql(['select * from person_relationship where person_a = ?', params[:id]]).map(&:person_b)
-
-    
-
-    @informant_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: informant_type_id).first.person_b 
-    
-    
-    person_mother_relation = PersonRelationship.find_by_sql(["select * from person_relationship where person_a = ? and person_relationship_type_id = ?",params[:id], person_mother_id])
-    mother_id = person_mother_relation.map{|relation| relation.person_b} #rescue nil
-    father_id = PersonRelationship.where(person_a: params[:id],
-                                          person_relationship_type_id: person_father_id).first.person_b rescue nil
-
-    @person_name = PersonName.find_by_person_id(params[:id])
     @person = Person.find(params[:id])
     @core_person = CorePerson.find(params[:id])
-    @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
-    
-    @person_record_status = PersonRecordStatus.where(:person_id => params[:id]).last
-    @person_status = @person_record_status.status.name
 
-    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@person_status])
+    #New Variables
 
-    @mother = Person.find(mother_id)
-    @father = Person.find(father_id) rescue nil
-    @mother_name = PersonName.find_by_person_id(mother_id)
-    @father_name = PersonName.find_by_person_id(father_id)
-    @mother_address = PersonAddress.find_by_person_id(mother_id)
-    @father_address = PersonAddress.find_by_person_id(father_id)
+    @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
+    @name = @person.person_names.last
+    @address = @person.addresses.last
 
+    @mother_person = @person.mother
+    @mother_address = @mother_person.addresses.last rescue nil
+    @mother_name = @mother_person.person_names.last rescue nil
 
-    @informant = Person.find(@informant_id)
-    @informant_name = PersonName.find_by_person_id(@informant_id)
-    @informant_address = PersonAddress.find_by_person_id(@informant_id)
+    @father_person = @person.father
+    @father_address = @father_person.addresses.last rescue nil
+    @father_name = @father_person.person_names.last rescue nil
 
-    
+    @informant_person = @person.informant rescue nil
+    @informant_address = @informant_person.addresses.last rescue nil
+    @informant_name = @informant_person.person_names.last rescue nil
+
+    @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
+    days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
+    @delayed =  days_gone > 42 ? "Yes" : "No"
+    location = Location.find(SETTINGS['location_id'])
+    facility_code = location.code
+    birth_loc = Location.find(@birth_details.birth_location_id)
+
+    birth_location = birth_loc.name rescue nil
+
+    @place_of_birth = birth_loc.name rescue nil
+
+    if birth_location == 'Other' && @birth_details.other_birth_location.present?
+      @birth_details.other_birth_location
+    end
+
+    @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
+
+    @status = PersonRecordStatus.status(@person.id)
+
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+
     @record = {
         "Details of Child" => [
             {
-                "Birth Entry Number" => "#{@person_details.district_id_number rescue nil}",
-                "Birth Registration Number" => "#{@person_name.national_serial_number rescue nil}"
-            },
-
-            {
-                ["First Name","mandatory"] => "#{@person_name.first_name rescue nil}",
-                "Other Name" => "#{@person_name.middle_name rescue nil}",
-                ["Surname", "mandatory"] => "#{@person_name.last_name rescue nil}"
+                "District ID Number" => "#{@birth_details.ben rescue nil}",
+                "Serial Number" => "#{@birth_details.brn  rescue nil}"
             },
             {
-                ["Date of birth" , "mandatory"] => "#{@person.birthdate rescue nil}",
-                ["Sex", "mandatory"] => "#{@person.gender rescue nil}",
-                "Place of birth" => "#{Location.find(@birth_details.place_of_birth).name rescue nil}"
-                
+                ["First Name", "mandatory"] => "#{@name.first_name rescue nil}",
+                "Other Name" => "#{@name.middle_name rescue nil}",
+                ["Surname", "mandatory"] => "#{@name.last_name rescue nil}"
             },
             {
-                "Name of Hospital" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
-                "Other Details" => "#{@person.other_birth_place_details rescue nil}",
-                "Address" => "#{@person.birth_address rescue nil}"
+                ["Date of birth", "mandatory"] => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                ["Sex", "mandatory"] => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
+                "Place of birth" => "#{loc(@birth_details.place_of_birth, 'Place of Birth')}"
             },
             {
-                #{}"District" => "#{@person.birth_district rescue nil}",
-                "District" => "#{Location.find(@mother_address.current_district).name rescue nil}",
-                "T/A" => "#{@person.birth_ta rescue nil}",
-                "Village" => "#{@person.birth_village rescue nil}"
+                "Name of Hospital" => "#{loc(@birth_details.birth_location_id, 'Health Facility')}",
+                "Other Details" => "#{@birth_details.other_birth_location}",
+                "Address" => "#{@child.birth_address rescue nil}"
+            },
+            {
+                "District" => "#{birth_loc.district}",
+                "T/A" => "#{birth_loc.ta}",
+                "Village" => "#{birth_loc.village rescue nil}"
             },
             {
                 "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
-                "Type of birth" => "#{PersonTypeOfBirth.find(@birth_details.type_of_birth).name rescue nil}",
+                "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
                 "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
             },
             {
-                "Are the parents married to each other?" => "#{@birth_details.parents_married_to_each_other ? "Yes" : "No" rescue nil}",
-                "If yes, date of marriage" => "#{@birth_details.date_of_marriage rescue nil}"
+                "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
+                "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
             },
-            {
-                "Court Order Attached?" => "#{@birth_details.court_order_attached ? "Yes" : "No" rescue nil}",
-                "Parents Signed?" => "#{@person.parents_signed rescue nil}",
-                "Record Complete?" => "YES" #{ (record_complete?(@person) == false ? 'No' : 'Yes')}",
 
+            {
+                "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
+                "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
+                "Record Complete?" => "----"
             },
             {
-                "Place where birth was recorded" => "", #@person.place_birth_was_recorded",
-                "Record Status" => "<div id='status'>#{@person_status rescue nil}</div>",
-                "Child Type" => "#{@person.relationship.titleize rescue nil}",
+                "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
+                "Record Status" => "#{@status}",
+                "Child/Person Type" => "#{@birth_details.reg_type.name}"
             }
-
-
         ],
         "Details of Child's Mother" => [
             {
@@ -117,22 +131,19 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "mandatory"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                ["Date of birth", "mandatory"] => "#{Person.find_by_person_id(mother_id).birthdate rescue nil}",
-                "Nationality" => "#{Location.find(@mother_address.citizenship).name rescue nil}",
-                "ID Number" => "#{@person.mother.id_number rescue nil}"
+                "Date of birth" => "#{@mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Nationality" => "#{@mother_person.citizenship rescue nil}",
+                "ID Number" => "#{@mother_person.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{(Location.find(@mother_address.current_district).name ||
-                    @person.mother.foreigner_current_district) rescue nil}",
-                "T/A" => "#{(Location.find(@mother_address.current_ta).name ||
-                    @person.mother.foreigner_current_ta) rescue nil}",
-                "Village/Town" => "#{(Location.find(@mother_address.current_village).name||
-                    @person.mother.foreigner_current_village) rescue nil}"
+                "Physical Residential Address, District" => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                "T/A" => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{Location.find(@mother_address.home_village).name rescue nil}",
-                "T/A" => "#{Location.find(@mother_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@mother_address.current_district).name rescue nil}"
+                "Home Address, Village/Town" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                "T/A" => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                "District" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
             },
             {
                 "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
@@ -140,41 +151,36 @@ class PersonController < ApplicationController
                 "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
             },
             {
-                "Mode of delivery" => "#{ModeOfDelivery.find(@birth_details.mode_of_delivery_id).name rescue nil}",
+                "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
                 "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
                 "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
             },
             {
-                "Level of education" => "#{LevelOfEducation.find(@birth_details.level_of_education_id).name rescue nil}"
+                "Level of education" => "#{@birth_details.level_of_education rescue nil}"
             }
         ],
-
         "Details of Child's Father" => [
             {
-                parents_married(@birth_details.parents_married_to_each_other, "First Name") => "#{@father_name.first_name rescue nil}",
+                "First Name" => "#{@father_name.first_name rescue nil}",
                 "Other Name" => "#{@father_name.middle_name rescue nil}",
-                parents_married(@birth_details.parents_married_to_each_other, "Surname") => "#{@father_name.last_name rescue nil}"
+                "Surname" => "#{@father_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{@father.birthdate rescue nil}",
-                "Nationality" => "#{Location.find(@father_address.citizenship).name rescue nil}",
-                "ID Number" => "#{@father.id_number rescue nil}"
+                "Date of birth" => "#{@father_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Nationality" => "#{@father_person.citizenship rescue nil}",
+                "ID Number" => "#{@father_person.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{(Location.find(@father_address.current_district).name ||
-                    @father.foreigner_current_district) rescue nil}",
-                "T/A" => "#{(Location.find(@father_address.current_ta).name ||
-                    @person.father.foreigner_current_ta) rescue nil}",
-                "Village/Town" => "#{(Location.find(@father_address.current_village).name ||
-                    @person.father.foreigner_current_village) rescue nil}"
+                "Physical Residential Address, District" => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                "T/A" => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{Location.find(@father_address.home_village).name rescue nil}",
-                "T/A" => "#{Location.find(@father_address.home_ta).name rescue nil}",
-                "District" =>  "#{Location.find(@father_address.current_district).name rescue nil}"
+                "Home Address, Village/Town" => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                "T/A" => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                "District" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
             }
         ],
-
         "Details of Child's Informant" => [
             {
                 "First Name" => "#{@informant_name.first_name rescue nil}",
@@ -182,44 +188,44 @@ class PersonController < ApplicationController
                 "Family Name" => "#{@informant_name.last_name rescue nil}"
             },
             {
-                "Relationship to child" => "#{PersonRelationType.find(PersonRelationship.find_by_person_b(@informant_id).person_relationship_type_id).name rescue ""}",
-                "ID Number" => "#{@person.informant.id_number rescue ""}"
+                "Relationship to child" => "#{@birth_details.informant_relationship_to_child rescue ""}",
+                "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{Location.find(@informant_address.current_district).name rescue nil}",
-                "T/A" => "#{Location.find(@informant_address.current_ta).name rescue nil}",
-                "Village/Town" => "#{Location.find(@informant_address.current_village).name rescue nil}"
+                "Physical Address, District" => "#{loc(@informant_address.home_district, 'District')rescue nil}",
+                "T/A" => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
+                "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Postal Address" => "#{@informant_address.address_line_1 rescue nil}",
-                " " => "#{@informant_address.address_line_2 rescue nil}",
-                "City" => "#{Location.find(@informant_address.current_district).name rescue nil}"
+                "Postal Address" => "#{@informant_address.addressline1 rescue nil}",
+                "" => "#{@informant_address.addressline2 rescue nil}",
+                "City" => "#{@informant_address.city rescue nil}"
             },
             {
-                "Phone Number" => "#{@person.informant.phone_number rescue ""}",
-                "Informant Signed?" => "#{@person.form_signed rescue ""}"
+                "Phone Number" => "#{@informant_person.get_attribute('Cell Phone Number')}",
+                "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
-                "Acknowledgement Date" => "#{@person.acknowledgement_of_receipt_date.strftime('%d/%b/%Y') rescue ""}",
-                "Date of Registration" => "#{@person.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
-                "Delayed Registration <br /><font size='1'  style='color: grey;'><i>({answer})</i></font>" => "{delayed}"
+                "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
+                ["Delayed Registration", "sub"] => "#{@delayed}"
             }
         ]
     }
 
-  
+
 
     @summaryHash = {
-      "Child Name" => "#{@person_name.first_name} #{@person_name.middle_name rescue nil} #{@person_name.last_name rescue nil}",
+      "Child Name" => @person.name,
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
       "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
-      "Child's Mother " => "#{@mother_name.first_name rescue nil} #{@mother_name.middle_name rescue nil} #{@mother_name.last_name rescue nil}",
-      "Child's Father" =>  "#{@father_name.first_name rescue nil} #{@father_name.middle_name rescue nil} #{@father_name.last_name rescue nil}",
+      "Child's Mother " => @mother_person.name,
+      "Child's Father" =>  (@father_person.name rescue nil),
       "Parents Married" => (@birth_details.parents_married_to_each_other == 1 ? 'Yes' : 'No'),
       "Court order attached" => (@birth_details.court_order_attached == 1 ? 'Yes' : 'No'),
       "Parents signed?" => ((@birth_details.parents_signed rescue -1) == 1 ? 'Yes' : 'No'),
-      "Delayed Registration" => ((@person.created_at.to_date - @person.birthdate.to_date).to_i > 42 ? 'Yes' : 'No')
+      "Delayed Registration" => @delayed
     }
 
     if  (BirthRegistrationType.find(@person_details.birth_registration_type_id).name.upcase rescue nil) == 'ADOPTED'
@@ -251,7 +257,8 @@ class PersonController < ApplicationController
   end
 
   def new
-    
+    @current_district = Location.current_district.name
+
     $prev_child_id = params[:id]
     
     if params[:id].blank?
@@ -263,8 +270,8 @@ class PersonController < ApplicationController
     else
       
       @person = PersonBirthDetail.find_by_person_id(params[:id])
-      @person_name = PersonName.find_by_person_id(params[:id])
 
+      @person_name = PersonName.find_by_person_id(params[:id])
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
@@ -280,7 +287,7 @@ class PersonController < ApplicationController
   end
 
   def create
-       
+    #raise params.inspect
 
     type_of_birth = params[:person][:type_of_birth]
     
@@ -296,29 +303,11 @@ class PersonController < ApplicationController
      end
 
      
-
     @person = PersonService.create_record(params)
 
+    #To be contued
     if @person.present? && SETTINGS['potential_search']
-      person = {}
-      person["id"] = @person.person_id
-      person["first_name"]= params[:person][:first_name]
-      person["last_name"] =  params[:person][:last_name]
-      person["middle_name"] = params[:person][:middle_name]
-      person["gender"] = params[:person][:gender]
-      person["birthdate"]= params[:person][:birthdate]
-      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
-      person["nationality"]=  params[:person][:mother][:citizenship]
-      person["place_of_birth"] = params[:person][:place_of_birth]
-      person["district"] = params[:person][:birth_district]
-      person["mother_first_name"]= params[:person][:mother][:first_name]
-      person["mother_last_name"] =  params[:person][:mother][:last_name]
-      person["mother_middle_name"] = params[:person][:mother][:middle_name]
-      person["father_first_name"]= params[:person][:father][:first_name]
-      person["father_last_name"] =  params[:person][:father][:last_name]
-      person["father_middle_name"] = params[:person][:father][:middle_name]
-
-      SimpleElasticSearch.add(person)
+      SimpleElasticSearch.add(person_for_elastic_search(params))
     else
 
     end
@@ -343,6 +332,72 @@ class PersonController < ApplicationController
 
   end
 
+  def person_for_elastic_search(params)
+      person = {}
+      person["id"] = @person.person_id
+      person["first_name"]= params[:person][:first_name]
+      person["last_name"] =  params[:person][:last_name]
+      person["middle_name"] = params[:person][:middle_name]
+      person["gender"] = params[:person][:gender]
+      person["birthdate"]= params[:person][:birthdate]
+      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
+
+      if is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+         prev_child = Person.find(params[:person][:prev_child_id].to_i)
+         if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+           mother = prev_child.adoptive_mother
+         else
+           mother = prev_child.mother
+         end
+         mother_name =  mother.person_names.first
+   
+         person["mother_first_name"] = mother_name.first_name rescue ""
+         person["mother_last_name"] =   mother_name.last_name rescue ""
+         person["mother_middle_name"] =  mother_name.first_name rescue ""
+
+         if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+           father = prev_child.adoptive_father
+         else
+           father = prev_child.father
+         end
+         father_name =  father.person_names.first
+         person["father_first_name"] = father_name.first_name rescue ""
+         person["father_last_name"] =   father_name.last_name rescue ""
+         person["father_middle_name"] = father_name.first_name rescue ""
+
+         birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
+         person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
+         person["district"] = Location.find(birth_details.district_of_birth).name
+         person["nationality"]= Location.find(mother.addresses.first.citizenship).name
+
+      else
+
+        person["place_of_birth"] = params[:person][:place_of_birth]
+        person["district"] = params[:person][:birth_district]
+        person["nationality"]=  params[:person][:mother][:citizenship]
+        person["mother_first_name"]= params[:person][:mother][:first_name]
+        person["mother_last_name"] =  params[:person][:mother][:last_name]
+        person["mother_middle_name"] = params[:person][:mother][:middle_name]
+        person["father_first_name"]= params[:person][:father][:first_name]
+        person["father_last_name"] =  params[:person][:father][:last_name]
+        person["father_middle_name"] = params[:person][:father][:middle_name]
+
+      end
+      return person
+  end
+
+  def is_twin_or_triplet(type_of_birth)
+    if type_of_birth.include?"Second Twin" 
+      return true 
+    elsif type_of_birth.include?"Second Triplet" 
+      return true 
+    elsif type_of_birth.to_s.include? "Third Triplet"
+      return true
+    else
+      return false
+    end
+  end
+
   def parents_married(parents_married,value)
     
     if parents_married == 1
@@ -362,8 +417,6 @@ class PersonController < ApplicationController
      else
         birthdate = (params[:birthdate].to_time.to_s.split(" ")[0] rescue params[:birthdate].to_time)
      end
-
-     
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
@@ -381,8 +434,12 @@ class PersonController < ApplicationController
 
       people = []
 
-      if SETTINGS['potential_search'] && !params[:type_of_birth].include?("Twin")
-        results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+      if SETTINGS['potential_search']
+        if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
+          results = []
+        else
+          results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+        end
       else
         results = []
       end
@@ -512,11 +569,18 @@ class PersonController < ApplicationController
   end
 
   def get_hospital
-  
+  map =  {'Mzuzu City' => 'Mzimba',
+          'Lilongwe City' => 'Lilongwe',
+          'Zomba City' => 'Zomba',
+          'Blantyre City' => 'Blantyre'}
+
+  params[:district] =map[params[:district]] if   params[:district].match(/City$/)
+
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
-  
-  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?", 
+  parent_location = Location.where(name: params[:district]).last.id rescue nil
+
+  Location.where("LENGTH(name) > 0 AND name LIKE (?) AND parent_location = #{parent_location} AND m.location_tag_id = ?",
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
     ON location.location_id = m.location_id").order('name ASC').map do |l|
     data << l.name

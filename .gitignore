@@ -10,7 +10,7 @@
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal
-
+metadata.sql
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
@@ -27,3 +27,5 @@ passenger*
 *.swp
 /bin/schema.rb
 *.~*
+public/sync_sentinel
+public/sentinel

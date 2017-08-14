@@ -29,7 +29,8 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
-
+    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
+    <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
 
@@ -48,8 +49,7 @@
       <% end %>
       
       <input id="person_original_surname" type="hidden"/>
-
-      <%= f.hidden_field :birth_district, :value => Location.current_district.id, :id => "person_birth_district" %>
+      <%= f.hidden_field :birth_district, :value => @current_district %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -88,7 +88,7 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="text" name="birthdate"
+        <input type="text" name="person[birthdate]"
                id="person_birthdate"
                class = "input_cell"
                fieldtype = "date"
@@ -179,11 +179,10 @@
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-        			 name="person[bd][holder]"
+        			 name="person[birth_district]"
         			 type="text"
         			 condition="beforeLiveDate()"
         			 optional="true"
-        			 value="<%= @person[:bd] rescue nil %>"
         			 ajaxURL = "/search_by_district"	
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
         			 class="input_cell"
@@ -301,6 +300,7 @@
                id= "person_date_of_marriage"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && __$('biological_parents').value.trim().toLowerCase() == 'both'",
                fieldtype = "date"
+               id="person_date_of_marriage"
                absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
                optional = true>
         <%#grill=  :tt_onLoad => "validateDate(__$('person_birthdate'), __$('person_date_of_marriage'), 45, 3, 60, 0)") %>

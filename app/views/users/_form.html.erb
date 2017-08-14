@@ -1,4 +1,4 @@
-<%= form_for(@user, :action => "submitForm()") do |f| %>
+<%= form_for(@user) do |f| %>
 
     <fieldset>
       <legend>
@@ -36,7 +36,7 @@
 
           <td>
             <% if request.path.match(/new/) %>
-		<%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :textCase => "lower", :uniq_check => "/username_availability?search_str=" %>
+		<%= f.text_field  :username, :textCase => "lower",:value => @user_name,:tt_onload =>"$('touchscreenInput5').value = ($('user_first_name').value.substring(0,3)+$('user_last_name').value.substring(0,3)).toLowerCase()" ,:validationRule =>"\\w{6}\\w*" ,:validationMessage => "Username must have at least SIX letters", :textCase => "lower" %>
             <%else %>
             <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower"%>
             <% end %>
@@ -87,7 +87,7 @@
             :
           </td>
           <td>
-            <%= i.select :role, options_for_select(@roles),
+            <%= i.select :role, options_for_select(@roles, (@role rescue nil)),
               :class => "input_cell",
               :id => "role",
               :placeholder => "Select Role",
@@ -161,7 +161,7 @@
 <% end %>
 
 <!--button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;" onclick="submitForm()">
-  <%= request.path.match(/new/) ? "Save" : "Update" %> User
+  <%#= request.path.match(/new/) ? "Save" : "Update" %> User
 </button-->
 
 <script>
@@ -178,6 +178,9 @@
                 }
             }
 
+    function checkLength(node){
+        alert(node.value);
+    }
     function validateForm() {
 
         username = document.getElementById('textForuser_username');
