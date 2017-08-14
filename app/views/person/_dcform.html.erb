@@ -919,8 +919,7 @@
                type="text"
                ajaxURL = "/get_last_names"
                value="<%= @person[:informant][:last_name] rescue nil %>"
-               class="input_cell"
-               optional="true"/>
+               class="input_cell"/>
       </div>
 
       <div class="field">
@@ -930,8 +929,7 @@
                type="text"
                ajaxURL = "/get_first_names"
                value="<%= @person[:informant][:first_name] rescue nil %>"
-               class="input_cell"
-               optional="true"/>
+               class="input_cell"/>
       </div>
 
       <div class="field">
@@ -957,7 +955,7 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
-        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell" optional="true">
+        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
@@ -1035,7 +1033,7 @@
                           :fieldtype => "date",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
-                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>
+                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>  
 
       </div>
 
