@@ -37,8 +37,8 @@
       <%= f.hidden_field :_rev rescue "" %>
       <%= f.hidden_field :place_of_birth, :value => Location.where(location_id: SETTINGS['location_id']).first.name %>
       <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.name}"  %>
-      <%= f.hidden_field :birth_district, :value => Location.current_health_facility.id %>
- 
+      <%= f.hidden_field :birth_district, :value => @current_district %>
+      <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
       <input id="person_original_surname" type="hidden"/>
 
 
