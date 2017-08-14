@@ -287,7 +287,6 @@ class PersonController < ApplicationController
   end
 
   def create
-   
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -431,31 +430,39 @@ class PersonController < ApplicationController
                       "father_last_name" => (params[:father_last_name] rescue nil)
                   }
 
-      people = []
 
       if SETTINGS['potential_search']
+        results = duplicate_search(person, params)
+      else
+        results = {:response => []}
+      end
+  
+
+      if results[:response].count == 0
+        render :text => {:response => false}.to_json
+      else
+        render :text => results.to_json
+      end 
+
+  end
+
+  def duplicate_search(person, params)
+      dupliates = SimpleElasticSearch.query_duplicate_coded(person,100)
+      exact = false
+      if dupliates.blank?
         if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
-          results = []
+          dupliates = []
         else
           if params[:relationship] == "normal" || params[:relationship] == "adopted"
-              results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+              dupliates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
           else
-              results = SimpleElasticSearch.query_duplicate_coded(person,"95")
+              dupliates = SimpleElasticSearch.query_duplicate_coded(person,"95")
           end
         end
       else
-        results = []
+        exact  = true
       end
-
-      people = results
-
-      if people.count == 0
-
-        render :text => {:response => false}.to_json
-      else
-
-        render :text => {:response => people}.to_json
-      end 
+      return {:response => dupliates, :exact => exact}
   end
   
   def get_names

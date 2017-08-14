@@ -5663,7 +5663,8 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-function duplicatesPopup(people,checkbox){
+function duplicatesPopup(data,checkbox){
+       var people = data.response
        if (__$("msg.shield")) {
             document.body.removeChild(__$("msg.shield"));
         }
@@ -5771,6 +5772,8 @@ function duplicatesPopup(people,checkbox){
                 return person["_id"]
            }).join("|");
            __$("person_duplicate").value = ids;
+
+           __$("person_is_exact_duplicate").value = data.exact
            document.body.removeChild(shield);
            document.forms[0].submit();
         }
@@ -5840,7 +5843,7 @@ function submitAfterSummary() {
         
         if(response.response && response.response.length != 0){
             
-            duplicatesPopup(response.response);
+            duplicatesPopup(response);
 
             hideSpinner();
 

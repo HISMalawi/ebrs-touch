@@ -31,6 +31,26 @@
     </table>
   </div>
 <% end %>  
+<% if  @folders.include?("Voided Duplicate Cases") %>
+  <div class="button child_menu manage_duplicates"  onclick="window.location = '/view_duplicates?exact=true'" tag=1>
+    <table style="text-align: left;">
+      <tr>
+        <td rowspan="2">
+          <img src="<%= @icoFolder %>" height="60"/><br />
+          <span class="count"><%= @stats['DC-DUPLICATE']%></span>
+        </td>
+        <td style="height: 30px;">
+          Exact Duplicate Cases
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 11px; font-style: italic;">
+          Exact duplicates captured by the system.
+        </td>
+      </tr>
+    </table>
+  </div>
+<% end %> 
 
 <% if  @folders.include?("Voided Duplicate Cases") %>
   <div class="button child_menu manage_duplicates"  onclick="window.location = '/duplicates'" tag=1>
