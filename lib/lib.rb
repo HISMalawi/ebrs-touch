@@ -24,13 +24,15 @@ module Lib
   end
 
   def self.new_mother(person, params,mother_type)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      mother_person = Person.find(params[:person][:prev_child_id]).mother
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
-        mother = params[:person][:mother]
-
+       
+        if mother_type =="Adoptive-Mother"
+          mother = params[:person][:foster_mother]
+        else
+          mother = params[:person][:mother]
+        end
         if mother[:first_name].blank?
           return nil
         end
@@ -92,12 +94,14 @@ module Lib
   end
 
   def self.new_father(person, params, father_type)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      father_person = Person.find(params[:person][:prev_child_id]).father
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
-      father = params[:person][:father]
+      if father_type =="Adoptive-Father"
+        father = params[:person][:foster_father]
+      else
+        father = params[:person][:father]
+      end
       father[:citizenship] = 'Malawian' if father[:citizenship].blank?
       father[:residential_country] = 'Malawi' if father[:residential_country].blank?
 
@@ -168,20 +172,17 @@ module Lib
     informant[:citizenship] = 'Malawian' if informant[:citizenship].blank?
     informant[:residential_country] = 'Malawi' if informant[:residential_country].blank?
 
-    if params[:person][:type_of_birth].to_s.include? "Twin"
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       informant_person = Person.find(params[:person][:prev_child_id]).informant
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
-      informant_person = Person.find(params[:person][:prev_child_id]).informant
-
     elsif params[:informant_same_as_mother] == 'Yes'
 
-      if params[:relationship] == "orphaned" || params[:relationship] == "adopted"
+      if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_mother
       else
          informant_person = person.mother
       end
     elsif params[:informant_same_as_father] == 'Yes'
-      if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+      if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_father
       else
          informant_person = person.father
@@ -248,10 +249,8 @@ module Lib
   end
 
   def self.new_birth_details(person, params)
-    if params[:person][:type_of_birth].to_s.include? "Twin"
-      return self.birth_details_multiple(person,params[:person][:prev_child_id].to_i)
-    elsif params[:person][:type_of_birth].to_s.include? "Triplet"
-      return self.birth_details_multiple(person,params[:person][:prev_child_id].to_i)
+    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+      return self.birth_details_multiple(person,params)
     end
     person_id = person.id; place_of_birth_id = nil; location_id = nil; other_place_of_birth = nil
     person = params[:person]
@@ -260,7 +259,11 @@ module Lib
       place_of_birth_id = Location.where(name: 'Hospital').last.id
       location_id = SETTINGS['location_id']
     else
-      place_of_birth_id = Location.locate_id_by_tag(person[:place_of_birth], 'Place of Birth')
+      unless person[:place_of_birth].blank?
+        place_of_birth_id = Location.locate_id_by_tag(person[:place_of_birth], 'Place of Birth')
+      else
+        place_of_birth_id = Location.locate_id_by_tag("Other", 'Place of Birth')
+      end
 
       if person[:place_of_birth] == 'Home'
         district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
@@ -288,24 +291,30 @@ module Lib
     end
 
     reg_type = SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id :
-        BirthRegistrationType.where(name: params[:relationship]).last.birth_registration_type_id
+        BirthRegistrationType.where(name: params[:person][:relationship]).last.birth_registration_type_id
+    unless person[:type_of_birth].blank?
+      type_of_birth_id = PersonTypeOfBirth.where(name: person[:type_of_birth]).last.id
+    else
+      type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
+    end
 
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
         place_of_birth:                           place_of_birth_id,
         birth_location_id:                        location_id,
+        district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             person[:birth_weight],
-        type_of_birth:                            PersonTypeOfBirth.where(name: (person[:type_of_birth] || 'Other')).last.id,
+        type_of_birth:                            type_of_birth_id,
         parents_married_to_each_other:            (person[:parents_married_to_each_other] == 'No' ? 0 : 1),
         date_of_marriage:                         (person[:date_of_marriage].to_date.to_s rescue nil),
         gestation_at_birth:                       (params[:gestation_at_birth].to_f rescue nil),
         number_of_prenatal_visits:                (params[:number_of_prenatal_visits].to_i rescue nil),
         month_prenatal_care_started:              (params[:month_prenatal_care_started].to_i rescue nil),
         mode_of_delivery_id:                      (ModeOfDelivery.where(name: person[:mode_of_delivery]).first.id rescue 1),
-        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue nil),
-        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue nil),
+        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue 1),
+        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue 1),
         level_of_education_id:                    (LevelOfEducation.where(name: person[:level_of_education]).last.id rescue 1),
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
@@ -321,13 +330,15 @@ module Lib
   
   end
 
-  def self.birth_details_multiple(person,prev_child_id)
-    prev_details = PersonBirthDetail.where(person_id: prev_child_id).first
+  def self.birth_details_multiple(person,params)
+    
+    prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_s).first
     prev_details_keys = prev_details.attributes.keys
-    prev_details_keys = prev_details_keys - ['person_id','person_birth_details_id']
+    prev_details_keys = prev_details_keys - ['person_id','person_birth_details_id',"birth_weight"]
 
     details = PersonBirthDetail.new
     details["person_id"] = person.id
+    details["birth_weight"] = params[:person][:birth_weight]
     prev_details_keys.each do |field|
         details[field] = prev_details[field]
     end
@@ -358,4 +369,15 @@ module Lib
     return status
   end
   
+  def self.is_twin_or_triplet(type_of_birth)
+    if type_of_birth == "Second Twin" 
+      return true 
+    elsif type_of_birth == "Second Triplet" 
+      return true 
+    elsif type_of_birth == "Third Triplet"
+      return true
+    else
+      return false
+    end
+  end
 end

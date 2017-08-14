@@ -257,7 +257,8 @@ class PersonController < ApplicationController
   end
 
   def new
-    
+    @current_district = Location.current_district.name
+
     $prev_child_id = params[:id]
     
     if params[:id].blank?
@@ -286,8 +287,7 @@ class PersonController < ApplicationController
   end
 
   def create
-       
-
+   
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -305,28 +305,8 @@ class PersonController < ApplicationController
     @person = PersonService.create_record(params)
 
     #To be contued
-    if @person.present? && SETTINGS['potential_search'] && false
-
-      person = {}
-      person["id"] = @person.person_id
-      person["first_name"]= params[:person][:first_name]
-      person["last_name"] =  params[:person][:last_name]
-      person["middle_name"] = params[:person][:middle_name]
-      person["gender"] = params[:person][:gender]
-      person["birthdate"]= params[:person][:birthdate]
-      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
-      
-      person["place_of_birth"] = params[:person][:place_of_birth]
-      person["district"] = params[:person][:birth_district]
-      person["nationality"]=  params[:person][:mother][:citizenship]
-      person["mother_first_name"]= params[:person][:mother][:first_name]
-      person["mother_last_name"] =  params[:person][:mother][:last_name]
-      person["mother_middle_name"] = params[:person][:mother][:middle_name]
-      person["father_first_name"]= params[:person][:father][:first_name]
-      person["father_last_name"] =  params[:person][:father][:last_name]
-      person["father_middle_name"] = params[:person][:father][:middle_name]
-
-      SimpleElasticSearch.add(person)
+    if @person.present? && SETTINGS['potential_search']
+      SimpleElasticSearch.add(person_for_elastic_search(params))
     else
 
     end
@@ -340,7 +320,7 @@ class PersonController < ApplicationController
 
        if application_mode == 'Facility'
 
-          redirect_to '/records/DC-Complete'
+          redirect_to '/view_cases'
 
         else
 
@@ -349,6 +329,72 @@ class PersonController < ApplicationController
         end
     end
 
+  end
+
+  def person_for_elastic_search(params)
+      person = {}
+      person["id"] = @person.person_id
+      person["first_name"]= params[:person][:first_name]
+      person["last_name"] =  params[:person][:last_name]
+      person["middle_name"] = params[:person][:middle_name]
+      person["gender"] = params[:person][:gender]
+      person["birthdate"]= params[:person][:birthdate]
+      person["birthdate_estimated"] = params[:person][:birthdate_estimated]
+
+      if is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+         prev_child = Person.find(params[:person][:prev_child_id].to_i)
+         if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+           mother = prev_child.adoptive_mother
+         else
+           mother = prev_child.mother
+         end
+         mother_name =  mother.person_names.first
+   
+         person["mother_first_name"] = mother_name.first_name rescue ""
+         person["mother_last_name"] =   mother_name.last_name rescue ""
+         person["mother_middle_name"] =  mother_name.first_name rescue ""
+
+         if params[:relationship] == "opharned" || params[:relationship] == "adopted"
+           father = prev_child.adoptive_father
+         else
+           father = prev_child.father
+         end
+         father_name =  father.person_names.first
+         person["father_first_name"] = father_name.first_name rescue ""
+         person["father_last_name"] =   father_name.last_name rescue ""
+         person["father_middle_name"] = father_name.first_name rescue ""
+
+         birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
+         person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
+         person["district"] = Location.find(birth_details.district_of_birth).name
+         person["nationality"]= Location.find(mother.addresses.first.citizenship).name
+
+      else
+
+        person["place_of_birth"] = params[:person][:place_of_birth]
+        person["district"] = params[:person][:birth_district]
+        person["nationality"]=  params[:person][:mother][:citizenship]
+        person["mother_first_name"]= params[:person][:mother][:first_name]
+        person["mother_last_name"] =  params[:person][:mother][:last_name]
+        person["mother_middle_name"] = params[:person][:mother][:middle_name]
+        person["father_first_name"]= params[:person][:father][:first_name]
+        person["father_last_name"] =  params[:person][:father][:last_name]
+        person["father_middle_name"] = params[:person][:father][:middle_name]
+
+      end
+      return person
+  end
+
+  def is_twin_or_triplet(type_of_birth)
+    if type_of_birth.include?"Second Twin" 
+      return true 
+    elsif type_of_birth.include?"Second Triplet" 
+      return true 
+    elsif type_of_birth.to_s.include? "Third Triplet"
+      return true
+    else
+      return false
+    end
   end
 
   def parents_married(parents_married,value)
@@ -388,10 +434,14 @@ class PersonController < ApplicationController
       people = []
 
       if SETTINGS['potential_search']
-        if params[:type_of_birth] &&  params[:type_of_birth].include?("Twin")         
+        if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
           results = []
         else
-          results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+          if params[:relationship] == "normal" || params[:relationship] == "adopted"
+              results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
+          else
+              results = SimpleElasticSearch.query_duplicate_coded(person,"95")
+          end
         end
       else
         results = []

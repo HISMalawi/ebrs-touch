@@ -29,7 +29,8 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
-
+    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
+    <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
 
@@ -37,8 +38,6 @@
       <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
 
        <input id="person_relationship" name="person[relationship]" value="abandoned" type="hidden"/>
-
-       <input name="relationship" value="abandoned" type="hidden"/>
 
       <% if flash[:error] == "Similar" %>
 
@@ -48,7 +47,7 @@
 
       <input id="person_original_surname" type="hidden"/>
 
-      <%= f.hidden_field :birth_district, :value => Location.current_district.id %>
+      <%= f.hidden_field :birth_district, :value => @current_district %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -82,7 +81,7 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="text" name="birthdate"
+        <input type="text" name="person[birthdate]"
                           class ="input_cell"
                           id = "person_birthdate"
                           fieldtype = "date"

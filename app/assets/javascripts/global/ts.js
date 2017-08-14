@@ -5689,6 +5689,7 @@ function duplicatesPopup(people,checkbox){
         div.style.width = width + "px";
         div.style.height = height + "px";
         div.style.backgroundColor = "#ffffff";
+        div.style.overflowY = "scroll";
         div.style.borderRadius = "1px";
         div.style.left = "calc(50% - " + (width / 2) + "px)";
         div.style.top = "calc(50% - " + (height * 0.6) + "px)";
@@ -5817,7 +5818,8 @@ function submitAfterSummary() {
                                         "person_father_first_name",
                                         "person_father_last_name",
                                         "person_father_middle_name",
-                                        "person_type_of_birth"]
+                                        "person_type_of_birth",
+                                        "person_relationship"]
 
     var data = {"twin_id": getUrlVars()["id"]}
 

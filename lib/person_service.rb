@@ -4,21 +4,31 @@ module PersonService
 
   def self.create_record(params)
     #raise params[:person].inspect
-    registration_type   = params[:relationship]
+    registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
-
+    
     case registration_type
     when "normal"       
        mother   = Lib.new_mother(person, params, 'Mother')
        father   = Lib.new_father(person, params,'Father')
        informant = Lib.new_informant(person, params)
     when "orphaned"
-       mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-       father   = Lib.new_father(person, params,'Adoptive-Father')
+       mother   = Lib.new_mother(person, params, 'Mother')
+       father   = Lib.new_father(person, params,'Father')
        informant = Lib.new_informant(person, params)
     when "adopted"
-       mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-       father   = Lib.new_father(person, params,'Adoptive-Father')
+       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+          mother   = Lib.new_mother(person, params, 'Mother')
+       end
+       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+          father   = Lib.new_father(person, params,'Father')
+       end
+       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+          adoptive_mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+       end
+       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+          adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
+       end
        informant = Lib.new_informant(person, params)
     else 
 
@@ -38,14 +48,21 @@ module PersonService
   end
 
   def self.mother(person_id)
-    result = nil
-    #raise person_id.inspect
-    relationship_type = PersonRelationType.find_by_name("Mother")
+    birth_details = PersonBirthDetail.where(person_id: person_id).first
+    birth_registration_type_id = birth_details.birth_registration_type_id
+    registration_name = BirthRegistrationType.where(birth_registration_type_id: birth_registration_type_id).last.name
+    case registration_name
+    when "Adopted"
+         relationship_name = "Adoptive-Mother"  
+    else
+        relationship_name = "Mother"   
+    end
 
-   # raise relationship_type.id.inspect
+    result = nil
+    relationship_type = PersonRelationType.find_by_name(relationship_name)
 
     relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
-    #raise relationship.person_b.inspect
+
     unless relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b).last
     end
@@ -54,10 +71,22 @@ module PersonService
   end
 
   def self.father(person_id)
+    birth_details = PersonBirthDetail.where(person_id: person_id).first
+    birth_registration_type_id = birth_details.birth_registration_type_id
+    registration_name = BirthRegistrationType.where(birth_registration_type_id: birth_registration_type_id).last.name
+    case registration_name
+    when "Adopted"
+         relationship_name = "Adoptive-Father"  
+    else
+        relationship_name = "Father"   
+    end
+
     result = nil
-    relationship_type = PersonRelationType.find_by_name("Father")
+    relationship_type = PersonRelationType.find_by_name(relationship_name)
+
     relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
-    if !relationship.blank?
+
+    unless relationship.blank?
       result = PersonName.where(:person_id => relationship.person_b).last
     end
 
@@ -90,14 +119,15 @@ module PersonService
     main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
-      next if mother.blank?
-      next if mother.first_name.blank?
+      #For abandoned cases mother details may not be availabe
+      #next if mother.blank?
+      #next if mother.first_name.blank?
       #The form treat Father as optional
       #next if father.blank?
       #next if father.first_name.blank?
       name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
-      mother_name   = ("#{mother.first_name} #{mother.middle_name} #{mother.last_name}")
-      father_name   = ("#{father.first_name rescue ''} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+      mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+      father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
 
       results << {
           'id' => data.person_id,

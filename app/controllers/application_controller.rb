@@ -124,6 +124,7 @@ class ApplicationController < ActionController::Base
     if application_mode == 'DC'
       Location.current_district = location
     else
+      Location.current_district = location.facility_district
       Location.current_health_facility = location
     end
 
