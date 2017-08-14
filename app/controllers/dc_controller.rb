@@ -43,8 +43,14 @@ def manage_duplicates_menu
 end
 
 def view_duplicates
-    @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE']
-    @section = "Potential Duplicates"
+    if params[:exact].present?
+      @states = ["DC-DUPLICATE"]
+       @section = "Exact Duplicates"
+    else
+      @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE']
+       @section = "Potential Duplicates"
+    end
+   
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)

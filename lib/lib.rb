@@ -351,12 +351,15 @@ module Lib
     status = nil
     is_record_a_duplicate = params[:person][:duplicate] rescue nil
     if is_record_a_duplicate.present?
-        if SETTINGS["application_mode"] == "FC"
-          status = PersonRecordStatus.new_record_state(person.id, 'FC-POTENTIAL DUPLICATE')
+        if params[:person][:is_exact_duplicate].present? && eval(params[:person][:is_exact_duplicate].to_s)
+            status = PersonRecordStatus.new_record_state(person.id, 'DC-DUPLICATE')
         else
-          status = PersonRecordStatus.new_record_state(person.id, 'DC-POTENTIAL DUPLICATE')
+          if SETTINGS["application_mode"] == "FC"
+            status = PersonRecordStatus.new_record_state(person.id, 'FC-POTENTIAL DUPLICATE')
+          else
+            status = PersonRecordStatus.new_record_state(person.id, 'DC-POTENTIAL DUPLICATE')
+          end
         end
-
         potential_duplicate = PotentialDuplicate.create(person_id: person.id,created_at: (Time.now))
         if potential_duplicate.present?
              is_record_a_duplicate.split("|").each do |id|

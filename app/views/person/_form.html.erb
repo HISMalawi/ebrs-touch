@@ -40,7 +40,10 @@
       <%= f.hidden_field :birth_district, :value => @current_district %>
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
       <input id="person_original_surname" type="hidden"/>
+      
+      <input id="person_duplicate" name="person[duplicate]" type="hidden" />
 
+      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
 
       <div class="field">
         <label for="person_last_name">Surname</label>
