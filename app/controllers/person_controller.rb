@@ -236,7 +236,7 @@ class PersonController < ApplicationController
 
     render :layout => "facility"
   end
-
+  
   def records
 
    if application_mode == 'Facility'
