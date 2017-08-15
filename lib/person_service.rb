@@ -6,7 +6,7 @@ module PersonService
     #raise params[:person].inspect
     registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
-    
+
     case registration_type
     when "normal"       
        mother   = Lib.new_mother(person, params, 'Mother')
@@ -30,6 +30,13 @@ module PersonService
           adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
        end
        informant = Lib.new_informant(person, params)
+    when "abandoned"
+       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Mother"
+          mother   = Lib.new_mother(person, params, 'Mother')
+       end
+       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Father"
+          mother   = Lib.new_father(person, params, 'Father')
+       end
     else 
 
     end
