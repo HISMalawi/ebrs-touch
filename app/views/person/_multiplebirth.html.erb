@@ -32,7 +32,7 @@
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
-      
+      <%= f.hidden_field :birth_district, :value => @current_district %>
       <%= f.hidden_field :_rev rescue "" %>
       <input type="hidden" name="person[type_of_birth]" id="person_type_of_birth" value="<%= @type_of_birth %>">
       
@@ -42,27 +42,18 @@
 
        <%= f.hidden_field :place_of_birth %> <!--@person[:place_of_birth] -->
        <%= f.hidden_field :birth_location_id %> <!--hospital_of_birth -->
-       <!-- %= f.hidden_field :birth_address  %> <!--birth_address -->
-       <!-- %= f.hidden_field :birth_district %> <!--birth_district -->
-       <!-- %= f.hidden_field :birth_ta  %> <!--birth_ta -->
-       <!-- %= f.hidden_field :birth_village  %> birth_village -->
-       <!-- %= f.hidden_field :other_birth_place_details  %> <!--other_birth_place_details -->
-       <%= f.hidden_field :parents_married_to_each_other  %> <!--@person[:parents_married_to_each_other] -->
        <%= f.hidden_field :date_of_marriage %> <!--date_of_marriage -->
-       <%= f.hidden_field :court_order_attached  %> <!--person_court_order_attached -->
-       <!-- %= f.hidden_field :parents_signed  % -->
-       <%= f.hidden_field :acknowledgement_of_receipt_date %> <!--person_parents_signed -->
-       <!-- %= f.hidden_field :type_of_birth % -->
-       <!-- %= f.hidden_field :multiple_birth_id % -->
+       <%= f.hidden_field :court_order_attached  %>
+       <%= f.hidden_field :acknowledgement_of_receipt_date %>
 
      
       <input type="hidden" id="person_prev_child_id" name="person[prev_child_id]" value="<%= $prev_child_id %>" class = "input_cell"/>
       <input type="hidden" id="core_person_mother_id" name="person[core_person_mother_id]" value="<%= $core_person_mother_id rescue nil %>" />
       <input type="hidden" id="core_person_informant_id" name="person[core_person_informant_id]" value="<%= @core_person_informant_id rescue nil %>" />
 
-       <input type="hidden" name="registration_type" id="registration_type" />
+      <input type="hidden" name="registration_type" id="registration_type" />
 
-       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
+      <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
        
       <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= @person_mother_last_name rescue nil %>" />
 
@@ -215,29 +206,6 @@
           <option <%= ((@person[:mode_of_delivery] rescue nil) == "Caesarean Section" ? "selected" : "") %> >Caesarean Section</option>
         </select>
       </div>
-
-      <!--div class="field">
-        <%= f.label :type_of_birth %>
-        <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true" >
-          <option></option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
-
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
-
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >First Triplet</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
-
-          <option <%= ((@person[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
-        <br>
-        <%= (f.text_field :other_type_of_birth, :class => "input_cell", :condition => "__$('person_type_of_birth').value.trim() == 'Other'", :optional => :true ) rescue "" %>
-      </div-->
 
     </fieldset>
 

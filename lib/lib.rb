@@ -292,7 +292,9 @@ module Lib
 
     reg_type = SETTINGS['application_mode'] =='FC' ? BirthRegistrationType.where(name: 'Normal').first.birth_registration_type_id :
         BirthRegistrationType.where(name: params[:person][:relationship]).last.birth_registration_type_id
+
     unless person[:type_of_birth].blank?
+
       type_of_birth_id = PersonTypeOfBirth.where(name: person[:type_of_birth]).last.id
     else
       type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
@@ -333,12 +335,20 @@ module Lib
   def self.birth_details_multiple(person,params)
     
     prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_s).first
+    
     prev_details_keys = prev_details.attributes.keys
-    prev_details_keys = prev_details_keys - ['person_id','person_birth_details_id',"birth_weight"]
+    exclude_these = ['person_id','person_birth_details_id',"birth_weight","type_of_birth","mode_of_delivery_id"]
+    prev_details_keys = prev_details_keys - exclude_these
 
     details = PersonBirthDetail.new
     details["person_id"] = person.id
     details["birth_weight"] = params[:person][:birth_weight]
+
+    type_of_birth_id = PersonTypeOfBirth.where(name: params[:person][:type_of_birth]).last.id
+    details["type_of_birth"] = type_of_birth_id
+
+    details["mode_of_delivery_id"] = (ModeOfDelivery.where(name: params[:person][:mode_of_delivery]).first.id rescue 1)
+
     prev_details_keys.each do |field|
         details[field] = prev_details[field]
     end
