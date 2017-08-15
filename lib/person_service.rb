@@ -3,10 +3,10 @@ module PersonService
   require 'json'
 
   def self.create_record(params)
-    #raise params[:person].inspect
+
     registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
-    
+
     case registration_type
     when "normal"       
        mother   = Lib.new_mother(person, params, 'Mother')
@@ -30,12 +30,20 @@ module PersonService
           adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
        end
        informant = Lib.new_informant(person, params)
+    when "abandoned"
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
+          mother   = Lib.new_mother(person, params, 'Mother')
+       end
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
+          mother   = Lib.new_father(person, params, 'Father')
+       end
+       informant = Lib.new_informant(person, params)
     else 
 
     end
     details = Lib.new_birth_details(person, params)
     status = Lib.workflow_init(person,params)
-    return person;
+    return person
   end
 
   def self.is_num?(val)
