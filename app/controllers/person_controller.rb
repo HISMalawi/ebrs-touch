@@ -202,7 +202,7 @@ class PersonController < ApplicationController
                 "City" => "#{@informant_address.city rescue nil}"
             },
             {
-                "Phone Number" => "#{@informant_person.get_attribute('Cell Phone Number')}",
+                "Phone Number" => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
                 "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
@@ -220,11 +220,11 @@ class PersonController < ApplicationController
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
       "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
-      "Child's Mother " => @mother_person.name,
+      "Child's Mother " => (@mother_person.name rescue nil),
       "Child's Father" =>  (@father_person.name rescue nil),
-      "Parents Married" => (@birth_details.parents_married_to_each_other == 1 ? 'Yes' : 'No'),
-      "Court order attached" => (@birth_details.court_order_attached == 1 ? 'Yes' : 'No'),
-      "Parents signed?" => ((@birth_details.parents_signed rescue -1) == 1 ? 'Yes' : 'No'),
+      "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
+      "Court order attached" => (@birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No'),
+      "Parents signed?" => ((@birth_details.parents_signed rescue -1).to_s == '1' ? 'Yes' : 'No'),
       "Delayed Registration" => @delayed
     }
 

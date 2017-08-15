@@ -3,7 +3,7 @@ module PersonService
   require 'json'
 
   def self.create_record(params)
-    #raise params[:person].inspect
+
     registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
 
@@ -42,7 +42,7 @@ module PersonService
     end
     details = Lib.new_birth_details(person, params)
     status = Lib.workflow_init(person,params)
-    return person;
+    return person
   end
 
   def self.is_num?(val)
