@@ -9,8 +9,10 @@ class LoginsController < ApplicationController
 
     username = params[:user][:username]
     password = params[:user][:password]
-    user = User.get_active_user(username)
-     #raise user.inspect
+
+    #user = User.get_active_user(username)
+    user = User.where(username: username, active: 1).first
+    #raise user.inspect
 
    if username.present? and password.present?
     if user and user.password_matches?(password)
