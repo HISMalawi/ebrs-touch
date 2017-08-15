@@ -41,9 +41,11 @@ class User < ActiveRecord::Base
   end
 
   def self.get_active_user(username)
-    user = User.where(username: username)
-    return if user.blank? || (user.first.user_role.role.level != SETTINGS['application_mode'].strip rescue true)
-    return user.first
+    user = User.find_by_sql("SELECT u.* FROM users u
+               INNER JOIN user_role ur ON ur.user_id = u.user_id
+               INNER JOIN role r ON r.role_id = ur.role_id WHERE r.level = '#{SETTINGS['application_mode']}' AND u.username = '#{username}' ").first rescue nil
+
+    return user
   end
 
   def confirm_password
