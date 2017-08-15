@@ -55,10 +55,12 @@
 
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
        
-      <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= @person_mother_last_name rescue nil %>" />
+      <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" value="<%= PersonName.where(person_id: $prev_child_mother_id).first.last_name rescue nil %>" />
 
-       <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" value="<%= @person[:mother][:first_name] rescue nil %>" />
-       <input type="hidden" id="person_mother_middle_name"  name="person[mother][middle_name]" value="<%= @person[:mother][:middle_name] rescue nil %>" />
+       <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" value="<%= PersonName.where(person_id: $prev_child_mother_id).first.first_name rescue nil %>" />
+
+       <input type="hidden" id="person_mother_middle_name"  name="person[mother][middle_name]" value="<%= PersonName.where(person_id: $prev_child_mother_id).first.middle_name rescue nil %>" />
+
        <input type="hidden" id="person_mother_id_number" name="person[mother][id_number]" value="<%= @person[:mother][:id_number] rescue nil %>" />
 
        <input type="hidden" id="person_mother_birthdate" name="person[mother][birthdate]" value="<%= @person[:mother][:birthdate] rescue nil %>" />
@@ -86,8 +88,8 @@
        <%= f.hidden_field :level_of_education  %> <!-- @person[:level_of_education] -->
 
        <input type="hidden" id="person_father_last_name"  name="person[father][last_name]" value="<%= @person[:father][:last_name] rescue nil %>" />
-       <input type="hidden" id="person_father_first_name"  name="person[father][first_name]" value="<%= @person[:father][:first_name] rescue nil %>" />
-       <input type="hidden" id="person_father_middle_name"  name="person[father][middle_name]" value="<%= @person[:father][:middle_name] rescue nil %>" />
+       <input type="hidden" id="person_father_first_name"  name="person[father][first_name]" value="<%= PersonName.where(person_id: $prev_child_father_id).first.first_name rescue nil %>" />
+       <input type="hidden" id="person_father_middle_name"  name="person[father][middle_name]" value="<%= PersonName.where(person_id: $prev_child_father_id).first.middle_name rescue nil %>" />
        <input type="hidden" id="person_father_id_number" name="person[father][id_number]" value="<%= @person[:father][:id_number] rescue nil %>" />
 
        <input type="hidden" id="person_father_birthdate" name="person[father][birthdate]" value="<%= @person[:father][:birthdate] rescue nil %>" />
@@ -118,6 +120,12 @@
        <input type="hidden" id="person_informant_addressline2" name="person[informant][addressline2]" value="<%= @person[:informant][:addressline2] rescue nil %>" />
        <input type="hidden" id="person_informant_city" name="person[informant][city]" value="<%= @person[:informant][:city] rescue nil %>" />
        <input type="hidden" id="person_informant_phone_number" name="person[informant][phone_number]" value="<%= @person[:informant][:phone_number] rescue nil %>" />
+
+      <input type="hidden" id="person_parents_married_to_each_other" name="person[parents_married_to_each_other]" value="<%= (PersonBirthDetail.where(person_id: $prev_child_id).first.parents_married_to_each_other == 1 ? 'Yes' : 'No') rescue nil %>" />
+
+      
+
+      <input type="hidden" id="person_parents_signed" name="person[parents_signed]" value="<%= (PersonBirthDetail.where(person_id: $prev_child_id).first.parents_signed == 1 ? 'Yes' : 'No') rescue nil %>" />
 
        <!-- %= f.hidden_field :record_status  % -->
        <!-- %= f.hidden_field :form_signed  % --> <!-- @person[:form_signed] -->
@@ -150,7 +158,7 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="hidden" name="person[birthdate]" value = '<%= @person.core_person.person.birthdate %>'>
+        <input type="hidden" id="person_birthdate" name="person[birthdate]" value = '<%= PersonBirthDetail.where(person_id: $prev_child_id).first.date_registered %>'>
         <input type="hidden" name="person[:birthdate_estimated]" value="<%= @person.core_person.person.birthdate_estimated %>">
       </div>
       <div class="field">
@@ -407,6 +415,7 @@
     init();
 
     summaryHash = {
+                    
                     "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
                     "Child Gender" : ["person_gender"],
                     "Child Date of Birth" : ["person_birthdate"],

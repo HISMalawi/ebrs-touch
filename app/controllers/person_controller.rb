@@ -216,6 +216,7 @@ class PersonController < ApplicationController
 
 
     @summaryHash = {
+
       "Child Name" => @person.name,
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
@@ -257,9 +258,11 @@ class PersonController < ApplicationController
   end
 
   def new
+
     @current_district = Location.current_district.name
 
     $prev_child_id = params[:id]
+
     
     if params[:id].blank?
       
@@ -270,6 +273,8 @@ class PersonController < ApplicationController
     else
       
       @person = PersonBirthDetail.find_by_person_id(params[:id])
+      $prev_child_mother_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: 6).first.person_b rescue nil
+      $prev_child_father_id = PersonRelationship.where(person_a: params[:id], person_relationship_type_id: 2).first.person_b rescue nil
 
       @person_name = PersonName.find_by_person_id(params[:id])
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
