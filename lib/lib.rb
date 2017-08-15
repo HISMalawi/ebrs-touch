@@ -321,6 +321,7 @@ module Lib
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
         form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
+        informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          params[:person][:informant][:relationship_to_person],
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person] == "Other" ? (params[:person][:informant][:other_relationship_to_child] rescue nil) : nil),
         acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),

@@ -8,35 +8,35 @@ module PersonService
     person  = Lib.new_child(params)
     case registration_type
       when "normal"
-       mother   = Lib.new_mother(person, params, 'Mother')
-       father   = Lib.new_father(person, params,'Father')
-       informant = Lib.new_informant(person, params)
+        mother   = Lib.new_mother(person, params, 'Mother')
+        father   = Lib.new_father(person, params,'Father')
+        informant = Lib.new_informant(person, params)
       when "orphaned"
-       mother   = Lib.new_mother(person, params, 'Mother')
-       father   = Lib.new_father(person, params,'Father')
-       informant = Lib.new_informant(person, params)
+        mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+        father   = Lib.new_father(person, params,'Adoptive-Father')
+        informant = Lib.new_informant(person, params)
       when "adopted"
-       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
-       end
-       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+        end
+        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
           father   = Lib.new_father(person, params,'Father')
-       end
-       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+        end
+        if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
           adoptive_mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-       end
-       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+        end
+        if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
           adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
-       end
-       informant = Lib.new_informant(person, params)
+        end
+        informant = Lib.new_informant(person, params)
       when "abandoned"
-       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
+        if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
-       end
-       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
+        end
+        if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
           mother   = Lib.new_father(person, params, 'Father')
-       end
-       informant = Lib.new_informant(person, params)
+        end
+        informant = Lib.new_informant(person, params)
     else 
 
     end

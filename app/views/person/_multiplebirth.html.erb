@@ -53,8 +53,10 @@
 
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
        
+
       <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" 
              value="<%= @person_mother_name.last_name %>" />
+
 
        <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" 
               value="<%= @person_mother_name.first_name %>" />
@@ -68,8 +70,10 @@
        <input type="hidden" id="person_father_first_name"  name="person[father][first_name]" 
               value="<%= @person_father_name.first_name %>" />
 
+
        <input type="hidden" id="person_father_middle_name"  name="person[father][middle_name]" 
               value="<%= @person_father_name.middle_name%>" />
+
 
       <input type="hidden" name="person[parents_married_to_each_other]" id="person_parents_married_to_each_other"
               value="<%= (@person_details.parents_married_to_each_other == 1 ? 'Yes' : 'No')%>">
@@ -80,9 +84,11 @@
       <input type="hidden" name="person[parents_signed]" id="person_parents_signed"
               value="<%=(@person_details.parents_signed == 1 ? 'Yes' : 'No')%>">
 
+
       <input type="hidden" name="person[informant][citizenship]" value="" >
       <input type="hidden" name="person[informant][residential_country]" value="" >
       
+
       <div class="field">
         <label for="person_last_name">Surname</label>
           
@@ -112,8 +118,10 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
+
         <input type="hidden" id="person_birthdate" name="person[birthdate]" value = '<%= @person.core_person.person.birthdate %>'>
         <input type="hidden" id="person_birthdate_estimated" name="person[:birthdate_estimated]" value="<%= @person.core_person.person.birthdate_estimated %>">
+
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
@@ -369,6 +377,7 @@
     init();
 
     summaryHash = {
+                    
                     "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
                     "Child Gender" : ["person_gender"],
                     "Child Date of Birth" : ["person_birthdate"],
