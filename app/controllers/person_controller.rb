@@ -648,7 +648,7 @@ class PersonController < ApplicationController
   end
 
   def view_pending_cases
-    @states = ["DC-PENDING"]
+    @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 

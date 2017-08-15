@@ -229,8 +229,8 @@
                 onclick="approve();">Approve</button>
     </td>
 
-      <td id="Mark Pending" style="display:<%= display%>;">
-        <button id="btnQuery"
+      <td id="Mark Pending" style="display:none">
+        <button style="display:none" id="btnQuery"
                 class="blue"
                 style=""
                 onclick="pending();">Mark Pending</button>
@@ -276,7 +276,7 @@
 
           var div = document.createElement("div");
           div.style.height = "380px";
-          div.style.width = "700px";
+          div.style.width = "800px";
 
           parent.appendChild(div);
 
@@ -323,8 +323,21 @@
 
           hideSpinner();
 
-          var no_action = "window.location='/incomplete_case_comment/<%= params[:id] %>'";
+          var no_action = "window.location='/pending_case_comment/<%= params[:id] %>'";
           showMsgForAction(msg, action, "600px", "Data Completeness Check", no_action);
+
+          __$("cancel").style.visibility="visible";
+
+          var btnYes = __$("yes");
+          btnYes.className = "green"
+          btnYes.innerHTML = "Complete"
+
+          var btnNo = __$("no");
+          btnNo.innerHTML = "Incomplete";
+          btnNo.className = "red"
+          btnNo.style.width = "auto";
+          btnNo.style.marginRight = "10%";
+          btnNo.style.marginLeft = "10%";
 
       }
 

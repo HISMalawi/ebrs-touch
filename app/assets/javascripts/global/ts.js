@@ -5471,6 +5471,18 @@ function showMsgForAction(msg, action, width, title, noAction) {
 
     tr3.appendChild(td2_2);
 
+    var btnCancel = document.createElement("button");
+    btnCancel.className = "blue";
+    btnCancel.innerHTML = "Cancel";
+    btnCancel.style.visibility = "hidden"
+    btnCancel.style.width = "120px";
+    btnCancel.style.cursor = "pointer";
+    btnCancel.style.fontSize = "24px";
+    btnCancel.style.minHeight = "60px";
+    btnCancel.style.marginRight = "20px"
+    btnCancel.id = "cancel"
+    td2_2.appendChild(btnCancel);
+
     var btnNo = document.createElement("button");
     btnNo.className = "blue";
     btnNo.innerHTML = "No";
@@ -5478,15 +5490,19 @@ function showMsgForAction(msg, action, width, title, noAction) {
     btnNo.style.cursor = "pointer";
     btnNo.style.fontSize = "24px";
     btnNo.style.minHeight = "60px";
+    btnNo.style.marginRight = "20px"
+    btnNo.id = "no"
 
     td2_2.appendChild(btnNo);
 
     var btnYes = document.createElement("button");
     btnYes.className = "blue";
     btnYes.innerHTML = "Yes";
+    btnYes.id = "yes"
     btnYes.style.width = "120px";
     btnYes.style.cursor = "pointer";
     btnYes.style.fontSize = "24px";
+    btnYes.style.marginRight = "20px"
     btnYes.style.minHeight = "60px";
 
     td2_2.appendChild(btnYes);
@@ -5507,6 +5523,20 @@ function showMsgForAction(msg, action, width, title, noAction) {
 
         eval(action);
 
+    }
+
+    btnCancel.onmousedown = function(){
+        if (__$("popup")) {
+
+            document.body.removeChild(__$("popup"));
+
+        }
+
+        if (__$("shield")) {
+
+            document.body.removeChild(__$("shield"));
+
+        }
     }
 
     btnNo.onmousedown = function () {
