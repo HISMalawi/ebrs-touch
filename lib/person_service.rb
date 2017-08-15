@@ -13,8 +13,8 @@ module PersonService
        father   = Lib.new_father(person, params,'Father')
        informant = Lib.new_informant(person, params)
     when "orphaned"
-       mother   = Lib.new_mother(person, params, 'Mother')
-       father   = Lib.new_father(person, params,'Father')
+       mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+       father   = Lib.new_father(person, params,'Adoptive-Father')
        informant = Lib.new_informant(person, params)
     when "adopted"
        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
@@ -31,12 +31,13 @@ module PersonService
        end
        informant = Lib.new_informant(person, params)
     when "abandoned"
-       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Mother"
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
        end
-       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Father"
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
           mother   = Lib.new_father(person, params, 'Father')
        end
+       informant = Lib.new_informant(person, params)
     else 
 
     end
