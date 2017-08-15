@@ -37,6 +37,7 @@ module PersonService
        if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
           mother   = Lib.new_father(person, params, 'Father')
        end
+       informant = Lib.new_informant(person, params)
     else 
 
     end
