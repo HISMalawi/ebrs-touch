@@ -8,12 +8,12 @@
 <script type="text/javascript" src="/assets/showSubMenu.js"></script>
 
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
-    <div class="button child_menu manage_duplicates"  onclick="" tag=0>
+    <div class="button child_menu manage_duplicates"   onclick="window.location = '/dc/abandoned_cases'" tag=0>
         <table style="text-align: left;">
           <tr>
             <td rowspan="2">
               <img src="<%= @icoFolder %>" height="60"/> <br />
-              <span class="count"></span>
+              <span class="count"><%= @abandoned%></span>
             </td>
             <td style="height: 30px;">
               Abandoned cases
@@ -27,12 +27,12 @@
         </table>
       </div> 
 
-      <div class="button child_menu manage_duplicates"  onclick="" tag=0>
+      <div class="button child_menu manage_duplicates"   onclick="window.location = '/dc/orphaned_cases'" tag=0>
         <table style="text-align: left;">
           <tr>
             <td rowspan="2">
               <img src="<%= @icoFolder %>" height="60"/> <br />
-              <span class="count"></span>
+              <span class="count"><%= @orphaned%></span>
             </td>
             <td style="height: 30px;">
               Orphaned 
@@ -46,12 +46,12 @@
         </table>
       </div> 
 
-      <div class="button child_menu manage_duplicates"  onclick="" tag=0>
+      <div class="button child_menu manage_duplicates"  onclick="window.location = '/dc/adopted_cases'" tag=0>
         <table style="text-align: left;">
           <tr>
             <td rowspan="2">
               <img src="<%= @icoFolder %>" height="60"/> <br />
-              <span class="count"></span>
+              <span class="count"><%= @adopted%></span>
             </td>
             <td style="height: 30px;">
              Adopted Cases

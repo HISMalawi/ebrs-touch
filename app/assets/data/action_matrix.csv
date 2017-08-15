@@ -2,7 +2,7 @@
 DC-ACTIVE,,,,"1,2",3,,,,,
 FC-POTENTIAL DUPLICATE,,,,"1,2",3,,,,,
 DC-INCOMPLETE,,,,"11,6",,,,,,
-DC-COMPLETE,,,,,"3,7",,,,,
+DC-COMPLETE,,,,,"3,7,4,6",,,,,
 DC-PENDING,,,,"11,6",3,,,,,
 DC-DUPLICATE,,,,,5,,,,,
 DC-REJECTED,,,,,"3,7",,,,,
