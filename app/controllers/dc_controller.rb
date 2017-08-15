@@ -151,18 +151,14 @@ def incomplete_case_comment
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     old_state = PersonRecordStatus.status(params[:id])
 
-    if PersonService.record_complete?(@child) == false
-      flash[:info] = "Record is not complete"
-    else
-      allocate_record = IdentifierAllocationQueue.new
-      allocate_record.person_id = params[:id].to_i
-      allocate_record.assigned = 0
-      allocate_record.creator = User.current.id
-      allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
-      allocate_record.created_at = Time.now
-      if allocate_record.save
-        PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
-      end
+    allocate_record = IdentifierAllocationQueue.new
+    allocate_record.person_id = params[:id].to_i
+    allocate_record.assigned = 0
+    allocate_record.creator = User.current.id
+    allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
+    allocate_record.created_at = Time.now
+    if allocate_record.save
+      PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
     end
 
     render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"

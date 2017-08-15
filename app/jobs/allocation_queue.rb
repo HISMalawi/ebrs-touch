@@ -30,7 +30,7 @@ class AllocationQueue
           end
 
           location = Location.find(SETTINGS['location_id'])
-          district_code = location.district.code
+          district_code = location.code
           district_code_len = district_code.length
           year = Date.today.year
           year_len = year.to_s.length
