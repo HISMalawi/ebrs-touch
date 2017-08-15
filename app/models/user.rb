@@ -42,7 +42,7 @@ class User < ActiveRecord::Base
 
   def self.get_active_user(username)
     user = User.where(username: username)
-    return if user.blank?
+    return if user.blank? || (user.user_role.role.role != SETTINGS['application_mode'].strip rescue true)
     return user.first
   end
 

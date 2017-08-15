@@ -35,6 +35,10 @@
       
       <%= f.hidden_field :_rev rescue "" %>
       <input type="hidden" name="person[type_of_birth]" id="person_type_of_birth" value="<%= @type_of_birth %>">
+      
+      <input id="person_duplicate" name="person[duplicate]" type="hidden" />
+
+      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
 
        <%= f.hidden_field :place_of_birth %> <!--@person[:place_of_birth] -->
        <%= f.hidden_field :birth_location_id %> <!--hospital_of_birth -->

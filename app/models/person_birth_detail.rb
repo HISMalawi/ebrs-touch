@@ -23,8 +23,8 @@ class PersonBirthDetail < ActiveRecord::Base
       ModeOfDelivery.find(self.mode_of_delivery_id)
     end
 
-    def mode_of_delivery
-      LevelOfEducation.find(self.level_of_education_id)
+    def level_of_education
+      LevelOfEducation.find(self.level_of_education_id).name
     end
 
     def brn
