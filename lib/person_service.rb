@@ -31,12 +31,13 @@ module PersonService
        end
        informant = Lib.new_informant(person, params)
     when "abandoned"
-       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Mother"
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
        end
-       if params[:parents_details_availabl] == "Both" || params[:parents_details_availabl] == "Father"
+       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
           mother   = Lib.new_father(person, params, 'Father')
        end
+       informant = Lib.new_informant(person, params)
     else 
 
     end
