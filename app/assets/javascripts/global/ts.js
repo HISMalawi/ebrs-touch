@@ -5402,6 +5402,7 @@ function showMsgForAction(msg, action, width, title, noAction) {
     var popup = document.createElement("div");
     popup.id = "popup";
     popup.style.position = "absolute";
+    popup.style.minWidth = "750px";
     popup.style.minHeight = "200px";
     popup.style.top = "20%";
     // popup.style.width = (width == undefined ? "330px" : width);
@@ -5908,7 +5909,7 @@ function submitAfterSummary() {
                 var td1 = document.createElement("th");
                 td1.align = "right";
                 td1.innerHTML = keys[i];
-
+                td1.style.width = "50%";
                 tr.appendChild(td1);
 
                 var td2 = document.createElement("td");
@@ -5917,7 +5918,7 @@ function submitAfterSummary() {
                 tr.appendChild(td2);
 
                 var td3 = document.createElement("td");
-
+                td3.style.width = "50%";
                 var label = "";
 
                 for (var j = 0; j < summaryHash[keys[i]].length; j++) {
