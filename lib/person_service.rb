@@ -6,41 +6,41 @@ module PersonService
 
     registration_type   = params[:person][:relationship]
     person  = Lib.new_child(params)
-
     case registration_type
-    when "normal"       
-       mother   = Lib.new_mother(person, params, 'Mother')
-       father   = Lib.new_father(person, params,'Father')
-       informant = Lib.new_informant(person, params)
-    when "orphaned"
-       mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-       father   = Lib.new_father(person, params,'Adoptive-Father')
-       informant = Lib.new_informant(person, params)
-    when "adopted"
-       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+      when "normal"
+        mother   = Lib.new_mother(person, params, 'Mother')
+        father   = Lib.new_father(person, params,'Father')
+        informant = Lib.new_informant(person, params)
+      when "orphaned"
+        mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+        father   = Lib.new_father(person, params,'Adoptive-Father')
+        informant = Lib.new_informant(person, params)
+      when "adopted"
+        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
-       end
-       if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+        end
+        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
           father   = Lib.new_father(person, params,'Father')
-       end
-       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+        end
+        if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
           adoptive_mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-       end
-       if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+        end
+        if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
           adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
-       end
-       informant = Lib.new_informant(person, params)
-    when "abandoned"
-       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
+        end
+        informant = Lib.new_informant(person, params)
+      when "abandoned"
+        if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
-       end
-       if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
+        end
+        if params[:parents_details_available] == "Both" || params[:parents_details_available] == "Father"
           mother   = Lib.new_father(person, params, 'Father')
-       end
-       informant = Lib.new_informant(person, params)
+        end
+        informant = Lib.new_informant(person, params)
     else 
 
     end
+
     details = Lib.new_birth_details(person, params)
     status = Lib.workflow_init(person,params)
     return person
@@ -101,12 +101,11 @@ module PersonService
     result
   end
 
-  def self.query_for_display(states)
+  def self.query_for_display(states, types=['Normal', 'Abandoned', 'Adopted', 'Orphaned'])
 
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
 
-    person_type = PersonType.where(name: 'Client').first
-
+    person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
     main = Person.find_by_sql(
           "SELECT n.*, prs.status_id FROM person p
@@ -115,12 +114,11 @@ module PersonService
             INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
             INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
           WHERE prs.status_id IN (#{state_ids.join(', ')})
-            AND cp.person_type_id = #{person_type.id}
+            AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
           GROUP BY p.person_id
           ORDER BY p.updated_at DESC
            "
     )
-
 
     results = []
 

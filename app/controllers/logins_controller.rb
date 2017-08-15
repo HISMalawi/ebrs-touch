@@ -47,7 +47,9 @@ class LoginsController < ApplicationController
   def logout
     # session[:touchcontext] = nil
     logout!
-    if SETTINGS['app_gate_url'].present?
+     
+    unless SETTINGS['app_gate_url'].blank?
+      
       redirect_to SETTINGS['app_gate_url'].to_s
     else
       flash[:notice] = 'You have been logged out. Good Bye!'

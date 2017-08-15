@@ -127,6 +127,9 @@ Rails.application.routes.draw do
   get "/view_dispatched_cases" => "person#view_dispatched_cases"
   get "/ajax_approve/:id" => "dc#ajax_approve"
 
+  get 'dc/abandoned_cases'
+  get 'dc/orphaned_cases'
+  get 'dc/adopted_cases'
 
   get "/comments/:id" => 'dc#comments'
 

@@ -31,19 +31,25 @@ class PersonRecordStatus < ActiveRecord::Base
     self.where(:person_id => person_id, :voided => 0).last.status.name
   end
 
-  def self.stats
+  def self.stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], approved=true)
     result = {}
+    birth_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
+
     Status.all.each do |status|
       result[status.name] = self.find_by_sql("
-      SELECT COUNT(*) c FROM person_record_statuses WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
+      SELECT COUNT(*) c FROM person_record_statuses s
+        INNER JOIN person_birth_details p ON p.person_id = s.person_id AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
+        WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
     end
 
-    excluded_states = ['HQ-REJECTED'].collect{|s| Status.find_by_name(s).id}
-      included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
+    unless approved == false
+      excluded_states = ['HQ-REJECTED'].collect{|s| Status.find_by_name(s).id}
+        included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
 
-    result['APPROVED BY ADR'] =  self.find_by_sql("
-      SELECT COUNT(*) c FROM person_record_statuses
-      WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')}) AND status_id IN (#{included_states.join(', ')})")[0]['c']
+      result['APPROVED BY ADR'] =  self.find_by_sql("
+        SELECT COUNT(*) c FROM person_record_statuses
+        WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')}) AND status_id IN (#{included_states.join(', ')})")[0]['c']
+    end
     result
   end
 end
