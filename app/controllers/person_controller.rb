@@ -268,10 +268,16 @@ class PersonController < ApplicationController
       @section = "New Person"
 
     else
-      
-      @person = PersonBirthDetail.find_by_person_id(params[:id])
+      @person = Person.find(params[:id])
+
+      @person_details = PersonBirthDetail.find_by_person_id(params[:id])
 
       @person_name = PersonName.find_by_person_id(params[:id])
+
+      @person_mother_name = @person.mother.person_names.first rescue nil
+
+      @person_father_name = @person.father.person_names.first rescue nil
+
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
