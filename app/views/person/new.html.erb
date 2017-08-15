@@ -2,7 +2,7 @@
 
 
 
-   <% if !@person_details["type_of_birth"].blank? && @person_details["type_of_birth"] != "Single" %>
+   <% if @type_of_birth != "Single" %>
      
 
     <%= render 'multiplebirth' %> 
@@ -15,7 +15,7 @@
 
 <%  elsif SETTINGS['application_mode'] == "DC" %>
 
-<% if !@person["type_of_birth"].blank? && @person["type_of_birth"] != "Single" %>
+<% if @type_of_birth != "Single" %>
 
     <%= render 'multiplebirth' %> 
 
