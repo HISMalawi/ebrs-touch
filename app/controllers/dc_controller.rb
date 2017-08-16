@@ -229,9 +229,15 @@ def incomplete_case_comment
 
   #################### Actions for special Cases ####################################################################################
   def special_cases
-    @abandoned = PersonRecordStatus.stats(['Abandoned'], false).values.sum
-    @orphaned = PersonRecordStatus.stats(['Orphaned'], false).values.sum
-    @adopted = PersonRecordStatus.stats(['Adopted'], false).values.sum
+    @states = []
+    #Filter only states that user has actions for
+    Status.all.map(&:name).each{|name|
+      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
+    }
+
+    @abandoned = PersonRecordStatus.stats(['Abandoned'], false).reject{|k, v| !@states.include?(k)}.values.sum
+    @orphaned = PersonRecordStatus.stats(['Orphaned'], false).reject{|k, v| !@states.include?(k)}.values.sum
+    @adopted = PersonRecordStatus.stats(['Adopted'], false).reject{|k, v| !@states.include?(k)}.values.sum
 
     @icoFolder = folder
     @section = "Special Cases"
@@ -242,7 +248,11 @@ def incomplete_case_comment
   end
 
   def abandoned_cases
-    @states = Status.all.map(&:name)
+    @states = []
+    Status.all.map(&:name).each{|name|
+      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
+    }
+
     @records = PersonService.query_for_display(@states, types=['Abandoned'])
     @section = "Abandoned Cases"
     @display_ben = true
@@ -250,7 +260,11 @@ def incomplete_case_comment
   end
 
   def adopted_cases
-    @states = Status.all.map(&:name)
+    @states = []
+    Status.all.map(&:name).each{|name|
+      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
+    }
+
     @records = PersonService.query_for_display(@states, types=['Adopted'])
     @section = "Adopted Cases"
     @display_ben = true
