@@ -55,24 +55,24 @@
        
 
       <input type="hidden" id="person_mother_last_name" name="person[mother][last_name]" 
-             value="<%= @person_mother_name.last_name %>" />
+             value="<%= @person_mother_name.last_name rescue ''%>" />
 
 
        <input type="hidden" id="person_mother_first_name"  name="person[mother][first_name]" 
-              value="<%= @person_mother_name.first_name %>" />
+              value="<%= @person_mother_name.first_name rescue '' %>" />
 
        <input type="hidden" id="person_mother_middle_name"  name="person[mother][middle_name]" 
-              value="<%= @person_mother_name.middle_name%>" />
+              value="<%= @person_mother_name.middle_name rescue ''%>" />
 
        <input type="hidden" id="person_father_last_name" name="person[father][last_name]" 
-             value="<%= @person_father_name.last_name %>" />
+             value="<%= @person_father_name.last_name rescue ''%>" />
 
        <input type="hidden" id="person_father_first_name"  name="person[father][first_name]" 
-              value="<%= @person_father_name.first_name %>" />
+              value="<%= @person_father_name.first_name rescue '' %>" />
 
 
        <input type="hidden" id="person_father_middle_name"  name="person[father][middle_name]" 
-              value="<%= @person_father_name.middle_name%>" />
+              value="<%= @person_father_name.middle_name rescue ''%>" />
 
 
       <input type="hidden" name="person[parents_married_to_each_other]" id="person_parents_married_to_each_other"

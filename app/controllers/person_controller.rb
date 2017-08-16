@@ -361,7 +361,11 @@ class PersonController < ApplicationController
          else
            mother = prev_child.mother
          end
-         mother_name =  mother.person_names.first
+         if mother.present?
+            mother_name =  mother.person_names.first
+          else
+            mother_name = nil
+          end
    
          person["mother_first_name"] = mother_name.first_name rescue ""
          person["mother_last_name"] =   mother_name.last_name rescue ""
@@ -372,7 +376,11 @@ class PersonController < ApplicationController
          else
            father = prev_child.father
          end
-         father_name =  father.person_names.first
+         if father.present?
+            father_name =  father.person_names.first
+         else
+            father_name = nil
+         end
          person["father_first_name"] = father_name.first_name rescue ""
          person["father_last_name"] =   father_name.last_name rescue ""
          person["father_middle_name"] = father_name.first_name rescue ""
@@ -380,7 +388,7 @@ class PersonController < ApplicationController
          birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
          person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
          person["district"] = Location.find(birth_details.district_of_birth).name
-         person["nationality"]= Location.find(mother.addresses.first.citizenship).name
+         person["nationality"]= Location.find(mother.addresses.first.citizenship).name rescue "Malawian"
 
       else
 
