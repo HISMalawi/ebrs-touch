@@ -71,7 +71,6 @@ Rails.application.routes.draw do
   get 'records/:status' => 'person#records'
 
   get "view_sync" =>"person#view_sync"
-  
   ########################### (create record form) routes
 
   get '/new_registration' => "dc#new_registration"
