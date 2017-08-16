@@ -17,6 +17,7 @@ DC,POTENTIAL-DUPLICATE,VOIDED,DC-VOIDED,A voided duplicate record at DC
 DC,DC OPEN,POTENTIAL DUPLICATE,DC-POTENTIAL DUPLICATE,A potential duplicate record at DC
 DC,,,DC-PENDING, A record to be reviewed by ADR
 DC,,,DC-EXACT DUPLICATE,Exact duplicate record at DC
+DC,,,DC-AMMEND,A record that has been ammended at DC
 HQ,VOIDED,CLOSED,HQ-VOIDED,A voided record at HQ
 HQ,HQ OPEN,GRANTED,HQ-GRANTED,Deprecated
 HQ,HQ OPEN,REJECTED,HQ-REJECTED,Deprecated
