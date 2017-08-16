@@ -69,7 +69,7 @@
               </td>
               <td class="Edit_Record"
                   style="display:<%= display%>;"
-                  class="action-button"><button class="btn btn-warning" onmousedown="javascript:alert('link with Matthew');">
+                  class="action-button"><button class="btn btn-warning" onmousedown="window.location = '/person/<%= record['id']%>/edit?next_path=<%= request.path%>'">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>
               </td>
               <td class="Void_Record"
