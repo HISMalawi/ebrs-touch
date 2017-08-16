@@ -482,6 +482,26 @@
     </div>
 <% end %>
 
+<% if @folders.include?("View Synced Records") %>
+    <div class="button child_menu manage_cases" onclick="" tag=0 title="Synchronize with HQ">
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            View Sync
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Views sync status if records are sent to <%= {'DC' => 'HQ', 'FC' => 'DC'}[SETTINGS['application_mode']]%> or not.
+          </td>
+        </tr>
+      </table>
+    </div>
+<%end %>
+
 <% if @folders.include?('Reports')%>
     <div class="button parent_menu" onclick="window.location='/reports/index'" tag=5>
       <table style="text-align: left;">
