@@ -1,12 +1,30 @@
 <style>
-    .action-buttons button , .action-buttons td {
-        margin: 0px;
+
+    .t-data{
+        border: 1px dotted #d3d3d3;
+        background: white;
     }
-    .action-button {
-        margin: 0px;
-        padding: 0px;
-        height: 30px;
+    th{
+        background-color: lightsteelblue !important;
+        color: black;
+        padding: 10px !important;
     }
+    #example_filter input{
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+
+    .action-button, .t-actions{
+        margin: 0px !important;
+        padding: 0px !important;
+        font-size: 0px;
+        background: white;
+    }
+
+    .action-button button{
+        margin: 2px !important;
+    }
+
 </style>
 <div class='data-table-container'>
 
@@ -27,20 +45,22 @@
 
   <tbody>
 
+
+  <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+  %>
+
   <%(@records || []).each do |record|%>
       <tr>
         <% if (@display_ben rescue false) %>
-            <td style="text-align: left;"><%= '' %></td>
+            <td class='t-data' style="text-align: left;"><%= record['ben'] %></td>
         <% end %>
-        <td style="text-align: left;"><%= record['name'] %></td>
-        <td style="text-align: left;"><%= record['mother_name'] %></td>
-        <td style="text-align: left;"><%= record['father_name'] %></td>
-        <td style="text-align: center;"><%= record['date_of_reporting'] %></td>
-        <td style="text-align: center;"><%=  record['status']%></td>
-        <td style="background-color: white;">
+        <td class='t-data' style="text-align: left;"><%= record['name'] %></td>
+        <td class='t-data' style="text-align: left;"><%= record['mother_name'] %></td>
+        <td class='t-data' style="text-align: left;"><%= record['father_name'] %></td>
+        <td class='t-data' style="text-align: center;"><%= record['date_of_reporting'] %></td>
+        <td class='t-data' style="text-align: center;"><%=  record['status']%></td>
+        <td class='t-data t-actions' style="background-color: white;">
 
-          <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
-          %>
 
           <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
             <tr>
