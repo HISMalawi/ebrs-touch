@@ -56,7 +56,7 @@ Root Folder Privileges,,,,,,,,,,
 Folder/Role,TestRole,Nurse/Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
 Register Child,Y,Y,Y,,,,,,,
 View Records,Y,Y,Y,,Y,Y,,,,
-View Synced Records,Y,Y,Y,Y,Y,Y,,,,
+View Synced Records,Y,Y,Y,,Y,Y,,,,
 Reports,Y,Y,Y,Y,Y,Y,,,,Y
 Manage Users,,,,,,,,,,Y
 Change Own Password,Y,Y,Y,Y,Y,Y,,,,Y
@@ -78,11 +78,11 @@ Approved by ADR,Y,Y,Y,Y,Y,,,,,
 Active Records,Y,Y,Y,Y,,,,,,
 Complete Cases from LO,,,,,Y,,,,,
 Pending Cases,,,,Y,,,,,,
-View Printed Records,,,,Y,Y,,,,,
+View Printed Records,,,,,Y,,,,,
 View Incomplete Cases,,,,,,,,,,
 View Voided Records,,,,,Y,,,,,
 Amendments,,,,,Y,,,,,
 Lost/damage cases,,,,,Y,,,,,
-Special Cases,,,,Y,Y,,,,,
+Special Cases,,,,,Y,,,,,
 ,,,,,,,,,,
 END ROOT FOLDER PRIVILEGES,,,,,,,,,,
