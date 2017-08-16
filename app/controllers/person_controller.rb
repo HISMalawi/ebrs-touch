@@ -696,7 +696,7 @@ class PersonController < ApplicationController
       @targeturl = params[:next_path]
     end
 
-    @section = "View Record"
+    @section = "Edit Record"
 
     @person = Person.find(params[:id])
     @core_person = CorePerson.find(params[:id])
