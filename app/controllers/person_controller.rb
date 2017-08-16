@@ -385,12 +385,12 @@ class PersonController < ApplicationController
         person["place_of_birth"] = params[:person][:place_of_birth]
         person["district"] = params[:person][:birth_district]
         person["nationality"]=  params[:person][:mother][:citizenship]
-        person["mother_first_name"]= params[:person][:mother][:first_name]
-        person["mother_last_name"] =  params[:person][:mother][:last_name]
-        person["mother_middle_name"] = params[:person][:mother][:middle_name]
-        person["father_first_name"]= params[:person][:father][:first_name]
-        person["father_last_name"] =  params[:person][:father][:last_name]
-        person["father_middle_name"] = params[:person][:father][:middle_name]
+        person["mother_first_name"]= params[:person][:mother][:first_name] rescue nil
+        person["mother_last_name"] =  params[:person][:mother][:last_name] rescue nil
+        person["mother_middle_name"] = params[:person][:mother][:middle_name] rescue nil
+        person["father_first_name"]= params[:person][:father][:first_name] rescue nil
+        person["father_last_name"] =  params[:person][:father][:last_name] rescue nil
+        person["father_middle_name"] = params[:person][:father][:middle_name] rescue nil
 
       end
       return person
