@@ -12,8 +12,8 @@ module PersonService
         father   = Lib.new_father(person, params,'Father')
         informant = Lib.new_informant(person, params)
       when "orphaned"
-        mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-        father   = Lib.new_father(person, params,'Adoptive-Father')
+        #mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+        #father   = Lib.new_father(person, params,'Adoptive-Father')
         informant = Lib.new_informant(person, params)
       when "adopted"
         if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
@@ -108,7 +108,7 @@ module PersonService
     person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
     main = Person.find_by_sql(
-          "SELECT n.*, prs.status_id FROM person p
+        "SELECT n.*, prs.status_id, pbd.district_id_number AS ben, pbd.national_serial_number AS brn FROM person p
             INNER JOIN core_person cp ON p.person_id = cp.person_id
             INNER JOIN person_name n ON p.person_id = n.person_id
             INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
@@ -137,6 +137,8 @@ module PersonService
 
       results << {
           'id' => data.person_id,
+          'ben' => data.ben,
+          'brn' => data.brn,
           'name'        => name,
           'father_name'       => father_name,
           'mother_name'       => mother_name,

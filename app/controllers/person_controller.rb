@@ -62,6 +62,7 @@ class PersonController < ApplicationController
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
     birth_loc = Location.find(@birth_details.birth_location_id)
+    district = Location.find(@birth_details.district_of_birth)
 
     birth_location = birth_loc.name rescue nil
 
@@ -76,12 +77,14 @@ class PersonController < ApplicationController
     @status = PersonRecordStatus.status(@person.id)
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+    informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
+        @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
     @record = {
         "Details of Child" => [
             {
-                "District ID Number" => "#{@birth_details.ben rescue nil}",
-                "Serial Number" => "#{@birth_details.brn  rescue nil}"
+                "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}"
             },
             {
                 ["First Name", "mandatory"] => "#{@name.first_name rescue nil}",
@@ -99,7 +102,7 @@ class PersonController < ApplicationController
                 "Address" => "#{@child.birth_address rescue nil}"
             },
             {
-                "District" => "#{birth_loc.district}",
+                "District" => "#{district.name}",
                 "T/A" => "#{birth_loc.ta}",
                 "Village" => "#{birth_loc.village rescue nil}"
             },
@@ -188,7 +191,7 @@ class PersonController < ApplicationController
                 "Family Name" => "#{@informant_name.last_name rescue nil}"
             },
             {
-                "Relationship to child" => "#{@birth_details.informant_relationship_to_child rescue ""}",
+                "Relationship to child" => informant_rel,
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
@@ -197,8 +200,8 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Postal Address" => "#{@informant_address.addressline1 rescue nil}",
-                "" => "#{@informant_address.addressline2 rescue nil}",
+                "Postal Address" => "#{@informant_address.address_line_1 rescue nil}",
+                "" => "#{@informant_address.address_line_2 rescue nil}",
                 "City" => "#{@informant_address.city rescue nil}"
             },
             {
@@ -237,7 +240,7 @@ class PersonController < ApplicationController
 
     render :layout => "facility"
   end
-
+  
   def records
 
    if application_mode == 'Facility'
@@ -360,7 +363,12 @@ class PersonController < ApplicationController
          else
            mother = prev_child.mother
          end
-         mother_name =  mother.person_names.first
+
+         if mother.present?
+            mother_name =  mother.person_names.first
+         else
+            mother_name = nil
+         end
    
          person["mother_first_name"] = mother_name.first_name rescue ""
          person["mother_last_name"] =   mother_name.last_name rescue ""
@@ -371,7 +379,13 @@ class PersonController < ApplicationController
          else
            father = prev_child.father
          end
-         father_name =  father.person_names.first
+
+         if father.present?
+            father_name =  father.person_names.first
+         else
+            father_name = nil
+         end
+         
          person["father_first_name"] = father_name.first_name rescue ""
          person["father_last_name"] =   father_name.last_name rescue ""
          person["father_middle_name"] = father_name.first_name rescue ""
@@ -379,19 +393,19 @@ class PersonController < ApplicationController
          birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
          person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
          person["district"] = Location.find(birth_details.district_of_birth).name
-         person["nationality"]= Location.find(mother.addresses.first.citizenship).name
+         person["nationality"]= Location.find(mother.addresses.first.citizenship).name rescue "Malawian"
 
       else
 
         person["place_of_birth"] = params[:person][:place_of_birth]
         person["district"] = params[:person][:birth_district]
         person["nationality"]=  params[:person][:mother][:citizenship]
-        person["mother_first_name"]= params[:person][:mother][:first_name]
-        person["mother_last_name"] =  params[:person][:mother][:last_name]
-        person["mother_middle_name"] = params[:person][:mother][:middle_name]
-        person["father_first_name"]= params[:person][:father][:first_name]
-        person["father_last_name"] =  params[:person][:father][:last_name]
-        person["father_middle_name"] = params[:person][:father][:middle_name]
+        person["mother_first_name"]= params[:person][:mother][:first_name] rescue nil
+        person["mother_last_name"] =  params[:person][:mother][:last_name] rescue nil
+        person["mother_middle_name"] = params[:person][:mother][:middle_name] rescue nil
+        person["father_first_name"]= params[:person][:father][:first_name] rescue nil
+        person["father_last_name"] =  params[:person][:father][:last_name] rescue nil
+        person["father_middle_name"] = params[:person][:father][:middle_name] rescue nil
 
       end
       return person
@@ -649,7 +663,7 @@ class PersonController < ApplicationController
   end
 
   def view_pending_cases
-    @states = ["DC-PENDING"]
+    @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
@@ -670,7 +684,7 @@ class PersonController < ApplicationController
     @states = ["HQ-REJECTED"]
     @section = "Rejected Cases at HQ"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @display_ben = true
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -679,7 +693,7 @@ class PersonController < ApplicationController
     @states = ["HQ-PRINTED", 'HQ-DISPATCHED']
     @section = "Printed Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @display_ben = true
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -696,6 +710,7 @@ class PersonController < ApplicationController
   def view_approved_cases
     @states = Status.where("name like 'HQ-%' ").map(&:name) - ["HQ-REJECTED"]
     @section = "Approved Cases"
+    @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
@@ -711,6 +726,25 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def lost_and_damaged_cases
+    @states = ["DC-LOST", 'DC-DAMAGED']
+    @section = "Lost/Damaged Cases"
+    @display_ben = true
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+
+  def ammendment_cases
+    @states = ['DC-AMMEND']
+    @section = "Ammendments"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
   #########################################################################
 
 end
