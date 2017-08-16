@@ -2,7 +2,7 @@ User.current = User.last
 
 
 def start
-  1.upto(100).each do |n|
+  1.upto(10).each do |n|
     params = setup_data
     ActiveRecord::Base.transaction do
       #puts ">>>>>>>>>>>>>>>> #{params[:person][:type_of_birth]}"
