@@ -88,6 +88,7 @@ Rails.application.routes.draw do
   ########################### (create record form) routes end
 
   get '/manage_cases' => "dc#manage_cases"
+  get '/pending_cases' => "dc#manage_pending_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
   get '/view_duplicates' => "dc#view_duplicates"
@@ -129,6 +130,9 @@ Rails.application.routes.draw do
   get 'dc/abandoned_cases'
   get 'dc/orphaned_cases'
   get 'dc/adopted_cases'
+
+  get 'person/lost_and_damaged_cases'
+  get 'person/ammendment_cases'
 
   get "/comments/:id" => 'dc#comments'
 

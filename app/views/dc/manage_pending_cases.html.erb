@@ -8,6 +8,7 @@
 <script type="text/javascript" src="/assets/showSubMenu.js"></script>
 
 <div id="default" style="width: 100%; height: 400px; text-align: center; vertical-align: top;">
+  <% if @folders.include?("Marked as pending")%>
     <div class="button child_menu manage_cases" onclick="window.location = '/view_pending_cases'" tag=0 title="View Pending Cases">
       <table style="text-align: left;">
         <tr>
@@ -16,7 +17,7 @@
             <span class="count"><%= @stats['DC-PENDING'].to_i + @stats['DC-INCOMPLETE'].to_i %></span>
           </td>
           <td style="height: 30px;">
-            Markes as pending
+            Marked as pending
           </td>
         </tr>
         <tr>
@@ -26,7 +27,9 @@
         </tr>
       </table>
     </div>
+  <% end %>
 
+  <% if @folders.include?("Rejected by ADR")%>
     <div class="button child_menu manage_cases" onclick="window.location = '/view_rejected_cases'" tag=0 title="View Rejected Cases">
       <table style="text-align: left;">
         <tr>
@@ -44,5 +47,7 @@
           </td>
         </tr>
       </table>
-    </div> 
+    </div>
+ <% end %>
+
 </div>

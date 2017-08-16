@@ -20,14 +20,14 @@
 <% end %>
 <% if @folders.include?("Lost/damage cases") %>
 
-    <div class="button child_menu manage_requests_child" onclick="window.location = '/view_requests'" tag=0 title="View Requests">
+    <div class="button child_menu manage_requests_child" onclick="window.location = '/person/lost_and_damaged_cases'" tag=0 title="View Requests">
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>
           </td>
           <td style="height: 30px;">
-            Lost/damage cases
+            Lost/damaged cases
           </td>
         </tr>
       </table>
@@ -36,7 +36,7 @@
 <% end %>
 <% if @folders.include?("Amendments") %>
 
-    <div class="button child_menu manage_requests_child" onclick="window.location = '/view_requests'" tag=0 title="View Requests">
+    <div class="button child_menu manage_requests_child" onclick="window.location = '/person/ammendment_cases'" tag=0 title="View Requests">
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
