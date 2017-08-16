@@ -169,7 +169,7 @@ def incomplete_case_comment
   def manage_pending_cases
     @stats = PersonRecordStatus.stats
     @icoFolder = folder
-    @section = "Manage Pending Cases"
+    @section = "Pending Cases"
     @targeturl = "/"
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 

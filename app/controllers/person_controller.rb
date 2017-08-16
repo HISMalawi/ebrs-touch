@@ -712,6 +712,24 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def lost_and_damaged_cases
+    @states = ["DC-LOST", 'DC-DAMAGED']
+    @section = "Lost/Damaged Cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+
+  def ammendment_cases
+    @states = ['DC-AMMEND']
+    @section = "Ammendments"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
   #########################################################################
 
 end
