@@ -299,6 +299,7 @@ class PersonController < ApplicationController
   end
 
   def create
+      raise params.inspect
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
