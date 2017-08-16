@@ -30,7 +30,7 @@
   <%(@records || []).each do |record|%>
       <tr>
         <% if (@display_ben rescue false) %>
-            <td style="text-align: left;"><%= '' %></td>
+            <td style="text-align: left;"><%= record['ben'] %></td>
         <% end %>
         <td style="text-align: left;"><%= record['name'] %></td>
         <td style="text-align: left;"><%= record['mother_name'] %></td>
