@@ -245,7 +245,7 @@ def incomplete_case_comment
     @states = Status.all.map(&:name)
     @records = PersonService.query_for_display(@states, types=['Abandoned'])
     @section = "Abandoned Cases"
-
+    @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
 
@@ -253,7 +253,7 @@ def incomplete_case_comment
     @states = Status.all.map(&:name)
     @records = PersonService.query_for_display(@states, types=['Adopted'])
     @section = "Adopted Cases"
-
+    @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
 
@@ -261,7 +261,7 @@ def incomplete_case_comment
     @states = Status.all.map(&:name)
     @records = PersonService.query_for_display(@states, types=['Orphaned'])
     @section = "Orphaned Cases"
-
+    @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
 end
