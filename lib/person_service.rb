@@ -12,8 +12,8 @@ module PersonService
         father   = Lib.new_father(person, params,'Father')
         informant = Lib.new_informant(person, params)
       when "orphaned"
-        mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
-        father   = Lib.new_father(person, params,'Adoptive-Father')
+        #mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+        #father   = Lib.new_father(person, params,'Adoptive-Father')
         informant = Lib.new_informant(person, params)
       when "adopted"
         if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
