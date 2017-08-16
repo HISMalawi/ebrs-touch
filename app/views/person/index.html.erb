@@ -72,6 +72,29 @@
 
 <% end %>
 
+
+<% if @folders.include?("Pending Cases")%>
+
+    <div class="button parent_menu" onclick="window.location = '/pending_cases'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Pending Cases
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            <!-- View cases that are still accessible at DC's office. -->
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
 <% if @folders.include?("Special Cases")%>
 
     <div class="button parent_menu" onclick="window.location = '/dc/special_cases'" tag=1>
@@ -226,7 +249,7 @@
 
 <% end %>
 
-<% if @folders.include?("View Voided Cases") %>
+<% if @folders.include?("View Voided Records") %>
 
     <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_voided_cases'" tag=0 title="View Voided Cases">
       <table style="text-align: left;">
@@ -458,7 +481,6 @@
       </table>
     </div>
 <% end %>
-
 
 <% if @folders.include?('Reports')%>
     <div class="button parent_menu" onclick="window.location='/reports/index'" tag=5>

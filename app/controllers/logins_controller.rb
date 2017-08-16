@@ -3,14 +3,17 @@ class LoginsController < ApplicationController
 
   def login
     @coa = icoFolder("coa")
+    logout!
   end
 
   def create
 
     username = params[:user][:username]
     password = params[:user][:password]
-    user = User.get_active_user(username)
-     #raise user.inspect
+
+    #user = User.get_active_user(username)
+    user = User.where(username: username, active: 1).first
+    #raise user.inspect
 
    if username.present? and password.present?
     if user and user.password_matches?(password)
@@ -47,12 +50,16 @@ class LoginsController < ApplicationController
   def logout
     # session[:touchcontext] = nil
     logout!
-    if SETTINGS['app_gate_url'].present?
+=begin     
+    unless SETTINGS['app_gate_url'].blank?
+      
       redirect_to SETTINGS['app_gate_url'].to_s
     else
       flash[:notice] = 'You have been logged out. Good Bye!'
       redirect_to "/", referrer_param => referrer_path
     end
+=end
+    redirect_to "/login"
   end
 
   def set_context

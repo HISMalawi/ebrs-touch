@@ -110,7 +110,7 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"><%= @stats['DC-PENDING']%></span>
+            <span class="count"><%= @stats['DC-PENDING'].to_i + @stats['DC-INCOMPLETE'].to_i %></span>
           </td>
           <td style="height: 30px;">
             Pending Cases
@@ -207,7 +207,7 @@
             <span class="count"><%= @stats['HQ-VOIDED']%></span>
           </td>
           <td style="height: 30px;">
-            Voided cases
+            Voided Cases
           </td>
         </tr>
         <tr>
@@ -242,8 +242,8 @@
         </tr>
       </table>
     </div>
-
 <% end %>
+
 <% if @folders.include?("View Synced Records") %>
       <div class="button child_menu manage_cases" onclick="" tag=0 title="Synchronize with HQ">
         <table style="text-align: left;">

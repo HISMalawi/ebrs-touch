@@ -17,7 +17,24 @@
           font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
           min-width: 684px;
           min-height: 519px;
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+        user-select: none;          /* Likely future */
       }
+
+
+
+      img {
+        user-drag: none;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        pointer-events: none;
+      }
+
   </style>
 
   <script>
