@@ -257,7 +257,7 @@
           </tr>
           <tr>
             <td style="font-size: 11px; font-style: italic;">
-              Views sync status if records are sent to HQ or not.
+              Views sync status if records are sent to <%= {'DC' => 'HQ', 'FC' => 'DC'}[SETTINGS['application_mode']]%> or not.
             </td>
           </tr>
         </table>

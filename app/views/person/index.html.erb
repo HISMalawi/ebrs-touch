@@ -19,9 +19,9 @@
         <tr>
           <td style="font-size: 11px; font-style: italic;">
            <% if mode == 'Facility' %>
-            <!-- Register child record at Facility.-->
+             Register child record at Facility
            <% else %>
-            <!--Register child record at DC's office. -->
+            Register child record at DC's office
            <% end %>
           </td>
         </tr>
@@ -43,7 +43,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-           <!-- Search for cases that came through this office -->
+           Search for cases that came through this office
           </td>
         </tr>
       </table>
@@ -64,7 +64,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!-- View cases that are still accessible at DC's office. -->
+            View cases that are still accessible
           </td>
         </tr>
       </table>
@@ -87,7 +87,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!-- View cases that are still accessible at DC's office. -->
+            View cases that are still accessible at DC's office.
           </td>
         </tr>
       </table>
@@ -109,7 +109,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--View cases that are still accessible at DC's office.-->
+            View cases that are still accessible at DC's office.
           </td>
         </tr>
       </table>
@@ -131,7 +131,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--View records that came through this office.-->
+            View records that came through this office
           </td>
         </tr>
       </table>
@@ -153,7 +153,7 @@
             </tr>
             <tr>
               <td style="font-size: 11px; font-style: italic;">
-               <!-- Search for cases that came through this office -->
+               Search for cases that came through this office
               </td>
             </tr>
           </table>
@@ -174,7 +174,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!-- Pending records menu i.e Marked as Pending.-->
+            Pending records menu i.e Marked as Pending.
           </td>
         </tr>
       </table>
@@ -195,7 +195,7 @@
             </tr>
             <tr>
               <td style="font-size: 11px; font-style: italic;">
-               <!-- View approved records that came through this office.-->
+               View approved records that came through this office.
               </td>
             </tr>
           </table>
@@ -217,7 +217,7 @@
             </tr>
             <tr>
               <td style="font-size: 11px; font-style: italic;">
-               <!-- View records which have been rejected at HQ.-->
+               View records which have been rejected at HQ.
               </td>
             </tr>
           </table>
@@ -241,7 +241,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-           <!-- View records whose certificates have been printed.-->
+           View records whose certificates have been printed
           </td>
         </tr>
       </table>
@@ -263,7 +263,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-           <!-- View voided records. -->
+           View voided records.
           </td>
         </tr>
       </table>
@@ -285,7 +285,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-          <!--  View records whose certificates have been dispatched. -->
+          View records whose certificates have been dispatched.
           </td>
         </tr>
       </table>
@@ -305,7 +305,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--Synchronizing data with HQ from this office. -->
+            Synchronizing data with <%= {'DC' => 'HQ', 'FC' => 'DC'}[SETTINGS['application_mode']]%> from this office.
           </td>
         </tr>
       </table>
@@ -326,7 +326,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--View cases that are still accessible at DC's office.-->
+            View cases that are still accessible at DC's office
           </td>
         </tr>
       </table>
@@ -433,7 +433,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-           <!-- Manage duplicate records.-->
+           Manage duplicate records
           </td>
         </tr>
       </table>
@@ -455,7 +455,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!-- Manage potential duplicate records.-->
+           Manage potential duplicate records.
           </td>
         </tr>
       </table>
@@ -475,7 +475,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--View records marked as duplicate.-->
+            Records that were marked duplicate
           </td>
         </tr>
       </table>
@@ -495,7 +495,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--View reports at <%= SETTINGS['application_mode']=="FC" ? "Facility" : "DC's office"%>.-->
+           View reports
           </td>
         </tr>
       </table>
@@ -516,7 +516,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-           <!-- Manage system users at <%= SETTINGS['application_mode']=="FC" ? "Facility" : "DC's office" %>.-->
+           Manage system users at <%= SETTINGS['application_mode']=="FC" ? "Facility" : "DC's office" %>.
           </td>
         </tr>
       </table>
@@ -537,7 +537,7 @@
         </tr>
         <tr>
           <td style="font-size: 11px; font-style: italic;">
-            <!--Manage current local user account. -->
+            Manage current user account. <span style="color: green">(<%= User.current.username%>)</span>
           </td>
         </tr>
       </table>
