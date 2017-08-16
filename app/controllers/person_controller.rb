@@ -82,8 +82,8 @@ class PersonController < ApplicationController
     @record = {
         "Details of Child" => [
             {
-                "District ID Number" => "#{@birth_details.ben rescue nil}",
-                "Serial Number" => "#{@birth_details.brn  rescue nil}"
+                "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}"
             },
             {
                 ["First Name", "mandatory"] => "#{@name.first_name rescue nil}",
