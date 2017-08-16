@@ -62,6 +62,7 @@ class PersonController < ApplicationController
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
     birth_loc = Location.find(@birth_details.birth_location_id)
+    district = Location.find(@birth_details.district_of_birth)
 
     birth_location = birth_loc.name rescue nil
 
@@ -101,7 +102,7 @@ class PersonController < ApplicationController
                 "Address" => "#{@child.birth_address rescue nil}"
             },
             {
-                "District" => "#{birth_loc.district}",
+                "District" => "#{district.name}",
                 "T/A" => "#{birth_loc.ta}",
                 "Village" => "#{birth_loc.village rescue nil}"
             },
@@ -682,7 +683,7 @@ class PersonController < ApplicationController
     @states = ["HQ-REJECTED"]
     @section = "Rejected Cases at HQ"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @display_ben = true
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -691,7 +692,7 @@ class PersonController < ApplicationController
     @states = ["HQ-PRINTED", 'HQ-DISPATCHED']
     @section = "Printed Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @display_ben = true
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -708,6 +709,7 @@ class PersonController < ApplicationController
   def view_approved_cases
     @states = Status.where("name like 'HQ-%' ").map(&:name) - ["HQ-REJECTED"]
     @section = "Approved Cases"
+    @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
@@ -723,6 +725,25 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def lost_and_damaged_cases
+    @states = ["DC-LOST", 'DC-DAMAGED']
+    @section = "Lost/Damaged Cases"
+    @display_ben = true
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+
+  def ammendment_cases
+    @states = ['DC-AMMEND']
+    @section = "Ammendments"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
   #########################################################################
 
 end
