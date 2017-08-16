@@ -88,6 +88,7 @@
                           :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
                           :absolute_max => Date.today.strftime('%Y/%m/%d'),
                           :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_birthdate')",
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
@@ -96,7 +97,7 @@
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
-        <select id="person_gender" name="person[gender]" class="input_cell">
+        <select id="person_gender" name="person[gender]" class="input_cell" tt_onLoad = "clearDateInterval('person_birthdate');">
           <option></option>
           <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
           <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
@@ -1057,6 +1058,42 @@
 <% end %>
 
 <script>
+    var date_interval ;
+    function dateInterval(id,validation_date){
+        date_interval = setInterval(function(){
+                  var today = new Date();
+                  if(validation_date){
+                    today = new Date(validation_date)
+                  }
+                  var input_value  = __$("textFor"+id).value;
+                  var parts = input_value.split("/");
+                  if(parts[0] == 0 ){
+                     __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
+                     __$("txtDateFor"+id).value = "?"
+                  }
+                  if(parseInt(parts[2]) > today.getFullYear()){
+                      __$("textFor"+id).value = parts[0]+"/"+parts[1]+"/"+today.getFullYear()
+                      __$("txtYearFor"+id).value = today.getFullYear()
+                  }else{
+                    var current_date = new Date(input_value);
+                    if( current_date.format("YYYY-mm-dd") > today.format("YYYY-mm-dd")){
+                        if (!__$("shield")){
+                            showMsg("Date Entered is greater than today", "Date validation")
+                            __$("btnToday"+id).click();
+                        }
+                    }                   
+                  }
+
+        },100);
+        setTimeout(function(){
+            clearInterval(date_interval);
+        },5000)
+
+    }
+    function clearDateInterval(id){
+        clearInterval(date_interval);
+        date_interval = null;
+    }
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);

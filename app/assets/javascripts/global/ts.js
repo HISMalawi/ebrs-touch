@@ -84,6 +84,56 @@ var summaryHash = {};
 
 var buttonNavigation = false;
 
+if (Object.getOwnPropertyNames(Date.prototype).indexOf("format") < 0) {
+
+    Object.defineProperty(Date.prototype, "format", {
+        value: function (format) {
+            var date = this;
+
+            var result = "";
+
+            if (!format) {
+
+                format = ""
+
+            }
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                "October", "November", "December"];
+
+            if (format.match(/YYYY\-mm\-dd\sHH\:\MM\:SS/)) {
+
+                result = date.getFullYear() + "-" + padZeros((parseInt(date.getMonth()) + 1), 2) + "-" +
+                    padZeros(date.getDate(), 2) + " " + padZeros(date.getHours(), 2) + ":" +
+                    padZeros(date.getMinutes(), 2) + ":" + padZeros(date.getSeconds(), 2);
+
+            } else if (format.match(/YYYY\-mm\-dd/)) {
+
+                result = date.getFullYear() + "-" + padZeros((parseInt(date.getMonth()) + 1), 2) + "-" +
+                    padZeros(date.getDate(), 2);
+
+            } else if (format.match(/mmm\/d\/YYYY/)) {
+
+                result = months[parseInt(date.getMonth())] + "/" + date.getDate() + "/" + date.getFullYear();
+
+            } else if (format.match(/d\smmmm,\sYYYY/)) {
+
+                result = date.getDate() + " " + monthNames[parseInt(date.getMonth())] + ", " + date.getFullYear();
+
+            } else {
+
+                result = date.getDate() + "/" + months[parseInt(date.getMonth())] + "/" + date.getFullYear();
+
+            }
+
+            return result;
+        }
+    });
+
+};
+
 function __$(id) {
     return document.getElementById(id);
 }
@@ -1507,7 +1557,7 @@ function addDate(parent, target, date) {
 
     var cells;
 
-    if (target.id == "child_birthdate") {
+    if (target.id == "person_birthdate") {
 
         cells = [
             [
@@ -1582,7 +1632,7 @@ function addDate(parent, target, date) {
                     "id": "btnToday" + target.id,
                     "target": target.id,
                     "value": "Today",
-                    "onmousedown": "getCurrentDate(this.getAttribute('target'))",
+                    "onclick": "getCurrentDate(this.getAttribute('target'))",
                     "class": "button green",
                     "style": "height: 58px; margin: auto; width: 100%;"
                 }
