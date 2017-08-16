@@ -13,7 +13,7 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"><%= @stats['DC-PENDING']%></span>
+            <span class="count"><%= @stats['DC-PENDING'].to_i + @stats['DC-INCOMPLETE'].to_i %></span>
           </td>
           <td style="height: 30px;">
             Markes as pending

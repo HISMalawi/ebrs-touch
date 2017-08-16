@@ -269,7 +269,8 @@ class PersonController < ApplicationController
     if params[:id].blank?
       
       @person = PersonName.new
-
+      @person_details = PersonBirthDetail.new
+      @type_of_birth = "Single"
       @section = "New Person"
 
     else
@@ -649,7 +650,7 @@ class PersonController < ApplicationController
   end
 
   def view_pending_cases
-    @states = ["DC-PENDING"]
+    @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 

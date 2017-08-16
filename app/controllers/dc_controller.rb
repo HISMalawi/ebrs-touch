@@ -185,7 +185,9 @@ def incomplete_case_comment
   end
 
   def pending_case
-    PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
+    
+    PersonRecordStatus.new_record_state(params[:id], 'DC-INCOMPLETE', params[:reason])
+    #PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
 
     if User.current.user_role.role.role.downcase == 'adr'
       redirect_to "/view_complete_cases"

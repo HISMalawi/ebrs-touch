@@ -5402,6 +5402,7 @@ function showMsgForAction(msg, action, width, title, noAction) {
     var popup = document.createElement("div");
     popup.id = "popup";
     popup.style.position = "absolute";
+    popup.style.minWidth = "750px";
     popup.style.minHeight = "200px";
     popup.style.top = "20%";
     // popup.style.width = (width == undefined ? "330px" : width);
@@ -5471,6 +5472,18 @@ function showMsgForAction(msg, action, width, title, noAction) {
 
     tr3.appendChild(td2_2);
 
+    var btnCancel = document.createElement("button");
+    btnCancel.className = "blue";
+    btnCancel.innerHTML = "Cancel";
+    btnCancel.style.visibility = "hidden"
+    btnCancel.style.width = "120px";
+    btnCancel.style.cursor = "pointer";
+    btnCancel.style.fontSize = "24px";
+    btnCancel.style.minHeight = "60px";
+    btnCancel.style.marginRight = "20px"
+    btnCancel.id = "cancel"
+    td2_2.appendChild(btnCancel);
+
     var btnNo = document.createElement("button");
     btnNo.className = "blue";
     btnNo.innerHTML = "No";
@@ -5478,15 +5491,19 @@ function showMsgForAction(msg, action, width, title, noAction) {
     btnNo.style.cursor = "pointer";
     btnNo.style.fontSize = "24px";
     btnNo.style.minHeight = "60px";
+    btnNo.style.marginRight = "20px"
+    btnNo.id = "no"
 
     td2_2.appendChild(btnNo);
 
     var btnYes = document.createElement("button");
     btnYes.className = "blue";
     btnYes.innerHTML = "Yes";
+    btnYes.id = "yes"
     btnYes.style.width = "120px";
     btnYes.style.cursor = "pointer";
     btnYes.style.fontSize = "24px";
+    btnYes.style.marginRight = "20px"
     btnYes.style.minHeight = "60px";
 
     td2_2.appendChild(btnYes);
@@ -5507,6 +5524,20 @@ function showMsgForAction(msg, action, width, title, noAction) {
 
         eval(action);
 
+    }
+
+    btnCancel.onmousedown = function(){
+        if (__$("popup")) {
+
+            document.body.removeChild(__$("popup"));
+
+        }
+
+        if (__$("shield")) {
+
+            document.body.removeChild(__$("shield"));
+
+        }
     }
 
     btnNo.onmousedown = function () {
@@ -5878,7 +5909,7 @@ function submitAfterSummary() {
                 var td1 = document.createElement("th");
                 td1.align = "right";
                 td1.innerHTML = keys[i];
-
+                td1.style.width = "50%";
                 tr.appendChild(td1);
 
                 var td2 = document.createElement("td");
@@ -5887,7 +5918,7 @@ function submitAfterSummary() {
                 tr.appendChild(td2);
 
                 var td3 = document.createElement("td");
-
+                td3.style.width = "50%";
                 var label = "";
 
                 for (var j = 0; j < summaryHash[keys[i]].length; j++) {
