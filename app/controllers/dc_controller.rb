@@ -185,7 +185,9 @@ def incomplete_case_comment
   end
 
   def pending_case
-    PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
+    
+    PersonRecordStatus.new_record_state(params[:id], 'DC-INCOMPLETE', params[:reason])
+    #PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
 
     if User.current.user_role.role.role.downcase == 'adr'
       redirect_to "/view_complete_cases"
@@ -227,12 +229,39 @@ def incomplete_case_comment
 
   #################### Actions for special Cases ####################################################################################
   def special_cases
-    @stats = PersonRecordStatus.stats
+    @abandoned = PersonRecordStatus.stats(['Abandoned'], false).values.sum
+    @orphaned = PersonRecordStatus.stats(['Orphaned'], false).values.sum
+    @adopted = PersonRecordStatus.stats(['Adopted'], false).values.sum
+
     @icoFolder = folder
     @section = "Special Cases"
     @targeturl = "/"
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
 
     render :layout => "facility"
+  end
+
+  def abandoned_cases
+    @states = Status.all.map(&:name)
+    @records = PersonService.query_for_display(@states, types=['Abandoned'])
+    @section = "Abandoned Cases"
+
+    render :template => "/person/records", :layout => "data_table"
+  end
+
+  def adopted_cases
+    @states = Status.all.map(&:name)
+    @records = PersonService.query_for_display(@states, types=['Adopted'])
+    @section = "Adopted Cases"
+
+    render :template => "/person/records", :layout => "data_table"
+  end
+
+  def orphaned_cases
+    @states = Status.all.map(&:name)
+    @records = PersonService.query_for_display(@states, types=['Orphaned'])
+    @section = "Orphaned Cases"
+
+    render :template => "/person/records", :layout => "data_table"
   end
 end

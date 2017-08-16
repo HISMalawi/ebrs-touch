@@ -76,12 +76,14 @@ class PersonController < ApplicationController
     @status = PersonRecordStatus.status(@person.id)
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+    informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
+        @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
     @record = {
         "Details of Child" => [
             {
-                "District ID Number" => "#{@birth_details.ben rescue nil}",
-                "Serial Number" => "#{@birth_details.brn  rescue nil}"
+                "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}"
             },
             {
                 ["First Name", "mandatory"] => "#{@name.first_name rescue nil}",
@@ -188,7 +190,7 @@ class PersonController < ApplicationController
                 "Family Name" => "#{@informant_name.last_name rescue nil}"
             },
             {
-                "Relationship to child" => "#{@birth_details.informant_relationship_to_child rescue ""}",
+                "Relationship to child" => informant_rel,
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
@@ -197,8 +199,8 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Postal Address" => "#{@informant_address.addressline1 rescue nil}",
-                "" => "#{@informant_address.addressline2 rescue nil}",
+                "Postal Address" => "#{@informant_address.address_line_1 rescue nil}",
+                "" => "#{@informant_address.address_line_2 rescue nil}",
                 "City" => "#{@informant_address.city rescue nil}"
             },
             {
@@ -216,6 +218,7 @@ class PersonController < ApplicationController
 
 
     @summaryHash = {
+
       "Child Name" => @person.name,
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
@@ -257,21 +260,32 @@ class PersonController < ApplicationController
   end
 
   def new
+
     @current_district = Location.current_district.name
 
     $prev_child_id = params[:id]
+
     
     if params[:id].blank?
       
       @person = PersonName.new
-
+      @person_details = PersonBirthDetail.new
+      @type_of_birth = "Single"
       @section = "New Person"
 
     else
-      
-      @person = PersonBirthDetail.find_by_person_id(params[:id])
+
+      @person = Person.find(params[:id])
+
+      @person_details = PersonBirthDetail.find_by_person_id(params[:id])
+
 
       @person_name = PersonName.find_by_person_id(params[:id])
+
+      @person_mother_name = @person.mother.person_names.first rescue nil
+
+      @person_father_name = @person.father.person_names.first rescue nil
+
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
@@ -636,7 +650,7 @@ class PersonController < ApplicationController
   end
 
   def view_pending_cases
-    @states = ["DC-PENDING"]
+    @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 

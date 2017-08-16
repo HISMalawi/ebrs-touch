@@ -214,7 +214,7 @@
         <button id="btnReject"
                 class="red"
                 style=""
-                onclick="reject()">Reject</button>
+                onclick="rejectComments()">Reject</button>
     </td>
       <td id="Check Completeness" style="display:<%= display%>;">
         <button id="btnComplete"
@@ -226,11 +226,11 @@
         <button id="btnApprove"
                 class="green"
                 style=""
-                onclick="approve();">Approve</button>
+                onclick="approveComments();">Approve</button>
     </td>
 
-      <td id="Mark Pending" style="display:<%= display%>;">
-        <button id="btnQuery"
+      <td id="Mark Pending" style="display:none">
+        <button style="display:none" id="btnQuery"
                 class="blue"
                 style=""
                 onclick="pending();">Mark Pending</button>
@@ -268,7 +268,6 @@
 
       function submitSummary(action) {
 
-          showSpinner();
 
           var msg = "";
 
@@ -276,7 +275,7 @@
 
           var div = document.createElement("div");
           div.style.height = "380px";
-          div.style.width = "700px";
+          div.style.width = "800px";
 
           parent.appendChild(div);
 
@@ -323,13 +322,25 @@
 
           hideSpinner();
 
-          var no_action = "window.location='/incomplete_case_comment/<%= params[:id] %>'";
+          var no_action = "window.location='/pending_case_comment/<%= params[:id] %>'";
           showMsgForAction(msg, action, "600px", "Data Completeness Check", no_action);
+
+          __$("cancel").style.visibility="visible";
+
+          var btnYes = __$("yes");
+          btnYes.className = "green"
+          btnYes.innerHTML = "Complete"
+
+          var btnNo = __$("no");
+          btnNo.innerHTML = "Incomplete";
+          btnNo.className = "red"
+          btnNo.style.width = "auto";
+          btnNo.style.marginRight = "10%";
+          btnNo.style.marginLeft = "10%";
 
       }
 
   function viewComment(){
-      showSpinner();
 
       var msg = "";
 
@@ -339,7 +350,7 @@
       div.style.height = "300px";
       div.style.width = "700px";
 
-
+      jQuery('.extra-btn').remove();
 
       var table = document.createElement("table");
       table.style.width = "100%";
@@ -355,6 +366,7 @@
           url: "/comments/<%= @person.id %>",
           data: "",
           success: function(result){
+              hideSpinner();
               $("#comment").empty();
               if (result.trim() == "<ul></ul>")
               {
@@ -362,6 +374,7 @@
               }else {
                   $("#comment").append(result);
               }
+
           }
 
       });
@@ -397,6 +410,30 @@
       function reject(){
           window.location = "/reject_case_comment/<%= params[:id] %>";
       }
+
+    function rejectComments(){
+        viewComment();
+        var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+        okBtn.className = "extra-btn red";
+        okBtn.innerHTML = "Reject";
+        okBtn.onclick = function(){ reject()}
+
+        __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+
+    }
+
+    function approveComments(){
+        viewComment();
+        var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+        okBtn.className = "extra-btn green";
+        okBtn.innerHTML = "Approve";
+        okBtn.onclick = function(){ approve()}
+
+        __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+    }
+
+
+    function showSpinner(){}
   </script>
 
 

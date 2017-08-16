@@ -193,7 +193,7 @@
       <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
-        <input type="text" name="hospital_of_birth" id="person_hospital_of_birth"
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                class ="input_cell"
                condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
                tt_onUnload = "setDistrict('district');",
@@ -295,14 +295,14 @@
       <div class="field">
         <label for="person_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <input type="text" name="date_of_marriage"
+        <input type="text" name="person[date_of_marriage]"
                class = "input_cell"
+               id= "person_date_of_marriage"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && __$('biological_parents').value.trim().toLowerCase() == 'both'",
                fieldtype = "date"
                id="person_date_of_marriage"
                absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
-               optional = true
-        >
+               optional = true>
         <%#grill=  :tt_onLoad => "validateDate(__$('person_birthdate'), __$('person_date_of_marriage'), 45, 3, 60, 0)") %>
       </div>
 
@@ -347,7 +347,6 @@
         			 type="text"
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
-        			 optional = "true"
         			 class="input_cell"
                tt_onUnload = "appendValue('person_mother_first_name');" />
 
@@ -357,7 +356,6 @@
         <label for="person_mother_first_name">First Name</label><br>
         <input id="person_mother_first_name" name="person[mother][first_name]"
         type="text"
-        optional = "true"
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
@@ -631,7 +629,6 @@
                type="text"
                value="<%= @person[:father][:last_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_last_name')"
-               optional = "true"
                ajaxURL = "/get_last_names"
                class="input_cell"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'" />
@@ -642,7 +639,6 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
-               optional = "true"
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
@@ -1445,6 +1441,14 @@
       </div>
     </div>
     </fieldset>
+<!--
+    //consider adding the Nationality and residence fields or the informant here...
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued ...</font></legend>
+
+    </fieldset>
+     -- >
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
@@ -2663,7 +2667,7 @@
      
       __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
        
-       console.log(__$('person_birth_district').val());
+       
     
      } else {
      

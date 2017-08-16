@@ -9,8 +9,10 @@ class LoginsController < ApplicationController
 
     username = params[:user][:username]
     password = params[:user][:password]
-    user = User.get_active_user(username)
-     #raise user.inspect
+
+    #user = User.get_active_user(username)
+    user = User.where(username: username, active: 1).first
+    #raise user.inspect
 
    if username.present? and password.present?
     if user and user.password_matches?(password)
@@ -47,7 +49,9 @@ class LoginsController < ApplicationController
   def logout
     # session[:touchcontext] = nil
     logout!
-    if SETTINGS['app_gate_url'].present?
+     
+    unless SETTINGS['app_gate_url'].blank?
+      
       redirect_to SETTINGS['app_gate_url'].to_s
     else
       flash[:notice] = 'You have been logged out. Good Bye!'
