@@ -20,7 +20,7 @@ end
     connection_timeout: 10000,
     retries_per_request: 10,
     http_connections: 30,
-    filter: ('MyLocation/my_location' + location_id),
+    filter: "MyLocation#{location_id}/my_location",
     query_params: {
         location_id: location_id
     },
@@ -34,7 +34,7 @@ if SETTINGS['application_mode'] == 'DC'
         connection_timeout: 10000,
         retries_per_request: 10,
         http_connections: 30,
-        filter: ('MyLocation/my_location' + location_id),
+        filter: "MyLocation#{location_id}/my_location",
         query_params: {
             location_id: location_id
         },
