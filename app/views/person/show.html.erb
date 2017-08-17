@@ -105,6 +105,10 @@
       text-align: center;
       padding: 5%;
   }
+
+  #comment_popup{
+      padding: 10px;
+  }
 </style>
   </head>
   <body>
@@ -229,7 +233,7 @@
                 onclick="approveComments();">Approve</button>
     </td>
 
-      <td id="Mark Pending" style="display:none">
+      <td id="Mark Pendingdddd" style="display:none">
         <button style="display:none" id="btnQuery"
                 class="blue"
                 style=""
@@ -332,7 +336,7 @@
           btnYes.innerHTML = "Complete"
 
           var btnNo = __$("no");
-          btnNo.innerHTML = "Incomplete";
+          btnNo.innerHTML = "Mark Pending";
           btnNo.className = "red"
           btnNo.style.width = "auto";
           btnNo.style.marginRight = "10%";

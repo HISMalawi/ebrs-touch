@@ -50,7 +50,7 @@ def view_duplicates
       @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE']
        @section = "Potential Duplicates"
     end
-   
+
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
     @records = PersonService.query_for_display(@states)
@@ -185,8 +185,7 @@ def incomplete_case_comment
   end
 
   def pending_case
-    
-    PersonRecordStatus.new_record_state(params[:id], 'DC-INCOMPLETE', params[:reason])
+    PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
     #PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
 
     if User.current.user_role.role.role.downcase == 'adr'
