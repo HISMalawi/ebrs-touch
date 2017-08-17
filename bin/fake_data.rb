@@ -96,21 +96,12 @@ def setup_data
      phone_number: ""
   }, 
    form_signed: "Yes", 
-<<<<<<< HEAD
-   acknowledgement_of_receipt_date: date_of_reporting.strftime('%d/%b/%Y')
-  }, 
-   home_address_same_as_physical: "Yes", 
-   gestation_at_birth: "39", 
-   number_of_prenatal_visits: "5", 
-   month_prenatal_care_started: "3", 
-=======
    acknowledgement_of_receipt_date: my_date_list[rand(my_date_list.length)]
   }, 
    home_address_same_as_physical: "Yes", 
    gestation_at_birth: "39", 
    number_of_prenatal_visits: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
    month_prenatal_care_started: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
->>>>>>> 052f9ff85080ac3a98ce2cac2de8bf76196361d7
    number_of_children_born_alive_inclusive: "1", 
    number_of_children_born_still_alive: "1", 
    same_address_with_mother: "", 
