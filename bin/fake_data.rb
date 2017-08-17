@@ -54,11 +54,7 @@ def setup_data
    middle_name: "", 
    birthdate: birthdate1.strftime('%d/%b/%Y'), 
    birth_district: "Lilongwe City", 
-<<<<<<< HEAD
-   gender: "Male", 
-=======
    gender: gender[rand(gender.length)], 
->>>>>>> 052f9ff85080ac3a98ce2cac2de8bf76196361d7
    place_of_birth: "Hospital", 
    hospital_of_birth: "ABC Comm. Hospital", 
    birth_weight: kgs, 
