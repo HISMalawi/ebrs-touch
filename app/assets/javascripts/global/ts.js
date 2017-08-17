@@ -6087,3 +6087,151 @@ document.addEventListener('DOMContentLoaded', function() {
 setTimeout("checkScrolls()", 500);
 
 // init();
+//Custom date validations
+var date_interval ;
+function dateInterval(id,validation_date){
+        var target = __$(id)
+        if(!__$("textFor"+id)){
+            clearInterval(date_interval);
+            return
+        }
+        if(target.value.length == 0){
+           resetDate(id,new Date(target.getAttribute("absolute_max")));
+        }
+        date_interval = setInterval(function(){
+
+                  var today = new Date();
+                  if(validation_date){
+                    today = new Date(validation_date)
+                  }else if(target.getAttribute("absolute_max")){
+                      today = new Date(target.getAttribute("absolute_max"))        
+                  }
+                   var input_value;
+                  if (!__$("textFor"+id)){
+                        clearInterval(date_interval);
+                        return
+                  }else{
+                      input_value  = __$("textFor"+id).value;
+                  }
+
+                  var parts = input_value.split("/");
+                  if(parts[0] == 0 ){
+                     __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
+                     __$("txtDateFor"+id).value = "?"
+                     target.setAttribute("absolute_max",today.format());
+                  }else if(parseInt(parts[2]) > today.getFullYear()){
+                      __$("textFor"+id).value = parts[0]+"/"+parts[1]+"/"+today.getFullYear()
+                      __$("txtYearFor"+id).value = today.getFullYear()
+                  }else{
+                    if(input_value.indexOf("?")>= 0){
+                        var estimated = (parts[0] == "?" ? "15" : parts[0]) +"/"+
+                                        (months.indexOf(parts[1]) >= 0 ? parts[1] : "Jul")
+                                        +"/"+(parts[2] == "?" ? "2017" : parts[2]);   
+                        if(months.indexOf(parts[1]) >= 0 && months.indexOf(parts[1]) > today.getMonth()){
+                            if (!__$("shield")){
+                                    showMsg("Date Estimated is greater than "+today.format(), "Date validation");
+                                    resetDate(id, today)
+                            }
+
+                        }
+                        __$(id).value = estimated;
+                        if(__$(id+"_estimated")){
+                            __$(id+"_estimated").value = 1 
+                        }
+
+                    }else{
+                            var current_date = new Date(input_value);
+                            if( current_date.format("YYYY-mm-dd") > today.format("YYYY-mm-dd")){
+                                if (!__$("shield")){
+                                    showMsg("Date Entered is greater than "+today.format(), "Date validation")
+                                    resetDate(id, today)
+                                }
+                            }   
+                    }
+                
+                  }
+
+        },250);
+
+    }
+
+    function resetDate(target_id, today){
+         if (today.getTime() === today.getTime()){
+                __$("textFor"+ target_id).value  = today.getDate() +"/"+ months[today.getMonth()] + "/"+ today.getFullYear();
+                __$("txtDateFor"+target_id).value = today.getDate();
+                __$("txtMonthFor"+target_id).value = months[today.getMonth()];
+                __$("txtYearFor"+ target_id).value = today.getFullYear()
+         }else{
+            __$("textFor"+ target_id).value  = "?/?/?";
+            __$("txtDateFor"+target_id).value = "?"
+            __$("txtMonthFor"+target_id).value = "?"
+            __$("txtYearFor"+ target_id).value = "?"
+            return;
+         }
+    }
+
+    function clearDateInterval(id){
+        clearInterval(date_interval);
+        date_interval = null;
+    }
+
+//Name validation
+var spaceInterval ;
+function checkSpace(id){
+      spaceInterval = setInterval(function(){
+        if(!__$("textFor"+id)){
+            clearInterval(spaceInterval);
+            return
+        }
+        var text_input =__$("textFor"+id).value
+        if(text_input.length > 0){
+          __$("textFor"+id).value = text_input.capitalize();
+        }   
+      },20);
+      
+}
+
+var cont = {}
+var name_length_interval
+function validateNameLength(person,id,level){
+      name_length_interval = setInterval(function(){
+          if(!__$("textFor"+id)){
+            clearInterval(name_length_interval);
+            return;
+          }
+          var input  = __$("textFor"+id).value.trim();
+          var regex = /^[a-zA-Z']{2,24}$/;
+          var name_length = (__$(person+'_last_name') ? __$(person+'_last_name').value.length : "") + 
+              (__$(person+'_first_name') ?  __$(person+'_first_name').value.length : "");
+
+          if(__$(person+'_middle_name') && __$(person+'_middle_name').value.length > 0){
+              name_length = name_length + __$(person+'_middle_name').value.split(" ").join("").length;
+          }
+
+          if(input.length > 0 ){
+            if(parseInt(name_length) > 50){
+              if(!__$("shield") && !cont[person]){
+                    showMsg("Name of the person has "+name_length+" character(s) which is more than 50 characters", "Name length validations");
+                    cont[person] = true
+              }
+            }
+            if(!__$("shield")){
+                var check_number_regex = /\d/;
+                var check_space_regex = /\s/;
+                var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,.\/]/
+                if(check_number_regex.test(input)){
+                    showMsg("Name of the person contains a number(s)", "Number in names validations");
+                    __$("textFor"+id).value  = input.replace(check_number_regex,"")
+                }else if(special_characters.test(input)){
+                     showMsg("Name of the person contains special character(s)", "Special charactes validations");
+                     __$("textFor"+id).value  = input.replace(special_characters,"")
+                }else{
+
+                }
+            }
+
+          }
+
+      },200);
+      //clearInterval(spaceInterval);
+}

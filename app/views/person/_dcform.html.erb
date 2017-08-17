@@ -56,6 +56,7 @@
         <%= (f.text_field :last_name,
         :class => "input_cell",
         :ajaxURL => "/get_last_names",
+        :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
       </div>
 
@@ -65,12 +66,13 @@
         <%= (f.text_field :first_name,
         :class => "input_cell",
         :ajaxURL => "/get_first_names",
+        :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
       </div>
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -86,7 +88,7 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
-                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_birthdate')",
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
@@ -229,9 +231,9 @@
                           id="person_date_of_marriage"
                           class="input_cell"
 													condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
-													fieldtype="date",
-													optional=true,
-                          absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>" >
+													fieldtype="date"
+													optional=true
+                          absolute_max="<%= Date.today.strftime('%Y-%m-%d') %>" >
       </div>
 
 
@@ -277,17 +279,20 @@
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
+               tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
                tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
 
       </div>
 
       <div class="field">
         <label for="person_mother_first_name">First Name</label><br>
-        <input id="person_mother_first_name" name="person[mother][first_name]"
-        type="text"
+        <input id="person_mother_first_name" 
+            name="person[mother][first_name]"
+          type="text"
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
+        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
         tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
 
@@ -299,6 +304,7 @@
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
                optional="true"/>
       </div>
 
@@ -327,9 +333,12 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
+                value = "<%= (Date.today- 10.years).strftime('%d/%b/%Y')%>"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
-                optional="true" />
+                optional="true"
+                absolute_max = "<%= (Date.today- 10.years).strftime('%Y-%m-%d') %>"
+                 />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
@@ -653,6 +662,7 @@
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
+               tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
 
@@ -664,6 +674,7 @@
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
@@ -676,6 +687,7 @@
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
+               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
       </div>
@@ -918,6 +930,7 @@
                name="person[informant][last_name]"
                type="text"
                ajaxURL = "/get_last_names"
+               tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -928,6 +941,7 @@
                name="person[informant][first_name]"
                type="text"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -938,6 +952,7 @@
                name="person[informant][middle_name]"
                type="text"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
                class="input_cell" optional="true" />
       </div>
@@ -1033,7 +1048,7 @@
                           :fieldtype => "date",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
-                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>  
+                          :absolute_max => Date.today.strftime('%Y-%m-%d')) rescue "" %>  
 
       </div>
 
@@ -1058,42 +1073,7 @@
 <% end %>
 
 <script>
-    var date_interval ;
-    function dateInterval(id,validation_date){
-        date_interval = setInterval(function(){
-                  var today = new Date();
-                  if(validation_date){
-                    today = new Date(validation_date)
-                  }
-                  var input_value  = __$("textFor"+id).value;
-                  var parts = input_value.split("/");
-                  if(parts[0] == 0 ){
-                     __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
-                     __$("txtDateFor"+id).value = "?"
-                  }
-                  if(parseInt(parts[2]) > today.getFullYear()){
-                      __$("textFor"+id).value = parts[0]+"/"+parts[1]+"/"+today.getFullYear()
-                      __$("txtYearFor"+id).value = today.getFullYear()
-                  }else{
-                    var current_date = new Date(input_value);
-                    if( current_date.format("YYYY-mm-dd") > today.format("YYYY-mm-dd")){
-                        if (!__$("shield")){
-                            showMsg("Date Entered is greater than today", "Date validation")
-                            __$("btnToday"+id).click();
-                        }
-                    }                   
-                  }
 
-        },100);
-        setTimeout(function(){
-            clearInterval(date_interval);
-        },5000)
-
-    }
-    function clearDateInterval(id){
-        clearInterval(date_interval);
-        date_interval = null;
-    }
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
