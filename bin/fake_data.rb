@@ -18,6 +18,13 @@ end
  
 def setup_data
 
+  gender = %w[Male,Female]
+  number_of_parental_visits = [1,2,3,4,5,6]
+
+  length_of_array = rand(number_of_parental_visits.length)
+
+  element = rand(gender.length)
+
   kgs = Random.rand(2..6).to_s.ljust(4,'0')
   kgs = "#{kgs[0..0]}.#{kgs[1..-1]}" 
 
@@ -40,7 +47,7 @@ def setup_data
    middle_name: "", 
    birthdate: birthdate1.strftime('%d/%b/%Y'), 
    birth_district: "Lilongwe City", 
-   gender: "Male", 
+   gender: gender[element], 
    place_of_birth: "Hospital", 
    hospital_of_birth: "ABC Comm. Hospital", 
    birth_weight: kgs, 
@@ -86,8 +93,8 @@ def setup_data
   }, 
    home_address_same_as_physical: "Yes", 
    gestation_at_birth: "39", 
-   number_of_prenatal_visits: "5", 
-   month_prenatal_care_started: "3", 
+   number_of_prenatal_visits: number_of_prenatal_visits[length_of_array].to_s, 
+   month_prenatal_care_started: number_of_prenatal_visits[length_of_array].to_s, 
    number_of_children_born_alive_inclusive: "1", 
    number_of_children_born_still_alive: "1", 
    same_address_with_mother: "", 

@@ -31,7 +31,7 @@ class UsersController < ApplicationController
 
   end
 
-  #Displays All Users
+  #Displays All Users whose status = Active
   def view
 
     @users = User.all.each
