@@ -9,6 +9,9 @@ def start
       person = PersonService.create_record(params)
       if person.present? 
         #SimpleElasticSearch.add(person_for_elastic_search(params))
+        #IdentifierAllocationQueue.create(person_id: person.person_id, person_identifier_type_id: 2)
+        record_status = PersonRecordStatus.where(person_id: person.person_id).first
+        record_status.update_attributes(status_id: Status.where(name: 'DC-ACTIVE').last.id)
         puts "Created ............. #{n}"
       end
     end
@@ -17,6 +20,13 @@ end
  
  
 def setup_data
+  my_date_list = []
+  gender = %w[Male,Female]
+  number_of_parental_visits = [1,2,3,4,5,6]
+
+  1.upto(14).each do |n| 
+    my_date_list << (Date.today - n.day).strftime('%d/%b/%Y')
+  end
 
   kgs = Random.rand(2..6).to_s.ljust(4,'0')
   kgs = "#{kgs[0..0]}.#{kgs[1..-1]}" 
@@ -29,18 +39,22 @@ def setup_data
   t2 = (Date.today - 20.year)
   birthdate2 = rand(t1..t2)
 
+  t1 = (Date.today - 9.month)
+  t2 = Date.today
+  date_of_reporting = rand(t1..t2)
+
 
   mother_first_name = Faker::Name.first_name
   mother_last_name = Faker::Name.last_name
 
    data = {person: {duplicate: "", is_exact_duplicate: "", 
-   relationship: "normal", 
+   relationship: "Adopted", 
    last_name: Faker::Name.last_name, 
    first_name: Faker::Name.first_name, 
    middle_name: "", 
    birthdate: birthdate1.strftime('%d/%b/%Y'), 
    birth_district: "Lilongwe City", 
-   gender: "Male", 
+   gender: gender[rand(gender.length)], 
    place_of_birth: "Hospital", 
    hospital_of_birth: "ABC Comm. Hospital", 
    birth_weight: kgs, 
@@ -82,12 +96,12 @@ def setup_data
      phone_number: ""
   }, 
    form_signed: "Yes", 
-   acknowledgement_of_receipt_date: Date.today.strftime('%d/%b/%Y')
+   acknowledgement_of_receipt_date: my_date_list[rand(my_date_list.length)]
   }, 
    home_address_same_as_physical: "Yes", 
    gestation_at_birth: "39", 
-   number_of_prenatal_visits: "5", 
-   month_prenatal_care_started: "3", 
+   number_of_prenatal_visits: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
+   month_prenatal_care_started: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
    number_of_children_born_alive_inclusive: "1", 
    number_of_children_born_still_alive: "1", 
    same_address_with_mother: "", 

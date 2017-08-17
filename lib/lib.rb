@@ -24,6 +24,7 @@ module Lib
   end
 
   def self.new_mother(person, params,mother_type)
+    
     if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else

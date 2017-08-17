@@ -13,12 +13,12 @@ class LoginsController < ApplicationController
 
     #user = User.get_active_user(username)
     user = User.where(username: username, active: 1).first
-    #raise user.inspect
+    
 
    if username.present? and password.present?
     if user and user.password_matches?(password)
-
       login! user
+      redirect_to "/", referrer_param => referrer_path and return
 
       if (Time.now.to_date - user.last_password_date.to_date).to_i >= 90
          if user.password_attempt >= 5 && username.downcase != 'admin'
@@ -40,9 +40,12 @@ class LoginsController < ApplicationController
 
          redirect_to back_or_default
       end
+    elsif (User.where(username: username, active: 0).first)
+        flash[:error] = 'The user account is deactivated. Please contact your Administrator.'
+        redirect_to "/login" and return
     end
 
-    end
+   end
 		flash[:error] = 'That username and/or password is not valid.'
       	redirect_to "/login"
   end

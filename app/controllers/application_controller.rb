@@ -133,6 +133,7 @@ class ApplicationController < ActionController::Base
     
     location = Location.find(SETTINGS['location_id'])
 
+
     if application_mode == 'DC'
       Location.current_district = location
     else
@@ -148,7 +149,13 @@ class ApplicationController < ActionController::Base
       end
       redirect_to '/login' and return
     else
-      User.current = User.find(session[:user_id])
+      user = User.find(session[:user_id]) rescue nil
+
+      if user.blank?
+        reset_session
+        redirect_to '/login' and return
+      end
+      User.current = user
     end
   end
 

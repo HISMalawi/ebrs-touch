@@ -1,9 +1,9 @@
 ,TestRole,Nurse/Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
 DC-ACTIVE,,,,"1,2",3,,,,,
 FC-POTENTIAL DUPLICATE,,,,"1,2",3,,,,,
-DC-INCOMPLETE,,,,"11,6",,,,,,
+DC-INCOMPLETE,,,,"11,6,1",,,,,,
 DC-COMPLETE,,,,,"3,7,4,6",,,,,
-DC-PENDING,,,,"11,6",3,,,,,
+DC-PENDING,,,,"11,6,1",3,,,,,
 DC-DUPLICATE,,,,,5,,,,,
 DC-REJECTED,,,,,"3,7",,,,,
 DC-VOIDED,,,,,,,,,,
