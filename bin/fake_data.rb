@@ -2,13 +2,16 @@ User.current = User.last
 
 
 def start
-  1.upto(10).each do |n|
+  1.upto(500).each do |n|
     params = setup_data
     ActiveRecord::Base.transaction do
       #puts ">>>>>>>>>>>>>>>> #{params[:person][:type_of_birth]}"
       person = PersonService.create_record(params)
       if person.present? 
         #SimpleElasticSearch.add(person_for_elastic_search(params))
+        IdentifierAllocationQueue.create(person_id: person.person_id, person_identifier_type_id: 2)
+        record_status = PersonRecordStatus.where(person_id: person.person_id).first
+        record_status.update_attributes(status_id: 8)
         puts "Created ............. #{n}"
       end
     end
@@ -36,6 +39,10 @@ def setup_data
   t2 = (Date.today - 20.year)
   birthdate2 = rand(t1..t2)
 
+  t1 = (Date.today - 10.month)
+  t2 = (Date.today)
+  acknowledgement_of_receipt_date = rand(t1..t2)
+
 
   mother_first_name = Faker::Name.first_name
   mother_last_name = Faker::Name.last_name
@@ -59,7 +66,7 @@ def setup_data
      last_name: mother_last_name, 
      first_name:  mother_first_name, 
      middle_name: "", 
-     birthdate: birthdate1.strftime('%d/%b/%Y'), 
+     birthdate: birthdate2.strftime('%d/%b/%Y'), 
      birthdate_estimated: "", 
      citizenship: "Malawian", 
      residential_country: "Malawi", 
@@ -89,12 +96,12 @@ def setup_data
      phone_number: ""
   }, 
    form_signed: "Yes", 
-   acknowledgement_of_receipt_date: Date.today.strftime('%d/%b/%Y')
+   acknowledgement_of_receipt_date: acknowledgement_of_receipt_date.strftime('%d/%b/%Y')
   }, 
    home_address_same_as_physical: "Yes", 
-   gestation_at_birth: "39", 
-   number_of_prenatal_visits: number_of_prenatal_visits[length_of_array].to_s, 
-   month_prenatal_care_started: number_of_prenatal_visits[length_of_array].to_s, 
+   gestation_at_birth: rand(36..40), 
+   number_of_prenatal_visits: length_of_array, 
+   month_prenatal_care_started: length_of_array, 
    number_of_children_born_alive_inclusive: "1", 
    number_of_children_born_still_alive: "1", 
    same_address_with_mother: "", 
