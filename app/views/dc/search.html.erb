@@ -1,0 +1,60 @@
+<style>
+    #search-table td{
+        border: 1px solid gray;
+    }
+
+    #filter-frame{
+        position: absolute;
+        top: 15%;
+        width: 60%;
+        height: 60%;
+        left: 20%;
+        border: 1px solid #000;
+        display: none;
+        background: white;
+    }
+</style>
+<table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
+  <caption style="text-align: left;">
+    <font size='5' style='border: 2px;'>Search Cases</font>
+  </caption>
+
+    <tr>
+
+        <td  valign='top' style="width: 70%;min-height: 20vh;
+                height: 20vh;">
+          <div class="" style="font-size: 20px;margin: auto; margin-top: 7px;width: 95%; text-align: center;border-bottom: 1px solid darkred;">
+            Search Filters
+          </div>
+        </td>
+      <td valign='top' style="width: 30%;">
+        <div class="btn blue" style="font-size: 20px;margin: 5px;cursor: pointer;"
+             onmousedown="showFilterWindow()">
+          Add Search Filter
+        </div>
+      </td>
+    </tr>
+
+      <tr>
+        <td  valign='top' colspan="2" style="min-height: 70vh; height: 70vh;">
+
+        </td>
+      </tr>
+</table>
+
+<iframe id="filter-frame" src="/filter">
+</iframe>
+
+<script type="text/javascript">
+	init();
+
+    function showFilterWindow(){
+        __$('filter-frame').setAttribute('src', '/search');
+        __$('filter-frame').style.display = 'block';
+    }
+
+    function hideFilterWindow(){
+        __$('filter-frame').src = '';
+        __$('filter-frame').style.display = 'none';
+    }
+</script>
