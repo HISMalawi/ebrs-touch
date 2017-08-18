@@ -86,6 +86,7 @@
                id="person_birthdate"
                class = "input_cell"
                fieldtype = "date"
+               tt_onLoad = "dateInterval('person_birthdate')"
                absolute_min = "<%= Time.now.advance(:years => -100).strftime('%Y/%m/%d') %>"
                min = "<%= Time.now.advance(:years => -16).strftime('%Y/%m/%d') %>"
                absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
@@ -233,12 +234,13 @@
                class="input_cell" />
       </div>
 
-      <div class="field">
+     <div class="field">
         <label for="person_informant_last_name">Surname</label><br>
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
                ajaxURL = "/get_last_names"
+               tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -249,6 +251,7 @@
                name="person[informant][first_name]"
                type="text"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -259,9 +262,11 @@
                name="person[informant][middle_name]"
                type="text"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
                class="input_cell" optional="true" />
       </div>
+      
 
       <div class="field">
         <label for="person_informant_id_number">ID Number</label><br>

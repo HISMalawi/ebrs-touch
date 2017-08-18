@@ -21,5 +21,4 @@ class SyncCheck
 
     SyncCheck.perform_in(60)
   end
-
 end

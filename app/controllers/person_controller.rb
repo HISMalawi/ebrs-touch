@@ -959,6 +959,16 @@ class PersonController < ApplicationController
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
+
+  def ammend_case
+    @section = 'Ammend Case'
+  end
+
+  def do_ammend
+    PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason']}", "Ammendment request; #{params['reason']}");
+
+    redirect_to session['list_url']
+  end
   #########################################################################
 
 end
