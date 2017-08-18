@@ -135,6 +135,8 @@ Rails.application.routes.draw do
   get 'person/ammendment_cases'
   get 'person/ammend_case'
   get 'person/do_ammend'
+  get '/search' => 'dc#search'
+  get '/filter' => 'dc#filter'
 
   get "/comments/:id" => 'dc#comments'
 

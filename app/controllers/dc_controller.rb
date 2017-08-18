@@ -277,4 +277,18 @@ def incomplete_case_comment
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
+
+  def search
+
+  end
+
+  def filter
+    @filter = params[:filter]
+    @filters = ["Child Name", "Child Gender",
+                "Place of Birth", 'Birth Details',
+                "Mother Name", "Mother Address",
+                "Father Name", "Father Address",
+                "Informant Details", 'Record State',
+                'District of Birth', 'Creator(Nurse/Clerk)']
+  end
 end
