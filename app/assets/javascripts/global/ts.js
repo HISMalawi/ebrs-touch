@@ -5908,7 +5908,6 @@ function submitAfterSummary() {
     var data = {"twin_id": getUrlVars()["id"]}
 
     for(var i = 0 ; i < duplicate_search.length ; i++){
-
         if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
              data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
          } else {
@@ -6153,9 +6152,9 @@ function dateInterval(id,validation_date){
 
         },250);
 
-    }
+}
 
-    function resetDate(target_id, today){
+function resetDate(target_id, today){
          if (today.getTime() === today.getTime()){
                 __$("textFor"+ target_id).value  = today.getDate() +"/"+ months[today.getMonth()] + "/"+ today.getFullYear();
                 __$("txtDateFor"+target_id).value = today.getDate();
@@ -6168,12 +6167,12 @@ function dateInterval(id,validation_date){
             __$("txtYearFor"+ target_id).value = "?"
             return;
          }
-    }
+}
 
-    function clearDateInterval(id){
+function clearDateInterval(id){
         clearInterval(date_interval);
         date_interval = null;
-    }
+}
 
 //Name validation
 var spaceInterval ;

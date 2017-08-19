@@ -82,17 +82,18 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="text" name="person[birthdate]"
-                          class ="input_cell"
-                          id = "person_birthdate"
-                          fieldtype = "date"
-                          tt_onLoad = "dateInterval('person_birthdate')"
-                          absolute_min = "<%= Time.now.advance(:years => -100).strftime('%Y/%m/%d') %>",
-                          min = "<%= Time.now.advance(:years => -16).strftime('%Y/%m/%d') %>",
-                          absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>",
-                          tt_onUnload = "recalculateDateValidations('c_dob')" >
+        
+        <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :value => Date.today.strftime('%d/%b/%Y'),
+                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
+                          :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_birthdate')",
+                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
+        <%= f.hidden_field :birth_district, :value => @current_district %>
 
       </div>
       <div class="field">
@@ -552,7 +553,7 @@
                ajaxURL = "/get_last_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+               />
       </div>
 
       <div class="field">
@@ -565,7 +566,7 @@
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+             />
       </div>
 
       <div class="field">
@@ -577,7 +578,6 @@
                ajaxURL = "/get_first_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
       </div>
       <div class="field">
@@ -939,7 +939,7 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onUnload => 'updateRegistrationType();setTimeout("checkValues()", 500)',
+                          :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
 
