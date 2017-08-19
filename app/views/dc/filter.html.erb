@@ -2,6 +2,7 @@
     #__content{
         -moz-transform: scale(0.73);
         -moz-transform-origin: 0 0;
+        width:99% !important;
     }
 
     #toolsCell1{
@@ -11,6 +12,13 @@
     }
     #fixedkeyboard{
         max-width: 800px !important;
+    }
+
+    #textForperson_birth_entry_number{
+        text-transform: uppercase;
+    }
+    #textForperson_facility_serial_number{
+        text-transform: uppercase;
     }
 </style>
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
@@ -29,6 +37,33 @@
   <%= f.hidden_field :birth_district, :value => '' %>
 </fieldset>
 
+
+<fieldset>
+  <div class="field">
+    <legend><font size='5' style='border: 2px;'>Birth Entry Number</font></legend>
+    <label for="person_birth_entry_number">Birth Entry Number</label>
+    <br>
+    <%= (f.text_field :birth_entry_number,
+                      :class => "input_cell",
+                      :textCase => 'upper',
+                      :condition => "__$('filters').value == 'Birth Entry Number' ",
+                      :optional => :true) %>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Facility Serial Number</font></legend>
+  <div class="field">
+    <label for="person_facility_serial_number">Facility Serial Number</label>
+    <br>
+    <%= (f.text_field :facility_serial_number,
+                      :class => "input_cell",
+                      :condition => "__$('filters').value == 'Facility Serial Number' ",
+                      :optional => :true)
+                       %>
+  </div>
+</fieldset>
+
 <fieldset>
   <legend><font size='5' style='border: 2px;'>Child Name</font></legend>
   <div class="field">
@@ -37,8 +72,7 @@
     <%= (f.text_field :last_name,
                       :class => "input_cell",
                       :condition => "__$('filters').value == 'Child Name' ",
-                      :optional => :true)
-                       %>
+                      :optional => :true)%>
   </div>
 </fieldset>
 
@@ -97,7 +131,7 @@
       <label for="person_bd_holder">Birth District</label><br>
 
       <input id="person_bd_holder"
-             condition = "__$('filters').value == 'Place of Birth' "  id="person_place_of_birth" name="person[place_of_birth]"
+             condition = "__$('filters').value == 'Place of Birth' "
              name="person[birth_district]"
              type="text"
              ajaxURL = "/search_by_district"
@@ -130,27 +164,31 @@
              class = "input_cell"
              condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
              ajaxURL = "/search_by_district"
-             tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_db_holder').value);"
-             tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
+             tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);"
+             tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_bd_holder').value + '&ta=' + __$('textForperson_birth_ta').value);">
+    </div>
+  <legend><font size='5' style='border: 2px;'>Village of Birth</font></legend>
+  <div class="field">
+    <label for="person_birth_village">Village</label>
+    <br>
+    <input type="text" name="person[birth_village]" class = "input_cell"
+           id="person_birth_village"
+           condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+           ajaxURL = "/search_by_village">
+  </div>
+</fieldset>
+
+
+<fieldset>
+    <legend><font size='5' style='border: 2px;'>Other Place of Birth</font></legend>
+    <div class="field">
+      <label for="person_other_birth_place">Give Details</label>
+      <br>
+      <input type="text" name="other_birth_place" class ="input_cell"
+             condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place">
     </div>
 </fieldset>
 
-
-<div class="field">
-  <label for="person_birth_village">Village</label>
-  <br>
-  <input type="text" name="person[birth_village]" class = "input_cell"
-         id="person_birth_village"
-         condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
-         ajaxURL = "/search_by_village">
-</div>
-<div class="field">
-  <label for="person_other_birth_place_details">Give Details</label>
-  <br>
-  <input type="text" name="other_birth_place_details" class ="input_cell" condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place_details">
-</div>
-
-</fieldset>
 <% end %>
 <script type="text/javascript">
 	init();
