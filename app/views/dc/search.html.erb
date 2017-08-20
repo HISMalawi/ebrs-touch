@@ -3,15 +3,46 @@
         border: 1px solid gray;
     }
 
-    #filter-frame{
+    #filter-frame, #rfilter-frame{
         position: absolute;
         top: 15%;
         width: 60%;
         height: 60%;
         left: 20%;
         border: 1px solid #000;
-        display: none;
         background: white;
+    }
+    .btn-badge{
+        border-radius: 0px !important;
+        font-size: 16px;
+        min-width: 12%;
+        background-color: #089de3;
+        margin: 5px;
+        padding: 2px;
+        display: inline-block;
+        margin-top: 0px !important;
+        vertical-align: top;
+    }
+    .btn-badge caption{
+       color: white;
+    }
+    .btn-badge table{
+        width: 100%;
+        color: #000;
+    }
+    .btn-badge td{
+        padding: 2px;padding-left: 10px;padding-right: 10px;margin:0px;
+        border: 1px solid #d3d3d3 !important;
+    }
+    .cancel{
+        border-radius: 50%;
+        width: 40px !important;
+        color: red;
+        background: white;
+        border: 1px solid black;
+    }
+    .value{
+        font-style: italic;
     }
 </style>
 <table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
@@ -20,18 +51,40 @@
   </caption>
 
     <tr>
-
         <td  valign='top' style="width: 70%;min-height: 20vh;
                 height: 20vh;">
-          <div class="" style="font-size: 20px;margin: auto; margin-top: 7px;width: 95%; text-align: center;border-bottom: 1px solid darkred;">
+          <div class="" style="font-size: 20px;margin: auto; margin-top: 0px;width: 95%; text-align: center;border-bottom: 1px solid darkred;">
             Search Filters
           </div>
+          <div style="width: 95%; margin: auto;padding: 5px;" id="filter-names"></div>
         </td>
       <td valign='top' style="width: 30%;">
-        <div class="btn blue" style="font-size: 20px;margin: 5px;cursor: pointer;"
-             onmousedown="showFilterWindow()">
-          Add Search Filter
-        </div>
+        <table style="width: 100%;">
+          <tr>
+            <td style="border: none;">
+              <div class="btn blue" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="showFilterWindow()">
+                Add Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div id='remove' class="btn gray" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="removeFilterWindow()">
+                Remove Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div class="btn green" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="search()">
+                Apply
+              </div>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
 
@@ -42,19 +95,75 @@
       </tr>
 </table>
 
-<iframe id="filter-frame" src="/filter">
-</iframe>
 
 <script type="text/javascript">
-	init();
+    function capitalize(string){
+        string = string.replace(/\_/g, ' ');
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function __$(id){
+        return document.getElementById(id);
+    }
 
     function showFilterWindow(){
-        __$('filter-frame').setAttribute('src', '/search');
-        __$('filter-frame').style.display = 'block';
+        var frm = document.createElement('iframe');
+        frm.id = 'filter-frame';
+        frm.src = '/filter';
+        document.body.appendChild(frm);
+    }
+
+    function removeFilterWindow(){
+        var frm = document.createElement('iframe');
+        frm.id = 'rfilter-frame';
+        frm.src = '/rfilter';
+        document.body.appendChild(frm);
     }
 
     function hideFilterWindow(){
-        __$('filter-frame').src = '';
-        __$('filter-frame').style.display = 'none';
+        __$('filter-frame').parentNode.removeChild(__$('filter-frame'));
     }
+
+    function hiderFilterWindow(){
+        __$('rfilter-frame').parentNode.removeChild(__$('rfilter-frame'));
+    }
+
+    function addFilter(data){
+        var badge = document.createElement('span');
+        badge.id =  data['filter_name'];
+        var str = "<div class='btn-badge'><table  style='background: ghostwhite'> <caption>"+ data['filter_name'] + "</caption>";
+        for(var k in data){
+            var d =  data[k];
+            k = k.replace(/person\[/, '').replace(/\]|\[/g, ' ');
+            if(k != 'filter_name') {
+                str += "<tr><td >" + capitalize(k) + '</td> <td class="value">' + d + "</td></tr>";
+            }
+        }
+        str +=  "</table><div>";
+        badge.innerHTML = str;
+        __$('remove').className = 'btn red';
+        __$('filter-names').appendChild(badge);
+    }
+
+    setInterval(function(){
+        if(__$('filter-frame') && __$('filter-frame').contentDocument && __$('filter-frame').contentDocument.getElementById('btn0')) {
+            btn = __$('filter-frame').contentDocument.getElementById('btn0');
+            btn.onmousedown = function () {
+                hideFilterWindow();
+            }
+
+            __$('filter-frame').contentDocument.forms[0].submit = function(){
+                data = {}
+                sets = __$('filter-frame').contentWindow.navigablefieldsets;
+                for (var i = 0; i < sets.length; i++) {
+                    if (sets[i][0].value.length > 0) {
+                        data[sets[i][0].name] = sets[i][0].value;
+                    }
+                }
+
+                addFilter(data);
+                hideFilterWindow();
+            };
+        }
+    }, 200)
 </script>

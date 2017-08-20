@@ -262,7 +262,7 @@ class PersonController < ApplicationController
 
   def new
 
-    @current_district = Location.current_district.name
+    @current_district = Location.find(SETTINGS['location_id']).district rescue nil
 
     $prev_child_id = params[:id]
 
@@ -610,7 +610,9 @@ class PersonController < ApplicationController
           'Zomba City' => 'Zomba',
           'Blantyre City' => 'Blantyre'}
 
-  params[:district] =map[params[:district]] if   params[:district].match(/City$/)
+  if  (params[:district].match(/City$/) rescue false)
+    params[:district] =map[params[:district]]
+  end
 
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []

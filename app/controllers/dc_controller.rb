@@ -284,11 +284,23 @@ def incomplete_case_comment
 
   def filter
     @filter = params[:filter]
-    @filters = ["Child Name", "Child Gender",
-                "Place of Birth", 'Birth Details',
-                "Mother Name", "Mother Address",
-                "Father Name", "Father Address",
-                "Informant Details", 'Record State',
-                'District of Birth', 'Creator(Nurse/Clerk)']
+    @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
+                "Place of Birth", "Mother Name","Father Name",
+                "Mother Address", "Father Address", "Mother Delivery Details",
+                'Birth Details', "Informant Details", 'Record State',
+                'District of Birth', 'Creator(Nurse/Clerk)',
+                "Date of Reporting"
+                ]
+  end
+
+  def rfilter
+    @filter = params[:filter]
+    @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
+                "Place of Birth", "Mother Name","Father Name",
+                "Mother Address", "Father Address", "Mother Delivery Details",
+                'Birth Details', "Informant Details", 'Record State',
+                'District of Birth', 'Creator(Nurse/Clerk)',
+                "Date of Reporting"
+    ]
   end
 end
