@@ -1098,49 +1098,7 @@
 <% end %>
 
 <script>
-    var special_characters_interval
-    function checkSpecialCharacters(id){
-        special_characters_interval ? clearInterval(special_characters_interval) : special_characters_interval
-        special_characters_interval = setInterval(function(){
-          if(!__$("textFor"+id)){
-              clearInterval(special_characters_interval);
-              return;
-          }
-           var input  = __$("textFor"+id).value.trim();
-           if(!__$("shield")){
-                  var check_number_regex = /\d/;
-                  var check_space_regex = /\s/;
-                  var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,'.\/]/
-                  if(special_characters.test(input)){
-                       showMsg("Name of the person contains special character(s)", "Special charactes validations");
-                       __$("textFor"+id).value  = input.replace(special_characters,"")
-                  }else{
 
-                  }
-            }
-        },200);
-    }
-
-    var capitalize_all_interval 
-    function capitalizeAllCharacters(id){
-        capitalize_all_interval ? clearInterval(capitalize_all_interval) : special_characters_interval;
-        capitalize_all_interval = setInterval(function(){
-            console.log(id)
-            if(!__$("textFor"+id)){
-                clearInterval(capitalize_all_interval);
-                return;
-            }
-            __$("textFor"+id).value = __$("textFor"+id).value.toUpperCase();
-            
-
-        },200)
-    }
-
-    function loadDate(id, date){
-        if(__$("textFor"+id) && __$("textFor"+id).value.trim() == ""){
-            resetDate(id, new Date(date));
-        }
-    }
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
