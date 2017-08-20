@@ -340,9 +340,8 @@
                 class="input_cell"
                 fieldtype="date"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
-                tt_onLoad="loadDate('person_mother_birthdate', '<%= (Date.today- 14.years).strftime('%Y-%m-%d') %>');validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
                 optional="true"
-                absolute_max = "<%= (Date.today- 10.years).strftime('%Y-%m-%d') %>"
                  />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
@@ -725,6 +724,7 @@
                class="input_cell"
                fieldtype="date"
                optional="true"
+               tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
 
@@ -976,6 +976,7 @@
                type="text"
                value="<%= @person[:informant][:id_number] rescue nil %>"
                class="input_cell"
+               length = 8
                tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
                optional="true" />
       </div>
@@ -994,6 +995,18 @@
         </select>
       </div>
     </div>
+
+      <div class="field">
+        <label for="person_informant_other_relationship_to_child">Specify Relationship</label><br>
+        <input id="person_informant_other_relationship_to_child"
+               name="person[informant][other_relationship_to_child]"
+               type="text"
+               value="<%= @person[:informant][:other_relationship_to_child] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_informant_relationship_to_child').value.trim().toLowerCase() == 'other'"
+               />
+      </div>
+
     </fieldset>
 
     <fieldset>

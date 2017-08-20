@@ -6303,7 +6303,7 @@ function validateNameLength(person,id,level){
                 var check_space_regex = /\s/;
                 var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,.\/]/
                 if(check_number_regex.test(input)){
-                    showMsg("Name of the person can not contain a number)", "Number in names validations");
+                    showMsg("Name of the person can not contain a number", "Number in names validations");
                     __$("textFor"+id).value  = input.replace(check_number_regex,"")
                 }else if(special_characters.test(input)){
                      showMsg("Name of the person can not contain special character(s)", "Special charactes validations");
