@@ -340,9 +340,8 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                value = "<%= (Date.today- 10.years).strftime('%d/%b/%Y')%>"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
+                tt_onLoad="loadDate('person_mother_birthdate', '<%= (Date.today- 14.years).strftime('%Y-%m-%d') %>');validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
                 optional="true"
                 absolute_max = "<%= (Date.today- 10.years).strftime('%Y-%m-%d') %>"
                  />
@@ -1118,12 +1117,17 @@
                 clearInterval(capitalize_all_interval);
                 return;
             }
-            __$("textFor"+id).value = __$("textFor"+id).value.capitalizeAll();
+            __$("textFor"+id).value = __$("textFor"+id).value.toUpperCase();
             
 
         },200)
     }
-    
+
+    function loadDate(id, date){
+        if(__$("textFor"+id) && __$("textFor"+id).value.trim() == ""){
+            resetDate(id, new Date(date));
+        }
+    }
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
