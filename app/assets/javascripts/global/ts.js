@@ -4877,6 +4877,35 @@ function clickCanGo() {
 
         }
 
+          if(parent.getAttribute("length") && parent.getAttribute("length") > 0){
+            
+            var length = parent.getAttribute("length")? parent.getAttribute("length") : 0;
+            if(__$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length != length){
+                  
+                  showMsg("Entered value has "+__$("textFor" + parent.id).value.trim().length
+                               + " character(s) but the field   expects exactly "+
+                                   length+ " character(s)");
+
+                  if (__$("cell" + i + ".3")) {
+
+                        if (parent.getAttribute("optional") == null) {
+
+                            __$("cell" + i + ".3").innerHTML = "<img src='" + imgUnTick + "' height=60 />";
+
+                        } else {
+
+                            __$("cell" + i + ".3").innerHTML = "";
+
+                        }
+
+                    }
+
+                    return false;
+            }
+
+        }
+
+
         if (parent.getAttribute("optional") == null || (parent.getAttribute("optional") != null && validationControl.value.trim().length > 0)) {
             if (parent.getAttribute("absolute_max") != null) {
                 if (parent.getAttribute("fieldtype") == "date" || parent.getAttribute("fieldtype") == "age") {

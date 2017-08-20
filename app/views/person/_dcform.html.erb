@@ -321,8 +321,7 @@
                tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id')"
                value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
-               word_max_length = 8
-               word_min_length = 8
+               length = 8
                optional="true" />
 
       </div>
@@ -707,6 +706,7 @@
                name="person[father][id_number]"
                type="text"
                value="<%= @person[:father][:id_number] rescue nil %>"
+               length = 8
                class="input_cell"
                tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
                optional="true"/>
