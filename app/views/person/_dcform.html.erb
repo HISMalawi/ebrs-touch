@@ -56,6 +56,7 @@
         <%= (f.text_field :last_name,
         :class => "input_cell",
         :ajaxURL => "/get_last_names",
+        :word_min_length => 2,
         :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
       </div>
@@ -65,6 +66,7 @@
         <br>
         <%= (f.text_field :first_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_first_names",
         :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
@@ -72,7 +74,7 @@
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name, :word_min_length=>2, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -279,6 +281,7 @@
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
                tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
 
@@ -292,6 +295,7 @@
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
+        word_min_length = 2
         tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
         tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
@@ -304,6 +308,7 @@
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
                optional="true"/>
       </div>
@@ -313,9 +318,11 @@
         <input id="person_mother_id_number"
                name="person[mother][id_number]"
                type="text"
+               tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id')"
                value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               word_max_length = 8
+               word_min_length = 8
                optional="true" />
 
       </div>
@@ -662,6 +669,7 @@
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
@@ -671,6 +679,7 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
@@ -687,6 +696,7 @@
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
@@ -699,7 +709,7 @@
                type="text"
                value="<%= @person[:father][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
                optional="true"/>
       </div>
 
@@ -929,6 +939,7 @@
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
@@ -940,6 +951,7 @@
         <input id="person_informant_first_name"
                name="person[informant][first_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
@@ -951,6 +963,7 @@
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
@@ -964,7 +977,7 @@
                type="text"
                value="<%= @person[:informant][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
                optional="true" />
       </div>
 
@@ -1073,7 +1086,44 @@
 <% end %>
 
 <script>
+    var special_characters_interval
+    function checkSpecialCharacters(id){
+        special_characters_interval ? clearInterval(special_characters_interval) : special_characters_interval
+        special_characters_interval = setInterval(function(){
+          if(!__$("textFor"+id)){
+              clearInterval(special_characters_interval);
+              return;
+          }
+           var input  = __$("textFor"+id).value.trim();
+           if(!__$("shield")){
+                  var check_number_regex = /\d/;
+                  var check_space_regex = /\s/;
+                  var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,'.\/]/
+                  if(special_characters.test(input)){
+                       showMsg("Name of the person contains special character(s)", "Special charactes validations");
+                       __$("textFor"+id).value  = input.replace(special_characters,"")
+                  }else{
 
+                  }
+            }
+        },200);
+    }
+
+    var capitalize_all_interval 
+    function capitalizeAllCharacters(id){
+        capitalize_all_interval ? clearInterval(capitalize_all_interval) : special_characters_interval;
+        capitalize_all_interval = setInterval(function(){
+            console.log(id)
+            if(!__$("textFor"+id)){
+                clearInterval(capitalize_all_interval);
+                return;
+            }
+            __$("textFor"+id).value = __$("textFor"+id).value.capitalizeAll();
+            
+
+        },200)
+    }
+    
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
