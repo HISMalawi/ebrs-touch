@@ -311,7 +311,7 @@ module Lib
         birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,
         parents_married_to_each_other:            (person[:parents_married_to_each_other] == 'No' ? 0 : 1),
-        date_of_marriage:                         (person[:date_of_marriage].to_date.to_s rescue nil),
+        date_of_marriage:                         (person[:date_of_marriage] rescue nil),
         gestation_at_birth:                       (params[:gestation_at_birth].blank? ? nil : params[:gestation_at_birth]),
         number_of_prenatal_visits:                (params[:number_of_prenatal_visits].blank? ? nil : params[:number_of_prenatal_visits]),
         month_prenatal_care_started:              (params[:month_prenatal_care_started].blank? ? nil : params[:month_prenatal_care_started]),

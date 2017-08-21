@@ -6169,15 +6169,18 @@ setTimeout("checkScrolls()", 500);
 // init();
 //Custom date validations
 var date_interval ;
-function dateInterval(id,validation_date){
+function dateInterval(id,validation_date,estimatable){
+        date_interval ? clearInterval(date_interval) : date_interval;
         var target = __$(id)
         if(!__$("textFor"+id)){
             clearInterval(date_interval);
             return
         }
         if(target.value.length == 0){
+            console.log(target.getAttribute("absolute_max"));
            resetDate(id,new Date(target.getAttribute("absolute_max")));
         }
+
         date_interval = setInterval(function(){
 
                   var today = new Date();
@@ -6346,7 +6349,6 @@ var capitalize_all_interval
 function capitalizeAllCharacters(id){
         capitalize_all_interval ? clearInterval(capitalize_all_interval) : special_characters_interval;
         capitalize_all_interval = setInterval(function(){
-            console.log(id)
             if(!__$("textFor"+id)){
                 clearInterval(capitalize_all_interval);
                 return;
@@ -6355,7 +6357,7 @@ function capitalizeAllCharacters(id){
             
 
         },200)
-    }
+}
 
 function loadDate(id, date){
         if(__$("textFor"+id) && __$("textFor"+id).value.trim() == ""){
