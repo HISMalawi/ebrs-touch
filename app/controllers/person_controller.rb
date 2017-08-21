@@ -977,9 +977,11 @@ class PersonController < ApplicationController
     @section = "Search Cases"
     @display_ben = true
     @search = true
+    @user = User.find(params[:user_id])
+    User.current = @user
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
-    @records = PersonService.query_for_display(@states)
+    filters = JSON.parse(params['data']) rescue {}
+    @records = PersonService.search_results(filters)
 
     render :template => "person/records", :layout => "data_table"
   end

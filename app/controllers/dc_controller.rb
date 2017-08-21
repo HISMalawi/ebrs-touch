@@ -279,28 +279,46 @@ def incomplete_case_comment
   end
 
   def search
-
   end
 
   def filter
     @filter = params[:filter]
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
-                "Place of Birth", "Mother Name","Father Name",
-                "Mother Address", "Father Address", "Mother Delivery Details",
-                'Birth Details', "Informant Details", 'Record State',
-                'District of Birth', 'Creator(Nurse/Clerk)',
-                "Date of Reporting"
+                "Place of Birth", 'Record Status'
                 ]
+    @statuses = Status.all.map(&:name)
+    users = User.find_by_sql(
+        "SELECT u.username, u.person_id FROM users u
+          INNER JOIN user_role ur ON ur.user_id = u.user_id
+          INNER JOIN role r ON r.role_id = ur.role_id
+         WHERE r.level IN ('DC', 'FC')
+        ")
+
+    @users = []
+    users.each do |u|
+      name = PersonName.where(:person_id => u.person_id).last
+      @users << [
+          "#{name.first_name} #{name.middle_name} #{name.last_name} (#{u.username})".gsub(/\s+/, ' '),
+          u.username
+      ]
+    end
+
+=begin
+    @locations = []
+    locations = Location.find_by_sql("SELECT distinct(location_created_at) AS location_id FROM person_birth_details" ).map(&:location_id)
+    locations.each do |l|
+      @locations << [
+          Location.find(l).name,
+          l
+      ]
+    end
+=end
   end
 
   def rfilter
     @filter = params[:filter]
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
-                "Place of Birth", "Mother Name","Father Name",
-                "Mother Address", "Father Address", "Mother Delivery Details",
-                'Birth Details', "Informant Details", 'Record State',
-                'District of Birth', 'Creator(Nurse/Clerk)',
-                "Date of Reporting"
+                "Place of Birth", 'Record Status', 'Location Created'
     ]
   end
 end
