@@ -54,6 +54,7 @@
         <br>
         <%= (f.text_field :last_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_last_names",
         :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
@@ -64,6 +65,7 @@
         <br>
         <%= (f.text_field :first_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_first_names",
         :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
@@ -71,7 +73,7 @@
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name,:word_min_length => 2, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -257,6 +259,7 @@
         <input id="person_mother_last_name"
                name="person[mother][last_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:mother][:last_name] rescue nil %>"
                ajaxURL = "/get_last_names"
                class="input_cell"
@@ -268,12 +271,13 @@
       <div class="field">
         <label for="person_mother_first_name">First Name</label><br>
         <input id="person_mother_first_name" name="person[mother][first_name]"
-        type="text"
-        value="<%= @person[:mother][:first_name] rescue nil %>"
-        ajaxURL = "/get_first_names"
-        class="input_cell"
-        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
-        tt_onUnload = "appendValue('person_mother_first_name')" />
+              type="text"
+              word_min_length = 2
+              value="<%= @person[:mother][:first_name] rescue nil %>"
+              ajaxURL = "/get_first_names"
+              class="input_cell"
+              tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
+              tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
 
       <div class="field">
@@ -281,6 +285,7 @@
         <input id="person_mother_middle_name"
                name="person[mother][middle_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
@@ -548,6 +553,7 @@
         <input id="person_father_last_name"
                name="person[father][last_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:last_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
@@ -561,6 +567,7 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
@@ -574,6 +581,7 @@
         <input id="person_father_middle_name"
                name="person[father][middle_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
@@ -799,6 +807,7 @@
         <input id="person_informant_designation"
                name="person[informant][designation]"
                type="text"
+               tt_onLoad ="checkSpace('person_informant_designation')"
                value="<%= @person[:informant][:designation] rescue nil %>"
                class="input_cell" />
       </div>
@@ -808,6 +817,7 @@
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
@@ -819,6 +829,7 @@
         <input id="person_informant_first_name"
                name="person[informant][first_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
@@ -830,6 +841,7 @@
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"

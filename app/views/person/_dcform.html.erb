@@ -56,6 +56,7 @@
         <%= (f.text_field :last_name,
         :class => "input_cell",
         :ajaxURL => "/get_last_names",
+        :word_min_length => 2,
         :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
       </div>
@@ -65,6 +66,7 @@
         <br>
         <%= (f.text_field :first_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_first_names",
         :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
@@ -72,7 +74,7 @@
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name, :word_min_length=>2, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -279,6 +281,7 @@
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
                tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
 
@@ -292,6 +295,7 @@
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
+        word_min_length = 2
         tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
         tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
@@ -304,6 +308,7 @@
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
                optional="true"/>
       </div>
@@ -313,9 +318,10 @@
         <input id="person_mother_id_number"
                name="person[mother][id_number]"
                type="text"
+               tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id')"
                value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               length = 8
                optional="true" />
 
       </div>
@@ -333,11 +339,9 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                value = "<%= (Date.today- 10.years).strftime('%d/%b/%Y')%>"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
                 optional="true"
-                absolute_max = "<%= (Date.today- 10.years).strftime('%Y-%m-%d') %>"
                  />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
@@ -662,6 +666,7 @@
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
@@ -671,6 +676,7 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
@@ -687,6 +693,7 @@
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
+               word_min_length = 2
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
@@ -698,8 +705,9 @@
                name="person[father][id_number]"
                type="text"
                value="<%= @person[:father][:id_number] rescue nil %>"
+               length = 8
                class="input_cell"
-               condition="false"
+               tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
                optional="true"/>
       </div>
 
@@ -716,6 +724,7 @@
                class="input_cell"
                fieldtype="date"
                optional="true"
+               tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
 
@@ -929,6 +938,7 @@
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
@@ -940,6 +950,7 @@
         <input id="person_informant_first_name"
                name="person[informant][first_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
@@ -951,6 +962,7 @@
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
@@ -964,7 +976,8 @@
                type="text"
                value="<%= @person[:informant][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               length = 8
+               tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
                optional="true" />
       </div>
 
@@ -982,6 +995,18 @@
         </select>
       </div>
     </div>
+
+      <div class="field">
+        <label for="person_informant_other_relationship_to_child">Specify Relationship</label><br>
+        <input id="person_informant_other_relationship_to_child"
+               name="person[informant][other_relationship_to_child]"
+               type="text"
+               value="<%= @person[:informant][:other_relationship_to_child] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_informant_relationship_to_child').value.trim().toLowerCase() == 'other'"
+               />
+      </div>
+
     </fieldset>
 
     <fieldset>
