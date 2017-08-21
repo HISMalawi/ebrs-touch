@@ -226,8 +226,8 @@ module Lib
           :home_village       => home_village_id,
           :citizenship            => Location.where(country: informant[:citizenship]).last.id,
           :residential_country    => Location.locate_id_by_tag(informant[:residential_country], 'Country'),
-          :address_line_1         => informant[:addressline_1],
-          :address_line_2         => informant[:addressline_2]
+          :address_line_1         => informant[:addressline1],
+          :address_line_2         => informant[:addressline2]
       )
 
     end
