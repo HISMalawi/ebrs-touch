@@ -301,6 +301,16 @@ module Lib
       type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
     end
 
+    rel = nil
+    if params[:informant_same_as_mother] == 'Yes'
+      rel = 'Mother'
+    elsif params[:informant_same_as_father] == 'Yes'
+      rel = 'Father'
+    else
+      rel = params[:person][:informant][:relationship_to_person] rescue nil
+    end
+
+
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
@@ -323,7 +333,7 @@ module Lib
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
         form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
-        informant_relationship_to_person:          params[:person][:informant][:relationship_to_person],
+        informant_relationship_to_person:          rel,
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
         acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
         location_created_at:                      SETTINGS['location_id'],
