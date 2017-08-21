@@ -1506,8 +1506,8 @@
         var section =  parseInt(__$("textForperson_mother_home_district").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
     }
@@ -1586,8 +1586,8 @@
         var section =  parseInt(__$("textForperson_mother_home_country").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
 
@@ -1783,7 +1783,7 @@
 
     function setpersonName() {
        __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
-       }
+    }
 
     init();
 

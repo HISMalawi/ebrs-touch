@@ -37,7 +37,7 @@
       <%= f.hidden_field :_rev rescue "" %>
       <%= f.hidden_field :place_of_birth, :value => Location.where(location_id: SETTINGS['location_id']).first.name %>
       <%= f.hidden_field :hospital_of_birth, :value => "#{Location.current.name}"  %>
-      <%= f.hidden_field :birth_district, :value => @current_district %>
+      <input type="hidden" id="person_birth_district" name="person[birth_district]" value="<%=Location.find(Location.current.parent_location).name%>">
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
       <input id="person_original_surname" type="hidden"/>
       
@@ -792,25 +792,13 @@
     </fieldset>
 
     <fieldset>
-      <legend><font size='5' style=''>Details of Informant</font></legend>
+      <legend><font size='5' style='border: 2px;'>Details of Informant</font></legend>
 
       <!-- Informant -->
 
       <div class="field">
         <label for="informant_same_as_mother">Mother is informant?</label><br>
-        <select id="informant_same_as_mother" name="informant_same_as_mother" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_mother').value.trim() == 'Yes'){setTimeout(function(){loadMothersDetails()}, 60);} else {unloadInformantsDetails();}" >
-          <option></option>
-          <option value="Yes" >Yes</option>
-          <option value="No" >No</option>
-
-        </select>
-
-       </div>
-
-        <div class="field">
-        <label for="informant_same_as_father">Father is informant?</label><br>
-        <select id="informant_same_as_father" name="informant_same_as_father" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
-                condition="__$('person_father_last_name').value.trim().length > 0 && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes');">
+        <select id="informant_same_as_mother" name="informant_same_as_mother" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_mother').value.trim() == 'Yes'){setTimeout(function(){loadMothersDetails()}, 60);} else {unloadInformantsDetails();}">
           <option></option>
           <option value="Yes" >Yes</option>
           <option value="No" >No</option>
@@ -819,7 +807,18 @@
 
       </div>
 
-     <div class="field">
+      <div class="field">
+        <label for="informant_same_as_father">Father is informant?</label><br>
+        <select id="informant_same_as_father" name="informant_same_as_father" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
+           condition="__$('person_father_last_name').value.trim().length > 0 && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes');">
+          <option></option>
+          <option value="Yes" >Yes</option>
+          <option value="No" >No</option>
+
+        </select>
+
+
+      <div class="field">
         <label for="person_informant_last_name">Surname</label><br>
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
@@ -847,22 +846,24 @@
         <label for="person_informant_middle_name">Other Name</label><br>
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
-               word_min_length = 2
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
                class="input_cell" optional="true" />
       </div>
-      
+
       <div class="field">
         <label for="person_informant_id_number">ID Number</label><br>
-        <input id="person_informant_id_number" 
-               name="person[informant][id_number]" 
-               type="text" 
+        <input id="person_informant_id_number"
+               name="person[informant][id_number]"
+               type="text"
                value="<%= @person[:informant][:id_number] rescue nil %>"
-               tt_onLoad ="checkSpecialCharacters('person_informant_id_number')"
-               class="input_cell" optional="true" />
+               class="input_cell"
+               length = 8
+               tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
+               optional="true" />
       </div>
 
       <div class="field">
@@ -894,27 +895,23 @@
     </fieldset>
 
     <fieldset>
-      <legend><font size='5' style=''>Details of  Informant continued: Address</font></legend>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
 
       <div class="field">
         <label for="person_informant_current_district">District</label><br>
-        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>"
-               class="input_cell"  ajaxURL = "/search_by_district"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);"
-               optional="true"/>
+        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);" optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_current_ta">T/A</label><br>
-        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_ta"
-               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);"
-               optional="true"/>
+        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>" class="input_cell" ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);" optional="true"/>
       </div>
 
       <div class="field">
         <label for="person_informant_current_village">Village</label><br>
-        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>"  ajaxURL="/search_by_village" class="input_cell" optional="true"/>
+        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>" ajaxURL="/search_by_village" class="input_cell" optional="true"/>
       </div>
 
       <div class="field">
@@ -930,14 +927,14 @@
 
       </fieldset>
       <fieldset>
-      <legend><font size='5' style=''>Details of Informant continued.. </font></legend>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued.. </font></legend>
 
       <div class="field">
 
         <label for="person_informant_phone_number">Phone Number</label><br>
 
         <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
-               class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})$|N\/A' regex_message="Please enter a valid phone number" />
+               class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" />
 
       </div>
 
@@ -962,12 +959,12 @@
                           :tt_onLoad =>"dateInterval('person_acknowledgement_of_receipt_date');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
-                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>
+                          :absolute_max => Date.today.strftime('%Y-%m-%d')) rescue "" %>  
 
       </div>
 
       <div class="field">
-        <label for="person_copy_mother_name">Replace Child Surname with Mother Maiden Surname?</label>
+        <label for="person_copy_mother_name">Replace person Surname with Mother Maiden Surname?</label>
         <br>
         <select id="person_copy_mother_name"
                 name="copy_mother_name"
@@ -980,8 +977,6 @@
       </div>
 
     </fieldset>
-
-
 
     <div class="actions">
       <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
@@ -1474,8 +1469,8 @@
         var section =  parseInt(__$("textForperson_mother_home_district").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
     }
 
@@ -1553,8 +1548,8 @@
         var section =  parseInt(__$("textForperson_mother_home_country").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
     }
 
@@ -1665,6 +1660,10 @@
         }
 
 
+    }
+
+    function setpersonName() {
+       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
     }
 
     function appendValue(id){
