@@ -152,6 +152,10 @@ module PersonService
   end
 
   def self.search_results(filters={})
+
+    if filters.blank?
+      return []
+    end
     entry_num_query = ''; fac_serial_query = ''; name_query = ''; limit = ' '
     limit = ' LIMIT 10 ' if filters.blank?
     gender_query = ''; place_of_birth_query = ''; status_query=''
