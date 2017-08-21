@@ -1,4 +1,10 @@
-<% session['list_url'] = request.path%>
+<% if request.referrer.match("/search")
+    session['list_url'] = '/search'
+   else
+     session['list_url'] = request.path
+   end
+%>
+
 
 <style>
 
@@ -66,12 +72,15 @@
 
           <table class='action-buttons' style="width: 100%; text-align: center; border-style: none;" cellpadding="0">
             <tr>
-              <td class="action-button"><button class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.path%>'">
+              <td class="action-button">
+                <button url='/person/<%= record['id']%>?next_path=<%= request.path%>' class="btn btn-info" onmousedown="window.location = '/person/<%= record['id']%>?next_path=<%= request.path%>'">
                 <%= image_tag "view.png", class: 'btn-images' %></button>
               </td>
               <td class="Edit_Record"
                   style="display:<%= display%>;"
-                  class="action-button"><button class="btn btn-warning" onmousedown="window.location = '/person/<%= record['id']%>/edit?next_path=<%= request.path%>'">
+                  class="action-button">
+                <button url='/person/<%= record['id']%>/edit?next_path=<%= request.path%>' class="btn btn-warning"
+                        onmousedown="window.location = '/person/<%= record['id']%>/edit?next_path=<%= request.path%>'">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>
               </td>
               <td class="Void_Record"
