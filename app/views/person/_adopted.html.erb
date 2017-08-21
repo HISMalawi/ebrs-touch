@@ -254,7 +254,7 @@
       <div class="field">
         <label for="person_type_of_birth">Type of birth</label>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell">
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
