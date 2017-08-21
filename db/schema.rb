@@ -279,9 +279,9 @@ end
 
   create_table "person_name", primary_key: "person_name_id", force: :cascade do |t|
     t.integer  "person_id",   limit: 4,               null: false
-    t.string   "first_name",  limit: 45,              null: false
-    t.string   "middle_name", limit: 45
-    t.string   "last_name",   limit: 45,              null: false
+    t.string   "first_name",  limit: 50,              null: false
+    t.string   "middle_name", limit: 50
+    t.string   "last_name",   limit: 50,              null: false
     t.integer  "voided",      limit: 1,   default: 0, null: false
     t.string   "void_reason", limit: 100
     t.integer  "voided_by",   limit: 4

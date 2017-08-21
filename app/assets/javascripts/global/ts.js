@@ -6169,15 +6169,17 @@ setTimeout("checkScrolls()", 500);
 // init();
 //Custom date validations
 var date_interval ;
-function dateInterval(id,validation_date){
+function dateInterval(id,validation_date,estimatable){
+        date_interval ? clearInterval(date_interval) : date_interval;
         var target = __$(id)
         if(!__$("textFor"+id)){
             clearInterval(date_interval);
             return
         }
-        if(target.value.length == 0){
+        /*if(target.value.length == 0){
            resetDate(id,new Date(target.getAttribute("absolute_max")));
-        }
+        }*/
+
         date_interval = setInterval(function(){
 
                   var today = new Date();
@@ -6194,8 +6196,13 @@ function dateInterval(id,validation_date){
                       input_value  = __$("textFor"+id).value;
                   }
 
+                  if(input_value.length == 0){
+                     return;
+                  }
+
                   var parts = input_value.split("/");
-                  if(parts[0] == 0 ){
+                  if(parts[0] == 0 && input_value.length != 0){
+
                      __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
                      __$("txtDateFor"+id).value = "?"
                      target.setAttribute("absolute_max",today.format());
@@ -6317,4 +6324,47 @@ function validateNameLength(person,id,level){
 
       },200);
       //clearInterval(spaceInterval);
+}
+
+var special_characters_interval
+function checkSpecialCharacters(id){
+        special_characters_interval ? clearInterval(special_characters_interval) : special_characters_interval
+        special_characters_interval = setInterval(function(){
+          if(!__$("textFor"+id)){
+              clearInterval(special_characters_interval);
+              return;
+          }
+           var input  = __$("textFor"+id).value.trim();
+           if(!__$("shield")){
+                  var check_number_regex = /\d/;
+                  var check_space_regex = /\s/;
+                  var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,'.\/]/
+                  if(special_characters.test(input)){
+                       showMsg("Name of the person contains special character(s)", "Special charactes validations");
+                       __$("textFor"+id).value  = input.replace(special_characters,"")
+                  }else{
+
+                  }
+            }
+        },200);
+}
+
+var capitalize_all_interval 
+function capitalizeAllCharacters(id){
+        capitalize_all_interval ? clearInterval(capitalize_all_interval) : special_characters_interval;
+        capitalize_all_interval = setInterval(function(){
+            if(!__$("textFor"+id)){
+                clearInterval(capitalize_all_interval);
+                return;
+            }
+            __$("textFor"+id).value = __$("textFor"+id).value.toUpperCase();
+            
+
+        },200)
+}
+
+function loadDate(id, date){
+        if(__$("textFor"+id) && __$("textFor"+id).value.trim() == ""){
+            resetDate(id, new Date(date));
+        }
 }

@@ -88,7 +88,6 @@
         <%= (f.text_field :birthdate,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
-                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_birthdate')",
@@ -223,7 +222,7 @@
       <div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
@@ -319,7 +318,7 @@
                 class="input_cell"
                 fieldtype="date"
                 optional="true"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)" />
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');" />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
@@ -613,7 +612,7 @@
                fieldtype="date"
                optional="true"
                condition="__$('parents_details_available').value.trim() == 'Father' || __$('parents_details_available').value.trim() == 'Both'"
-               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
+               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
         <input id="person_father_birthdate_estimated"
         			 name="person[father][birthdate_estimated]"
@@ -860,27 +859,28 @@
       </div>
 
       <div class="field">
-        <label for="person_informant_relationship_to_child">Relationship To Child</label><br>
-        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell">
+        <label for="person_informant_relationship_to_person">Relationship To person</label><br>
+        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
+      </div>
     </div>
 
-    <div class="field">
-        <label for="person_informant_other_relationship_to_child">Specify Relationship</label><br>
-        <input id="person_informant_other_relationship_to_child"
-               name="person[informant][other_relationship_to_child]"
+      <div class="field">
+        <label for="other_informant_relationship_to_person">Specify Relationship</label><br>
+        <input id="other_informant_relationship_to_person"
+               name="person[informant][other_informant_relationship_to_person]"
                type="text"
-               value="<%= @person[:informant][:other_relationship_to_child] rescue nil %>"
+               value="<%= @person[:informant][:other_informant_relationship_to_person] rescue nil %>"
                class="input_cell"
-               condition="__$('person_informant_relationship_to_child').value.trim().toLowerCase() == 'other'"
+               condition="__$('person_informant_relationship_to_person').value.trim().toLowerCase() == 'other'"
                />
       </div>
 
@@ -951,6 +951,7 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
+                          :tt_onLoad => "dateInterval('person_acknowledgement_of_receipt_date');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
@@ -1294,11 +1295,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "Father";
+            __$("person_informant_relationship_to_person").value = "Father";
 
-            __$("textForperson_informant_relationship_to_child").value = "Father";
+            __$("textForperson_informant_relationship_to_person").value = "Father";
 
         }
 
@@ -1522,11 +1523,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "Mother";
+            __$("person_informant_relationship_to_person").value = "Mother";
 
-            __$("textForperson_informant_relationship_to_child").value = "Mother";
+            __$("textForperson_informant_relationship_to_person").value = "Mother";
 
         }
 
@@ -1591,11 +1592,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "";
+            __$("person_informant_relationship_to_person").value = "";
 
-            __$("textForperson_informant_relationship_to_child").value = "";
+            __$("textForperson_informant_relationship_to_person").value = "";
 
         }
 

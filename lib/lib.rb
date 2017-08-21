@@ -311,7 +311,7 @@ module Lib
         birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,
         parents_married_to_each_other:            (person[:parents_married_to_each_other] == 'No' ? 0 : 1),
-        date_of_marriage:                         (person[:date_of_marriage].to_date.to_s rescue nil),
+        date_of_marriage:                         (person[:date_of_marriage] rescue nil),
         gestation_at_birth:                       (params[:gestation_at_birth].blank? ? nil : params[:gestation_at_birth]),
         number_of_prenatal_visits:                (params[:number_of_prenatal_visits].blank? ? nil : params[:number_of_prenatal_visits]),
         month_prenatal_care_started:              (params[:month_prenatal_care_started].blank? ? nil : params[:month_prenatal_care_started]),
@@ -324,7 +324,7 @@ module Lib
         form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          params[:person][:informant][:relationship_to_person],
-        other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person] == "Other" ? (params[:person][:informant][:other_relationship_to_child] rescue nil) : nil),
+        other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
         acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
         location_created_at:                      SETTINGS['location_id'],
         date_registered:                          (Date.today.to_s)
