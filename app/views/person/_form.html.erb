@@ -211,7 +211,7 @@
                ajaxURL = "/get_last_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
-               tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
+               tt_onUnload = "appendValue('person_mother_first_name');setpersonName()" />
 
       </div>
 
@@ -1663,6 +1663,7 @@
     }
 
     function setpersonName() {
+      
        __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
     }
 
