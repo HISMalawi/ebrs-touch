@@ -616,7 +616,7 @@ class PersonController < ApplicationController
 
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
-  parent_location = Location.where(name: params[:district]).last.id rescue nil
+  parent_location = Location.where(" name = '#{params[:district]}' AND COALESCE(code, '') != '' ").first.id rescue nil
 
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND parent_location = #{parent_location} AND m.location_tag_id = ?",
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
@@ -970,6 +970,18 @@ class PersonController < ApplicationController
     PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason']}", "Ammendment request; #{params['reason']}");
 
     redirect_to session['list_url']
+  end
+
+  def searched_cases
+    @states = Status.all.map(&:name)
+    @section = "Search Cases"
+    @display_ben = true
+    @search = true
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "person/records", :layout => "data_table"
   end
   #########################################################################
 

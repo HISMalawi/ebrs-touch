@@ -10,16 +10,7 @@
         min-width: 250px !important;
         width: 500px !important;
     }
-    #fixedkeyboard{
-        max-width: 800px !important;
-    }
 
-    #textForperson_birth_entry_number{
-        text-transform: uppercase;
-    }
-    #textForperson_facility_serial_number{
-        text-transform: uppercase;
-    }
 </style>
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 <fieldset>
@@ -38,24 +29,5 @@
 <% end %>
 <script type="text/javascript">
 	init();
-    function resize(){}
-
-    function setDistrict(place) {
-
-        if (place == 'district') {
-            __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.find(SETTINGS['location_id']).district %>" ;
-
-            try{
-                __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
-            }catch(e){
-
-            }
-
-        } else {
-
-            __$('person_birth_district').value = "<%= Location.find(SETTINGS['location_id']).district %>" ;
-
-        }
-    }
 
 </script>

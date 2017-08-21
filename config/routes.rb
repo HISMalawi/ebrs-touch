@@ -136,6 +136,8 @@ Rails.application.routes.draw do
   get 'person/ammend_case'
   get 'person/do_ammend'
   get '/search' => 'dc#search'
+  get '/searched_cases' => 'person#searched_cases'
+
   get '/filter' => 'dc#filter'
   get '/rfilter' => 'dc#rfilter'
 

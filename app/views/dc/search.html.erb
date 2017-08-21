@@ -11,6 +11,7 @@
         left: 20%;
         border: 1px solid #000;
         background: white;
+        z-index: 3000;
     }
     .btn-badge{
         border-radius: 0px !important;
@@ -42,7 +43,6 @@
         border: 1px solid black;
     }
     .value{
-        font-style: italic;
     }
 </style>
 <table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
@@ -89,11 +89,15 @@
     </tr>
 
       <tr>
-        <td  valign='top' colspan="2" style="min-height: 70vh; height: 70vh;">
+        <td  valign='top' colspan="2" style="min-height: 50vh;">
+            <iframe src="/searched_cases"  style="width: 100%; height: 70vh;" colSpan="2">
 
+            </iframe>
         </td>
       </tr>
 </table>
+<div id='shieldd' style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;z-index: 2000; background: black; opacity: 0.3; display: none">
+</div>
 
 
 <script type="text/javascript">
@@ -107,6 +111,7 @@
     }
 
     function showFilterWindow(){
+        __$('shieldd').style.display = 'block';
         var frm = document.createElement('iframe');
         frm.id = 'filter-frame';
         frm.src = '/filter';
@@ -114,18 +119,23 @@
     }
 
     function removeFilterWindow(){
-        var frm = document.createElement('iframe');
-        frm.id = 'rfilter-frame';
-        frm.src = '/rfilter';
-        document.body.appendChild(frm);
+        if(__$('remove').className.match(/red/)) {
+            __$('shieldd').style.display = 'block';
+            var frm = document.createElement('iframe');
+            frm.id = 'rfilter-frame';
+            frm.src = '/rfilter';
+            document.body.appendChild(frm);
+        }
     }
 
     function hideFilterWindow(){
         __$('filter-frame').parentNode.removeChild(__$('filter-frame'));
+        __$('shieldd').style.display = 'none';
     }
 
     function hiderFilterWindow(){
         __$('rfilter-frame').parentNode.removeChild(__$('rfilter-frame'));
+        __$('shieldd').style.display = 'none';
     }
 
     function addFilter(data){
@@ -145,16 +155,20 @@
         __$('filter-names').appendChild(badge);
     }
 
+    function removeFilter(filter){
+        __$(filter).parentNode.removeChild(__$(filter));
+    }
+
     setInterval(function(){
         if(__$('filter-frame') && __$('filter-frame').contentDocument && __$('filter-frame').contentDocument.getElementById('btn0')) {
-            btn = __$('filter-frame').contentDocument.getElementById('btn0');
+            var btn = __$('filter-frame').contentDocument.getElementById('btn0');
             btn.onmousedown = function () {
                 hideFilterWindow();
             }
 
             __$('filter-frame').contentDocument.forms[0].submit = function(){
-                data = {}
-                sets = __$('filter-frame').contentWindow.navigablefieldsets;
+                var data = {}
+                var sets = __$('filter-frame').contentWindow.navigablefieldsets;
                 for (var i = 0; i < sets.length; i++) {
                     if (sets[i][0].value.length > 0) {
                         data[sets[i][0].name] = sets[i][0].value;
@@ -165,5 +179,17 @@
                 hideFilterWindow();
             };
         }
-    }, 200)
+        if(__$('rfilter-frame') && __$('rfilter-frame').contentDocument && __$('rfilter-frame').contentDocument.getElementById('btn0')) {
+            var btn = __$('rfilter-frame').contentDocument.getElementById('btn0');
+            btn.onmousedown = function () {
+                hiderFilterWindow();
+            }
+
+            __$('rfilter-frame').contentDocument.forms[0].submit = function() {
+                var filter = __$('rfilter-frame').contentDocument.getElementById('filters').value;
+                removeFilter(filter);
+                hiderFilterWindow();
+            }
+        }
+    }, 200);
 </script>
