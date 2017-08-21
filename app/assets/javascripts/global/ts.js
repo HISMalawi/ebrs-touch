@@ -6176,10 +6176,9 @@ function dateInterval(id,validation_date,estimatable){
             clearInterval(date_interval);
             return
         }
-        if(target.value.length == 0){
-            console.log(target.getAttribute("absolute_max"));
+        /*if(target.value.length == 0){
            resetDate(id,new Date(target.getAttribute("absolute_max")));
-        }
+        }*/
 
         date_interval = setInterval(function(){
 
@@ -6197,8 +6196,13 @@ function dateInterval(id,validation_date,estimatable){
                       input_value  = __$("textFor"+id).value;
                   }
 
+                  if(input_value.length == 0){
+                     return;
+                  }
+
                   var parts = input_value.split("/");
-                  if(parts[0] == 0 ){
+                  if(parts[0] == 0 && input_value.length != 0){
+
                      __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
                      __$("txtDateFor"+id).value = "?"
                      target.setAttribute("absolute_max",today.format());

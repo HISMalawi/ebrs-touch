@@ -162,6 +162,7 @@
                           class="input_cell"
                           condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
                           fieldtype="date"
+                          tt_onLoad = "dateInterval('person_date_of_marriage')"
                           optional=true
                           absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>" >
       </div>
