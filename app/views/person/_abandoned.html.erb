@@ -936,7 +936,8 @@
        <div class="field">
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
-        <select id="form_signed" name="person[form_signed]" class="input_cell">
+        <select id="form_signed" name="person[form_signed]" class="input_cell"
+               tt_onUnLoad="summaryFields()">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -1720,31 +1721,37 @@
   }
 
 
-    var full_place_of_birth;
+  function summaryFields(){
+            var full_place_of_birth;
 
-    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
-    {
-    	full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+            if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+            {
+              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
 
+            }
+            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+            {
+
+              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+            }
+            else {
+
+              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+            }
+
+
+            summaryHash = {
+                            "person Name" : ["person_first_name","person_middle_name","person_last_name"],
+                            "person Gender" : ["person_gender"],
+                            "person Date of Birth" : ["person_birthdate"],
+                            "Place of Birth"    : ["person_place_of_birth"],
+                            "Location of Birth" : full_place_of_birth,
+                            "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                            "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                            "Form Signed by Informant?" : ["form_signed"],
+                            "Delayed Registration" : ['registration_type']
+                           };
     }
-      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
-    {
-    	full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
-    }
-    else {
-
-      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-    }
-
-
-    summaryHash = {
-                    "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
-                    "Child Gender" : ["person_gender"],
-                    "Child Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : full_place_of_birth,
-                    "Form Signed by Informant?" : ["form_signed"],
-                    "Delayed Registration" : ['registration_type']
-                   };
 
     function updateRegistrationType()
     {
