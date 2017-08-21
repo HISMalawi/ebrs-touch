@@ -11,6 +11,7 @@
         left: 20%;
         border: 1px solid #000;
         background: white;
+        z-index: 3000;
     }
     .btn-badge{
         border-radius: 0px !important;
@@ -42,8 +43,8 @@
         border: 1px solid black;
     }
     .value{
-        font-style: italic;
     }
+
 </style>
 <table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
   <caption style="text-align: left;">
@@ -89,11 +90,20 @@
     </tr>
 
       <tr>
-        <td  valign='top' colspan="2" style="min-height: 70vh; height: 70vh;">
+        <td  valign='top' colspan="2" style="min-height: 50vh;">
+          <form id='frm1' name="form1" action="/searched_cases" target="myIframe" method="POST">
+           <input name="data" id="data" type="hidden"/>
+            <input name="user_id" id="user_id" type="hidden" value="<%=User.current.id%>"/>
+          </form>
 
+          <iframe name="myIframe" id='search-frame' src="/searched_cases?user_id=<%=User.current.id%>"  style="width: 100%; height: 70vh;" colSpan="2">
+
+            </iframe>
         </td>
       </tr>
 </table>
+<div id='shieldd' style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;z-index: 2000; background: black; opacity: 0.3; display: none">
+</div>
 
 
 <script type="text/javascript">
@@ -107,6 +117,7 @@
     }
 
     function showFilterWindow(){
+        __$('shieldd').style.display = 'block';
         var frm = document.createElement('iframe');
         frm.id = 'filter-frame';
         frm.src = '/filter';
@@ -114,23 +125,32 @@
     }
 
     function removeFilterWindow(){
-        var frm = document.createElement('iframe');
-        frm.id = 'rfilter-frame';
-        frm.src = '/rfilter';
-        document.body.appendChild(frm);
+        if(__$('remove').className.match(/red/)) {
+            __$('shieldd').style.display = 'block';
+            var frm = document.createElement('iframe');
+            frm.id = 'rfilter-frame';
+            frm.src = '/rfilter';
+            document.body.appendChild(frm);
+        }
     }
 
     function hideFilterWindow(){
         __$('filter-frame').parentNode.removeChild(__$('filter-frame'));
+        __$('shieldd').style.display = 'none';
     }
 
     function hiderFilterWindow(){
         __$('rfilter-frame').parentNode.removeChild(__$('rfilter-frame'));
+        __$('shieldd').style.display = 'none';
     }
 
     function addFilter(data){
         var badge = document.createElement('span');
         badge.id =  data['filter_name'];
+        badge.className = 'data-badge';
+        badge.setAttribute('data', JSON.stringify(data));
+        console.log(JSON.stringify(data));
+
         var str = "<div class='btn-badge'><table  style='background: ghostwhite'> <caption>"+ data['filter_name'] + "</caption>";
         for(var k in data){
             var d =  data[k];
@@ -145,25 +165,72 @@
         __$('filter-names').appendChild(badge);
     }
 
+    function removeFilter(filter){
+        __$(filter).parentNode.removeChild(__$(filter));
+    }
+
     setInterval(function(){
         if(__$('filter-frame') && __$('filter-frame').contentDocument && __$('filter-frame').contentDocument.getElementById('btn0')) {
-            btn = __$('filter-frame').contentDocument.getElementById('btn0');
+            var btn = __$('filter-frame').contentDocument.getElementById('btn0');
             btn.onmousedown = function () {
                 hideFilterWindow();
             }
 
             __$('filter-frame').contentDocument.forms[0].submit = function(){
-                data = {}
-                sets = __$('filter-frame').contentWindow.navigablefieldsets;
+                var data = {}
+                var sets = __$('filter-frame').contentWindow.navigablefieldsets;
                 for (var i = 0; i < sets.length; i++) {
                     if (sets[i][0].value.length > 0) {
                         data[sets[i][0].name] = sets[i][0].value;
                     }
                 }
 
-                addFilter(data);
+                if (Object.keys(data).length > 1) {
+                    addFilter(data);
+                }
+
                 hideFilterWindow();
             };
         }
-    }, 200)
+        if(__$('rfilter-frame') && __$('rfilter-frame').contentDocument && __$('rfilter-frame').contentDocument.getElementById('btn0')) {
+            var btn = __$('rfilter-frame').contentDocument.getElementById('btn0');
+            btn.onmousedown = function () {
+                hiderFilterWindow();
+            }
+
+            __$('rfilter-frame').contentDocument.forms[0].submit = function() {
+                var filter = __$('rfilter-frame').contentDocument.getElementById('filters').value;
+                removeFilter(filter);
+                hiderFilterWindow();
+            }
+        }
+
+        if(__$('search-frame') && __$('search-frame').contentDocument && __$('search-frame').contentDocument.getElementsByClassName('red').length > 0) {
+            var btn =  __$('search-frame').contentDocument.getElementsByClassName('red')[0];
+            btn.onmousedown = function () {
+               window.location = '/'
+            }
+
+            var buttons =__$('search-frame').contentDocument.getElementsByClassName('btn');
+            for (var i = 0; i < buttons.length; i++){
+
+                buttons[i].onmousedown = function(){
+                    window.location = this.getAttribute('url');
+                }
+            }
+        }
+    }, 200);
+
+    function search(){
+        var filters = {};
+        var form = document.createElement('form');
+
+        var badges = document.getElementsByClassName('data-badge');
+        for(var i = 0; i < badges.length; i++){
+            var data = JSON.parse(badges[i].getAttribute('data'));
+            filters[data['filter_name']] = data;
+        }
+        __$('data').value = JSON.stringify(filters);
+        __$('frm1').submit();
+    }
 </script>

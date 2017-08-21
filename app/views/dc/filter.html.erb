@@ -165,15 +165,19 @@
              condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
              ajaxURL = "/search_by_district"
              tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);"
-             tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_bd_holder').value + '&ta=' + __$('textForperson_birth_ta').value);">
+            >
     </div>
+</fieldset>
+
+<fieldset>
   <legend><font size='5' style='border: 2px;'>Village of Birth</font></legend>
   <div class="field">
     <label for="person_birth_village">Village</label>
     <br>
     <input type="text" name="person[birth_village]" class = "input_cell"
            id="person_birth_village"
-           condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+           condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home' "
+           tt_onload = "__$('person_birth_village').setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_bd_holder').value + '&ta=' + __$('person_birth_ta').value);"
            ajaxURL = "/search_by_village">
   </div>
 </fieldset>
@@ -187,6 +191,32 @@
       <input type="text" name="other_birth_place" class ="input_cell"
              condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place">
     </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Record Status</font></legend>
+  <div class="field">
+    <label for="person_record_status">Record Status</label><br>
+    <select condition = "__$('filters').value == 'Record Status' "  id="person_record_status" name="person[record_status]" class="input_cell">
+      <option></option>
+      <% @statuses.each do |s|%>
+        <option><%= s%></option>
+      <% end %>
+    </select>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Record Creator</font></legend>
+  <div class="field">
+    <label for="person_users">Record Creator</label><br>
+    <select condition = "__$('filters').value == 'Creator' "  id="person_users" name="person[creator]" class="input_cell">
+      <option></option>
+      <% @users.each do |name, id|%>
+          <option value="<%= id%>"><%= name%></option>
+      <% end %>
+    </select>
+  </div>
 </fieldset>
 
 <% end %>
