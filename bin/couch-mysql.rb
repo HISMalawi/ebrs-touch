@@ -41,7 +41,54 @@ $client = Mysql2::Client.new(:host => mysql_host,
 )
 class Methods
   def self.update_doc(doc)
-    `rails runner bin/save_from_couch.rb '#{doc.to_json}'`
+    client = $client; table = doc['type']; p_key = doc.keys[2]; p_value = doc[p_key]
+    return nil if p_value.blank?
+
+    rows = client.query("SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
+    data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
+
+    if !rows.blank?
+      row = rows[0]
+      update_query = "UPDATE #{table} SET "
+      data.each do |k, v|
+        next if ['null'].include[doc[k]] && row[k].blank?
+
+        if k.match(/\_at$|^date\_|\_date$/)
+          v = v.to_datetime.to_s(:db) rescue v
+        end
+
+        unless ['national_serial_number', 'facility_serial_number', 'district_id_number', 'birth_weight',
+                'gestation_at_birth', 'number_of_prenarital_visits', 'month_of_care_started'].include?(k) and (v.blank? || v == 'null')
+          update_query += " #{k} = \"#{v}\", "
+        end
+      end
+      update_query = update_query.strip.sub(/\,$/, '')
+      update_query += " WHERE #{p_key} = '#{p_value}' "
+      out = client.query(update_query) rescue (raise update_query.to_s)
+    else
+      insert_query = "INSERT INTO #{table} ("
+      keys = []
+      values = []
+
+      data.each do |k, v|
+
+        if (['national_serial_number', 'facility_serial_number', 'district_id_number', 'birth_weight',
+        'gestation_at_birth', 'number_of_prenarital_visits', 'month_of_care_started'].include?(k) and (v.blank? || v == 'null'))
+          next
+        end
+
+        if k.match(/updated_at|created_at|changed_at|date/)
+          v = v.to_datetime.to_s(:db) rescue v
+        end
+        keys << k
+        values << v
+
+      end
+
+      insert_query += (keys.join(', ') + " ) VALUES (" )
+      insert_query += ( "\"" + values.join( "\", \"")) + "\")"
+      client.query(insert_query) rescue nil # (raise insert_query.to_s)
+    end
   end
 end
 

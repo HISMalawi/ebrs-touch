@@ -13,3 +13,4 @@ class SyncCheck
     SyncCheck.perform_in(2*60)
   end rescue (SyncCheck.perform_in(2*60))
 end
+
