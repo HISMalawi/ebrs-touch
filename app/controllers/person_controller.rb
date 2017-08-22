@@ -195,7 +195,7 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{loc(@informant_address.home_district, 'District')rescue nil}",
+                "Physical Address, District" => "#{loc(@informant_address.current_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
                 "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },

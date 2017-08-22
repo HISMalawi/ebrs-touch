@@ -81,7 +81,7 @@
 
 <% end %>
 
-<% if @folders.include?("Approved by ADR") %>
+<% if @folders.include?("Approved by ADR") && SETTINGS['application_mode'] == 'DC'%>
 
     <div class="button child_menu manage_cases" onclick="window.location = '/view_approved_cases'" tag=0 title="View Approved Cases">
       <table style="text-align: left;">
