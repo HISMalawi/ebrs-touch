@@ -335,7 +335,7 @@ module Lib
         level_of_education_id:                    (LevelOfEducation.where(name: person[:level_of_education]).last.id rescue 1),
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
-        form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
+        form_signed:                              (person[:form_signed] == 'Yes' ? 1 : 0),
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          rel,
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
