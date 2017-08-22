@@ -1055,7 +1055,8 @@
        <div class="field">
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
-        <select id="form_signed" name="person[form_signed]" class="input_cell">
+        <select id="form_signed" name="person[form_signed]" 
+            class="input_cell" tt_onUnLoad = "summaryFields()">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -1782,7 +1783,6 @@
 
 
     function setpersonName() {
-        console.log("__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
 
        __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
     }
@@ -1792,99 +1792,106 @@
 
     function clearRelated(){
       if (__$('del')){
-      __$('del').onmousedown = function () {
+        __$('del').onmousedown = function () {
 
-        if (target) {
+          if (target) {
 
-          if ("N/A" == target.value.trim()) {
+            if ("N/A" == target.value.trim()) {
 
-            target.value = "";
+              target.value = "";
 
-          } else {
+            } else {
 
-            target.value = target.value.trim().substring(0, (target.value.trim().length - 1));
+              target.value = target.value.trim().substring(0, (target.value.trim().length - 1));
 
-          }
+            }
 
-          if(target.getAttribute("target") == "person_mother_current_district"){
+            if(target.getAttribute("target") == "person_mother_current_district"){
 
-            __$("person_mother_current_ta").value = "";
-            __$("person_mother_current_village").value = "";
+              __$("person_mother_current_ta").value = "";
+              __$("person_mother_current_village").value = "";
 
-            __$("textForperson_mother_current_ta").value = "";
-            __$("textForperson_mother_current_village").value = "";
+              __$("textForperson_mother_current_ta").value = "";
+              __$("textForperson_mother_current_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_current_ta"){
+            }else if(target.getAttribute("target") == "person_mother_current_ta"){
 
-            __$("person_mother_current_village").value = "";
+              __$("person_mother_current_village").value = "";
 
-            __$("textForperson_mother_current_village").value = "";
+              __$("textForperson_mother_current_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_home_district"){
+            }else if(target.getAttribute("target") == "person_mother_home_district"){
 
-            __$("person_mother_home_ta").value = "";
-            __$("person_mother_home_village").value = "";
+              __$("person_mother_home_ta").value = "";
+              __$("person_mother_home_village").value = "";
 
-            __$("textForperson_mother_home_ta").value = "";
-            __$("textForperson_mother_home_village").value = "";
+              __$("textForperson_mother_home_ta").value = "";
+              __$("textForperson_mother_home_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_home_ta"){
+            }else if(target.getAttribute("target") == "person_mother_home_ta"){
 
-            __$("person_mother_home_village").value = "";
+              __$("person_mother_home_village").value = "";
 
-            __$("textForperson_mother_home_village").value = "";
+              __$("textForperson_mother_home_village").value = "";
 
-          }
+            }
 
 
-          if(target.getAttribute("target")){
+            if(target.getAttribute("target")){
 
-            if(__$(target.getAttribute("target"))){
+              if(__$(target.getAttribute("target"))){
 
-              __$(target.getAttribute("target")).value = target.value;
+                __$(target.getAttribute("target")).value = target.value;
+
+              }
 
             }
 
           }
 
         }
-
       }
-    }
-
-  }
-
-
-    var full_place_of_birth;
-
-    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
-    {
-    	full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
 
     }
-      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
-    {
-    	full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+
+
+  
+
+
+    function summaryFields(){
+            var full_place_of_birth;
+
+            if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+            {
+              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+
+            }
+            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+            {
+
+              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+            }
+            else {
+
+              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+            }
+
+
+            summaryHash = {
+                            "person Name" : ["person_first_name","person_middle_name","person_last_name"],
+                            "person Gender" : ["person_gender"],
+                            "person Date of Birth" : ["person_birthdate"],
+                            "Place of Birth"    : ["person_place_of_birth"],
+                            "Location of Birth" : full_place_of_birth,
+                            "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                            "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                            "Parents Married to each Other?": ['person_parents_married_to_each_other'],
+                            "Court order attached?": ['person_court_order_attached'],
+                            "Parents signed?" : ["person_parents_signed"],
+                            "Form Signed by Informant?" : ["form_signed"],
+                            "Delayed Registration" : ['registration_type']
+                           };
     }
-    else {
-
-      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-    }
-
-
-    summaryHash = {
-                    "person Name" : ["person_first_name","person_middle_name","person_last_name"],
-                    "person Gender" : ["person_gender"],
-                    "person Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : full_place_of_birth,
-                    "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
-                    "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
-                    "Parents Married to each Other?": ['person_parents_married_to_each_other'],
-                    "Court order attached?": ['person_court_order_attached'],
-                    "Parents signed?" : ["person_parents_signed"],
-                    "Form Signed by Informant?" : ["form_signed"],
-                    "Delayed Registration" : ['registration_type']
-                   };
 
     function updateRegistrationType()
     {
