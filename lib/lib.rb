@@ -82,7 +82,9 @@ module Lib
             :home_village_other       => mother[:foreigner_home_village],
 
             :citizenship            => Location.where(country: mother[:citizenship]).last.id,
-            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country')
+            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country'),
+            :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+            :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
     end
     unless mother_person.blank?
@@ -153,7 +155,9 @@ module Lib
           :home_village_other       => father[:foreigner_home_village],
 
           :citizenship            => Location.where(country: father[:citizenship]).last.id,
-          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country')
+          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country'),
+          :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+          :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
     end
     unless father_person.blank?
