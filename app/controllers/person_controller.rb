@@ -639,7 +639,7 @@ class PersonController < ApplicationController
     @states = ["DC-ACTIVE"]
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-    
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
    
     render :template => "person/records", :layout => "data_table"
@@ -649,7 +649,7 @@ class PersonController < ApplicationController
     @states = ["DC-COMPLETE"]
     @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -658,7 +658,7 @@ class PersonController < ApplicationController
     @states = ["DC-INCOMPLETE"]
     @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end

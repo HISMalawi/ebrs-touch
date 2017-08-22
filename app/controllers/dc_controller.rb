@@ -52,7 +52,7 @@ def view_duplicates
     end
 
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+   @targeturl ="/manage_duplicates_menu"
     @records = PersonService.query_for_display(@states)
 
     render :template => "dc/view_duplicates", :layout => "data_table"
@@ -66,6 +66,7 @@ def potential_duplicate
   @potential_records.duplicate_records.each do |record|
     @similar_records << person_details(record.person_id)
   end
+  @targeturl = params[:next_path]
   render :layout => "facility"
 end
 
@@ -108,7 +109,7 @@ def duplicates
     @states = ['DC-VOIDED']
     @section = "Resolved Duplicates"
    # @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl ="/manage_duplicates_menu"
     @records = PersonService.query_for_display(@states)
 
     render :template => "dc/view_duplicates", :layout => "data_table"
