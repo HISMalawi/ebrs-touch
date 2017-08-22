@@ -1,5 +1,10 @@
 doc = JSON.parse(ARGV[0])
 doc['document_id'] = doc['_id']
+doc.each do |k, v|
+  doc[k] = v.to_datetime rescue v
+end
+
+table_name = doc['type']
 doc = doc.delete_if{|k, v| ['_id', '_rev', 'type'].include?(k)}
 
 models = [BirthRegistrationType, CorePerson, DuplicateRecord,
@@ -14,7 +19,7 @@ models = [BirthRegistrationType, CorePerson, DuplicateRecord,
           PotentialDuplicate, Role, Status, User, UserRole]
 
 models.each do |model|
-  next if model.table_name != doc['type']
+  next if model.table_name != table_name
   primary_key = doc[model.primary_key]
   data = model.find(primary_key) rescue nil
   if data.present?
