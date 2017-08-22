@@ -7,6 +7,11 @@ require 'rails'
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
 
+settings_path = Dir.pwd + "/config/settings.yml"
+settings = YAML.load_file(settings_path)
+$app_mode = settings['application_mode']
+$app_mode = 'HQ' if $app_mode.blank?
+
 couch_db_settings = db_settings[Rails.env]
 
 couch_protocol = couch_db_settings["protocol"]
@@ -40,8 +45,11 @@ class Methods
     client.query("SET FOREIGN_KEY_CHECKS = 0")
     table = doc['type']
     doc_id = doc['document_id']
-    return nil if doc_id.blank?
-    rows = client.query("SELECT * FROM #{table} WHERE document_id = '#{doc_id}' LIMIT 1").each(:as => :hash)
+    p_key = doc.keys[2]
+    p_value = doc[p_key]
+    return nil if p_value.blank?
+
+    rows = client.query("SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
     data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
 
     if !rows.blank?
@@ -51,13 +59,13 @@ class Methods
           v = v.to_datetime.to_s(:db) rescue v
         end
 
-        unless (['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null'))
-          update_query += " #{k} = \"#{v}\", "
+        unless ['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null')
+         update_query += " #{k} = \"#{v}\", "
         end
       end
       update_query = update_query.strip.sub(/\,$/, '')
-      update_query += " WHERE document_id = '#{doc_id}' "
-      out = client.query(update_query) rescue (raise table.to_s)
+      update_query += " WHERE #{p_key} = '#{p_value}' "
+      out = client.query(update_query) rescue (raise update_query.to_s)
     else
       insert_query = "INSERT INTO #{table} ("
       keys = []
@@ -74,6 +82,7 @@ class Methods
         end
         keys << k
         values << v
+
       end
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
@@ -88,7 +97,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
   # Which database should we connect to?
   database "#{mysql_adapter}://#{mysql_username}:#{mysql_password}@#{mysql_host}:#{mysql_port}/#{mysql_db}"
   #StatusCouchdb Document Type
-
   document 'type' => 'core_person' do |doc|
     output = Methods.update_doc(doc.document)
   end
