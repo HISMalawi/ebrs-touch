@@ -864,6 +864,7 @@
         <input id="person_informant_designation"
                name="person[informant][designation]"
                type="text"
+               tt_onLoad ="checkSpace('person_informant_designation')"
                optional = true
                value="<%= @person[:informant][:designation] rescue nil %>"
                class="input_cell" />
@@ -927,7 +928,6 @@
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
-    </div>
 
       <div class="field">
         <label for="other_informant_relationship_to_person">Specify Relationship</label><br>
@@ -942,15 +942,26 @@
 
     </fieldset>
 
-    <fieldset>
+ <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
 
       <div class="field">
         <label for="person_informant_current_district">District</label><br>
         <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district"
-                   />
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);" optional="true"/>
       </div>
-      
+
+      <div class="field">
+        <label for="person_informant_current_ta">T/A</label><br>
+        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>" class="input_cell" ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_current_village">Village</label><br>
+        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>" ajaxURL="/search_by_village" class="input_cell" optional="true"/>
+      </div>
+
       <div class="field">
         <label for="person_informant_addressline1">Postal Address</label><br>
         <input id="person_informant_addressline1" name="person[informant][addressline1]" type="text" value="<%= @person[:informant][:addressline1] rescue nil %>" class="input_cell" placeholder= "e.g. P.O Box 31797 or Current Village" optional="true"/>
@@ -963,6 +974,7 @@
       </div>
 
       </fieldset>
+
       <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued.. </font></legend>
 
