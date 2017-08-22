@@ -4828,7 +4828,7 @@ function clickCanGo() {
         if(parent.getAttribute("word_min_length") && parent.getAttribute("word_min_length") > 0){
             
             var word_min_length = parent.getAttribute("word_min_length")? parent.getAttribute("word_min_length") : 0;
-            if(__$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length < word_min_length){
+            if(__$("textFor" + parent.id) && __$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length < word_min_length){
                   
                   showMsg("Entered value length doesn't meet minimum required length of "+word_min_length+" character(s)");
 
@@ -4854,7 +4854,7 @@ function clickCanGo() {
         if(parent.getAttribute("word_max_length") && parent.getAttribute("word_max_length") > 0){
             
             var word_max_length = parent.getAttribute("word_max_length")? parent.getAttribute("word_max_length") : 0;
-            if(__$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length > word_max_length){
+            if(__$("textFor" + parent.id) && __$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length > word_max_length){
                   
                   showMsg("Entered value length execeeds the maximum required length of "+word_max_length+" character(s)");
 
@@ -6052,7 +6052,7 @@ function submitAfterSummary() {
                 var label = "";
 
                 for (var j = 0; j < summaryHash[keys[i]].length; j++) {
-
+                    console.log(__$(summaryHash[keys[i]][j]).value)
                     if (__$(summaryHash[keys[i]][j])) {
 
                         if (label.trim().length > 0) {
