@@ -1,8 +1,5 @@
 doc = JSON.parse(ARGV[0])
 doc['document_id'] = doc['_id']
-doc.each do |k, v|
-  doc[k] = v.to_datetime rescue v
-end
 
 table_name = doc['type']
 doc = doc.delete_if{|k, v| ['_id', '_rev', 'type'].include?(k)}

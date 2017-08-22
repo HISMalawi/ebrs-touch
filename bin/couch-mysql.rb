@@ -41,10 +41,7 @@ $client = Mysql2::Client.new(:host => mysql_host,
 )
 class Methods
   def self.update_doc(doc)
-    client = $client
-    client.query("SET FOREIGN_KEY_CHECKS = 0")
     `rails runner bin/save_from_couch.rb '#{doc.to_json}'`
-    client.query("SET FOREIGN_KEY_CHECKS = 1")
   end
 end
 
