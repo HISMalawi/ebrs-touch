@@ -60,7 +60,7 @@ module Lib
         cur_district_id         = Location.locate_id_by_tag(mother[:current_district], 'District')
         cur_ta_id               = Location.locate_id(mother[:current_ta], 'Traditional Authority', cur_district_id)
         cur_village_id          = Location.locate_id(mother[:current_village], 'Village', cur_ta_id)
-
+        
         home_district_id        = Location.locate_id_by_tag(mother[:home_district], 'District')
         home_ta_id              = Location.locate_id(mother[:home_ta], 'Traditional Authority', home_district_id)
         home_village_id         = Location.locate_id(mother[:home_village], 'Village', home_ta_id)
