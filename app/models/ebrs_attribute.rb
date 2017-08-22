@@ -76,7 +76,7 @@ module EbrsAttribute
     transformed_data['type'] = eval(data.class.name).table_name
     doc_id = send_data(transformed_data)
     if data.document_id.blank?
-      data.update_column(:document_id => doc_id)
+      data.update_attributes(:document_id => doc_id)
     end
   end
 end

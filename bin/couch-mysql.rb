@@ -32,10 +32,19 @@ mysql_host = mysql_db_settings["host"] || '0.0.0.0'
 mysql_db = mysql_db_settings["database"]
 mysql_port = mysql_db_settings["port"] || '3306'
 mysql_adapter = mysql_db_settings["adapter"]
+#reading db_mapping
 
+$client = Mysql2::Client.new(:host => mysql_host,
+  :username => mysql_username,
+  :password => mysql_password,
+  :database => mysql_db
+)
 class Methods
   def self.update_doc(doc)
-    `bundle exec rails runner bin/save_from_couch.rb '#{doc.to_json}'`
+    client = $client
+    client.query("SET FOREIGN_KEY_CHECKS = 0")
+    `rails runner bin/save_from_couch.rb '#{doc.to_json}'`
+    client.query("SET FOREIGN_KEY_CHECKS = 1")
   end
 end
 
