@@ -6,12 +6,12 @@ replicator = "#{@database['protocol']}://#{@database['username']}:#{@database['p
 
 doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{source}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{source}/_design/MyLocation#{location_id}`
+`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{source}/_design/MyLocation#{location_id}  1>&- 2>&-`
 end
 
 doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{target}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-  `cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{target}/_design/MyLocation#{location_id}`
+  `cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{target}/_design/MyLocation#{location_id}  1>&- 2>&-`
 end
 
 %x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
