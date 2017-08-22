@@ -82,7 +82,9 @@ module Lib
             :home_village_other       => mother[:foreigner_home_village],
 
             :citizenship            => Location.where(country: mother[:citizenship]).last.id,
-            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country')
+            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country'),
+            :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+            :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
     end
     unless mother_person.blank?
@@ -153,7 +155,9 @@ module Lib
           :home_village_other       => father[:foreigner_home_village],
 
           :citizenship            => Location.where(country: father[:citizenship]).last.id,
-          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country')
+          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country'),
+          :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+          :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
     end
     unless father_person.blank?
@@ -326,12 +330,12 @@ module Lib
         number_of_prenatal_visits:                (params[:number_of_prenatal_visits].blank? ? nil : params[:number_of_prenatal_visits]),
         month_prenatal_care_started:              (params[:month_prenatal_care_started].blank? ? nil : params[:month_prenatal_care_started]),
         mode_of_delivery_id:                      (ModeOfDelivery.where(name: person[:mode_of_delivery]).first.id rescue 1),
-        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue 1),
-        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue 1),
+        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive].present? ? params[:number_of_children_born_alive_inclusive] : 1),
+        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive].present? ? params[:number_of_children_born_still_alive] : 1),
         level_of_education_id:                    (LevelOfEducation.where(name: person[:level_of_education]).last.id rescue 1),
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
-        form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
+        form_signed:                              (person[:form_signed] == 'Yes' ? 1 : 0),
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          rel,
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),

@@ -6052,7 +6052,6 @@ function submitAfterSummary() {
                 var label = "";
 
                 for (var j = 0; j < summaryHash[keys[i]].length; j++) {
-                    console.log(__$(summaryHash[keys[i]][j]).value)
                     if (__$(summaryHash[keys[i]][j])) {
 
                         if (label.trim().length > 0) {
