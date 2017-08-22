@@ -41,55 +41,7 @@ $client = Mysql2::Client.new(:host => mysql_host,
 )
 class Methods
   def self.update_doc(doc)
-    client = $client
-    client.query("SET FOREIGN_KEY_CHECKS = 0")
-    table = doc['type']
-    doc_id = doc['document_id']
-    p_key = doc.keys[2]
-    p_value = doc[p_key]
-    return nil if p_value.blank?
-
-    rows = client.query("SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
-    data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
-
-    if !rows.blank?
-      update_query = "UPDATE #{table} SET "
-      data.each do |k, v|
-        if k.match(/updated_at|created_at|changed_at|date/)
-          v = v.to_datetime.to_s(:db) rescue v
-        end
-
-        unless ['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null')
-         update_query += " #{k} = \"#{v}\", "
-        end
-      end
-      update_query = update_query.strip.sub(/\,$/, '')
-      update_query += " WHERE #{p_key} = '#{p_value}' "
-      out = client.query(update_query) rescue (raise update_query.to_s)
-    else
-      insert_query = "INSERT INTO #{table} ("
-      keys = []
-      values = []
-
-      data.each do |k, v|
-
-        if (['national_serial_number', 'facility_serial_number', 'district_id_number'].include?(k) and (v.blank? || v == 'null'))
-          next
-        end
-
-        if k.match(/updated_at|created_at|changed_at|date/)
-          v = v.to_datetime.to_s(:db) rescue v
-        end
-        keys << k
-        values << v
-
-      end
-
-      insert_query += (keys.join(', ') + " ) VALUES (" )
-      insert_query += ( "\"" + values.join( "\", \"")) + "\")"
-      client.query(insert_query) rescue (raise insert_query.to_s)
-    end
-    client.query("SET FOREIGN_KEY_CHECKS = 1")
+    `bundle exec rails runner bin/save_from_couch.rb '#{doc.to_json}'`
   end
 end
 
@@ -122,9 +74,6 @@ changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_identifiers' do |doc|
-    output = Methods.update_doc(doc.document)
-  end
-  document 'type' => 'person_attributes' do |doc|
     output = Methods.update_doc(doc.document)
   end
   document 'type' => 'person_record_statuses' do |doc|
