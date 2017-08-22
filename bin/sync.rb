@@ -25,7 +25,7 @@ end
         location_id: location_id
     },
     continuous: true
-}.to_json}' "#{replicator}"]
+}.to_json}' "#{replicator}" 1>&- 2>&-]
 
 if SETTINGS['application_mode'] == 'DC'
     %x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
@@ -39,7 +39,7 @@ if SETTINGS['application_mode'] == 'DC'
             location_id: location_id
         },
         continuous: true
-         }.to_json}' "#{replicator}/_replicate"]
+         }.to_json}' "#{replicator}/_replicate" 1>&- 2>&-]
 end
 
 

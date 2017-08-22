@@ -3,7 +3,7 @@ class SyncCheck
   workers 1
 
   def perform()
-
+    config.log_level = :error
     begin
       load "#{Rails.root}/bin/sync.rb"
       FileUtils.touch("#{Rails.root}/public/sync_sentinel")
