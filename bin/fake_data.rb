@@ -19,12 +19,14 @@ end
 def setup_data
 
   my_date_list = []
-  gender = %w[Male,Female]
-  number_of_parental_visits = [1,2,3,4,5,6]
 
   1.upto(14).each do |n| 
     my_date_list << (Date.today - n.day).strftime('%d/%b/%Y')
   end
+
+  gender = %w[Male,Female]
+  level_of_education = ["Higher Education","Secondary Education","Primary Education","None"]
+  number_of_parental_visits = [1,2,3,4,5,6]
 
   kgs = Random.rand(2..6).to_s.ljust(4,'0')
   kgs = "#{kgs[0..0]}.#{kgs[1..-1]}" 
@@ -72,7 +74,7 @@ def setup_data
      home_village: "Bakili"
   }, 
    mode_of_delivery: "SVD", 
-   level_of_education: "Higher Education", 
+   level_of_education: level_of_education[rand(level_of_education.length)], 
    father: {
      birthdate_estimated: "", 
      residential_country: ""
