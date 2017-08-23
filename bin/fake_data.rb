@@ -2,7 +2,7 @@ User.current = User.last
 
 
 def start
-  1.upto(100).each do |n|
+  1.upto(10).each do |n|
     params = setup_data
     ActiveRecord::Base.transaction do
       #puts ">>>>>>>>>>>>>>>> #{params[:person][:type_of_birth]}"
@@ -102,8 +102,8 @@ def setup_data
   }, 
    home_address_same_as_physical: "Yes", 
    gestation_at_birth: "39", 
-   number_of_prenatal_visits: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
-   month_prenatal_care_started: number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
+   number_of_prenatal_visits: 1, #number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
+   month_prenatal_care_started: 1, # number_of_prenatal_visits[rand(number_of_prenatal_visits.length)].to_s, 
    number_of_children_born_alive_inclusive: "1", 
    number_of_children_born_still_alive: "1", 
    same_address_with_mother: "", 

@@ -256,10 +256,11 @@ end
     t.integer  "location_created_at",                     limit: 4
     t.integer  "form_signed",                             limit: 1,  default: 0, null: false
     t.string   "informant_relationship_to_person",         limit: 255
-    t.string   "other_informant_relationship_to_person",   limit: 255
-    t.string   "informant_designation",   limit: 255
+    t.string   "other_informant_relationship_to_person",  limit: 255
+    t.string   "informant_designation",                    limit: 255
     t.string   "level",                                 limit: 10
     t.date     "date_registered",                                                null: false
+    t.integer  "creator",     limit: 4,     null: false
     t.string   "document_id", limit: 100
     t.datetime "created_at",                                                     null: false
     t.datetime "updated_at",                                                     null: false
@@ -476,6 +477,7 @@ end
   add_foreign_key "person_birth_details", "location", column: "place_of_birth", primary_key: "location_id", name: "fk_person_birth_details_2"
   add_foreign_key "person_birth_details", "mode_of_delivery", primary_key: "mode_of_delivery_id", name: "fk_person_birth_details_5"
   add_foreign_key "person_birth_details", "person_type_of_births", column: "type_of_birth", primary_key: "person_type_of_birth_id", name: "fk_person_birth_details_7"
+  add_foreign_key "person_birth_details", "users", column: "creator", primary_key: "user_id", name: "fk_person_birth_details_9"
   add_foreign_key "person_name", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_name_1"
   add_foreign_key "person_name", "users", column: "voided_by", primary_key: "user_id", name: "fk_person_name_2"
   add_foreign_key "person_name_code", "person_name", primary_key: "person_name_id", name: "fk_person_name_code_1"
