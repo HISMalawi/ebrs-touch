@@ -50,7 +50,7 @@ class Methods
     begin
       data = runner.query(query)
     rescue
-      sleep(1000)
+      sleep(2)
       #reconnect to mysql
       couch_mysql_path = Dir.pwd + "/config/database.yml"
       db_settings = YAML.load_file(couch_mysql_path)
@@ -71,7 +71,11 @@ class Methods
                                   :reconnect => true
       )
 
-      data = runner.query(query) rescue (raise query.inspect)
+      begin
+        data = runner.query(query)
+      rescue
+
+      end
     end
 
     data
@@ -80,10 +84,10 @@ class Methods
   def self.update_doc(doc)
     client = $client; table = doc['type']; p_key = doc.keys[2]; p_value = doc[p_key]
     return nil if p_value.blank?
-
     self.qry(client, "SET FOREIGN_KEY_CHECKS = 0")
-    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
+    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
     data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
+
     if !rows.blank?
       row = rows[0]
       update_query = "UPDATE #{table} SET "
