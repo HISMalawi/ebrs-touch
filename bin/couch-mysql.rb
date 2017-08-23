@@ -35,36 +35,71 @@ mysql_adapter = mysql_db_settings["adapter"]
 #reading db_mapping
 
 $client = Mysql2::Client.new(:host => mysql_host,
-  :username => mysql_username,
-  :password => mysql_password,
-  :database => mysql_db
+                             :username => mysql_username,
+                             :password => mysql_password,
+                             :database => mysql_db,
+                             :read_timeout => 60,
+                             :write_timeout => 60,
+                             :connect_timeout => 60,
+                             :reconnect => true
 )
+
 class Methods
+  def self.qry(runner, query)
+
+    begin
+      data = runner.query(query)
+    rescue
+      sleep(1000)
+      #reconnect to mysql
+      couch_mysql_path = Dir.pwd + "/config/database.yml"
+      db_settings = YAML.load_file(couch_mysql_path)
+      db_settings = YAML.load_file(couch_mysql_path)
+      mysql_db_settings = db_settings[Rails.env]
+      mysql_username = mysql_db_settings["username"]
+      mysql_password = mysql_db_settings["password"]
+      mysql_host = mysql_db_settings["host"] || '0.0.0.0'
+      mysql_db = mysql_db_settings["database"]
+
+      runner = Mysql2::Client.new(:host => mysql_host,
+                                  :username => mysql_username,
+                                  :password => mysql_password,
+                                  :database => mysql_db,
+                                  :read_timeout => 60,
+                                  :write_timeout => 60,
+                                  :connect_timeout => 60,
+                                  :reconnect => true
+      )
+
+      data = runner.query(query) rescue (raise query.inspect)
+    end
+
+    data
+  end
+
   def self.update_doc(doc)
     client = $client; table = doc['type']; p_key = doc.keys[2]; p_value = doc[p_key]
     return nil if p_value.blank?
 
-    rows = client.query("SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0")
+    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash)
     data = doc.reject{|k, v| ['_id', '_rev', 'type'].include?(k)}
-
     if !rows.blank?
       row = rows[0]
       update_query = "UPDATE #{table} SET "
       data.each do |k, v|
-        next if ['null'].include[doc[k]] && row[k].blank?
+        next if ['null', 'nil'].include?(v) && row[k].blank?
 
-        if k.match(/\_at$|^date\_|\_date$/)
-          v = v.to_datetime.to_s(:db) rescue v
-        end
-
-        unless ['national_serial_number', 'facility_serial_number', 'district_id_number', 'birth_weight',
-                'gestation_at_birth', 'number_of_prenarital_visits', 'month_of_care_started'].include?(k) and (v.blank? || v == 'null')
+        if !v.blank?
           update_query += " #{k} = \"#{v}\", "
+        else
+          update_query += " #{k} = NULL, "
         end
       end
       update_query = update_query.strip.sub(/\,$/, '')
       update_query += " WHERE #{p_key} = '#{p_value}' "
-      out = client.query(update_query) rescue (raise update_query.to_s)
+
+      self.qry(client, update_query)
     else
       insert_query = "INSERT INTO #{table} ("
       keys = []
@@ -72,23 +107,24 @@ class Methods
 
       data.each do |k, v|
 
-        if (['national_serial_number', 'facility_serial_number', 'district_id_number', 'birth_weight',
-        'gestation_at_birth', 'number_of_prenarital_visits', 'month_of_care_started'].include?(k) and (v.blank? || v == 'null'))
-          next
+        if !v.blank?
+          v = "\"#{v}\""
+        else
+          v = " NULL "
         end
 
-        if k.match(/updated_at|created_at|changed_at|date/)
-          v = v.to_datetime.to_s(:db) rescue v
-        end
         keys << k
         values << v
 
       end
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
-      insert_query += ( "\"" + values.join( "\", \"")) + "\")"
-      client.query(insert_query) rescue nil # (raise insert_query.to_s)
+      insert_query += ( values.join(",")) + ")"
+
+      self.qry(client, insert_query)
     end
+
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1")
   end
 end
 
