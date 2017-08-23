@@ -20,7 +20,7 @@ end
  
  
 def setup_data
-  my_date_list = []
+    my_date_list = []
 
   1.upto(14).each do |n| 
     my_date_list << (Date.today - n.day).strftime('%d/%b/%Y')
@@ -28,7 +28,7 @@ def setup_data
 
   gender = %w[Male,Female]
   level_of_education = ["Higher Education","Secondary Education","Primary Education","None"]
-  number_of_parental_visits = [1,2,3,4,5,6]
+  number_of_prenatal_visits = [1,2,3,4,5,6]
 
   kgs = Random.rand(2..6).to_s.ljust(4,'0')
   kgs = "#{kgs[0..0]}.#{kgs[1..-1]}" 
