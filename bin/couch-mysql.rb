@@ -46,11 +46,11 @@ $client = Mysql2::Client.new(:host => mysql_host,
 
 class Methods
   def self.qry(runner, query)
-
+    query = runner.escape(query)
     begin
       data = runner.query(query)
     rescue
-      sleep(1000)
+      sleep(2)
       #reconnect to mysql
       couch_mysql_path = Dir.pwd + "/config/database.yml"
       db_settings = YAML.load_file(couch_mysql_path)
@@ -71,7 +71,11 @@ class Methods
                                   :reconnect => true
       )
 
-      data = runner.query(query) rescue (raise query.inspect)
+      begin
+        data = runner.query(query)
+      rescue
+
+      end
     end
 
     data
