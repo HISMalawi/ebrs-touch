@@ -60,7 +60,7 @@ module Lib
         cur_district_id         = Location.locate_id_by_tag(mother[:current_district], 'District')
         cur_ta_id               = Location.locate_id(mother[:current_ta], 'Traditional Authority', cur_district_id)
         cur_village_id          = Location.locate_id(mother[:current_village], 'Village', cur_ta_id)
-
+        
         home_district_id        = Location.locate_id_by_tag(mother[:home_district], 'District')
         home_ta_id              = Location.locate_id(mother[:home_ta], 'Traditional Authority', home_district_id)
         home_village_id         = Location.locate_id(mother[:home_village], 'Village', home_ta_id)
@@ -82,7 +82,9 @@ module Lib
             :home_village_other       => mother[:foreigner_home_village],
 
             :citizenship            => Location.where(country: mother[:citizenship]).last.id,
-            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country')
+            :residential_country    => Location.locate_id_by_tag(mother[:residential_country], 'Country'),
+            :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+            :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
     end
     unless mother_person.blank?
@@ -153,7 +155,9 @@ module Lib
           :home_village_other       => father[:foreigner_home_village],
 
           :citizenship            => Location.where(country: father[:citizenship]).last.id,
-          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country')
+          :residential_country    => Location.locate_id_by_tag(father[:residential_country], 'Country'),
+          :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
+          :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
     end
     unless father_person.blank?
@@ -226,8 +230,8 @@ module Lib
           :home_village       => home_village_id,
           :citizenship            => Location.where(country: informant[:citizenship]).last.id,
           :residential_country    => Location.locate_id_by_tag(informant[:residential_country], 'Country'),
-          :address_line_1         => informant[:addressline_1],
-          :address_line_2         => informant[:addressline_2]
+          :address_line_1         => informant[:addressline1],
+          :address_line_2         => informant[:addressline2]
       )
 
     end
@@ -301,6 +305,16 @@ module Lib
       type_of_birth_id = PersonTypeOfBirth.where(name:  'Single').last.id
     end
 
+    rel = nil
+    if params[:informant_same_as_mother] == 'Yes'
+      rel = 'Mother'
+    elsif params[:informant_same_as_father] == 'Yes'
+      rel = 'Father'
+    else
+      rel = params[:person][:informant][:relationship_to_person] rescue nil
+    end
+
+
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
@@ -308,23 +322,23 @@ module Lib
         birth_location_id:                        location_id,
         district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
         other_birth_location:                     other_place_of_birth,
-        birth_weight:                             person[:birth_weight],
+        birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,
         parents_married_to_each_other:            (person[:parents_married_to_each_other] == 'No' ? 0 : 1),
-        date_of_marriage:                         (person[:date_of_marriage].to_date.to_s rescue nil),
-        gestation_at_birth:                       (params[:gestation_at_birth] rescue nil),
-        number_of_prenatal_visits:                (params[:number_of_prenatal_visits] rescue nil),
-        month_prenatal_care_started:              (params[:month_prenatal_care_started] rescue nil),
+        date_of_marriage:                         (person[:date_of_marriage] rescue nil),
+        gestation_at_birth:                       (params[:gestation_at_birth].blank? ? nil : params[:gestation_at_birth]),
+        number_of_prenatal_visits:                (params[:number_of_prenatal_visits].blank? ? nil : params[:number_of_prenatal_visits]),
+        month_prenatal_care_started:              (params[:month_prenatal_care_started].blank? ? nil : params[:month_prenatal_care_started]),
         mode_of_delivery_id:                      (ModeOfDelivery.where(name: person[:mode_of_delivery]).first.id rescue 1),
-        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive] rescue 1),
-        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive] rescue 1),
+        number_of_children_born_alive_inclusive:  (params[:number_of_children_born_alive_inclusive].present? ? params[:number_of_children_born_alive_inclusive] : 1),
+        number_of_children_born_still_alive:      (params[:number_of_children_born_still_alive].present? ? params[:number_of_children_born_still_alive] : 1),
         level_of_education_id:                    (LevelOfEducation.where(name: person[:level_of_education]).last.id rescue 1),
         court_order_attached:                     (person[:court_order_attached] == 'Yes' ? 1 : 0),
         parents_signed:                           (person[:parents_signed] == 'Yes' ? 1 : 0),
-        form_signed:                              (person[:parents_signed] == 'Yes' ? 1 : 0),
+        form_signed:                              (person[:form_signed] == 'Yes' ? 1 : 0),
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
-        informant_relationship_to_person:          params[:person][:informant][:relationship_to_person],
-        other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person] == "Other" ? (params[:person][:informant][:other_relationship_to_child] rescue nil) : nil),
+        informant_relationship_to_person:          rel,
+        other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
         acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
         location_created_at:                      SETTINGS['location_id'],
         date_registered:                          (Date.today.to_s)

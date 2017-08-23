@@ -2,13 +2,16 @@ User.current = User.last
 
 
 def start
-  1.upto(10).each do |n|
+  1.upto(100).each do |n|
     params = setup_data
     ActiveRecord::Base.transaction do
       #puts ">>>>>>>>>>>>>>>> #{params[:person][:type_of_birth]}"
       person = PersonService.create_record(params)
       if person.present? 
         #SimpleElasticSearch.add(person_for_elastic_search(params))
+        #IdentifierAllocationQueue.create(person_id: person.person_id, person_identifier_type_id: 2)
+        record_status = PersonRecordStatus.where(person_id: person.person_id).first
+        record_status.update_attributes(status_id: Status.where(name: 'DC-ACTIVE').last.id)
         puts "Created ............. #{n}"
       end
     end
@@ -17,7 +20,6 @@ end
  
  
 def setup_data
-
   my_date_list = []
 
   1.upto(14).each do |n| 
@@ -39,12 +41,16 @@ def setup_data
   t2 = (Date.today - 20.year)
   birthdate2 = rand(t1..t2)
 
+  t1 = (Date.today - 9.month)
+  t2 = Date.today
+  date_of_reporting = rand(t1..t2)
+
 
   mother_first_name = Faker::Name.first_name
   mother_last_name = Faker::Name.last_name
 
    data = {person: {duplicate: "", is_exact_duplicate: "", 
-   relationship: "normal", 
+   relationship: "Adopted", 
    last_name: Faker::Name.last_name, 
    first_name: Faker::Name.first_name, 
    middle_name: "", 

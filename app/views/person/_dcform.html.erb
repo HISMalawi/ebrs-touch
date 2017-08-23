@@ -56,6 +56,8 @@
         <%= (f.text_field :last_name,
         :class => "input_cell",
         :ajaxURL => "/get_last_names",
+        :word_min_length => 2,
+        :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
       </div>
 
@@ -64,13 +66,15 @@
         <br>
         <%= (f.text_field :first_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_first_names",
+        :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
       </div>
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name, :word_min_length=>2, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -78,16 +82,16 @@
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
-<div class="field">
+      <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
         
         <%= (f.text_field :birthdate,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
-                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
-                          :absolute_max => Date.today.strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_birthdate')",
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
@@ -96,7 +100,7 @@
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
-        <select id="person_gender" name="person[gender]" class="input_cell">
+        <select id="person_gender" name="person[gender]" class="input_cell" tt_onLoad = "clearDateInterval('person_birthdate');">
           <option></option>
           <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
           <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
@@ -192,7 +196,7 @@
       <div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell">
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
@@ -228,9 +232,9 @@
                           id="person_date_of_marriage"
                           class="input_cell"
 													condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
-													fieldtype="date",
-													optional=true,
-                          absolute_max="<%= Date.today.strftime('%Y/%m/%d') %>" >
+													fieldtype="date"
+													optional=true
+                        >
       </div>
 
 
@@ -276,17 +280,22 @@
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
-               tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
+               word_min_length = 2
+               tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
+               tt_onUnload = "appendValue('person_mother_first_name');setpersonName()" />
 
       </div>
 
       <div class="field">
         <label for="person_mother_first_name">First Name</label><br>
-        <input id="person_mother_first_name" name="person[mother][first_name]"
-        type="text"
+        <input id="person_mother_first_name" 
+            name="person[mother][first_name]"
+          type="text"
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
+        word_min_length = 2
+        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
         tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
 
@@ -298,6 +307,8 @@
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
+               word_min_length = 2
+               tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
                optional="true"/>
       </div>
 
@@ -306,9 +317,10 @@
         <input id="person_mother_id_number"
                name="person[mother][id_number]"
                type="text"
+               tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id')"
                value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               length = 8
                optional="true" />
 
       </div>
@@ -327,8 +339,9 @@
                 class="input_cell"
                 fieldtype="date"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)"
-                optional="true" />
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
+                optional="true"
+                 />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
@@ -652,6 +665,8 @@
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
+               word_min_length = 2
+               tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
 
@@ -660,9 +675,11 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
       </div>
@@ -675,6 +692,8 @@
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
+               word_min_length = 2
+               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
       </div>
@@ -685,8 +704,9 @@
                name="person[father][id_number]"
                type="text"
                value="<%= @person[:father][:id_number] rescue nil %>"
+               length = 8
                class="input_cell"
-               condition="false"
+               tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
                optional="true"/>
       </div>
 
@@ -703,8 +723,9 @@
                class="input_cell"
                fieldtype="date"
                optional="true"
+               tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
-               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
+               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
         <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden" condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" optional='true'/>
 
@@ -916,7 +937,9 @@
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_last_names"
+               tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -926,7 +949,9 @@
         <input id="person_informant_first_name"
                name="person[informant][first_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
                class="input_cell"/>
       </div>
@@ -936,7 +961,9 @@
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
                class="input_cell" optional="true" />
       </div>
@@ -948,7 +975,8 @@
                type="text"
                value="<%= @person[:informant][:id_number] rescue nil %>"
                class="input_cell"
-               condition="false"
+               length = 8
+               tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
                optional="true" />
       </div>
 
@@ -958,6 +986,7 @@
           <option></option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Grandmother/Grandfather</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
@@ -965,7 +994,17 @@
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
-    </div>
+      <div class="field">
+        <label for="other_informant_relationship_to_person">Specify Relationship</label><br>
+        <input id="other_informant_relationship_to_person"
+               name="person[informant][other_informant_relationship_to_person]"
+               type="text"
+               value="<%= @person[:informant][:other_informant_relationship_to_person] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_informant_relationship_to_person').value.trim().toLowerCase() == 'other'"
+               />
+      </div>
+
     </fieldset>
 
     <fieldset>
@@ -1015,7 +1054,8 @@
        <div class="field">
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
-        <select id="form_signed" name="person[form_signed]" class="input_cell">
+        <select id="form_signed" name="person[form_signed]" 
+            class="input_cell" tt_onUnLoad = "summaryFields()">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -1030,9 +1070,10 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_acknowledgement_of_receipt_date');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
-                          :absolute_max => Date.today.strftime('%d/%b/%Y')) rescue "" %>  
+                          :absolute_max => Date.today.strftime('%Y-%m-%d')) rescue "" %>  
 
       </div>
 
@@ -1057,6 +1098,7 @@
 <% end %>
 
 <script>
+    var date_estimate;
     function reportingDate(){
 
       commence = new Date(8 + '/' + 1 + '/' + 2015);
@@ -1464,8 +1506,8 @@
         var section =  parseInt(__$("textForperson_mother_home_district").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
     }
@@ -1544,8 +1586,8 @@
         var section =  parseInt(__$("textForperson_mother_home_country").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
 
@@ -1740,107 +1782,115 @@
 
 
     function setpersonName() {
+
        __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
-       }
+    }
 
     init();
 
 
     function clearRelated(){
       if (__$('del')){
-      __$('del').onmousedown = function () {
+        __$('del').onmousedown = function () {
 
-        if (target) {
+          if (target) {
 
-          if ("N/A" == target.value.trim()) {
+            if ("N/A" == target.value.trim()) {
 
-            target.value = "";
+              target.value = "";
 
-          } else {
+            } else {
 
-            target.value = target.value.trim().substring(0, (target.value.trim().length - 1));
+              target.value = target.value.trim().substring(0, (target.value.trim().length - 1));
 
-          }
+            }
 
-          if(target.getAttribute("target") == "person_mother_current_district"){
+            if(target.getAttribute("target") == "person_mother_current_district"){
 
-            __$("person_mother_current_ta").value = "";
-            __$("person_mother_current_village").value = "";
+              __$("person_mother_current_ta").value = "";
+              __$("person_mother_current_village").value = "";
 
-            __$("textForperson_mother_current_ta").value = "";
-            __$("textForperson_mother_current_village").value = "";
+              __$("textForperson_mother_current_ta").value = "";
+              __$("textForperson_mother_current_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_current_ta"){
+            }else if(target.getAttribute("target") == "person_mother_current_ta"){
 
-            __$("person_mother_current_village").value = "";
+              __$("person_mother_current_village").value = "";
 
-            __$("textForperson_mother_current_village").value = "";
+              __$("textForperson_mother_current_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_home_district"){
+            }else if(target.getAttribute("target") == "person_mother_home_district"){
 
-            __$("person_mother_home_ta").value = "";
-            __$("person_mother_home_village").value = "";
+              __$("person_mother_home_ta").value = "";
+              __$("person_mother_home_village").value = "";
 
-            __$("textForperson_mother_home_ta").value = "";
-            __$("textForperson_mother_home_village").value = "";
+              __$("textForperson_mother_home_ta").value = "";
+              __$("textForperson_mother_home_village").value = "";
 
-          }else if(target.getAttribute("target") == "person_mother_home_ta"){
+            }else if(target.getAttribute("target") == "person_mother_home_ta"){
 
-            __$("person_mother_home_village").value = "";
+              __$("person_mother_home_village").value = "";
 
-            __$("textForperson_mother_home_village").value = "";
+              __$("textForperson_mother_home_village").value = "";
 
-          }
+            }
 
 
-          if(target.getAttribute("target")){
+            if(target.getAttribute("target")){
 
-            if(__$(target.getAttribute("target"))){
+              if(__$(target.getAttribute("target"))){
 
-              __$(target.getAttribute("target")).value = target.value;
+                __$(target.getAttribute("target")).value = target.value;
+
+              }
 
             }
 
           }
 
         }
-
       }
-    }
-
-  }
-
-
-    var full_place_of_birth;
-
-    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
-    {
-    	full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
 
     }
-      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
-    {
-    	full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+
+
+  
+
+
+    function summaryFields(){
+            var full_place_of_birth;
+
+            if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+            {
+              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+
+            }
+            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+            {
+
+              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+            }
+            else {
+
+              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+            }
+
+
+            summaryHash = {
+                            "person Name" : ["person_first_name","person_middle_name","person_last_name"],
+                            "person Gender" : ["person_gender"],
+                            "person Date of Birth" : ["person_birthdate"],
+                            "Place of Birth"    : ["person_place_of_birth"],
+                            "Location of Birth" : full_place_of_birth,
+                            "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                            "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                            "Parents Married to each Other?": ['person_parents_married_to_each_other'],
+                            "Court order attached?": ['person_court_order_attached'],
+                            "Parents signed?" : ["person_parents_signed"],
+                            "Form Signed by Informant?" : ["form_signed"],
+                            "Delayed Registration" : ['registration_type']
+                           };
     }
-    else {
-
-      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-    }
-
-
-    summaryHash = {
-                    "person Name" : ["person_first_name","person_middle_name","person_last_name"],
-                    "person Gender" : ["person_gender"],
-                    "person Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : full_place_of_birth,
-                    "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
-                    "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
-                    "Parents Married to each Other?": ['person_parents_married_to_each_other'],
-                    "Court order attached?": ['person_court_order_attached'],
-                    "Parents signed?" : ["person_parents_signed"],
-                    "Form Signed by Informant?" : ["form_signed"],
-                    "Delayed Registration" : ['registration_type']
-                   };
 
     function updateRegistrationType()
     {

@@ -1,3 +1,13 @@
+<script type="text/javascript">
+	var site_type = "<%= @site_type %>";
+    String.prototype.capitalize = function(lower) {
+        return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    };
+    String.prototype.capitalizeAll = function(){
+    	return this.toUpperCase();
+    };
+</script>
+
 <%  if SETTINGS['application_mode'] == "FC" %>
 
    <% if @type_of_birth != "Single" %>

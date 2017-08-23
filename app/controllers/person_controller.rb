@@ -144,9 +144,9 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                "Home Address, District" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
-                "District" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+                "Village/Town" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
             },
             {
                 "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
@@ -179,9 +179,9 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                "Home Address, District" => "#{loc(@father_address.home_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
-                "District" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                "Village/Town" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
             }
         ],
         "Details of Child's Informant" => [
@@ -195,7 +195,7 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{loc(@informant_address.home_district, 'District')rescue nil}",
+                "Physical Address, District" => "#{loc(@informant_address.current_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
                 "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },
@@ -262,7 +262,7 @@ class PersonController < ApplicationController
 
   def new
 
-    @current_district = Location.current_district.name
+    @current_district = Location.find(SETTINGS['location_id']).district rescue nil
 
     $prev_child_id = params[:id]
 
@@ -610,11 +610,13 @@ class PersonController < ApplicationController
           'Zomba City' => 'Zomba',
           'Blantyre City' => 'Blantyre'}
 
-  params[:district] =map[params[:district]] if   params[:district].match(/City$/)
+  if  (params[:district].match(/City$/) rescue false)
+    params[:district] =map[params[:district]]
+  end
 
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
-  parent_location = Location.where(name: params[:district]).last.id rescue nil
+  parent_location = Location.where(" name = '#{params[:district]}' AND COALESCE(code, '') != '' ").first.id rescue nil
 
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND parent_location = #{parent_location} AND m.location_tag_id = ?",
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
@@ -637,7 +639,7 @@ class PersonController < ApplicationController
     @states = ["DC-ACTIVE"]
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-    
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
    
     render :template => "person/records", :layout => "data_table"
@@ -647,7 +649,7 @@ class PersonController < ApplicationController
     @states = ["DC-COMPLETE"]
     @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -656,7 +658,7 @@ class PersonController < ApplicationController
     @states = ["DC-INCOMPLETE"]
     @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -957,6 +959,30 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
     @records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def ammend_case
+    @section = 'Ammend Case'
+  end
+
+  def do_ammend
+    PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason']}", "Ammendment request; #{params['reason']}");
+
+    redirect_to session['list_url']
+  end
+
+  def searched_cases
+    @states = Status.all.map(&:name)
+    @section = "Search Cases"
+    @display_ben = true
+    @search = true
+    @user = User.find(params[:user_id])
+    User.current = @user
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    filters = JSON.parse(params['data']) rescue {}
+    @records = PersonService.search_results(filters)
+
     render :template => "person/records", :layout => "data_table"
   end
   #########################################################################
