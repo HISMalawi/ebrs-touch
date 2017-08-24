@@ -159,6 +159,7 @@ class SimpleElasticSearch
 
       potential_duplicates = []
       hits = self.query("content",query_string,precision,10,0)["data"]
+
       hits.each do |hit|
         potential_duplicates << hit if hit["_id"] !=(person.person_id rescue nil)
       end
@@ -172,8 +173,9 @@ class SimpleElasticSearch
 
       potential_duplicates = []
       hits = self.query("coded_content",query_string,precision,10,0)["data"]
+      
       hits.each do |hit|
-        potential_duplicates << hit if hit["_id"] !=(person.person_id rescue nil)
+        potential_duplicates << hit if hit["_id"].squish !=(person["person_id"].squish rescue nil)
       end
 
       return potential_duplicates
