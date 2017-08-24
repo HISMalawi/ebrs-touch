@@ -81,10 +81,58 @@ class Person < ActiveRecord::Base
       "#{name.first_name} #{name.middle_name} #{name.last_name}".gsub(/\s+/, ' ')
     end
 
+    def first_name
+      self.person_names.last.first_name
+    end
+
+    def middle_name
+      self.person_names.last.middle_name
+    end
+
+    def last_name
+      self.person_names.last.last_name
+    end
+
+
     def full_gender
       {'M' => 'Male', 'F' => 'Female'}[self.gender]
     end
+    
+    def loc_map(id, tag=nil)
+      tag_id = LocationTag.where(name: tag).last.id rescue nil
+      result = nil
+      if tag_id.blank?
+        result = Location.find(id).name rescue nil
+      else
+        tagmap = LocationTagMap.where(location_tag_id: tag_id, location_id: id).last rescue nil
+        if tagmap
+          result = Location.find(tagmap.location_id).name rescue nil
+        end
+      end
+  
+      result
+    end
 
+    def place_of_birth
+      PersonBirthDetail.find_by_person_id(self.id).birth_place.name
+    end   
+
+    def hospital_of_birth
+       self.loc_map(PersonBirthDetail.find_by_person_id(self.id).birth_location_id, "Health Facility")
+    end  
+
+    def birth_ta
+
+    end  
+
+    def birth_village
+
+    end  
+
+    def birth_district
+
+    end
+    
     def dob
       if self.birthdate_estimated.to_s == 0 && self.birthdate != "1900-01-01"
         return self.birthdate.to_date.strftime("%d/%b/%Y")

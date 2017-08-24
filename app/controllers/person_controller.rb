@@ -302,6 +302,7 @@ class PersonController < ApplicationController
   end
 
   def create
+    
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -344,6 +345,39 @@ class PersonController < ApplicationController
     end
 
   end
+
+  def update_person
+
+    @person = Person.find(params[:id])
+    
+    @person_details = PersonBirthDetail.find_by_person_id(params[:id])
+    
+    @person_name = PersonName.find_by_person_id(params[:id])
+
+    @person_mother_name = @person.mother.person_names.first rescue nil
+
+    @person_father_name = @person.father.person_names.first rescue nil
+
+    #raise PersonBirthDetail.find_by_person_id(params[:id]).birth_place.inspect
+
+    if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
+        @type_of_birth = "Second Twin"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
+        @type_of_birth = "Second Triplet"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 5
+        @type_of_birth = "Third Triplet"
+    end
+            
+    @field = params['field']
+
+    @section = "Update Record"
+
+    render :layout => "touch"
+  end
+
+  def update
+    raise params.inspect  
+  end   
 
   def person_for_elastic_search(params)
       person = {}
