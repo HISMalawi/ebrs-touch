@@ -345,6 +345,31 @@ class PersonController < ApplicationController
 
   end
 
+  def update_person
+
+    @person = Person.find(params[:id])
+    
+    @person_details = PersonBirthDetail.find_by_person_id(params[:id])
+    raise @person_details.inspect
+    @person_name = PersonName.find_by_person_id(params[:id])
+
+    @person_mother_name = @person.mother.person_names.first rescue nil
+
+    @person_father_name = @person.father.person_names.first rescue nil
+
+    if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
+        @type_of_birth = "Second Twin"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
+        @type_of_birth = "Second Triplet"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 5
+        @type_of_birth = "Third Triplet"
+    end
+            
+    @field = params['field']
+    @section = "Update Record"
+
+    render :layout => "touch"
+  end
   def person_for_elastic_search(params)
       person = {}
       person["id"] = @person.person_id

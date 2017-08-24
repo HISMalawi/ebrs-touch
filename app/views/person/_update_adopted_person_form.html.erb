@@ -759,6 +759,493 @@
 
     </fieldset>
     
+ <!-- adoptive mother -->
+ 
+ 
+    <% elsif ["child_foster_mother_last_name","child_foster_mother_first_name", "child_foster_mother_middle_name", "child_foster_mother_id_number" ].include? @field  %>
+
+   
+      
+      <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother</font></legend>
+      
+      <% if params[:amend].present? && params[:amend]=="true" %>
+
+          <input type="hidden" name="old_foster_mother_last_name" value="<%=@child[:foster_mother][:last_name]%>">
+          <input type="hidden" name="old_foster_mother_first_name" value="<%=@child[:foster_mother][:first_name]%>">
+          <input type="hidden" name="old_foster_mother_middle" value="<%=@child[:foster_mother][:middle_name]%>">
+      <%end %>
+
+      <div class="field">
+        <label for="child_foster_mother_last_name">Maiden Surname</label><br>
+
+        <input id="child_foster_mother_last_name"
+        			 name="child[foster_mother][last_name]"
+        			 type="text"
+        			 value="<%= @child[:foster_mother][:last_name] rescue nil %>"
+        			 ajaxURL = "/get_last_names"
+        			 class="input_cell"/>
+
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_first_name">First Name</label><br>
+        <input id="child_foster_mother_first_name" name="child[foster_mother][first_name]"
+        type="text"
+        value="<%= @child[:foster_mother][:first_name] rescue nil %>"
+        ajaxURL = "/get_first_names"
+        class="input_cell" />
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_middle_name">Other Name</label><br>
+        <input id="child_foster_mother_middle_name"
+               name="child[foster_mother][middle_name]"
+               type="text"
+               value="<%= @child[:foster_mother][:middle_name] rescue nil %>"
+               class="input_cell"
+               ajaxURL = "/get_first_names"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_id_number">ID Number</label><br>
+        <input id="child_foster_mother_id_number"
+               name="child[foster_mother][id_number]"
+               type="text"
+               value="<%= @child[:foster_mother][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true" />
+
+      </div>
+
+    </fieldset>
+    
+<% elsif ["child_foster_mother_birthdate","child_foster_mother_citizenship"].include? @field  %>
+      
+      <fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued</font></legend>
+
+      <div class="field">
+        <label for="child_foster_mother_birthdate">Date of Birth</label>
+        <br>
+
+        <input id="child_foster_mother_birthdate" name="child[foster_mother][birthdate]" type="text"
+                value="<%= @child[:foster_mother][:birthdate] rescue nil %>"
+                class="input_cell"
+                fieldtype="date"
+                optional="true"
+                tt_onLoad="validateDate(__$('child_birthdate'), __$('child_foster_mother_birthdate'), 45, 14, 60, 8)" />
+
+        <input id="child_foster_mother_birthdate_estimated" name="child[mother][birthdate_estimated]" type="hidden"/>
+
+
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_citizenship">Nationality</label><br>
+        <input id="child_foster_mother_citizenship" 
+        			 name="child[foster_mother][citizenship]" 
+        			 type="text" 
+        			 value="<%= @child[:foster_mother][:citizenship] rescue nil %>"
+               class="input_cell" 
+               ajaxURL="/search_by_nationality" />
+      </div>
+      
+       <div class="field">
+        <label for="child_foster_mother_local_residential_country">Country of Residence</label><br>
+        <input id="child_foster_mother_local_residential_country" name="child[foster_mother][residential_country]" type="text"
+               value="<%= @child[:foster_mother][:residential_country] rescue nil %>"
+               class="input_cell" 
+               ajaxURL="/search_by_country" />
+      </div>
+
+    </fieldset>
+    
+<% elsif ["child_foster_mother_current_district","child_foster_mother_current_ta", "child_foster_mother_current_village"].include? @field  %>
+ <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="child_foster_mother_current_district">District</label><br>
+        <input id="child_foster_mother_current_district" name="child[foster_mother][current_district]" type="text" value="<%= @child[:foster_mother][:current_district] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_district"
+               condition="__$('child_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_mother_current_ta').getAttribute('section'))][parseInt(__$('textForchild_foster_mother_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForchild_foster_mother_current_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_current_ta">T/A or Area of Residence</label><br>
+        <input id="child_foster_mother_current_ta" name="child[foster_mother][current_ta]" type="text" value="<%= @child[:foster_mother][:current_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               condition="__$('child_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_mother_current_village').getAttribute('section'))][parseInt(__$('textForchild_foster_mother_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForchild_foster_mother_current_district').value + '&ta=' + __$('textForchild_foster_mother_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_current_village">Village/Town</label><br>
+        <input id="child_foster_mother_current_village" name="child[foster_mother][current_village]" type="text" value="<%= @child[:foster_mother][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+	      ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+    </fieldset>
+    
+  <% elsif ["child_foster_mother_residential_country","child_foster_mother_foreigner_current_district", "child_foster_mother_foreigner_current_village", "child_foster_mother_foreigner_current_ta"].include? @field  %>
+
+     <fieldset>
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_current_district">District/State</label><br>
+        <input id="child_foster_mother_foreigner_current_district" name="child[foster_mother][foreigner_current_district]" type="text"
+               value="<%= @child[:foster_mother][:foreigner_current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_current_village">Village/Town</label><br>
+        <input id="child_foster_mother_foreigner_current_village"
+               name="child[foster_mother][foreigner_current_village]"
+	       type="text"
+	       value="<%= @child[:foster_mother][:foreigner_current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_current_ta">Address</label><br>
+        <input id="child_foster_mother_foreigner_current_ta"
+	       name="child[foster_mother][foreigner_current_ta]"
+	       type="text"
+               value="<%= @child[:foster_mother][:foreigner_current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+  
+  <% elsif ["child_foster_mother_home_district","child_foster_mother_home_ta", "child_foster_mother_home_village"].include? @field  %>
+  
+    <fieldset>
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Home address</font></legend>
+
+       <div class="field">
+        <label for="foreigner_home_address_same_as_physical_foster">Home address same as the physical address?</label>
+        <br>
+        <select id="foreigner_home_address_same_as_physical_foster"
+		name="home_address_same_as_physical"
+                condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+		class="input_cell"
+         	tt_onUnload= />
+          	<option></option>
+          	<option value="Yes" >Yes</option>
+          	<option value="No" >No</option>
+        </select>
+      </div>
+
+       <div class="field">
+        <label for="child_foster_mother_home_country">Country</label><br>
+        <input id="child_foster_mother_home_country" name="child[mother][home_country]" type="text"
+               value="<%= @child[:foster_mother][:home_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_home_district">District/State</label><br>
+        <input id="child_foster_mother_foreigner_home_district" name="child[foster_mother][foreigner_home_district]" type="text"
+               value="<%= @child[:foster_mother][:foreigner_home_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_home_village">Village/Town</label><br>
+        <input id="child_foster_mother_foreigner_home_village"
+               name="child[foster_mother][foreigner_home_village]"
+	       type="text"
+	       value="<%= @child[:foster_mother][:foreigner_home_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_mother_foreigner_home_ta">Address</label><br>
+        <input id="child_foster_mother_foreigner_home_ta"
+	       name="child[foster_mother][foreigner_home_ta]"
+	       type="text"
+               value="<%= @child[:foster_mother][:foreigner_home_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+<% elsif ["child_foster_mother_home_country", "child_foster_mother_foreigner_home_district","child_foster_mother_foreigner_home_village", "child_foster_mother_foreigner_home_ta"].include? @field  %>
+
+     <fieldset condition="__$('child_mother_citizenship').value.trim() != 'Malawian'">
+
+      <legend>Details of Child's Mother (cont'd) - Home address</legend>
+      
+       <div class="field">
+        <label for="child_mother_home_country">Country</label><br>
+        <input id="child_mother_home_country" name="child[mother][home_country]" type="text" 
+               value="<%= @child[:mother][:home_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+               condition="__$('child_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+       
+      <div class="field">
+        <label for="child_mother_foreigner_home_district">District/State</label><br>
+        <input id="child_mother_foreigner_home_district" name="child[mother][foreigner_home_district]" type="text" 
+               value="<%= @child[:mother][:foreigner_home_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+       
+
+      <div class="field">
+        <label for="child_mother_foreigner_home_village">Village/Town</label><br>
+        <input id="child_mother_foreigner_home_village" 
+               name="child[mother][foreigner_home_village]" 
+	       type="text" 
+	       value="<%= @child[:mother][:foreigner_home_village] rescue nil %>"
+               class="input_cell" 
+               condition="__$('child_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_mother_foreigner_home_ta">Address</label><br>
+        <input id="child_mother_foreigner_home_ta" 
+	       name="child[mother][foreigner_home_ta]" 
+	       type="text" 
+               value="<%= @child[:mother][:foreigner_home_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+      
+
+    </fieldset>
+ 
+ <!-- adoptive mother -->
+ 
+ 
+ <!-- adoptive father -->
+ 
+ <% elsif ["child_foster_father_last_name","child_foster_father_first_name","child_foster_father_middle_name", "child_foster_father_id_number"].include? @field  %>
+
+      <!-- Father -->
+      
+      <fieldset>
+      
+      <% if params[:amend].present? && params[:amend]=="true" %>
+
+          <input type="hidden" name="old_foster_father_last_name" value="<%=@child[:foster_father][:last_name]%>">
+          <input type="hidden" name="old_foster_father_first_name" value="<%=@child[:foster_father][:first_name]%>">
+          <input type="hidden" name="old_foster_father_middle" value="<%=@child[:foster_father][:middle_name]%>">
+      <% end %>
+      
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father</font></legend>
+
+      <!-- Father -->
+
+      <div class="field">
+        <label for="child_foster_father_last_name">Surname</label><br>
+        <input id="child_foster_father_last_name"
+               name="child[foster_father][last_name]"
+               type="text"
+               value="<%= @child[:foster_father][:last_name] rescue nil %>"
+               ajaxURL = "/get_last_names"
+               class="input_cell"
+        />
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_first_name">First Name</label><br>
+        <input id="child_foster_father_first_name"
+               name="child[foster_father][first_name]"
+               type="text"
+               value="<%= @child[:foster_father][:first_name] rescue nil %>"
+               ajaxURL = "/get_first_names"
+               class="input_cell"
+              />
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_middle_name">Other Name</label><br>
+        <input id="child_foster_father_middle_name"
+               name="child[foster_father][middle_name]"
+               type="text"
+               value="<%= @child[:foster_father][:middle_name] rescue nil %>"
+               ajaxURL = "/get_first_names"
+               class="input_cell"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_id_number">ID Number</label><br>
+        <input id="child_foster_father_id_number"
+               name="child[foster_father][id_number]"
+               type="text"
+               value="<%= @child[:foster_father][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+    
+<% elsif ["child_foster_father_birthdate","child_foster_father_first_name","child_foster_father_middle_name", "child_foster_father_citizenship"].include? @field  %>
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued</font></legend>
+
+      <div class="field">
+        <label for="child_foster_father_birthdate">Date of Birth</label><br>
+
+        <input id="child_foster_father_birthdate" name="child[foster_father][birthdate]" type="text"
+      	       value="<%= @child[:foster_father][:birthdate] rescue nil %>"
+               class="input_cell"
+               fieldtype="date"
+               optional="true"
+               tt_onLoad="validateDate(__$('child_birthdate'), __$('child_foster_father_birthdate'), 100, 14, 115, 8)" />
+
+        <input id="child_foster_father_birthdate_estimated" name="child[foster_father][birthdate_estimated]" type="hidden" optional='true'/>
+
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_citizenship">Nationality</label><br>
+        <input id="child_foster_father_citizenship"
+               name="child[foster_father][citizenship]"
+               type="text"
+               value="<%= @child[:foster_father][:citizenship] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_nationality" />
+      </div>
+      
+      
+      <div class="field">
+        <label for="child_foster_father_residential_country">Country of Residence</label><br>
+        <input id="child_foster_father_residential_country" name="child[foster_father][residential_country]" type="text"
+               value="<%= @child[:foster_father][:residential_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+         />
+      </div>
+
+    </fieldset>
+    
+<% elsif ["child_foster_father_current_district","child_foster_father_current_ta","child_foster_father_current_village"].include? @field  %>
+
+    <fieldset>
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="child_foster_father_current_district">District</label><br>
+        <input id="child_foster_father_current_district" name="child[foster_father][current_district]" type="text" value="<%= @child[:foster_father][:current_district] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_district"
+               condition="__$('child_foster_father_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_father_current_ta').getAttribute('section'))][parseInt(__$('textForchild_foster_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForchild_foster_father_current_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_current_ta">T/A or Area of Residence</label><br>
+        <input id="child_foster_father_current_ta" name="child[foster_father][current_ta]" type="text" value="<%= @child[:foster_father][:current_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               condition="__$('child_foster_father_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_father_current_village').getAttribute('section'))][parseInt(__$('textForchild_foster_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForchild_foster_father_current_district').value + '&ta=' + __$('textForchild_foster_father_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_current_village">Village/Town</label><br>
+        <input id="child_foster_father_current_village" name="child[foster_father][current_village]" type="text" value="<%= @child[:foster_father][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('child_foster_father_residential_country').value.trim() == 'Malawi'"
+	      ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+    </fieldset>
+    
+<% elsif ["child_foster_father_home_district","child_foster_father_home_ta","child_foster_father_home_village"].include? @field  %>
+ 
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued: Home Address</font></legend>
+
+      <div class="field">
+        <label for="foster_father_home_address_same_as_physical">Home address same as the physical address?</label>
+        <br>
+        <select id="foster_father_home_address_same_as_physical"
+        name="home_address_same_as_physical"
+        class="input_cell" 
+        tt_onUnload="if(__$('textForfoster_father_home_address_same_as_physical').value.trim() == 'Yes'){loadFosterFathersAddress();} else {unloadFosterFathersAddress();}" />
+        <option></option>
+        <option value="Yes" >Yes</option>
+        <option value="No" >No</option>
+      </select>
+    </div>
+
+      <div class="field">
+        <label for="child_foster_father_home_district">District</label><br>
+        <input id="child_foster_father_home_district"
+               name="child[foster_father][home_district]"
+               type="text"
+               value="<%= @child[:foster_father][:home_district] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_father_home_ta').getAttribute('section'))][parseInt(__$('textForchild_foster_father_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForchild_foster_father_home_district').value);" optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_home_ta">T/A</label><br>
+        <input id="child_foster_father_home_ta"
+               name="child[foster_father][home_ta]"
+               type="text"
+               value="<%= @child[:foster_father][:home_ta] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForchild_foster_father_home_village').getAttribute('section'))][parseInt(__$('textForchild_foster_father_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForchild_foster_father_home_district').value + '&ta=' + __$('textForchild_foster_father_home_ta').value);"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="child_foster_father_home_village">Village</label><br>
+        <input id="child_foster_father_home_village"
+               name="child[foster_father][home_village]"
+               type="text"
+               value="<%= @child[:foster_father][:home_village] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_village" optional="true" />
+      </div>
+
+    </fieldset>
+ <!-- adoptive father -->
+ 
 <% elsif ["child_informant_last_name","child_informant_first_name","child_informant_middle_name", "child_informant_id_number", "child_informant_relationship_to_child"].include? @field  %>
 
     <fieldset>
