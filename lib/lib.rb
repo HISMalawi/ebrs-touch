@@ -393,7 +393,7 @@ module Lib
              end
         end
     else
-       status =PersonRecordStatus.new_record_state(person.id, 'DC-ACTIVE')
+       status = PersonRecordStatus.new_record_state(person.id, 'DC-ACTIVE')
     end
     return status
   end
