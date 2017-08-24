@@ -1,0 +1,50 @@
+<style>
+    #table{
+        font-size: 1em;
+        color: darkslategray;
+    }
+    #table th{
+        border: 1px solid #d3d3d3;
+        background: #d3d3d3;
+        width: 33%;
+    }
+    #table td{
+       border: 1px solid #d3d3d3;
+    }
+
+        .cat{
+            font-weight: bold;
+        }
+</style>
+<script type="text/javascript" src="/assets/showSubMenu.js"></script>
+
+<div id="default" style="width: 95%; margin: auto; height: 400px; text-align: center; vertical-align: top;">
+<table id='table' style="width: 100%;" cellpadding="5" cellspacing="0">
+
+  <thead>
+        <tr>
+          <th>Category</th>
+          <th>Gender</th>
+          <th>Total</th>
+        </tr>
+  </thead>
+
+  <% @data.each do |cat, data|
+  %>
+      <tr>
+        <td>
+          <%= cat%>
+        </td>
+        <td>
+            <table style="width: 100%;">
+                <% data.each do |k, sub_data|
+                %>
+                    <tr><td><%= k%></td></tr>
+                <% end
+                %>
+            </table>
+        </td>
+      </tr>
+  <% end %>
+</table>
+</div>

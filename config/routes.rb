@@ -145,6 +145,9 @@ Rails.application.routes.draw do
 
   get "/comments/:id" => 'dc#comments'
 
+  get 'reports/births_report'
+  get 'reports/report_date_range'
+
   resources :person
 
   resources :users
