@@ -719,6 +719,11 @@ class PersonController < ApplicationController
   end
 
   def view_cases
+    if SETTINGS['application_mode'] == "FC"
+        @states = ["DC-ACTIVE","FC-POTENTIAL DUPLICATE"]
+    else
+       @states = ["DC-ACTIVE"]
+    end
     @states = ["DC-ACTIVE"]
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)

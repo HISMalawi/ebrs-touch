@@ -64,11 +64,7 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <% if SETTINGS['application_mode'] == "FC" %>
-              <span class="count"><%= @stats['DC-ACTIVE','FC-POTENTIAL DUPLICATE']%></span>
-            <%else%>
               <span class="count"><%= @stats['DC-ACTIVE']%></span>
-            <%end%>
           </td>
           <td style="height: 30px;">
             Active Records
