@@ -78,6 +78,8 @@ class PersonController < ApplicationController
 
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+    
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
@@ -239,7 +241,7 @@ class PersonController < ApplicationController
       @summaryHash["Adoption Court Order"] = nil
     end
 
-    if ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE'].include? @status
+    if ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE'].include? @status && @folders.include?("Manage Duplicates")
         redirect_to "/potential/duplicate/#{@person.id}?index=0"
     else
         if @person.present? && SETTINGS['potential_search'] && SETTINGS['application_mode'] =="DC"
@@ -719,12 +721,12 @@ class PersonController < ApplicationController
   end
 
   def view_cases
+
     if SETTINGS['application_mode'] == "FC"
         @states = ["DC-ACTIVE","FC-POTENTIAL DUPLICATE"]
     else
        @states = ["DC-ACTIVE"]
     end
-    @states = ["DC-ACTIVE"]
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
