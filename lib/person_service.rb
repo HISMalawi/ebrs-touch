@@ -127,7 +127,7 @@ module PersonService
     results = []
 
     main.each do |data|
-      person_name =  PersonName.find_by_person_id(data.person_id)
+      person_name =  Person.find(data.person_id).person_names.last
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       #For abandoned cases mother details may not be availabe
