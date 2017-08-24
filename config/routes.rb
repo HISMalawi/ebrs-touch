@@ -92,6 +92,7 @@ Rails.application.routes.draw do
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
   get '/view_duplicates' => "dc#view_duplicates"
+  get "/view_hq_duplicates" => "dc#view_hq_duplicates"
   get "/potential/duplicate/:id" => "dc#potential_duplicate"
   get "/add_duplicate_comment/:id" => "dc#add_duplicate_comment"
   get "/resolve_duplicate" =>"dc#resolve_duplicate"
@@ -144,6 +145,10 @@ Rails.application.routes.draw do
   get '/rfilter' => 'dc#rfilter'
 
   get "/comments/:id" => 'dc#comments'
+
+  get '/update_person' => 'person#update_person'
+
+  post '/update' => "person#update"
 
   resources :person
 

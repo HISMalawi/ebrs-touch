@@ -46,6 +46,10 @@ module PersonService
     return person
   end
 
+  def self.update_record(params)
+
+  end  
+
   def self.is_num?(val)
 
     #checks if the val is numeric or string
