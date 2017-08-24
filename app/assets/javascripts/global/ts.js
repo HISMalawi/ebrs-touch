@@ -5937,7 +5937,7 @@ function duplicatesPopup(data,checkbox){
 
            __$("person_is_exact_duplicate").value = data.exact
            if(data.exact && facility_type  =="FC"){
-               window.location.href +"/"
+               window.location.href = "/"
            }else{
                document.body.removeChild(shield);
                document.forms[0].submit();            

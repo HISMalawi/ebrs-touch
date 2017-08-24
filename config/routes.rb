@@ -146,6 +146,10 @@ Rails.application.routes.draw do
 
   get "/comments/:id" => 'dc#comments'
 
+  get '/update_person' => 'person#update_person'
+
+  post '/update' => "person#update"
+
   resources :person
 
   resources :users
