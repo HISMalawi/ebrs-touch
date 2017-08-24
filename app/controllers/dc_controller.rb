@@ -58,6 +58,16 @@ def view_duplicates
     render :template => "dc/view_duplicates", :layout => "data_table"
 end
 
+def view_hq_duplicates
+    
+    @states = ['DC-VERIFY DUPLICATE']
+    @section = "Duplicates from HQ"
+    @targeturl ="/manage_duplicates_menu"
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "dc/view_duplicates", :layout => "data_table"
+end
+
 def potential_duplicate
   @section = "Resolve Duplicates"
   @potential_duplicate =  person_details(params[:id])
