@@ -78,7 +78,7 @@
   <th colspan='2' style="width: 49%;" class="duplicate">
     Duplicate Record <i style="color: #999">(<%= @potential_duplicate[:status] %>)</i>
   </th>
-  <td rowspan="17" style="border: none;">
+  <td rowspan="25" style="border: none;">
     &nbsp;
   </td>
   <th colspan='2' style="width: 49%;">
@@ -194,171 +194,222 @@
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Hospital of Birth
+    Place of Birth
   </td>
   <td align="left">
-   		<%= @potential_duplicate[:hospital_of_birth] %>
+      <%= @potential_duplicate[:place_of_birth] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Hospital of Birth
+    Place of Birth
   </td>
   <td align="left" id="hospital">
-    	<%= @similar_records[params[:index].to_i][:hospital_of_birth] %>
+      <%= @similar_records[params[:index].to_i][:place_of_birth] %>
   </td>
 </tr>
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Birth Address
+    Location of Birth
   </td>
   <td align="left">
-    	<%= @potential_duplicate[:birth_address] %>
+   		<%= @potential_duplicate[:location_of_birth] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Birth Address
+    Location of Birth
   </td>
-  <td align="left" id="birthAddress">
-    	<%= @similar_records[params[:index].to_i][:birth_address] %>
+  <td align="left" id="hospital">
+    	<%= @similar_records[params[:index].to_i][:location_of_birth] %>
   </td>
 </tr>
-
 <tr>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    Village of Birth
-  </td>
-  <td align="left">
-  	  <%= @potential_duplicate[:village_of_birth] %>
-  </td>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    Village of Birth
-  </td>
-  <td align="left" id="village">
-    <%= @similar_records[params[:index].to_i][:village_of_birth] %>
-  </td>
+  <th colspan="2">Mother details and physical address</th>
+  <th colspan="2">Mother details and Physical address</th>
 </tr>
-
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    T/A of Birth
-  </td>
-  <td align="left">
-    	<%= @potential_duplicate[:ta_of_birth] %>
-  </td>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    T/A of Birth
-  </td>
-  <td align="left" id="ta">
-    	<%= @similar_records[params[:index].to_i][:ta_of_birth] %>
-  </td>
-</tr>
-
-<tr>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    District of Birth
-  </td>
-  <td align="left">
-    	<%= @potential_duplicate[:district_of_birth] %>
-  </td>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    District of Birth
-  </td>
-  <td align="left" id="district">
-    	<%= @similar_records[params[:index].to_i][:district_of_birth] %>
-  </td>
-</tr>
-
-<tr>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    Mother First Name
+    First Name
   </td>
   <td align="left">
     <%= @potential_duplicate[:mother_first_name] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Mother First Name
+    First Name
   </td>
   <td align="left" id="motherFName">
-    	<%= @similar_records[params[:index].to_i][:mother_first_name] %>
+      <%= @similar_records[params[:index].to_i][:mother_first_name] %>
   </td>
 </tr>
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Mother Middle Name
+    Middle Name
   </td>
   <td align="left">
-   		<%= @potential_duplicate[:mother_middle_name] %>
+      <%= @potential_duplicate[:mother_middle_name] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Mother Middle Name
+    Middle Name
   </td>
   <td align="left" id="motherMName">
-   		<%= @similar_records[params[:index].to_i][:mother_middle_name] %>
+      <%= @similar_records[params[:index].to_i][:mother_middle_name] %>
   </td>
 </tr>
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Mother Last Name
+    Last Name
   </td>
   <td align="left">
-    	<%= @potential_duplicate[:mother_last_name] %>
+      <%= @potential_duplicate[:mother_last_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Last Name
+  </td>
+  <td align="left" id="motherLName">
+      <%= @similar_records[params[:index].to_i][:mother_last_name] %>
+  </td>
+</tr>
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village
+  </td>
+  <td align="left">
+  	  <%= @potential_duplicate[:mother_village] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village
+  </td>
+  <td align="left" id="village">
+    <%= @similar_records[params[:index].to_i][:mother_village] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    T/A
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:mother_ta] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    T/A
+  </td>
+  <td align="left" id="ta">
+    	<%= @similar_records[params[:index].to_i][:mother_ta] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    District
+  </td>
+  <td align="left">
+    	<%= @potential_duplicate[:mother_district] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    District
+  </td>
+  <td align="left" id="district">
+    	<%= @similar_records[params[:index].to_i][:mother_district] %>
+  </td>
+</tr>
+<tr>
+  <th colspan="2">Father details and physical address</th>
+  <th colspan="2">Father details and Physical address</th>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    First Name
+  </td>
+  <td align="left">
+    <%= @potential_duplicate[:father_first_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    First Name
+  </td>
+  <td align="left" id="motherFName">
+      <%= @similar_records[params[:index].to_i][:father_first_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Middle Name
+  </td>
+  <td align="left">
+      <%= @potential_duplicate[:father_middle_name] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Middle Name
+  </td>
+  <td align="left" id="motherMName">
+      <%= @similar_records[params[:index].to_i][:father_middle_name] %>
+  </td>
+</tr>
+
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Last Name
+  </td>
+  <td align="left">
+      <%= @potential_duplicate[:father_last_name] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
     Mother Last Name
   </td>
   <td align="left" id="motherLName">
-    	<%= @similar_records[params[:index].to_i][:mother_last_name] %>
+      <%= @similar_records[params[:index].to_i][:father_last_name] %>
+  </td>
+</tr>
+<tr>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village
+  </td>
+  <td align="left">
+      <%= @potential_duplicate[:father_village] %>
+  </td>
+  <td align="right" style="font-size: 12px; font-weight: bold;">
+    Village
+  </td>
+  <td align="left" id="village">
+    <%= @similar_records[params[:index].to_i][:father_village] %>
   </td>
 </tr>
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father First Name
+    T/A
   </td>
   <td align="left">
-   		<%= @potential_duplicate[:mother_first_name] %>
+      <%= @potential_duplicate[:father_ta] %>
   </td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father First Name
+    T/A
   </td>
-  <td align="left" id="fatherFName">
-    	<%= @similar_records[params[:index].to_i][:father_first_name] %>
+  <td align="left" id="ta">
+      <%= @similar_records[params[:index].to_i][:father_ta] %>
   </td>
 </tr>
 
 <tr>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father Middle Name
+    District
   </td>
   <td align="left">
-   	<%= @potential_duplicate[:mother_middle_name] %>
+      <%= @potential_duplicate[:father_district] %>
   </td>
-  <td></td>
   <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father Middle Name
+    District
   </td>
-  <td align="left" id="fatherMName">
-    	<%= @similar_records[params[:index].to_i][:father_middle_name] %>
+  <td align="left" id="district">
+      <%= @similar_records[params[:index].to_i][:father_district] %>
   </td>
 </tr>
-
 <tr>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father Last Name
-  </td>
-  <td align="left">
-   	 <%= @potential_duplicate[:mother_last_name] %>
-  </td>
-  <td></td>
-  <td align="right" style="font-size: 12px; font-weight: bold;">
-    Father Last Name
-  </td>
-  <td align="left" id="fatherLName">
-    	<%= @similar_records[params[:index].to_i][:father_last_name] %>
-  </td>
+  <th colspan="2"></th>
+  <th colspan="2"></th>
 </tr>
-
 </table>
 
 </div>

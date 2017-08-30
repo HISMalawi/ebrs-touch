@@ -76,7 +76,10 @@ class PersonController < ApplicationController
 
     @status = PersonRecordStatus.status(@person.id)
 
+
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+    
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
@@ -144,9 +147,9 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                "Home Address, District" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
-                "District" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+                "Village/Town" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
             },
             {
                 "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
@@ -179,9 +182,9 @@ class PersonController < ApplicationController
                 "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
             },
             {
-                "Home Address, Village/Town" => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                "Home Address, District" => "#{loc(@father_address.home_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
-                "District" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                "Village/Town" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
             }
         ],
         "Details of Child's Informant" => [
@@ -195,7 +198,7 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{loc(@informant_address.home_district, 'District')rescue nil}",
+                "Physical Address, District" => "#{loc(@informant_address.current_district, 'District') rescue nil}",
                 "T/A" => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
                 "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
             },
@@ -238,7 +241,55 @@ class PersonController < ApplicationController
       @summaryHash["Adoption Court Order"] = nil
     end
 
-    render :layout => "facility"
+    if ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE'].include? @status && @folders.include?("Manage Duplicates")
+        redirect_to "/potential/duplicate/#{@person.id}?index=0"
+    else
+        if @person.present? && SETTINGS['potential_search'] && SETTINGS['application_mode'] =="DC"
+
+          person = {}
+          person["person_id"] = @person.person_id.to_s
+          person["first_name"]= @name.first_name rescue ''
+          person["last_name"] =  @name.last_name rescue ''
+          person["middle_name"] = @name.middle_name rescue ''
+          person["gender"] = (@person.gender == 'F' ? 'Female' : 'Male')
+          person["birthdate"]= @person.birthdate.to_date
+          person["birthdate_estimated"] = @person.birthdate_estimated
+          person["nationality"]=  @mother_person.citizenship
+          person["place_of_birth"] = @place_of_birth
+          if  birth_loc.district.present?
+            person["district"] = birth_loc.district
+          else
+            person["district"] = "Lilongwe"
+          end      
+          person["mother_first_name"]= @mother_name.first_name rescue ''
+          person["mother_last_name"] =  @mother_name.last_name  rescue ''
+          person["mother_middle_name"] = @mother_name.middle_name rescue '' 
+          person["father_first_name"]= @father_name.first_name  rescue ''
+          person["father_last_name"] =  @father_name.last_name  rescue ''
+          person["father_middle_name"] = @father_name.middle_name  rescue ''
+        
+          SimpleElasticSearch.add(person)
+
+          if @status == "DC-ACTIVE"
+            @results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])       
+            if @results.present?
+               potential_duplicate = PotentialDuplicate.create(person_id: @person.person_id,created_at: (Time.now))
+               if potential_duplicate.present?
+                     @results.each do |result|
+                        potential_duplicate.create_duplicate(result["_id"])
+                     end
+               end
+               #PersonRecordStatus.new_record_state(@person.person_id, "HQ-POTENTIAL DUPLICATE-TBA", "System mark record as potential duplicate")
+               @status = "DC-POTENTIAL DUPLICATE" #PersonRecordStatus.status(@person.id)
+
+            end      
+          end
+        else
+             @results = []
+        end
+        render :layout => "facility"
+    end
+
   end
   
   def records
@@ -262,7 +313,7 @@ class PersonController < ApplicationController
 
   def new
 
-    @current_district = Location.current_district.name
+    @current_district = Location.find(SETTINGS['location_id']).district rescue nil
 
     $prev_child_id = params[:id]
 
@@ -302,6 +353,7 @@ class PersonController < ApplicationController
   end
 
   def create
+    
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -344,6 +396,39 @@ class PersonController < ApplicationController
     end
 
   end
+
+  def update_person
+
+    @person = Person.find(params[:id])
+    
+    @person_details = PersonBirthDetail.find_by_person_id(params[:id])
+    
+    @person_name = PersonName.find_by_person_id(params[:id])
+
+    @person_mother_name = @person.mother.person_names.first rescue nil
+
+    @person_father_name = @person.father.person_names.first rescue nil
+
+    #raise PersonBirthDetail.find_by_person_id(params[:id]).birth_place.inspect
+
+    if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
+        @type_of_birth = "Second Twin"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 4
+        @type_of_birth = "Second Triplet"
+    elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 5
+        @type_of_birth = "Third Triplet"
+    end
+            
+    @field = params['field']
+
+    @section = "Update Record"
+
+    render :layout => "touch"
+  end
+
+  def update
+    raise params.inspect  
+  end   
 
   def person_for_elastic_search(params)
       person = {}
@@ -610,11 +695,13 @@ class PersonController < ApplicationController
           'Zomba City' => 'Zomba',
           'Blantyre City' => 'Blantyre'}
 
-  params[:district] =map[params[:district]] if   params[:district].match(/City$/)
+  if  (params[:district].match(/City$/) rescue false)
+    params[:district] =map[params[:district]]
+  end
 
   nationality_tag = LocationTag.where("name = 'Hospital' OR name = 'Health Facility'").first
   data = []
-  parent_location = Location.where(name: params[:district]).last.id rescue nil
+  parent_location = Location.where(" name = '#{params[:district]}' AND COALESCE(code, '') != '' ").first.id rescue nil
 
   Location.where("LENGTH(name) > 0 AND name LIKE (?) AND parent_location = #{parent_location} AND m.location_tag_id = ?",
     "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
@@ -634,10 +721,15 @@ class PersonController < ApplicationController
   end
 
   def view_cases
-    @states = ["DC-ACTIVE"]
+
+    if SETTINGS['application_mode'] == "FC"
+        @states = ["DC-ACTIVE","FC-POTENTIAL DUPLICATE"]
+    else
+       @states = ["DC-ACTIVE"]
+    end
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-    
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
    
     render :template => "person/records", :layout => "data_table"
@@ -647,7 +739,7 @@ class PersonController < ApplicationController
     @states = ["DC-COMPLETE"]
     @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -656,7 +748,7 @@ class PersonController < ApplicationController
     @states = ["DC-INCOMPLETE"]
     @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = "/manage_cases"
     @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -968,6 +1060,20 @@ class PersonController < ApplicationController
     PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason']}", "Ammendment request; #{params['reason']}");
 
     redirect_to session['list_url']
+  end
+
+  def searched_cases
+    @states = Status.all.map(&:name)
+    @section = "Search Cases"
+    @display_ben = true
+    @search = true
+    @user = User.find(params[:user_id])
+    User.current = @user
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    filters = JSON.parse(params['data']) rescue {}
+    @records = PersonService.search_results(filters)
+
+    render :template => "person/records", :layout => "data_table"
   end
   #########################################################################
 

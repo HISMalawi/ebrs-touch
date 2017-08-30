@@ -1,0 +1,245 @@
+<style>
+    #__content{
+        -moz-transform: scale(0.73);
+        -moz-transform-origin: 0 0;
+        width:99% !important;
+    }
+
+    #toolsCell1{
+        height: 450px !important;
+        min-width: 250px !important;
+        width: 500px !important;
+    }
+    #fixedkeyboard{
+        max-width: 800px !important;
+    }
+
+    #textForperson_birth_entry_number{
+        text-transform: uppercase;
+    }
+    #textForperson_facility_serial_number{
+        text-transform: uppercase;
+    }
+</style>
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+<fieldset>
+	 <legend><font size='5' style='border: 2px;'>Search filters</font></legend>
+	 <div class="field">
+       <label for="filters">Select Filter</label>
+       <select id="filters" name="filter_name" class="input_cell">
+         <option></option>
+         <% @filters.each do |f|%>
+             <option value="<%=f%>"><%=f%></option>
+         <%end%>
+       </select>
+	 </div>
+
+  <%= f.hidden_field :birth_district, :value => '' %>
+</fieldset>
+
+
+<fieldset>
+  <div class="field">
+    <legend><font size='5' style='border: 2px;'>Birth Entry Number</font></legend>
+    <label for="person_birth_entry_number">Birth Entry Number</label>
+    <br>
+    <%= (f.text_field :birth_entry_number,
+                      :class => "input_cell",
+                      :textCase => 'upper',
+                      :condition => "__$('filters').value == 'Birth Entry Number' ",
+                      :optional => :true) %>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Facility Serial Number</font></legend>
+  <div class="field">
+    <label for="person_facility_serial_number">Facility Serial Number</label>
+    <br>
+    <%= (f.text_field :facility_serial_number,
+                      :class => "input_cell",
+                      :condition => "__$('filters').value == 'Facility Serial Number' ",
+                      :optional => :true)
+                       %>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Child Name</font></legend>
+  <div class="field">
+    <label for="person_last_name">Surname</label>
+    <br>
+    <%= (f.text_field :last_name,
+                      :class => "input_cell",
+                      :condition => "__$('filters').value == 'Child Name' ",
+                      :optional => :true)%>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Child Name</font></legend>
+  <div class="field">
+    <label for="person_first_name">First Name</label>
+    <br>
+    <%= (f.text_field :first_name,
+                      :class => "input_cell",
+                      :condition => "__$('filters').value == 'Child Name' ",
+                      :optional => :true)%>
+  </div>
+</fieldset>
+
+<fieldset>
+  <div class="field">
+    <legend><font size='5' style='border: 2px;'>Child Name</font></legend>
+    <label for="person_middle_name">Other Names</label>
+    <br>
+    <%= (f.text_field :middle_name,
+                      :class => "input_cell",
+                      :condition => "__$('filters').value == 'Child Name' ",
+                      :optional => :true) %>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Gender</font></legend>
+  <div class="field">
+    <label for="person_gender">Sex</label><br>
+    <select condition = "__$('filters').value == 'Child Gender' "  id="person_gender" name="person[gender]" class="input_cell">
+      <option></option>
+      <option>Female</option>
+      <option>Male</option>
+    </select>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Place of Birth</font></legend>
+  <div class="field">
+    <label for="person_place_of_birth">Place of Birth</label><br>
+    <select condition = "__$('filters').value == 'Place of Birth' "  id="person_place_of_birth" name="person[place_of_birth]" class="input_cell">
+      <option></option>
+      <option>Home</option>
+      <option>Hospital</option>
+      <option>Other</option>
+    </select>
+  </div>
+</fieldset>
+
+<fieldset>
+    <legend><font size='5' style='border: 2px;'>Birth District</font></legend>
+    <div class="field">
+      <label for="person_bd_holder">Birth District</label><br>
+
+      <input id="person_bd_holder"
+             condition = "__$('filters').value == 'Place of Birth' "
+             name="person[birth_district]"
+             type="text"
+             ajaxURL = "/search_by_district"
+             class="input_cell"
+      />
+    </div>
+</fieldset>
+
+
+<fieldset>
+    <legend><font size='5' style='border: 2px;'>Hospital of Birth</font></legend>
+    <div class="field">
+      <label for="person_hospital_of_birth">Name of Hospital</label>
+      <br>
+      <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
+             class ="input_cell"
+             condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+             tt_onLoad = "__$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)"
+             tt_onUnload = "setDistrict('district'); "
+             ajaxURL = "/search_by_hospital" >
+    </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>TA of Birth</font></legend>
+    <div class="field">
+      <label for="person_birth_ta">T/A</label>
+      <br>
+      <input type="text" name="person[birth_ta]" id="person_birth_ta"
+             class = "input_cell"
+             condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+             ajaxURL = "/search_by_district"
+             tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);"
+            >
+    </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Village of Birth</font></legend>
+  <div class="field">
+    <label for="person_birth_village">Village</label>
+    <br>
+    <input type="text" name="person[birth_village]" class = "input_cell"
+           id="person_birth_village"
+           condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home' "
+           tt_onload = "__$('person_birth_village').setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_bd_holder').value + '&ta=' + __$('person_birth_ta').value);"
+           ajaxURL = "/search_by_village">
+  </div>
+</fieldset>
+
+
+<fieldset>
+    <legend><font size='5' style='border: 2px;'>Other Place of Birth</font></legend>
+    <div class="field">
+      <label for="person_other_birth_place">Give Details</label>
+      <br>
+      <input type="text" name="other_birth_place" class ="input_cell"
+             condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place">
+    </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Record Status</font></legend>
+  <div class="field">
+    <label for="person_record_status">Record Status</label><br>
+    <select condition = "__$('filters').value == 'Record Status' "  id="person_record_status" name="person[record_status]" class="input_cell">
+      <option></option>
+      <% @statuses.each do |s|%>
+        <option><%= s%></option>
+      <% end %>
+    </select>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend><font size='5' style='border: 2px;'>Record Creator</font></legend>
+  <div class="field">
+    <label for="person_users">Record Creator</label><br>
+    <select condition = "__$('filters').value == 'Creator' "  id="person_users" name="person[creator]" class="input_cell">
+      <option></option>
+      <% @users.each do |name, id|%>
+          <option value="<%= id%>"><%= name%></option>
+      <% end %>
+    </select>
+  </div>
+</fieldset>
+
+<% end %>
+<script type="text/javascript">
+	init();
+    function resize(){}
+
+    function setDistrict(place) {
+
+        if (place == 'district') {
+            __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.find(SETTINGS['location_id']).district %>" ;
+
+            try{
+                __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
+            }catch(e){
+
+            }
+
+        } else {
+
+            __$('person_birth_district').value = "<%= Location.find(SETTINGS['location_id']).district %>" ;
+
+        }
+    }
+
+</script>

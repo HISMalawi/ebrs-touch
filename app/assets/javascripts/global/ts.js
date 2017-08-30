@@ -4825,6 +4825,87 @@ function clickCanGo() {
 
         }
 
+        if(parent.getAttribute("word_min_length") && parent.getAttribute("word_min_length") > 0){
+            
+            var word_min_length = parent.getAttribute("word_min_length")? parent.getAttribute("word_min_length") : 0;
+            if(__$("textFor" + parent.id) && __$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length < word_min_length){
+                  
+                  showMsg("Entered value length doesn't meet minimum required length of "+word_min_length+" character(s)");
+
+                  if (__$("cell" + i + ".3")) {
+
+                        if (parent.getAttribute("optional") == null) {
+
+                            __$("cell" + i + ".3").innerHTML = "<img src='" + imgUnTick + "' height=60 />";
+
+                        } else {
+
+                            __$("cell" + i + ".3").innerHTML = "";
+
+                        }
+
+                    }
+
+                    return false;
+            }
+
+        }
+
+        if(parent.getAttribute("word_max_length") && parent.getAttribute("word_max_length") > 0){
+            
+            var word_max_length = parent.getAttribute("word_max_length")? parent.getAttribute("word_max_length") : 0;
+            if(__$("textFor" + parent.id) && __$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length > word_max_length){
+                  
+                  showMsg("Entered value length execeeds the maximum required length of "+word_max_length+" character(s)");
+
+                  if (__$("cell" + i + ".3")) {
+
+                        if (parent.getAttribute("optional") == null) {
+
+                            __$("cell" + i + ".3").innerHTML = "<img src='" + imgUnTick + "' height=60 />";
+
+                        } else {
+
+                            __$("cell" + i + ".3").innerHTML = "";
+
+                        }
+
+                    }
+
+                    return false;
+            }
+
+        }
+
+          if(parent.getAttribute("length") && parent.getAttribute("length") > 0){
+            
+            var length = parent.getAttribute("length")? parent.getAttribute("length") : 0;
+            if(__$("textFor" + parent.id).value.trim().length > 0 && __$("textFor" + parent.id).value.trim().length != length){
+                  
+                  showMsg("Entered value has "+__$("textFor" + parent.id).value.trim().length
+                               + " character(s) but the field   expects exactly "+
+                                   length+ " character(s)");
+
+                  if (__$("cell" + i + ".3")) {
+
+                        if (parent.getAttribute("optional") == null) {
+
+                            __$("cell" + i + ".3").innerHTML = "<img src='" + imgUnTick + "' height=60 />";
+
+                        } else {
+
+                            __$("cell" + i + ".3").innerHTML = "";
+
+                        }
+
+                    }
+
+                    return false;
+            }
+
+        }
+
+
         if (parent.getAttribute("optional") == null || (parent.getAttribute("optional") != null && validationControl.value.trim().length > 0)) {
             if (parent.getAttribute("absolute_max") != null) {
                 if (parent.getAttribute("fieldtype") == "date" || parent.getAttribute("fieldtype") == "age") {
@@ -5799,7 +5880,7 @@ function duplicatesPopup(data,checkbox){
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
-        th.innerHTML = "The record is potential duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
+        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
         tr.appendChild(th);
         if(people){
             for(var i = 0; i < people.length ; i++){
@@ -5855,8 +5936,12 @@ function duplicatesPopup(data,checkbox){
            __$("person_duplicate").value = ids;
 
            __$("person_is_exact_duplicate").value = data.exact
-           document.body.removeChild(shield);
-           document.forms[0].submit();
+           if(data.exact && facility_type  =="FC"){
+               window.location.href = "/"
+           }else{
+               document.body.removeChild(shield);
+               document.forms[0].submit();            
+           }
         }
         footdiv.appendChild(ok);
 
@@ -5908,7 +5993,6 @@ function submitAfterSummary() {
     var data = {"twin_id": getUrlVars()["id"]}
 
     for(var i = 0 ; i < duplicate_search.length ; i++){
-
         if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
              data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
          } else {
@@ -5972,7 +6056,6 @@ function submitAfterSummary() {
                 var label = "";
 
                 for (var j = 0; j < summaryHash[keys[i]].length; j++) {
-
                     if (__$(summaryHash[keys[i]][j])) {
 
                         if (label.trim().length > 0) {
@@ -6089,15 +6172,17 @@ setTimeout("checkScrolls()", 500);
 // init();
 //Custom date validations
 var date_interval ;
-function dateInterval(id,validation_date){
+function dateInterval(id,validation_date,estimatable){
+        date_interval ? clearInterval(date_interval) : date_interval;
         var target = __$(id)
         if(!__$("textFor"+id)){
             clearInterval(date_interval);
             return
         }
-        if(target.value.length == 0){
+        /*if(target.value.length == 0){
            resetDate(id,new Date(target.getAttribute("absolute_max")));
-        }
+        }*/
+
         date_interval = setInterval(function(){
 
                   var today = new Date();
@@ -6114,8 +6199,13 @@ function dateInterval(id,validation_date){
                       input_value  = __$("textFor"+id).value;
                   }
 
+                  if(input_value.length == 0){
+                     return;
+                  }
+
                   var parts = input_value.split("/");
-                  if(parts[0] == 0 ){
+                  if(parts[0] == 0 && input_value.length != 0){
+
                      __$("textFor"+id).value = "?/"+parts[1]+"/"+parts[2]
                      __$("txtDateFor"+id).value = "?"
                      target.setAttribute("absolute_max",today.format());
@@ -6153,9 +6243,9 @@ function dateInterval(id,validation_date){
 
         },250);
 
-    }
+}
 
-    function resetDate(target_id, today){
+function resetDate(target_id, today){
          if (today.getTime() === today.getTime()){
                 __$("textFor"+ target_id).value  = today.getDate() +"/"+ months[today.getMonth()] + "/"+ today.getFullYear();
                 __$("txtDateFor"+target_id).value = today.getDate();
@@ -6168,32 +6258,35 @@ function dateInterval(id,validation_date){
             __$("txtYearFor"+ target_id).value = "?"
             return;
          }
-    }
+}
 
-    function clearDateInterval(id){
+function clearDateInterval(id){
         clearInterval(date_interval);
         date_interval = null;
-    }
+}
 
 //Name validation
 var spaceInterval ;
 function checkSpace(id){
+      spaceInterval? clearInterval(spaceInterval) : spaceInterval
       spaceInterval = setInterval(function(){
         if(!__$("textFor"+id)){
             clearInterval(spaceInterval);
             return
         }
+        //console.log(__$("textFor"+id).value);
         var text_input =__$("textFor"+id).value
         if(text_input.length > 0){
           __$("textFor"+id).value = text_input.capitalize();
         }   
-      },20);
+      },100);
       
 }
 
 var cont = {}
 var name_length_interval
 function validateNameLength(person,id,level){
+     name_length_interval ? clearInterval(name_length_interval) : name_length_interval
       name_length_interval = setInterval(function(){
           if(!__$("textFor"+id)){
             clearInterval(name_length_interval);
@@ -6220,10 +6313,10 @@ function validateNameLength(person,id,level){
                 var check_space_regex = /\s/;
                 var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,.\/]/
                 if(check_number_regex.test(input)){
-                    showMsg("Name of the person contains a number(s)", "Number in names validations");
+                    showMsg("Name of the person can not contain a number", "Number in names validations");
                     __$("textFor"+id).value  = input.replace(check_number_regex,"")
                 }else if(special_characters.test(input)){
-                     showMsg("Name of the person contains special character(s)", "Special charactes validations");
+                     showMsg("Name of the person can not contain special character(s)", "Special charactes validations");
                      __$("textFor"+id).value  = input.replace(special_characters,"")
                 }else{
 
@@ -6234,4 +6327,47 @@ function validateNameLength(person,id,level){
 
       },200);
       //clearInterval(spaceInterval);
+}
+
+var special_characters_interval
+function checkSpecialCharacters(id){
+        special_characters_interval ? clearInterval(special_characters_interval) : special_characters_interval
+        special_characters_interval = setInterval(function(){
+          if(!__$("textFor"+id)){
+              clearInterval(special_characters_interval);
+              return;
+          }
+           var input  = __$("textFor"+id).value.trim();
+           if(!__$("shield")){
+                  var check_number_regex = /\d/;
+                  var check_space_regex = /\s/;
+                  var special_characters =  /[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,'.\/]/
+                  if(special_characters.test(input)){
+                       showMsg("Name of the person contains special character(s)", "Special charactes validations");
+                       __$("textFor"+id).value  = input.replace(special_characters,"")
+                  }else{
+
+                  }
+            }
+        },200);
+}
+
+var capitalize_all_interval 
+function capitalizeAllCharacters(id){
+        capitalize_all_interval ? clearInterval(capitalize_all_interval) : special_characters_interval;
+        capitalize_all_interval = setInterval(function(){
+            if(!__$("textFor"+id)){
+                clearInterval(capitalize_all_interval);
+                return;
+            }
+            __$("textFor"+id).value = __$("textFor"+id).value.toUpperCase();
+            
+
+        },200)
+}
+
+function loadDate(id, date){
+        if(__$("textFor"+id) && __$("textFor"+id).value.trim() == ""){
+            resetDate(id, new Date(date));
+        }
 }

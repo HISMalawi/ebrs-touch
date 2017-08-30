@@ -29,8 +29,6 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
-    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
-    <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
 
@@ -54,6 +52,7 @@
         <br>
         <%= (f.text_field :last_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_last_names",
         :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
@@ -64,6 +63,7 @@
         <br>
         <%= (f.text_field :first_name,
         :class => "input_cell",
+        :word_min_length => 2,
         :ajaxURL => "/get_first_names",
         :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
         :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
@@ -71,7 +71,7 @@
       <div class="field">
         <label for="person_middle_name">Other Names</label>
         <br>
-        <%= (f.text_field :middle_name, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
+        <%= (f.text_field :middle_name,:word_min_length => 2, :class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
       </div>
 
     </fieldset>
@@ -82,17 +82,17 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        <input type="text" name="person[birthdate]"
-                          class ="input_cell"
-                          id = "person_birthdate"
-                          fieldtype = "date"
-                          tt_onLoad = "dateInterval('person_birthdate')"
-                          absolute_min = "<%= Time.now.advance(:years => -100).strftime('%Y/%m/%d') %>",
-                          min = "<%= Time.now.advance(:years => -16).strftime('%Y/%m/%d') %>",
-                          absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>",
-                          tt_onUnload = "recalculateDateValidations('c_dob')" >
+        
+        <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :value => Date.today.strftime('%d/%b/%Y'),
+                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
+                          :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_birthdate')",
+                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
+        <%= f.hidden_field :birth_district, :value => @current_district %>
 
       </div>
       <div class="field">
@@ -220,7 +220,7 @@
       <div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" optional="true">
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
@@ -247,7 +247,7 @@
 
      <!-- Mother -->
 
-    <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
+  <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
       <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
 
       <div class="field">
@@ -256,23 +256,25 @@
         <input id="person_mother_last_name"
                name="person[mother][last_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:mother][:last_name] rescue nil %>"
                ajaxURL = "/get_last_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
-               tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
+               tt_onUnload = "appendValue('person_mother_first_name');" />
 
       </div>
 
       <div class="field">
         <label for="person_mother_first_name">First Name</label><br>
         <input id="person_mother_first_name" name="person[mother][first_name]"
-        type="text"
-        value="<%= @person[:mother][:first_name] rescue nil %>"
-        ajaxURL = "/get_first_names"
-        class="input_cell"
-        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
-        tt_onUnload = "appendValue('person_mother_first_name')" />
+              type="text"
+              word_min_length = 2
+              value="<%= @person[:mother][:first_name] rescue nil %>"
+              ajaxURL = "/get_first_names"
+              class="input_cell"
+              tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
+              tt_onUnload = "appendValue('person_mother_first_name')" />
       </div>
 
       <div class="field">
@@ -280,6 +282,7 @@
         <input id="person_mother_middle_name"
                name="person[mother][middle_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
@@ -313,7 +316,7 @@
                 class="input_cell"
                 fieldtype="date"
                 optional="true"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8)" />
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');" />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
@@ -324,6 +327,7 @@
         <label for="person_mother_citizenship">Nationality</label><br>
         <input id="person_mother_citizenship"
         			 name="person[mother][citizenship]"
+               optional="true"
         			 type="text"
         			 value="<%= @person[:mother][:citizenship] rescue nil %>"
                     class="input_cell"
@@ -335,6 +339,7 @@
         <input id="person_mother_local_residential_country"
                name="person[mother][residential_country]"
                type="text"
+               optional="true"
                value="<%= @person[:mother][:residential_country] rescue nil %>"
                class="input_cell"
                ajaxURL="/search_by_country" />
@@ -351,6 +356,7 @@
         <label for="person_mother_current_district">District</label><br>
         <input id="person_mother_current_district" name="person[mother][current_district]" type="text" value="<%= @person[:mother][:current_district] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_district"
+               optional="true"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
                tt_onLoad="clearRelated()"
 
@@ -360,6 +366,7 @@
       <div class="field">
         <label for="person_mother_current_ta">T/A or Area of Residence</label><br>
         <input id="person_mother_current_ta" name="person[mother][current_ta]" type="text" value="<%= @person[:mother][:current_ta] rescue nil %>"
+               optional="true"
                class="input_cell" ajaxURL="/search_by_ta"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
                tt_onLoad="clearRelated()"
@@ -370,6 +377,7 @@
         <label for="person_mother_current_village">Village/Town</label><br>
         <input id="person_mother_current_village" name="person[mother][current_village]" type="text" value="<%= @person[:mother][:current_village] rescue nil %>"
                class="input_cell"
+               optional="true"
                condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
 	      ajaxURL="/search_by_village"/>
       </div>
@@ -385,6 +393,7 @@
         <input id="person_mother_foreigner_current_district" name="person[mother][foreigner_current_district]" type="text"
                value="<%= @person[:mother][:foreigner_current_district] rescue nil %>"
                class="input_cell"
+               optional="true"
                condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi' && __$('person_mother_local_residential_country').value.trim() != '' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
                />
       </div>
@@ -394,6 +403,7 @@
         <label for="person_mother_foreigner_current_village">Village/Town</label><br>
         <input id="person_mother_foreigner_current_village"
                name="person[mother][foreigner_current_village]"
+               optional="true"
 	       type="text"
 	       value="<%= @person[:mother][:foreigner_current_village] rescue nil %>"
                class="input_cell"
@@ -404,8 +414,9 @@
       <div class="field">
         <label for="person_mother_foreigner_current_ta">Address</label><br>
         <input id="person_mother_foreigner_current_ta"
-	       name="person[mother][foreigner_current_ta]"
-	       type="text"
+	             name="person[mother][foreigner_current_ta]"
+	             type="text"
+               optional="true"
                value="<%= @person[:mother][:foreigner_current_ta] rescue nil %>"
                class="input_cell"
                condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi' && __$('person_mother_local_residential_country').value.trim() != '' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
@@ -422,8 +433,7 @@
       <div class="field">
         <label for="home_address_same_as_physical">Home address same as the physical address?</label>
         <br>
-        <select id="home_address_same_as_physical"
-		name="home_address_same_as_physical"
+        <select id="home_address_same_as_physical" name="home_address_same_as_physical" optional="true"
             condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
 		        class="input_cell"
          	  tt_onUnload="if(__$('textForhome_address_same_as_physical').value.trim() == 'Yes'){loadMothersAddress();} else {unloadMothersAddress();}" />
@@ -435,24 +445,25 @@
 
       <div class="field">
         <label for="person_mother_home_district">District</label><br>
-        <input id="person_mother_home_district"
-	       name="person[mother][home_district]"
+        <input id="person_mother_home_district" name="person[mother][home_district]"
+               optional="true"
                condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
-	       type="text"
-	       value="<%= @person[:mother][:home_district] rescue nil %>"
+	             type="text"
+	             value="<%= @person[:mother][:home_district] rescue nil %>"
                class="input_cell"
-	       ajaxURL="/search_by_district"
-         tt_onLoad="clearRelated()"
+	             ajaxURL="/search_by_district"
+               tt_onLoad="clearRelated()"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_ta').getAttribute('section'))][parseInt(__$('textForperson_mother_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_mother_home_district').value);" />
       </div>
 
       <div class="field">
         <label for="person_mother_home_ta">T/A</label><br>
         <input id="person_mother_home_ta"
-	       name="person[mother][home_ta]"
-	       condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
-	       type="text"
-	       value="<%= @person[:mother][:home_ta] rescue nil %>"
+	             name="person[mother][home_ta]"
+               optional="true"
+	             condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
+	             type="text"
+	             value="<%= @person[:mother][:home_ta] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_ta"
                tt_onLoad="clearRelated()"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_village').getAttribute('section'))][parseInt(__$('textForperson_mother_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_mother_home_district').value + '&ta=' + __$('textForperson_mother_home_ta').value);"/>
@@ -464,6 +475,7 @@
                name="person[mother][home_village]"
                condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
                type="text"
+               optional="true"
                value="<%= @person[:mother][:home_village] rescue nil %>"
                class="input_cell"
                ajaxURL="/search_by_village"
@@ -532,9 +544,84 @@
                condition="__$('person_mother_citizenship').value.trim() != 'Malawian' && __$('person_mother_citizenship').value.trim() != '' && (__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both')"
                />
       </div>
+    </fieldset>
+
+    <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
+      <legend><font size='5' style=''>Details of Mother continued..</font></legend>
+
+      <div class="field">
+        <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
+        <br>
+       <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
+                class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
+      </div>
+      <div class="field">
+        <label for="person_number_of_prenatal_visits">Number of prenatal visits</label>
+        <br>
+        <input type="text" fieldtype="number" name="number_of_prenatal_visits" id="person_number_of_prenatal_visits"
+                class="input_cell" min="3" absolute_min="0" max="6" absolute_max="12" optional="true" >
+      </div>
+      <div class="field">
+        <label for="person_month_prenatal_care_started">Month of pregnancy prenatal care started</label>
+        <br>
+     <input type="text" fieldtype="number" name="month_prenatal_care_started" id="person_month_prenatal_care_started"
+               class="input_cell" min="3" absolute_min="1" max="6" absolute_max="10" optional="true">
+      </div>
+      <div class="field">
+        <label for="person_mode_of_delivery">Mode of delivery</label>
+        <br>
+        <select id="person_mode_of_delivery" name="person[mode_of_delivery]" class="input_cell" optional="true">
+          <option></option>
+          <option <%= ((@person[:mode_of_delivery] rescue nil) == "SVD" ? "selected" : "") %> >SVD</option>
+          <option <%= ((@person[:mode_of_delivery] rescue nil) == "Vacuum Extraction" ? "selected" : "") %> >Vacuum Extraction</option>
+          <option <%= ((@person[:mode_of_delivery] rescue nil) == "Breech" ? "selected" : "") %> >Breech</option>
+          <option <%= ((@person[:mode_of_delivery] rescue nil) == "Forceps" ? "selected" : "") %> >Forceps</option>
+          <option <%= ((@person[:mode_of_delivery] rescue nil) == "Caesarean Section" ? "selected" : "") %> >Caesarean Section</option>
+        </select>
+      </div>
+
+      </fieldset>
+
+      <fieldset>
+      <legend><font size='5' style=''>Details of Mother continued..</font></legend>
+      <div class="field">
+        <label for="person_number_of_children_born_alive_inclusive">Number of children born to the mother, including this
+          child</label>
+        <br>
+        <input type="text" fieldtype="number" name="number_of_children_born_alive_inclusive" id="person_number_of_children_born_alive_inclusive"
+                class="input_cell" absolute_min="1" max="6" absolute_max="20"
+               tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+                >
+      </div>
+
+
+      <div class="field">
+        <label for="person_number_of_children_born_still_alive">Number of children born to the mother, and still
+          living</label>
+        <br>
+        <input type="text" fieldtype="number" name="number_of_children_born_still_alive" 
+                 id="person_number_of_children_born_still_alive"
+                 class="input_cell" absolute_min="1" max="6" absolute_max="20"
+                 tt_onLoad="possibleChildren(__$('person_type_of_birth'), __$('person_number_of_children_born_alive_inclusive'))"
+                 tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('section'))][parseInt(__$('textForperson_number_of_children_born_still_alive').getAttribute('pos'))].setAttribute('absolute_max', __$('textForperson_number_of_children_born_alive_inclusive').value.trim())"
+                >
+      </div>
 
 
 
+
+      <div class="field">
+        <label for="person_level_of_education">Completed Level of education</label>
+        <br>
+        <select id="person_level_of_education" name="person[level_of_education]" class="input_cell" optional="true" >
+          <option></option>
+          <option <%= ((@person[:level_of_education] rescue nil) == "None" ? "selected" : "") %> >None</option>
+          <option <%= ((@person[:level_of_education] rescue nil) == "Primary" ? "selected" : "") %> >Primary</option>
+          <option <%= ((@person[:level_of_education] rescue nil) == "Secondary" ? "selected" : "") %> >Secondary</option>
+          <option <%= ((@person[:level_of_education] rescue nil) == "Higher Education" ? "selected" : "") %> >Higher Education</option>
+        </select>
+      </div>
     </fieldset>
 
     <fieldset condition="__$('parents_details_available').value.trim() == 'Father' || __$('parents_details_available').value.trim() == 'Both'">
@@ -547,12 +634,13 @@
         <input id="person_father_last_name"
                name="person[father][last_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:last_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+               />
       </div>
 
       <div class="field">
@@ -560,12 +648,13 @@
         <input id="person_father_first_name"
                name="person[father][first_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:first_name] rescue nil %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+             />
       </div>
 
       <div class="field">
@@ -573,11 +662,11 @@
         <input id="person_father_middle_name"
                name="person[father][middle_name]"
                type="text"
+               word_min_length = 2
                value="<%= @person[:father][:middle_name] rescue nil %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                optional="true"/>
       </div>
       <div class="field">
@@ -605,7 +694,7 @@
                fieldtype="date"
                optional="true"
                condition="__$('parents_details_available').value.trim() == 'Father' || __$('parents_details_available').value.trim() == 'Both'"
-               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8)" />
+               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
         <input id="person_father_birthdate_estimated"
         			 name="person[father][birthdate_estimated]"
@@ -799,6 +888,7 @@
         <input id="person_informant_designation"
                name="person[informant][designation]"
                type="text"
+               tt_onLoad ="checkSpace('person_informant_designation')"
                value="<%= @person[:informant][:designation] rescue nil %>"
                class="input_cell" />
       </div>
@@ -808,6 +898,7 @@
         <input id="person_informant_last_name"
                name="person[informant][last_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
@@ -819,6 +910,7 @@
         <input id="person_informant_first_name"
                name="person[informant][first_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
@@ -830,6 +922,7 @@
         <input id="person_informant_middle_name"
                name="person[informant][middle_name]"
                type="text"
+               word_min_length = 2
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
@@ -848,27 +941,27 @@
       </div>
 
       <div class="field">
-        <label for="person_informant_relationship_to_child">Relationship To Child</label><br>
-        <select id="person_informant_relationship_to_child" name="person[informant][relationship_to_child]" class="input_cell">
+        <label for="person_informant_relationship_to_person">Relationship To person</label><br>
+        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
-          <option <%= ((@person[:person_informant_relationship_to_child] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
-    </div>
+      </div>
 
-    <div class="field">
-        <label for="person_informant_other_relationship_to_child">Specify Relationship</label><br>
-        <input id="person_informant_other_relationship_to_child"
-               name="person[informant][other_relationship_to_child]"
+      <div class="field">
+        <label for="other_informant_relationship_to_person">Specify Relationship</label><br>
+        <input id="other_informant_relationship_to_person"
+               name="person[informant][other_informant_relationship_to_person]"
                type="text"
-               value="<%= @person[:informant][:other_relationship_to_child] rescue nil %>"
+               value="<%= @person[:informant][:other_informant_relationship_to_person] rescue nil %>"
                class="input_cell"
-               condition="__$('person_informant_relationship_to_child').value.trim().toLowerCase() == 'other'"
+               condition="__$('person_informant_relationship_to_person').value.trim().toLowerCase() == 'other'"
                />
       </div>
 
@@ -924,7 +1017,8 @@
        <div class="field">
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
-        <select id="form_signed" name="person[form_signed]" class="input_cell">
+        <select id="form_signed" name="person[form_signed]" class="input_cell"
+               tt_onUnLoad="summaryFields()">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -939,7 +1033,8 @@
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onUnload => 'updateRegistrationType();setTimeout("checkValues()", 500)',
+                          :tt_onLoad => "dateInterval('person_acknowledgement_of_receipt_date');",
+                          :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
 
@@ -1282,11 +1377,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "Father";
+            __$("person_informant_relationship_to_person").value = "Father";
 
-            __$("textForperson_informant_relationship_to_child").value = "Father";
+            __$("textForperson_informant_relationship_to_person").value = "Father";
 
         }
 
@@ -1360,8 +1455,8 @@
         var section =  parseInt(__$("textForperson_mother_home_district").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
     }
@@ -1440,8 +1535,8 @@
         var section =  parseInt(__$("textForperson_mother_home_country").getAttribute("section"));
         loadPage(section + 1);
 
-        var section =  parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("section"));
-        var pos = parseInt(__$("textForperson_person_gestation_at_birth").getAttribute("pos"));
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
         navigateTo(pos, section, false);
 
 
@@ -1510,11 +1605,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "Mother";
+            __$("person_informant_relationship_to_person").value = "Mother";
 
-            __$("textForperson_informant_relationship_to_child").value = "Mother";
+            __$("textForperson_informant_relationship_to_person").value = "Mother";
 
         }
 
@@ -1579,11 +1674,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "";
+            __$("person_informant_relationship_to_person").value = "";
 
-            __$("textForperson_informant_relationship_to_child").value = "";
+            __$("textForperson_informant_relationship_to_person").value = "";
 
         }
 
@@ -1707,31 +1802,37 @@
   }
 
 
-    var full_place_of_birth;
+  function summaryFields(){
+            var full_place_of_birth;
 
-    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
-    {
-    	full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+            if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+            {
+              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
 
+            }
+            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+            {
+
+              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+            }
+            else {
+
+              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+            }
+
+
+            summaryHash = {
+                            "person Name" : ["person_first_name","person_middle_name","person_last_name"],
+                            "person Gender" : ["person_gender"],
+                            "person Date of Birth" : ["person_birthdate"],
+                            "Place of Birth"    : ["person_place_of_birth"],
+                            "Location of Birth" : full_place_of_birth,
+                            "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                            "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                            "Form Signed by Informant?" : ["form_signed"],
+                            "Delayed Registration" : ['registration_type']
+                           };
     }
-      else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
-    {
-    	full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
-    }
-    else {
-
-      full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-    }
-
-
-    summaryHash = {
-                    "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
-                    "Child Gender" : ["person_gender"],
-                    "Child Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : full_place_of_birth,
-                    "Form Signed by Informant?" : ["form_signed"],
-                    "Delayed Registration" : ['registration_type']
-                   };
 
     function updateRegistrationType()
     {

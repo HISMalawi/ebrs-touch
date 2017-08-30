@@ -33,7 +33,7 @@
 <% end %>
 
 <% if @folders.include?("Search Cases") %>
-    <div class="button child_menu manage_cases" onclick="" tag=0 title="Search Cases">
+    <div class="button child_menu manage_cases" onclick="window.location = '/search' " tag=0 title="Search Cases">
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
@@ -143,7 +143,7 @@
 
 <% if @folders.include?("View Records") %>
     <% if @folders.include?("Search Cases")%>
-        <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/search_cases'" tag=0 title="Search Cases">
+        <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/search'" tag=0 title="Search Cases">
           <table style="text-align: left;">
             <tr>
               <td rowspan="2">
@@ -184,7 +184,7 @@
 
 <% end %>      
 
-    <% if @folders.include?("Approved By ADR")%>
+    <% if @folders.include?("Approved By ADR") && SETTINGS['application_mode'] == 'DC' %>
         <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/view_approved_cases'" tag=0 title="View Approved Cases">
           <table style="text-align: left;">
             <tr>

@@ -3,13 +3,21 @@ require 'faker'
 
 current_date = DateTime.now.strftime("%d/%m/%Y %H:%M")
 
-
+puts current_date
 start = 0
 count = 10
 
-params[]
+params = []
 
 gender = %w[Male,Female]
+
+my_date_list = []
+
+1.upto(14).each do |n| 
+    my_date_list << (Date.today - n.day).strftime('%d/%b/%Y')
+    puts "<<<<<<<<<<<<<<<<<<<<<< #{my_date_list[n]} <<<<<<<<<<<<<<<<"
+end
+=begin
 
 while start < count do
 
@@ -86,4 +94,4 @@ while start < count do
 
 end
 
-
+=end

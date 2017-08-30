@@ -1,0 +1,33 @@
+<style>
+    #__content{
+        -moz-transform: scale(0.73);
+        -moz-transform-origin: 0 0;
+        width:99% !important;
+    }
+
+    #toolsCell1{
+        height: 450px !important;
+        min-width: 250px !important;
+        width: 500px !important;
+    }
+
+</style>
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+<fieldset>
+	 <legend><font size='5' style='border: 2px;'>Search filters</font></legend>
+	 <div class="field">
+       <label for="filters">Select Filter</label>
+       <select id="filters" name="filter_name" class="input_cell">
+         <option></option>
+         <% @filters.each do |f|%>
+             <option value="<%=f%>"><%=f%></option>
+         <%end%>
+       </select>
+	 </div>
+</fieldset>
+
+<% end %>
+<script type="text/javascript">
+	init();
+
+</script>

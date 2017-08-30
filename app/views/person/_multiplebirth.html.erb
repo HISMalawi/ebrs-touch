@@ -279,11 +279,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "Mother";
+            __$("person_informant_relationship_to_person").value = "Mother";
 
-            __$("textForperson_informant_relationship_to_child").value = "Mother";
+            __$("textForperson_informant_relationship_to_person").value = "Mother";
 
         }
 
@@ -342,11 +342,11 @@
 
         }
 
-        if (__$("person_informant_relationship_to_child") && __$("textForperson_informant_relationship_to_child")) {
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
 
-            __$("person_informant_relationship_to_child").value = "";
+            __$("person_informant_relationship_to_person").value = "";
 
-            __$("textForperson_informant_relationship_to_child").value = "";
+            __$("textForperson_informant_relationship_to_person").value = "";
 
         }
 
@@ -386,20 +386,35 @@
 
     init();
 
+    var full_place_of_birth;
+
+    if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital'){
+              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+    }
+    else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home'){
+
+              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+    }
+    else {
+
+              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+    }
+
+
     summaryHash = {
-                    
-                    "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
-                    "Child Gender" : ["person_gender"],
-                    "Child Date of Birth" : ["person_birthdate"],
-                    "Place of Birth" : ((__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital') ? ["person_hospital_of_birth"] : ["person_place_of_birth"]),
-                    "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
-                    "Father" : ["person_father_first_name", "person_father_middle_name","person_father_last_name"],
-                    "Parents Married to each Other?": ['person_parents_married_to_each_other'],
-                    "Court order attached?": ['person_court_order_attached'],
-                    "Parents signed?" : ["person_parents_signed"],
-                    "Form Signed by Informant?" : ["person_form_signed"],
-                    "Delayed Registration" : ['registration_type']
-                   };
+                            "person Name" : ["person_first_name","person_middle_name","person_last_name"],
+                            "person Gender" : ["person_gender"],
+                            "person Date of Birth" : ["person_birthdate"],
+                            "Place of Birth"    : ["person_place_of_birth"],
+                            "Location of Birth" : full_place_of_birth,
+                            "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                            "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                            "Parents Married to each Other?": ['person_parents_married_to_each_other'],
+                            "Court order attached?": ['person_court_order_attached'],
+                            "Parents signed?" : ["person_parents_signed"],
+                            "Form Signed by Informant?" : ["form_signed"],
+                            "Delayed Registration" : ['registration_type']
+    };
 
   function updateRegistrationType()
     {

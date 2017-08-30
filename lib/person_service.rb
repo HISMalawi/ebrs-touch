@@ -46,6 +46,10 @@ module PersonService
     return person
   end
 
+  def self.update_record(params)
+
+  end  
+
   def self.is_num?(val)
 
     #checks if the val is numeric or string
@@ -123,6 +127,108 @@ module PersonService
     results = []
 
     main.each do |data|
+      person_name =  Person.find(data.person_id).person_names.last
+      mother = self.mother(data.person_id)
+      father = self.father(data.person_id)
+      #For abandoned cases mother details may not be availabe
+      #next if mother.blank?
+      #next if mother.first_name.blank?
+      #The form treat Father as optional
+      #next if father.blank?
+      #next if father.first_name.blank?
+      name          = ("#{person_name.first_name} #{person_name.middle_name rescue ''} #{person_name.last_name}")
+      mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+      father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+
+      results << {
+          'id' => data.person_id,
+          'ben' => data.ben,
+          'brn' => data.brn,
+          'name'        => name,
+          'father_name'       => father_name,
+          'mother_name'       => mother_name,
+          'status'            => Status.find(data.status_id).name, #.gsub(/DC\-|FC\-|HQ\-/, '')
+          'date_of_reporting' => data['created_at'].to_date.strftime("%d/%b/%Y"),
+      }
+    end
+
+    results
+
+  end
+
+  def self.search_results(filters={})
+
+    if filters.blank?
+      return []
+    end
+    entry_num_query = ''; fac_serial_query = ''; name_query = ''; limit = ' '
+    limit = ' LIMIT 10 ' if filters.blank?
+    gender_query = ''; place_of_birth_query = ''; status_query=''
+
+    filters.keys.each do |k|
+      case k
+        when 'Birth Entry Number'
+          entry_num_query = " AND pbd.district_id_number = '#{filters[k]['person[birth_entry_number]']}' "
+        when 'Facility Serial Number'
+          fac_serial_query =  " AND pbd.facility_serial_number = '#{filters[k]['person[facility_serial_number]']}' "
+        when 'Child Name'
+          if filters[k]["person[last_name]"].present?
+            name_query += " AND  n.last_name = '#{filters[k]["person[last_name]"]}'"
+          end
+          if filters[k]["person[middle_name]"].present?
+            name_query += " AND n.middle_name = '#{filters[k]["person[middle_name]"]}'"
+          end
+          if filters[k]["person[first_name]"].present?
+            name_query += " AND n.first_name = '#{filters[k]["person[first_name]"]}'"
+          end
+        when 'Child Gender'
+          gender_query = " AND p.gender = '#{filters[k]["person[gender]"].split('')[0]}' "
+        when 'Place of Birth'
+          place_id = Location.locate_id_by_tag(filters[k]["person[place_of_birth]"], 'Place of Birth')
+          if place_id.present?
+            place_of_birth_query = " AND  place_of_birth = #{place_id} "
+          end
+          district_id = Location.locate_id_by_tag(filters[k]["person[birth_district]"], 'District')
+          if district_id.present?
+            place_of_birth_query += " AND  district_of_birth = #{district_id} "
+          end
+          ta_id = Location.locate_id(filters[k]["person[birth_ta]"], 'Traditional Authority', district_id)
+          if ta_id.present?
+            village_id = Location.locate_id(filters[k]["person[birth_village]"], 'Village', ta_id)
+            place_of_birth_query += " AND  birth_location_id = #{village_id} "
+          end
+
+          hospital_id = Location.locate_id(filters[k]["person[hospital_of_birth]"], 'Health Facility', district_id)
+          if hospital_id.present?
+            place_of_birth_query += " AND  birth_location_id = #{hospital_id} "
+          end
+
+          if filters[k]["other_birth_place"].present?
+            place_of_birth_query += " AND  other_birth_location = '#{filters[k]["other_birth_place"].strip}' "
+          end
+        when 'Record Status'
+          status_id = Status.where(name: filters[k]["person[record_status]"]).last.id
+          status_query = " AND prs.status_id = #{status_id} "
+      end
+    end
+
+    main = Person.find_by_sql(
+        "SELECT n.*, prs.status_id, pbd.district_id_number AS ben, pbd.national_serial_number AS brn FROM person p
+            INNER JOIN core_person cp ON p.person_id = cp.person_id
+            INNER JOIN person_name n ON p.person_id = n.person_id
+            INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id
+            INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
+          WHERE COALESCE(prs.voided, 0) = 0
+            #{entry_num_query} #{fac_serial_query} #{name_query} #{gender_query} #{place_of_birth_query} #{status_query}
+          GROUP BY p.person_id
+          ORDER BY p.updated_at DESC
+            #{limit}
+           "
+    )
+
+    results = []
+
+    main.each do |data|
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       #For abandoned cases mother details may not be availabe
@@ -150,6 +256,7 @@ module PersonService
     results
 
   end
+
 
   def self.record_complete?(child)
       name = PersonName.find_by_person_id(child.id)
