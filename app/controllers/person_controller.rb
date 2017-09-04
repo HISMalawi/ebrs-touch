@@ -240,7 +240,7 @@ class PersonController < ApplicationController
       @summaryHash[ "Adoptive Father"] = nil
       @summaryHash["Adoption Court Order"] = nil
     end
-
+    @results = []
     if ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE'].include? @status && @folders.include?("Manage Duplicates")
         redirect_to "/potential/duplicate/#{@person.id}?index=0"
     else
