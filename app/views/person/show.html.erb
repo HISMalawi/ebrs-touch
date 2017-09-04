@@ -84,7 +84,7 @@
   }
   #comment{
       width: 98%;
-      height: 58%;
+      height: 50%;
       overflow-y: scroll;
   }
   #comment ul{
@@ -250,7 +250,6 @@
  </tr>
 </table>
 </div>
-
   <script>
 
     <% (@actions || []).each do |action|
@@ -427,33 +426,58 @@
           window.location = "/reject_case_comment/<%= params[:id] %>";
       }
 
-    function rejectComments(){
-        viewComment();
-        var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
-        okBtn.className = "extra-btn red";
-        okBtn.innerHTML = "Reject";
-        okBtn.onclick = function(){ reject()}
+      function rejectComments(){
+          viewComment();
+          var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+          okBtn.className = "extra-btn red";
+          okBtn.innerHTML = "Reject";
+          okBtn.onclick = function(){ reject()}
 
-        __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+          __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
 
-    }
+      }
 
-    function approveComments(){
-        viewComment();
-        var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
-        okBtn.className = "extra-btn green";
-        okBtn.innerHTML = "Approve";
-        okBtn.onclick = function(){ approve()}
+      function approveComments(){
+          viewComment();
+          var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+          okBtn.className = "extra-btn green";
+          okBtn.innerHTML = "Approve";
+          okBtn.onclick = function(){ approve()}
 
-        __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
-    }
+          __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+      }
 
-    function ammend(){
-        window.location = '/person/ammend_case?person_id=<%= params[:id]%>';
-    }
+      function ammend(){
+          window.location = '/person/ammend_case?person_id=<%= params[:id]%>';
+      }
 
-    function showSpinner(){}
+      function duplicateComments(){
+          viewComment();
+          var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+          __$("title").innerHTML = "Record is potential duplicate with <%=@results.count%> record(s)";
+          var table = "<table align='center' id='printers'>"+
+                      "</tr><% @results.each do |result| %><tr>"+
+                      "<td><%= PersonBirthDetail.find_by_person_id(result['_id'].to_i).district_id_number rescue ''%></td>"+
+                      "<td style='text-align: left; padding-left:50px;''><%=result['_source']['content'] %></td>"+
+                      "</tr><% end %></table>"
+          jQuery(table).insertAfter(__$("title"));
+          okBtn = __$("button")
+          okBtn.onclick = function(){ duplicate('System')}
+
+          __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+      }
+
+      function duplicate(operation){
+          window.location = '/add_duplicate_comment/<%= params[:id]%>?decision=POTENTIAL DUPLICATE'+
+                            '&next_path=/view_cases&operation='+operation;
+      }
+
+      function showSpinner(){}
   </script>
-
+  <% if @status == "DC-POTENTIAL DUPLICATE" %>
+    <script type="text/javascript">
+          duplicateComments();
+    </script>
+  <%end%>
   </body>
 

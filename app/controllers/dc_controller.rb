@@ -58,6 +58,16 @@ def view_duplicates
     render :template => "dc/view_duplicates", :layout => "data_table"
 end
 
+def view_hq_duplicates
+    
+    @states = ['DC-VERIFY DUPLICATE']
+    @section = "Duplicates from HQ"
+    @targeturl ="/manage_duplicates_menu"
+    @records = PersonService.query_for_display(@states)
+
+    render :template => "dc/view_duplicates", :layout => "data_table"
+end
+
 def potential_duplicate
   @section = "Resolve Duplicates"
   @potential_duplicate =  person_details(params[:id])
@@ -75,17 +85,18 @@ def add_duplicate_comment
 end
 
 def resolve_duplicate
-
      potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
-        potential_records.resolved = 1
-        potential_records.decision = params[:decision]
-        potential_records.comment = params[:reason]
-        potential_records.resolved_at = Time.now
-        potential_records.save
+        if params[:decision] == "POTENTIAL DUPLICATE"
+           PersonRecordStatus.new_record_state(params[:id], 'DC-POTENTIAL DUPLICATE', params[:reason])
+           redirect_to params[:next_path]
+        elsif params[:decision] == "NOT DUPLICATE"
+          potential_records.resolved = 1
+          potential_records.decision = params[:decision]
+          potential_records.comment = params[:reason]
+          potential_records.resolved_at = Time.now
+          potential_records.save
 
-
-        if params[:decision] == "NOT DUPLICATE"
           allocate_record = IdentifierAllocationQueue.new
           allocate_record.person_id = params[:id].to_i
           allocate_record.assigned = 0
@@ -97,6 +108,12 @@ def resolve_duplicate
           end
           redirect_to params[:next_path]
         else
+          potential_records.resolved = 1
+          potential_records.decision = params[:decision]
+          potential_records.comment = params[:reason]
+          potential_records.resolved_at = Time.now
+          potential_records.save
+
            PersonRecordStatus.new_record_state(params[:id], 'DC-VOIDED', params[:reason])
            redirect_to params[:next_path]
         end

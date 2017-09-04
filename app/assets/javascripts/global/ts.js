@@ -5880,7 +5880,7 @@ function duplicatesPopup(data,checkbox){
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
-        th.innerHTML = "The record is potential duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
+        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
         tr.appendChild(th);
         if(people){
             for(var i = 0; i < people.length ; i++){
@@ -5936,8 +5936,12 @@ function duplicatesPopup(data,checkbox){
            __$("person_duplicate").value = ids;
 
            __$("person_is_exact_duplicate").value = data.exact
-           document.body.removeChild(shield);
-           document.forms[0].submit();
+           if(data.exact && facility_type  =="FC"){
+               window.location.href = "/"
+           }else{
+               document.body.removeChild(shield);
+               document.forms[0].submit();            
+           }
         }
         footdiv.appendChild(ok);
 

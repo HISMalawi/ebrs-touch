@@ -1,0 +1,5 @@
+<% if @person_details.birth_registration_type_id == 3 %>
+  <%= render 'update_adopted_person_form' %>
+<% else %>
+	<%= render 'update_person_form' %>
+<% end %>

@@ -46,6 +46,10 @@ module PersonService
     return person
   end
 
+  def self.update_record(params)
+
+  end  
+
   def self.is_num?(val)
 
     #checks if the val is numeric or string
@@ -123,6 +127,7 @@ module PersonService
     results = []
 
     main.each do |data|
+      person_name =  Person.find(data.person_id).person_names.last
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       #For abandoned cases mother details may not be availabe
@@ -131,7 +136,7 @@ module PersonService
       #The form treat Father as optional
       #next if father.blank?
       #next if father.first_name.blank?
-      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
+      name          = ("#{person_name.first_name} #{person_name.middle_name rescue ''} #{person_name.last_name}")
       mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
       father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
 
