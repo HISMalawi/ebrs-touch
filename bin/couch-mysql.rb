@@ -83,9 +83,9 @@ class Methods
   end
 
   def self.update_doc(doc)
-    client = $client;
+    client = $client; person_id = doc['_id']
 
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0")
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
     change_agent = doc['change_agent']
     doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id'].include?(k)}
 
@@ -111,7 +111,7 @@ class Methods
         update_query = update_query.strip.sub(/\,$/, '')
         update_query += " WHERE #{p_key} = '#{p_value}' "
 
-        self.qry(client, update_query)
+        self.qry(client, update_query, person_id)
       else
         insert_query = "INSERT INTO #{table} ("
         keys = []
@@ -132,20 +132,19 @@ class Methods
         insert_query += (keys.join(', ') + " ) VALUES (" )
         insert_query += ( values.join(",")) + ")"
 
-        self.qry(client, insert_query)
+        self.qry(client, insert_query, person_id)
       end
     end
 
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1")
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
   end
 end
 
 changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}" do
   # Which database should we connect to?
   database "#{mysql_adapter}://#{mysql_username}:#{mysql_password}@#{mysql_host}:#{mysql_port}/#{mysql_db}"
-  #StatusCouchdb Document Type
   document 'type' => 'data' do |doc|
-    output = Methods.update_doc(doc.document)
+    Methods.update_doc(doc.document)
   end
 end
 
