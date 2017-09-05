@@ -43,7 +43,7 @@ end
     http_connections: 30,
     filter: "MyLocation#{location_id}/my_location",
     query_params: {
-        document_id: location_id.to_s
+        location_id: location_id.to_s
     },
     continuous: true
      }.to_json}' "#{replicator}/_replicate"]
