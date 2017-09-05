@@ -1,23 +1,26 @@
 @database = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
 
+location_id = SETTINGS['location_id']
 if SETTINGS['application_mode'] == 'FC'
-  location_id = SETTINGS['location_id']
+  filter = 'filters.js'
 else
-  location_id = Location.find(SETTINGS['location_id']).parent_location
+  filter = 'filters2.js'
 end
 
+raise location_id.inspect
 source = "#{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/#{@database['prefix']}_#{@database['suffix']}"
 target = "#{SETTINGS['sync_protocol']}://#{SETTINGS['sync_username']}:#{SETTINGS['sync_password']}@#{SETTINGS['sync_host']}/#{SETTINGS['sync_database']}"
 replicator = "#{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_replicate"
 
+
 doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{source}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{source}/_design/MyLocation#{location_id}`
+`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @#{filter} #{source}/_design/MyLocation#{location_id}`
 end
 
 doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{target}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-  `cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @filters.js #{target}/_design/MyLocation#{location_id}`
+  `cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @#{filter} #{target}/_design/MyLocation#{location_id}`
 end
 
 %x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
