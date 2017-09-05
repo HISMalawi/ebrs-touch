@@ -7,7 +7,6 @@ else
   filter = 'filters2.js'
 end
 
-raise location_id.inspect
 source = "#{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/#{@database['prefix']}_#{@database['suffix']}"
 target = "#{SETTINGS['sync_protocol']}://#{SETTINGS['sync_username']}:#{SETTINGS['sync_password']}@#{SETTINGS['sync_host']}/#{SETTINGS['sync_database']}"
 replicator = "#{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_replicate"
