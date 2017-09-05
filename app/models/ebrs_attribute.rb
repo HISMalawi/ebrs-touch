@@ -40,6 +40,8 @@ module EbrsAttribute
       }
       h = Pusher.new(temp_hash)
     end
+
+    h['change_agent'] = self.class.table_name
     h.save
   end
 
