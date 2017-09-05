@@ -87,7 +87,7 @@ class Methods
 
     self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
     change_agent = doc['change_agent']
-    doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id'].include?(k)}
+    doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
 
     doc.each do |table, data|
       p_key = data.keys[0]; p_value = data[p_key]

@@ -32,10 +32,14 @@ module EbrsAttribute
         h[self.class.table_name][k] = hash[k]
       end
     else
+
+      district_id = Location.find(SETTINGS['location_id']).parent_location
+
       temp_hash = {
           '_id' => id,
           'type' => 'data',
           'location_id' => SETTINGS['location_id'],
+          'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
           self.class.table_name => hash
       }
       h = Pusher.new(temp_hash)
