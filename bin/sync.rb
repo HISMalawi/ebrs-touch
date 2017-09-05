@@ -33,35 +33,6 @@ end
     continuous: true
 }.to_json}' "#{replicator}"]
 
-if SETTINGS['application_mode'] == 'DC'
-    %x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
-        source: target,
-        target: source,
-        connection_timeout: 10000,
-        retries_per_request: 10,
-        http_connections: 30,
-        filter: "MyLocation#{location_id}/my_location",
-        query_params: {
-            document_id: location_id.to_s
-        },
-        continuous: true
-         }.to_json}' "#{replicator}/_replicate"]
-end
-
-%x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
-    source: source,
-    target: target,
-    connection_timeout: 10000,
-    retries_per_request: 10,
-    http_connections: 30,
-    filter: "MyLocation#{location_id}/my_location",
-    query_params: {
-        location_id: location_id
-    },
-    continuous: true
-}.to_json}' "#{replicator}"]
-
-
 %x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
     source: target,
     target: source,
@@ -70,11 +41,8 @@ end
     http_connections: 30,
     filter: "MyLocation#{location_id}/my_location",
     query_params: {
-        location_id: location_id
+        document_id: location_id.to_s
     },
     continuous: true
-}.to_json}' "#{replicator}/_replicate"]
+     }.to_json}' "#{replicator}/_replicate"]
 
-                  
-        
-                
