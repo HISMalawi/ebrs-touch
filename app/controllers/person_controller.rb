@@ -271,7 +271,15 @@ class PersonController < ApplicationController
           SimpleElasticSearch.add(person)
 
           if @status == "DC-ACTIVE"
-            @results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])       
+
+            @results = []
+            duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
+            
+            duplicates.each do |dup|
+                next if DuplicateRecord.where(person_id: person['person_id']).present?
+                @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
+            end
+            
             if @results.present?
                potential_duplicate = PotentialDuplicate.create(person_id: @person.person_id,created_at: (Time.now))
                if potential_duplicate.present?
