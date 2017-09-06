@@ -90,7 +90,6 @@ class Methods
     doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
 
     doc.each do |table, data|
-      next if table != change_agent
       p_key = data.keys[0]; p_value = data[p_key]
       next if p_value.blank?
 
