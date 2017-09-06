@@ -74,7 +74,7 @@ class Methods
       begin
         data = runner.query(query)
       rescue => error
-        data = query + "       \n\n" + error
+        data = query + "       \n\n" + error.to_s
         File.open("#{Rails.root}/public/errors/#{person_id}", 'w') { |file| file.write(data) }
       end
     end
