@@ -10,12 +10,10 @@ class PersonRecordStatus < ActiveRecord::Base
     state_id = Status.where(:name => state).first.id
     trail = self.where(:person_id => person_id)
     trail.each do |state|
-      if state.voided != 1
-        state.voided = 1
-        state.date_voided = Time.now
-        state.voided_by = User.current.id
-        state.save
-      end
+      state.voided = 1
+      state.date_voided = Time.now
+      state.voided_by = User.current.id
+      state.save
     end
 
     self.create(
