@@ -38,7 +38,7 @@ class PersonRecordStatus < ActiveRecord::Base
       SELECT COUNT(*) c FROM person_record_statuses s
         INNER JOIN person_birth_details p ON p.person_id = s.person_id
           AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
-        WHERE voided = 0 AND status_id = #{status.id} GROUP BY s.person_id, s.status_id LIMIT 1").last.c rescue 0
+        WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
     end
 
     unless approved == false
@@ -48,7 +48,7 @@ class PersonRecordStatus < ActiveRecord::Base
       result['APPROVED BY ADR'] =  self.find_by_sql("
         SELECT COUNT(*) c FROM person_record_statuses s
         WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')})
-          AND status_id IN (#{included_states.join(', ')}) GROUP BY s.person_id, s.status_id LIMIT 1 ").last.c rescue 0
+          AND status_id IN (#{included_states.join(', ')})")[0]['c']
     end
     result
   end
