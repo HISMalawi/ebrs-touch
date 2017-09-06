@@ -36,8 +36,9 @@ class PersonRecordStatus < ActiveRecord::Base
     Status.all.each do |status|
       result[status.name] = self.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
-        INNER JOIN person_birth_details p ON p.person_id = s.person_id AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
-        WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
+        INNER JOIN person_birth_details p ON p.person_id = s.person_id
+          AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
+        WHERE voided = 0 AND status_id = #{status.id} GROUP BY person_id")[0]['c']
     end
 
     unless approved == false
