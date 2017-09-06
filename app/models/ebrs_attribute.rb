@@ -12,23 +12,41 @@ module EbrsAttribute
   def send_data(hash)
 
     hash.each {|k, v|
-      hash[k] = v.to_s(:db) if (['Time', 'Date'].include?(v.class.name))
+      hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
 
-    if !hash['document_id'].blank?
-      h = Pusher.database.get(hash['document_id'])
+    person_id = hash['person_id']
+    person_id = hash['person_a'] if person_id.blank?
+    person_id = PersonName.find(hash['person_name_id']).person_id rescue nil if person_id.blank? && hash['person_name_id'].present?
+    person_id = User.find(hash['user_id']).person_id rescue nil if person_id.blank? && hash['user_id'].present?
+    id = person_id.to_s if !person_id.blank?
+
+    return nil if id.blank?
+
+    h = Pusher.database.get(id) rescue nil
+    if h.present?
+      h[self.class.table_name] = {} if h[self.class.table_name].blank?
+      h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
+
       hash.keys.each do |k|
-        h[k] = hash[k]
+        h[self.class.table_name][k] = hash[k]
       end
     else
-      h = Pusher.new(hash)
+
+      district_id = Location.find(SETTINGS['location_id']).parent_location
+
+      temp_hash = {
+          '_id' => id,
+          'type' => 'data',
+          'location_id' => SETTINGS['location_id'],
+          'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
+          self.class.table_name => hash
+      }
+      h = Pusher.new(temp_hash)
     end
 
+    h['change_agent'] = self.class.table_name
     h.save
-    h['document_id'] = h.id
-    h.save
-
-    h.id
   end
 
   def self.included(base)
@@ -77,11 +95,6 @@ module EbrsAttribute
   def create_or_update_in_couch
     data = self
     transformed_data = data.as_json
-    #transformed_data.delete("#{eval(data.class.name).primary_key}")
-    transformed_data['type'] = eval(data.class.name).table_name
-    doc_id = send_data(transformed_data)
-    if data.document_id.blank?
-      data.update_attributes(:document_id => doc_id)
-    end
+    send_data(transformed_data)
   end
 end

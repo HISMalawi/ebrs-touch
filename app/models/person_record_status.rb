@@ -10,12 +10,10 @@ class PersonRecordStatus < ActiveRecord::Base
     state_id = Status.where(:name => state).first.id
     trail = self.where(:person_id => person_id)
     trail.each do |state|
-      if state.voided != 1
-        state.voided = 1
-        state.date_voided = Time.now
-        state.voided_by = User.current.id
-        state.save
-      end
+      state.voided = 1
+      state.date_voided = Time.now
+      state.voided_by = User.current.id
+      state.save
     end
 
     self.create(
@@ -38,7 +36,8 @@ class PersonRecordStatus < ActiveRecord::Base
     Status.all.each do |status|
       result[status.name] = self.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
-        INNER JOIN person_birth_details p ON p.person_id = s.person_id AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
+        INNER JOIN person_birth_details p ON p.person_id = s.person_id
+          AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
         WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
     end
 
@@ -47,8 +46,9 @@ class PersonRecordStatus < ActiveRecord::Base
         included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
 
       result['APPROVED BY ADR'] =  self.find_by_sql("
-        SELECT COUNT(*) c FROM person_record_statuses
-        WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')}) AND status_id IN (#{included_states.join(', ')})")[0]['c']
+        SELECT COUNT(*) c FROM person_record_statuses s
+        WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')})
+          AND status_id IN (#{included_states.join(', ')})")[0]['c']
     end
     result
   end

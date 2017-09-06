@@ -146,8 +146,9 @@ Rails.application.routes.draw do
 
   get "/comments/:id" => 'dc#comments'
 
+  get 'reports/births_report'
+  get 'reports/report_date_range'
   get '/update_person' => 'person#update_person'
-
   post '/update' => "person#update"
 
   resources :person

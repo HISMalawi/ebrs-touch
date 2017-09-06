@@ -1,0 +1,30 @@
+<form action="/reports/births_report" method='GET'>
+<fieldset>
+  <legend><font size='5'>Select report range</font></legend>
+
+  <div class="field">
+    <label for="start_date">Start Date</label><br>
+    <input id="start_date" name="start_date" type="text"
+           value="<%= Date.today.strftime("%d/%b/%Y") %>"
+           class="input_cell"
+           fieldtype="date"
+           />
+
+  </div>
+  <div>
+    <label for="end_date">End Date</label><br>
+    <input id="end_date" name="end_date" type="text"
+           value="<%= Date.today.strftime("%d/%b/%Y") %>"
+           class="input_cell"
+           fieldtype="date"
+    />
+
+  </div>
+
+</fieldset>
+
+</form>
+
+<script>
+  init();
+</script>
