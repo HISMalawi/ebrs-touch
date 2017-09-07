@@ -6,7 +6,7 @@
     #table th{
         border: 1px solid #d3d3d3;
         background: #d3d3d3;
-        width: 33%;
+        width: 2%;
     }
     #table td{
        border: 1px solid #d3d3d3;
@@ -18,13 +18,15 @@
 </style>
 <script type="text/javascript" src="/assets/showSubMenu.js"></script>
 
-<div id="default" style="width: 95%; margin: auto; height: 400px; text-align: center; vertical-align: top;">
+<div id="default" style="width: 95%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:2%">
 <table id='table' style="width: 100%;" cellpadding="5" cellspacing="0">
 
   <thead>
         <tr>
           <th>Category</th>
-          <th>Gender</th>
+          <th>Sub category</th>
+          <th>Female</th>
+          <th>Male</th>
           <th>Total</th>
         </tr>
   </thead>
@@ -35,11 +37,24 @@
         <td>
           <%= cat%>
         </td>
-        <td>
-            <table style="width: 100%;">
+        <td style="padding:0">
+            <table style="width: 100%; border:none; border-collapse: collapse; ">
                 <% data.each do |k, sub_data|
                 %>
                     <tr><td><%= k%></td></tr>
+                <% end
+                %>
+            </table>
+        </td>
+        <td colspan="3" style="padding:0">
+            <table style="width: 100%; border:none; border-collapse: collapse; ">
+                <% data.each do |k, sub_data|
+                %>  
+                    <tr>
+                        <td><%= sub_data['Female']%></td>
+                        <td><%= sub_data['Male']%></td>
+                        <td><%= sub_data['Female'].to_i + sub_data['Male'].to_i %></td>
+                      </tr>
                 <% end
                 %>
             </table>

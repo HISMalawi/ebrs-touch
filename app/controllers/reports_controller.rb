@@ -10,7 +10,9 @@ class ReportsController < ApplicationController
   end
 
   def births_report
-    @data = Report.births_report(params[:start_date], params[:end_date])
+    status = params[:status]
+    
+    @data = Report.births_report(params[:start_date], params[:end_date],status)
     @section = "Births Report"
     @targeturl = "/"
 
@@ -20,6 +22,6 @@ class ReportsController < ApplicationController
   def report_date_range
     @section = "Report range"
     @targeturl = "/"
-    render :layout => "facility"
+    render :layout => "touch"
   end
 end
