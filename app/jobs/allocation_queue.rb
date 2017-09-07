@@ -24,12 +24,13 @@ class AllocationQueue
 
         if record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Entry Number").last.person_identifier_type_id
+
+          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE', '', queue.creator)
+
           if !ben.blank?
             record.update_attributes(assigned: 1)
             next
           end
-
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE', '', queue.creator)
 
           location = Location.find(SETTINGS['location_id'])
           district_code = location.code
@@ -49,12 +50,13 @@ class AllocationQueue
 
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Registration Number").last.person_identifier_type_id
+
+          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT', '', queue.creator)
           if !brn.blank?
             record.update_attributes(assigned: 1)
             next
           end
 
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT', '', queue.creator)
           last = (PersonBirthDetail.select(" MAX(national_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
           brn = last + 1
           person_birth_detail.update_attributes(national_serial_number: brn)
