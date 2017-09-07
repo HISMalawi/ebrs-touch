@@ -8,12 +8,13 @@ class PersonRecordStatus < ActiveRecord::Base
 
   def self.new_record_state(person_id, state, change_reason='')
     state_id = Status.where(:name => state).first.id
-    trail = self.where(:person_id => person_id)
+    trail = self.where(:person_id => person_id, :voided => 0)
     trail.each do |state|
-      state.voided = 1
-      state.date_voided = Time.now
-      state.voided_by = User.current.id
-      state.save
+      state.update_attributes(
+          voided: 1,
+          date_voided: Time.now,
+          voided_by: User.current.id
+      )
     end
 
     self.create(
