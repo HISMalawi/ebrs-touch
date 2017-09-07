@@ -52,7 +52,7 @@ def setup_data
   mother_first_name = Faker::Name.first_name
   mother_last_name = Faker::Name.last_name
 
-   data = {person: {duplicate: "", is_exact_duplicate: "", 
+   data = { person: {duplicate: "", is_exact_duplicate: "", 
    relationship: "Adopted", 
    last_name: Faker::Name.last_name, 
    first_name: Faker::Name.first_name, 
