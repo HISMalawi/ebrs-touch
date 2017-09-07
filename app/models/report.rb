@@ -8,10 +8,15 @@ class Report < ActiveRecord::Base
     else
       status_ids = Status.where(name: status).map{|m| m.status_id}.join(",")
     end
+
+    total_male   =  0
+    total_female =  0
+
     reg_type = {}
     ['Normal', 'Abandoned', 'Adopted', 'Orphaned'].each do |type|
       reg_type[type] = {}
-      reg_type[type]['Male'] =  ActiveRecord::Base.connection.select_all(
+      
+      male =  ActiveRecord::Base.connection.select_all(
 
             "SELECT COUNT(*) AS total FROM person_birth_details pbd
                   INNER JOIN person p ON p.person_id = pbd.person_id
@@ -21,9 +26,10 @@ class Report < ActiveRecord::Base
                 AND prs.status_id IN (#{status_ids})
                 GROUP BY p.gender, pbd.birth_registration_type_id
               "
-    ).as_json.last['total'] rescue 0
+      ).as_json.last['total'] rescue 0
+      reg_type[type]['Male']  = male
 
-      reg_type[type]['Female'] =  ActiveRecord::Base.connection.select_all(
+      female =  ActiveRecord::Base.connection.select_all(
 
           "SELECT COUNT(*) AS total FROM person_birth_details pbd
                   INNER JOIN person p ON p.person_id = pbd.person_id
@@ -34,6 +40,11 @@ class Report < ActiveRecord::Base
                   GROUP BY p.gender, pbd.birth_registration_type_id
               "
       ).as_json.last['total'] rescue 0
+      reg_type[type]['Female'] = female
+
+      total_male = total_male + male
+      total_female = total_female + female
+      
     end
 
     parents_married  = {}
@@ -87,8 +98,7 @@ class Report < ActiveRecord::Base
                 "
       ).as_json.last['total'] rescue 0
     end
-    total_male   =  0
-    total_female =  0
+
     place_of_birth = {}
 
     ['Home','Hospital','Other'].each do |k|
@@ -117,9 +127,6 @@ class Report < ActiveRecord::Base
                   "
         ).as_json.last['total'] rescue 0
         place_of_birth[k]['Female']  = female
-
-        total_male = total_male + male
-        total_female = total_female + female
 
     end
 

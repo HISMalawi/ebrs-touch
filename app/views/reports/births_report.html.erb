@@ -7,18 +7,119 @@
         border: 1px solid #d3d3d3;
         background: #d3d3d3;
         width: 2%;
+        color: #3465a4;
     }
     #table td{
        border: 1px solid #d3d3d3;
     }
 
-        .cat{
-            font-weight: bold;
-        }
+    .cat{
+      font-weight: bold;
+    }
+    .mintable{
+      width: 100%; 
+      border:none;
+      border-collapse: collapse;
+    }
+    .mintable td, .mintable th{
+        width: 33.33333% !important;
+        text-align: right;
+        padding-right: 10%;
+    }
+        #search-table td{
+        border: 1px solid gray;
+    }
+
+    #filter-frame, #rfilter-frame{
+        position: absolute;
+        top: 15%;
+        width: 60%;
+        height: 60%;
+        left: 20%;
+        border: 1px solid #000;
+        background: white;
+        z-index: 3000;
+    }
+    .btn-badge{
+        border-radius: 0px !important;
+        font-size: 16px;
+        min-width: 12%;
+        background-color: #089de3;
+        margin: 5px;
+        padding: 2px;
+        display: inline-block;
+        margin-top: 0px !important;
+        vertical-align: top;
+    }
+    .btn-badge caption{
+       color: white;
+    }
+    .btn-badge table{
+        width: 100%;
+        color: #000;
+    }
+    .btn-badge td{
+        padding: 2px;padding-left: 10px;padding-right: 10px;margin:0px;
+        border: 1px solid #d3d3d3 !important;
+    }
+    .cancel{
+        border-radius: 50%;
+        width: 40px !important;
+        color: red;
+        background: white;
+        border: 1px solid black;
+    }
+    .value{
+    }
+
 </style>
 <script type="text/javascript" src="/assets/showSubMenu.js"></script>
+<table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
+  <caption style="text-align: left;">
+    <font size='5' style='border: 2px;'></font>
+  </caption>
 
-<div id="default" style="width: 95%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:2%">
+    <tr>
+        <td  valign='top' style="width: 70%;min-height: 20vh;
+                height: 20vh;">
+          <div class="" style="font-size: 20px;margin: auto; margin-top: 0px;width: 95%; text-align: center;border-bottom: 1px solid darkred;">
+            Report Filters
+          </div>
+          <div style="width: 95%; margin: auto;padding: 5px;" id="filter-names"></div>
+        </td>
+      <td valign='top' style="width: 30%;">
+        <table style="width: 100%;">
+          <tr>
+            <td style="border: none;">
+              <div class="btn blue" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="showFilterWindow()">
+                Add Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div id='remove' class="btn gray" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="">
+                Remove Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div class="btn green" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="">
+                Apply
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+</table>
+<div id='shieldd' style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;z-index: 2000; background: black; opacity: 0.3; display: none">
+</div>
+<div id="default" style="width: 98%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:1%;">
 <table id='table' style="width: 100%;" cellpadding="5" cellspacing="0">
 
   <thead>
@@ -47,7 +148,7 @@
             </table>
         </td>
         <td colspan="3" style="padding:0">
-            <table style="width: 100%; border:none; border-collapse: collapse; ">
+            <table class="mintable">
                 <% data.each do |k, sub_data|
                 %>  
                     <tr>
@@ -63,3 +164,21 @@
   <% end %>
 </table>
 </div>
+<script type="text/javascript">
+    function capitalize(string){
+        string = string.replace(/\_/g, ' ');
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function __$(id){
+        return document.getElementById(id);
+    }
+
+    function showFilterWindow(){
+        __$('shieldd').style.display = 'block';
+        var frm = document.createElement('iframe');
+        frm.id = 'filter-frame';
+        frm.src = '/reports/filter';
+        document.body.appendChild(frm);
+    }
+</script>

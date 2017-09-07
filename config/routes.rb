@@ -148,6 +148,7 @@ Rails.application.routes.draw do
 
   get 'reports/births_report'
   get 'reports/report_date_range'
+  get 'reports/filter'
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"
 
