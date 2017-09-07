@@ -409,6 +409,7 @@
              type: "GET",
              url: "/ajax_approve/<%= @person.id %>",
              success: function(next_path){
+
                 window.location = next_path;
              },
              error: function(){

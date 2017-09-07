@@ -24,6 +24,7 @@ class AllocationQueue
 
         if record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Entry Number").last.person_identifier_type_id
+
           if !ben.blank?
             record.update_attributes(assigned: 1)
             next
@@ -43,22 +44,20 @@ class AllocationQueue
 
           person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
           record.update_attributes(assigned: 1)
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE')
           PersonIdentifier.new_identifier(record.person_id, 'Birth Entry Number', person_birth_detail.district_id_number)
 
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Registration Number").last.person_identifier_type_id
+
           if !brn.blank?
             record.update_attributes(assigned: 1)
             next
           end
 
-
           last = (PersonBirthDetail.select(" MAX(national_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
           brn = last + 1
           person_birth_detail.update_attributes(national_serial_number: brn)
           record.update_attributes(assigned: 1)
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT')
 
           PersonIdentifier.new_identifier(record.person_id, 'Birth Registration Number', person_birth_detail.national_serial_number)
 

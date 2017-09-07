@@ -177,6 +177,8 @@ def incomplete_case_comment
     allocate_record.created_at = Time.now
     allocate_record.save
 
+    PersonRecordStatus.new_record_state(@child.person_id, 'HQ-ACTIVE')
+
     render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
     render :text =>  "/view_complete_cases"
   end
