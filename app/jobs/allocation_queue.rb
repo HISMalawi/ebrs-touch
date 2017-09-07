@@ -25,7 +25,7 @@ class AllocationQueue
         if record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Entry Number").last.person_identifier_type_id
 
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE', '', queue.creator)
+          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE', '', record.creator)
 
           if !ben.blank?
             record.update_attributes(assigned: 1)
@@ -51,7 +51,7 @@ class AllocationQueue
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Registration Number").last.person_identifier_type_id
 
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT', '', queue.creator)
+          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT', '', record.creator)
           if !brn.blank?
             record.update_attributes(assigned: 1)
             next
