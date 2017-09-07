@@ -29,7 +29,7 @@ def setup_data
     my_date_list << (Date.today - n.day).strftime('%d/%b/%Y')
   end
 
-  gender = %w[Male,Female]
+  gender = ['Male','Female']
   level_of_education = ["Higher Education","Secondary Education","Primary Education","None"]
   number_of_prenatal_visits = [1,2,3,4,5,6]
 
@@ -59,7 +59,7 @@ def setup_data
    middle_name: "", 
    birthdate: birthdate1.strftime('%d/%b/%Y'), 
    birth_district: "Lilongwe City", 
-   gender: gender[rand(gender.length)], 
+   gender: gender[rand(0..1)], 
    place_of_birth: "Hospital", 
    hospital_of_birth: "ABC Comm. Hospital", 
    birth_weight: kgs, 

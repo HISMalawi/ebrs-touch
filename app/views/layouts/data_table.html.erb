@@ -35,10 +35,10 @@
 
       .btn {
         font-weight: bold;
-        height: 20px !important;
+        height: 25px !important;
         width: 30px !important;
-        margin: 0px;
       }
+
 
       .btn-info {
       }
@@ -130,7 +130,7 @@
 
         </div>
       
-        <% if  User.current.user_role.role.role == "Data Clerk"  && params[:action] == "view_cases"%>
+        <% if  (User.current.user_role.role.role == "Data Clerk"  && params[:action] == "view_cases") || !SETTINGS['enable_role_privileges']%>
              <button class="blue" style="position: absolute; right: 160px; bottom: 20px; cursor: pointer;
                 border: 1px solid #fff; padding: 5px; border-radius: 50px; padding-top: 7px;"
                 onmousedown="window.location = '<%= application_mode == "Facility" ?  "/person/new": "/new_registration" %>'">

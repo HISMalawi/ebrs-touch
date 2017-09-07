@@ -8,4 +8,18 @@ class ReportsController < ApplicationController
 
      render :layout => "facility"
   end
+
+  def births_report
+    @data = Report.births_report(params[:start_date], params[:end_date])
+    @section = "Births Report"
+    @targeturl = "/"
+
+    render :layout => "facility"
+  end
+
+  def report_date_range
+    @section = "Report range"
+    @targeturl = "/"
+    render :layout => "facility"
+  end
 end

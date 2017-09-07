@@ -119,7 +119,7 @@ module PersonService
             INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
           WHERE prs.status_id IN (#{state_ids.join(', ')})
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
-          GROUP BY p.person_id
+          GROUP BY prs.person_id
           ORDER BY p.updated_at DESC
            "
     )
@@ -127,6 +127,7 @@ module PersonService
     results = []
 
     main.each do |data|
+      person_name =  Person.find(data.person_id).person_names.last
       mother = self.mother(data.person_id)
       father = self.father(data.person_id)
       #For abandoned cases mother details may not be availabe
@@ -135,7 +136,7 @@ module PersonService
       #The form treat Father as optional
       #next if father.blank?
       #next if father.first_name.blank?
-      name          = ("#{data['first_name']} #{data['middle_name']} #{data['last_name']}")
+      name          = ("#{person_name.first_name} #{person_name.middle_name rescue ''} #{person_name.last_name}")
       mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
       father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
 

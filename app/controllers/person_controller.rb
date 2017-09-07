@@ -76,7 +76,10 @@ class PersonController < ApplicationController
 
     @status = PersonRecordStatus.status(@person.id)
 
+
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+    
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
@@ -237,8 +240,64 @@ class PersonController < ApplicationController
       @summaryHash[ "Adoptive Father"] = nil
       @summaryHash["Adoption Court Order"] = nil
     end
+    @results = []
+    if ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE','DC-DUPLICATE'].include? @status && @folders.include?("Manage Duplicates")
+        redirect_to "/potential/duplicate/#{@person.id}?index=0"
+    else
+        if @person.present? && SETTINGS['potential_search'] && SETTINGS['application_mode'] =="DC"
 
-    render :layout => "facility"
+          person = {}
+          person["person_id"] = @person.person_id.to_s
+          person["first_name"]= @name.first_name rescue ''
+          person["last_name"] =  @name.last_name rescue ''
+          person["middle_name"] = @name.middle_name rescue ''
+          person["gender"] = (@person.gender == 'F' ? 'Female' : 'Male')
+          person["birthdate"]= @person.birthdate.to_date
+          person["birthdate_estimated"] = @person.birthdate_estimated
+          person["nationality"]=  @mother_person.citizenship
+          person["place_of_birth"] = @place_of_birth
+          if  birth_loc.district.present?
+            person["district"] = birth_loc.district
+          else
+            person["district"] = "Lilongwe"
+          end      
+          person["mother_first_name"]= @mother_name.first_name rescue ''
+          person["mother_last_name"] =  @mother_name.last_name  rescue ''
+          person["mother_middle_name"] = @mother_name.middle_name rescue '' 
+          person["father_first_name"]= @father_name.first_name  rescue ''
+          person["father_last_name"] =  @father_name.last_name  rescue ''
+          person["father_middle_name"] = @father_name.middle_name  rescue ''
+        
+          SimpleElasticSearch.add(person)
+
+          if @status == "DC-ACTIVE"
+
+            @results = []
+            duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
+            
+            duplicates.each do |dup|
+                next if DuplicateRecord.where(person_id: person['person_id']).present?
+                @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
+            end
+            
+            if @results.present?
+               potential_duplicate = PotentialDuplicate.create(person_id: @person.person_id,created_at: (Time.now))
+               if potential_duplicate.present?
+                     @results.each do |result|
+                        potential_duplicate.create_duplicate(result["_id"])
+                     end
+               end
+               #PersonRecordStatus.new_record_state(@person.person_id, "HQ-POTENTIAL DUPLICATE-TBA", "System mark record as potential duplicate")
+               @status = "DC-POTENTIAL DUPLICATE" #PersonRecordStatus.status(@person.id)
+
+            end      
+          end
+        else
+             @results = []
+        end
+        render :layout => "facility"
+    end
+
   end
   
   def records
@@ -670,7 +729,12 @@ class PersonController < ApplicationController
   end
 
   def view_cases
-    @states = ["DC-ACTIVE"]
+
+    if SETTINGS['application_mode'] == "FC"
+        @states = ["DC-ACTIVE","FC-POTENTIAL DUPLICATE"]
+    else
+       @states = ["DC-ACTIVE"]
+    end
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"

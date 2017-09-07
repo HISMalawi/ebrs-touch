@@ -85,17 +85,18 @@ def add_duplicate_comment
 end
 
 def resolve_duplicate
-
      potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
-        potential_records.resolved = 1
-        potential_records.decision = params[:decision]
-        potential_records.comment = params[:reason]
-        potential_records.resolved_at = Time.now
-        potential_records.save
+        if params[:decision] == "POTENTIAL DUPLICATE"
+           PersonRecordStatus.new_record_state(params[:id], 'DC-POTENTIAL DUPLICATE', params[:reason])
+           redirect_to params[:next_path]
+        elsif params[:decision] == "NOT DUPLICATE"
+          potential_records.resolved = 1
+          potential_records.decision = params[:decision]
+          potential_records.comment = params[:reason]
+          potential_records.resolved_at = Time.now
+          potential_records.save
 
-
-        if params[:decision] == "NOT DUPLICATE"
           allocate_record = IdentifierAllocationQueue.new
           allocate_record.person_id = params[:id].to_i
           allocate_record.assigned = 0
@@ -107,6 +108,12 @@ def resolve_duplicate
           end
           redirect_to params[:next_path]
         else
+          potential_records.resolved = 1
+          potential_records.decision = params[:decision]
+          potential_records.comment = params[:reason]
+          potential_records.resolved_at = Time.now
+          potential_records.save
+
            PersonRecordStatus.new_record_state(params[:id], 'DC-VOIDED', params[:reason])
            redirect_to params[:next_path]
         end
@@ -168,9 +175,7 @@ def incomplete_case_comment
     allocate_record.creator = User.current.id
     allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
     allocate_record.created_at = Time.now
-    if allocate_record.save
-      PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
-    end
+    allocate_record.save
 
     render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
     render :text =>  "/view_complete_cases"
