@@ -43,7 +43,7 @@ class AllocationQueue
 
           person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
           record.update_attributes(assigned: 1)
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE')
+          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE', '', queue.creator)
           PersonIdentifier.new_identifier(record.person_id, 'Birth Entry Number', person_birth_detail.district_id_number)
 
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
