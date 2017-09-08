@@ -10,13 +10,18 @@ class ReportsController < ApplicationController
   end
 
   def births_report
-    status = (params[:status].present? ? params[:status] : "Reported")
 
-    @data = Report.births_report(params[:start_date], params[:end_date],status)
     @section = "Births Report"
     @targeturl = "/"
 
     render :layout => "facility"
+  end
+
+  def report
+    status = (params[:status].present? ? params[:status] : "Reported")
+
+    @data = Report.births_report(params[:start_date], params[:end_date],status)
+    render :layout =>false
   end
 
   def report_date_range
@@ -27,7 +32,7 @@ class ReportsController < ApplicationController
 
   def filter
     @filter = params[:filter]
-    @filters = ["Hospital of Birth", "Record Status"]
+    @filters = filters
     @statuses = Status.all.map(&:name)
     users = User.find_by_sql(
         "SELECT u.username, u.person_id FROM users u
@@ -35,5 +40,14 @@ class ReportsController < ApplicationController
           INNER JOIN role r ON r.role_id = ur.role_id
          WHERE r.level IN ('DC', 'FC')
         ")
+  end
+
+  def rfilter
+      @filters = filters
+  end
+
+  private
+  def filters
+      ["Hospital of Birth", "Record Status","Date Registration Range"]
   end
 end

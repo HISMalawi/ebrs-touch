@@ -147,8 +147,10 @@ Rails.application.routes.draw do
   get "/comments/:id" => 'dc#comments'
 
   get 'reports/births_report'
+  get 'reports/report'
   get 'reports/report_date_range'
   get 'reports/filter'
+  get 'reports/rfilter'
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"
 

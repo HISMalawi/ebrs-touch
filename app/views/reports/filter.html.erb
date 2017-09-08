@@ -1,0 +1,88 @@
+<style>
+    #__content{
+        -moz-transform: scale(0.73);
+        -moz-transform-origin: 0 0;
+        width:99% !important;
+    }
+
+    #toolsCell1{
+        height: 450px !important;
+        min-width: 250px !important;
+        width: 500px !important;
+    }
+    #fixedkeyboard{
+        max-width: 800px !important;
+    }
+
+    #textForperson_birth_entry_number{
+        text-transform: uppercase;
+    }
+    #textForperson_facility_serial_number{
+        text-transform: uppercase;
+    }
+</style>
+<form>
+	<fieldset>
+		 <legend><font size='5' style='border: 2px;'>Report filters</font></legend>
+		 <div class="field">
+	       <label for="filters">Select Filter</label>
+	       <select id="filters" name="filter_name" class="input_cell">
+	         <option></option>
+	         <% @filters.each do |f|%>
+	             <option value="<%=f%>"><%=f%></option>
+	         <%end%>
+	       </select>
+		 </div>
+	</fieldset>
+	<fieldset>
+	   <legend><font size='5' style='border: 2px;'>Hospital of Birth</font></legend>
+		  <div class="field">
+		    <label for="hospital_of_birth">Hospital of Birth</label>
+		    <br>
+		    <input type="text" name="hospital_of_birth" id="hospital_of_birth" class="input_cell" condition="__$('filters').value == 'Hospital of Birth'" ajaxURL = "/search_by_hospital" optional=true>
+		  </div>
+	</fieldset>
+	<fieldset>
+		 <legend><font size='5' style='border: 2px;'>Record status</font></legend>
+		 <div class="field">
+	       <label for="states">Select record status</label>
+	       <select id="states" name="record_status" class="input_cell" condition="__$('filters').value == 'Record Status'" optional=true>
+	         <option></option>
+	         <% @statuses.each do |s|%>
+	             <option value="<%=s%>"><%=s%></option>
+	         <%end%>
+	       </select>
+		 </div>
+	</fieldset>
+
+	<fieldset>
+	  <legend><font size='5' style='border: 2px;'>Start Date</font></legend>
+
+	  <div class="field">
+	    <label for="start_date">Start Date</label>
+	    <input id="start_date" name="start_date" type="text"
+	           value="<%= Date.today.strftime("%d/%b/%Y") %>"
+	           condition="__$('filters').value == 'Date Registration Range'"
+	           class="input_cell"
+	           fieldtype="date"
+	           />
+
+	  </div>
+	</fieldset>
+	<fieldset>
+		<legend><font size="5" style='border: 2px;'>End Date</font></legend>
+		<div>
+	    <label for="end_date">End Date</label>
+	    <input id="end_date" name="end_date" type="text"
+	           value="<%= Date.today.strftime("%d/%b/%Y") %>"
+	           condition="__$('filters').value == 'Date Registration Range'"
+	           class="input_cell"
+	           fieldtype="date"
+	    />
+
+	  </div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+	init();
+</script>
