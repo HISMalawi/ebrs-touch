@@ -1064,8 +1064,8 @@ class PersonController < ApplicationController
     @section = 'Ammend Case'
   end
 
-  def do_ammend
-    PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason']}", "Ammendment request; #{params['reason']}");
+  def do_reprint
+    PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
 
     redirect_to session['list_url']
   end

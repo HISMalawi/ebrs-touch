@@ -233,12 +233,18 @@
                 onclick="approveComments();">Approve</button>
     </td>
 
-      <td id="Ammend" style="display:<%= display%>;">
+    <td id="Re-print" style="display:<%= display%>;">
+        <button id="btnAmmend"
+                class="green"
+                style=""
+                onclick="reprint();">Re-print</button>
+    </td>
+    <td id="Ammend" style="display:<%= display%>;">
         <button id="btnAmmend"
                 class="green"
                 style=""
                 onclick="ammend();">Ammend</button>
-      </td>
+    </td>
 
       <td id="Mark Pendingdddd" style="display:none">
         <button style="display:none" id="btnQuery"
@@ -448,8 +454,8 @@
           __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
       }
 
-      function ammend(){
-          window.location = '/person/ammend_case?person_id=<%= params[:id]%>';
+      function reprint(){
+          window.location = '/person/reprint_case?person_id=<%= params[:id]%>';
       }
 
       function duplicateComments(){

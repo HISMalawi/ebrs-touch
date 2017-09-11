@@ -134,8 +134,8 @@ Rails.application.routes.draw do
 
   get 'person/lost_and_damaged_cases'
   get 'person/ammendment_cases'
-  get 'person/ammend_case'
-  get 'person/do_ammend'
+  get 'person/reprint_case'
+  get 'person/do_reprint'
   get '/search' => 'dc#search'
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'
