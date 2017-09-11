@@ -37,6 +37,16 @@ bundle exec rake db:drop
 curl -X DELETE $COUCH_PROTOCOL://$COUCH_USER:$COUCH_PASSWORD@$COUCH_HOST:$COUCH_PORT/$PREFIX$UNDERSCORE$SUFFIX
 curl -X PUT $COUCH_PROTOCOL://$COUCH_USER:$COUCH_PASSWORD@$COUCH_HOST:$COUCH_PORT/$PREFIX$UNDERSCORE$SUFFIX
 
+ESPROTOCOL=`ruby -ryaml -e "puts YAML::load_file('config/elasticsearchsetting.yml')['elasticsearch']['protocol']"`
+ESHOST=`ruby -ryaml -e "puts YAML::load_file('config/elasticsearchsetting.yml')['elasticsearch']['host']"`
+ESINDEX=`ruby -ryaml -e "puts YAML::load_file('config/elasticsearchsetting.yml')['elasticsearch']['index']"`
+ESPORT=`ruby -ryaml -e "puts YAML::load_file('config/elasticsearchsetting.yml')['elasticsearch']['port']"`
+ESTYPE=`ruby -ryaml -e "puts YAML::load_file('config/elasticsearchsetting.yml')['elasticsearch']['type']"`
+
+echo 'DELETE elasticsearch index'
+curl -XDELETE $ESPROTOCOL://$ESHOST:$ESPORT/$ESINDEX
+
+
 echo 'SETTING UP NEW DATABASES'
 export RAILS_ENV=$ENV
 

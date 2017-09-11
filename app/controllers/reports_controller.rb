@@ -48,6 +48,6 @@ class ReportsController < ApplicationController
 
   private
   def filters
-      ["Hospital of Birth", "Record Status","Date Registration Range"]
+      ["Record Status","Date Registration Range"]
   end
 end
