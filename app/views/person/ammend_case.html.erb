@@ -1,0 +1,95 @@
+<style type="text/css">
+		#table{
+			width: 90%;
+			margin: auto;
+			margin-top: 2%;
+			border-collapse: collapse;
+			box
+		}
+		#table th {
+			padding: 1%;
+			border: 1px solid #bdbfc2;
+			width: 33.333%;
+		}
+		#table td {
+			padding: 1%;
+			border: 1px solid #bdbfc2;
+			text-align: center;
+			width: 33.333%
+		}
+		#table tr:nth-child(even) {
+			background: #eff0f2;
+		}
+
+		#table tr:hover {
+			color:#3465a4;
+		}
+</style>
+<table id="table">
+			<thead>
+					<tr>
+						<th style="border:none"></th>
+						<th style="color: #093a1a;background: #bdbfc2;">Existing record</th>
+						<th style="color: #98530f;background: #bdbfc2;">Amended record</th>
+					</tr>
+			</thead>
+			<tbody>
+					<tr onmousedown="amendField('Death Entry Number')">
+						<th >Death Entry Number</th>
+						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
+						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
+					</tr>
+					<tr onmousedown="amendField('Registration Number')">
+						<th>Registration Number</th>
+						<td><%= @birth_details.national_serial_number rescue 'XXXXXXXXXX' %></td>
+						<td><%= @birth_details.national_serial_number rescue 'XXXXXXXXXX' %></td>
+					</tr>
+					<tr onmousedown="amendField('Name')">
+						<th>Name</th>
+						<td><%= @name.first_name %> <%= @name.last_name %></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Date of birth')">
+						<th >Date of birth</th>
+						<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Sex')">
+						<th >Sex</th>
+						<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Place of birth')">
+						<th >Place of birth</th>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Name of mother')">
+						<th >Name of mother</th>
+						<td><% @mother_name.first_name %> <% @mother_name.last_name %></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Name of father')">
+						<th >Name of father</th>
+						<td><% @father_name.first_name rescue '' %> <% @father_name.last_name rescue '' %></td>
+						<td></td>
+					</tr>
+					<tr onmousedown="amendField('Date of registration')">
+						<th>Date of registration</th>
+						<td></td>
+						<td></td>
+					</tr>
+
+			</tbody>
+</table>
+<script type="text/javascript">
+	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
+	function amendField(field){
+		if(can_not_amend.indexOf(field) < 0){
+				window.location = "/person/amend_edit/<%=@id%>?fields[]="+field
+		}else{
+				alert("Can not amend "+field);
+		}
+
+	}
+</script>
