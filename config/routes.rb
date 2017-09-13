@@ -136,6 +136,7 @@ Rails.application.routes.draw do
   get 'person/ammendment_cases'
   get 'person/ammend_case'
   get '/person/amend_edit/:id'=> 'person#amend_edit'
+  get '/person/amend_field'
   get 'person/reprint_case'
   get 'person/do_reprint'
   get '/search' => 'dc#search'

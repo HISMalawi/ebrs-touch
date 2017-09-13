@@ -418,6 +418,27 @@ end
 
   add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
 
+  create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
+    t.string  "name", limit: 20
+    t.integer "creator", limit: 11
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
+    t.integer   "audit_trail_type_id", limit: 11, null: false
+    t.string    "table_name", limit: 100, null: false
+    t.integer   "table_row_id", limit: 11, null:false
+    t.string    "field", limit:50
+    t.string    "previous_value", limit: 255
+    t.string    "current_value", limit: 255
+    t.string    "comment", limit: 255
+    t.integer   "location_id", limit: 11, null:false
+    t.integer   "creator", limit: 11
+    t.datetime  "created_at"
+    t.datetime  "updated_at"
+  end
+
   ##########################################################################################################################
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
@@ -461,4 +482,9 @@ end
   add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
+
+  add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
+  add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
+  add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
+
 end

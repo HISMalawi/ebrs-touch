@@ -1061,26 +1061,35 @@ class PersonController < ApplicationController
   end
 
   def ammend_case
-    @id = 1002515
-    @person = Person.find(@id)
-    @birth_details = PersonBirthDetail.where(person_id: @id).last
+    @person = Person.find(params[:id])
+    
+    @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
     @name = @person.person_names.last
     @address = @person.addresses.last
 
     @mother_person = @person.mother
-    @mother_address = @mother_person.addresses.last rescue nil
     @mother_name = @mother_person.person_names.last rescue nil
 
     @father_person = @person.father
-    @father_address = @father_person.addresses.last rescue nil
     @father_name = @father_person.person_names.last rescue nil
-    
+
     @section = 'Ammend Case'
     render :layout => "facility"
   end
 
   def amend_edit
-    raise params.inspect
+    @person = Person.find(params[:id])
+    @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+    @name = @person.person_names.last
+    @address = @person.addresses.last
+
+    @mother_person = @person.mother
+    @mother_name = @mother_person.person_names.last rescue nil
+
+    @father_person = @person.father
+    @father_name = @father_person.person_names.last rescue nil
+     @targeturl = "/person/ammend_case?id=#{params[:id]}"
+    render :layout => "touch"
   end
 
   def amend_field

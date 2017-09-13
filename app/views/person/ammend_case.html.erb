@@ -61,17 +61,17 @@
 					</tr>
 					<tr onmousedown="amendField('Place of birth')">
 						<th >Place of birth</th>
-						<td></td>
+						<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
 						<td></td>
 					</tr>
 					<tr onmousedown="amendField('Name of mother')">
 						<th >Name of mother</th>
-						<td><% @mother_name.first_name %> <% @mother_name.last_name %></td>
+						<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
 						<td></td>
 					</tr>
 					<tr onmousedown="amendField('Name of father')">
 						<th >Name of father</th>
-						<td><% @father_name.first_name rescue '' %> <% @father_name.last_name rescue '' %></td>
+						<td><%= @father_name.first_name rescue 'N/A' %> <%= @father_name.last_name rescue '' %></td>
 						<td></td>
 					</tr>
 					<tr onmousedown="amendField('Date of registration')">
@@ -86,7 +86,7 @@
 	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
 	function amendField(field){
 		if(can_not_amend.indexOf(field) < 0){
-				window.location = "/person/amend_edit/<%=@id%>?fields[]="+field
+				window.location = "/person/amend_edit/<%=params[:id]%>?fields[]="+field
 		}else{
 				alert("Can not amend "+field);
 		}
