@@ -83,15 +83,17 @@ class Methods
   end
 
   def self.update_doc(doc)
-    client = $client; person_id = doc['_id']
+    client = $client;
+    person_id = doc['_id']
 
     self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
-    change_agent = doc['change_agent']
+    table = doc['change_agent']
     doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
+    data = doc[table]
 
-    doc.each do |table, data|
-      p_key = data.keys[0]; p_value = data[p_key]
-      next if p_value.blank?
+      p_key = data.keys[0]
+      p_value = data[p_key]
+      return nil if p_value.blank?
 
       rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
 
@@ -133,12 +135,12 @@ class Methods
         insert_query += ( values.join(",")) + ")"
 
         self.qry(client, insert_query, person_id)
+        self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
+
       end
     end
 
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
   end
-end
 
 changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}" do
   # Which database should we connect to?
