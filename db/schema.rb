@@ -58,21 +58,6 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
   add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
 
-  create_table "couch_sequence", primary_key: "name", force: :cascade do |t|
-    t.integer  "seq",        limit: 8, default: 0
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "couchdb_changes", primary_key: "couchdb_change_id", force: :cascade do |t|
-    t.integer  "last_seq",   limit: 4, null: false
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
-  end
-
-  add_index "couchdb_changes", ["couchdb_change_id"], name: "couchdb_change_id_UNIQUE", unique: true, using: :btree
-  add_index "couchdb_changes", ["last_seq"], name: "last_seq_UNIQUE", unique: true, using: :btree
-
   create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
     t.integer  "person_id",              limit: 4
     t.integer  "potential_duplicate_id", limit: 4
