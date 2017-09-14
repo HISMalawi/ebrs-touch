@@ -11,7 +11,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20170912104756) do
+
+  create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
+    t.string   "name",       limit: 20
+    t.integer  "creator",    limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
+    t.integer  "audit_trail_type_id", limit: 4,   null: false
+    t.string   "table_name",          limit: 100, null: false
+    t.integer  "table_row_id",        limit: 4,   null: false
+    t.string   "field",               limit: 50
+    t.string   "previous_value",      limit: 255
+    t.string   "current_value",       limit: 255
+    t.string   "comment",             limit: 255
+    t.integer  "location_id",         limit: 4,   null: false
+    t.integer  "creator",             limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "audit_trails", ["audit_trail_type_id"], name: "fk_audit_trails_1", using: :btree
+  add_index "audit_trails", ["creator"], name: "fk_audit_trails_3", using: :btree
+  add_index "audit_trails", ["location_id"], name: "fk_audit_trails_2", using: :btree
 
   create_table "birth_registration_type", primary_key: "birth_registration_type_id", force: :cascade do |t|
     t.string   "name",        limit: 45,                  null: false
@@ -25,13 +50,19 @@ ActiveRecord::Schema.define(version: 0) do
   add_index "birth_registration_type", ["birth_registration_type_id"], name: "birth_registration_type_id_UNIQUE", unique: true, using: :btree
 
   create_table "core_person", primary_key: "person_id", force: :cascade do |t|
-    t.integer  "person_type_id", limit: 4,  null: false
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.integer  "person_type_id", limit: 4, null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
   add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
+
+  create_table "couch_sequence", primary_key: "name", force: :cascade do |t|
+    t.integer  "seq",        limit: 8, default: 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "couchdb_changes", primary_key: "couchdb_change_id", force: :cascade do |t|
     t.integer  "last_seq",   limit: 4, null: false
@@ -42,16 +73,35 @@ ActiveRecord::Schema.define(version: 0) do
   add_index "couchdb_changes", ["couchdb_change_id"], name: "couchdb_change_id_UNIQUE", unique: true, using: :btree
   add_index "couchdb_changes", ["last_seq"], name: "last_seq_UNIQUE", unique: true, using: :btree
 
+  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
+    t.integer  "person_id",              limit: 4
+    t.integer  "potential_duplicate_id", limit: 4
+    t.datetime "created_at"
+  end
+
+  add_index "duplicate_records", ["person_id"], name: "fk_duplicate_records_2", using: :btree
+  add_index "duplicate_records", ["potential_duplicate_id"], name: "fk_duplicate_records_1", using: :btree
+
+  create_table "global_property", primary_key: "property", force: :cascade do |t|
+    t.string   "value",      limit: 50, null: false
+    t.string   "uuid",       limit: 38, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
+
   create_table "identifier_allocation_queue", primary_key: "identifier_allocation_queue_id", force: :cascade do |t|
-    t.integer  "person_id",       limit: 4,               null: false
+    t.integer  "person_id",                 limit: 4,             null: false
     t.integer  "person_identifier_type_id", limit: 4,             null: false
-    t.integer  "assigned",        limit: 1,   default: 0, null: false
-    t.integer  "creator",         limit: 4,               null: false
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
+    t.integer  "assigned",                  limit: 1, default: 0, null: false
+    t.integer  "creator",                   limit: 4,             null: false
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
   end
 
   add_index "identifier_allocation_queue", ["person_id"], name: "fk_identifier_allocation_queue_1_idx", using: :btree
+  add_index "identifier_allocation_queue", ["person_identifier_type_id"], name: "fk_identifier_allocation_queue_2", using: :btree
 
   create_table "level_of_education", primary_key: "level_of_education_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
@@ -83,7 +133,7 @@ ActiveRecord::Schema.define(version: 0) do
     t.string   "uuid",            limit: 38,                  null: false
     t.integer  "changed_by",      limit: 4
     t.datetime "changed_at"
-end
+  end
 
   add_index "location", ["changed_by"], name: "location_changed_by", using: :btree
   add_index "location", ["creator"], name: "user_who_created_location", using: :btree
@@ -188,6 +238,56 @@ end
   add_index "person_attributes", ["person_attribute_type_id"], name: "fk_person_attributes_2_idx", using: :btree
   add_index "person_attributes", ["person_id"], name: "fk_person_attributes_1_idx", using: :btree
 
+  create_table "person_birth_details", primary_key: "person_birth_details_id", force: :cascade do |t|
+    t.integer  "person_id",                               limit: 4,               null: false
+    t.integer  "place_of_birth",                          limit: 4,               null: false
+    t.integer  "district_of_birth",                       limit: 4,               null: false
+    t.integer  "birth_location_id",                       limit: 4,               null: false
+    t.string   "other_birth_location",                    limit: 45
+    t.float    "birth_weight",                            limit: 24
+    t.integer  "type_of_birth",                           limit: 4,               null: false
+    t.integer  "parents_married_to_each_other",           limit: 1,   default: 0, null: false
+    t.date     "date_of_marriage"
+    t.integer  "gestation_at_birth",                      limit: 4
+    t.integer  "number_of_prenatal_visits",               limit: 4
+    t.integer  "month_prenatal_care_started",             limit: 4
+    t.integer  "mode_of_delivery_id",                     limit: 4,               null: false
+    t.integer  "number_of_children_born_alive_inclusive", limit: 4,   default: 1, null: false
+    t.integer  "number_of_children_born_still_alive",     limit: 4,   default: 1, null: false
+    t.integer  "level_of_education_id",                   limit: 4,               null: false
+    t.string   "district_id_number",                      limit: 20
+    t.integer  "national_serial_number",                  limit: 4
+    t.integer  "court_order_attached",                    limit: 1,   default: 0, null: false
+    t.integer  "parents_signed",                          limit: 1,   default: 0, null: false
+    t.date     "acknowledgement_of_receipt_date",                                 null: false
+    t.string   "facility_serial_number",                  limit: 30
+    t.integer  "adoption_court_order",                    limit: 1,   default: 0, null: false
+    t.integer  "birth_registration_type_id",              limit: 4,               null: false
+    t.integer  "location_created_at",                     limit: 4
+    t.integer  "form_signed",                             limit: 1,   default: 0, null: false
+    t.string   "informant_relationship_to_person",        limit: 255
+    t.string   "other_informant_relationship_to_person",  limit: 255
+    t.string   "informant_designation",                   limit: 255
+    t.string   "level",                                   limit: 10
+    t.date     "date_registered",                                                 null: false
+    t.integer  "creator",                                 limit: 4,               null: false
+    t.datetime "created_at",                                                      null: false
+    t.datetime "updated_at",                                                      null: false
+  end
+
+  add_index "person_birth_details", ["birth_location_id"], name: "fk_person_birth_details_3_idx", using: :btree
+  add_index "person_birth_details", ["birth_registration_type_id"], name: "fk_person_birth_details_8_idx", using: :btree
+  add_index "person_birth_details", ["creator"], name: "fk_person_birth_details_9", using: :btree
+  add_index "person_birth_details", ["district_id_number"], name: "district_id_number_UNIQUE", unique: true, using: :btree
+  add_index "person_birth_details", ["facility_serial_number"], name: "facility_serial_number_UNIQUE", unique: true, using: :btree
+  add_index "person_birth_details", ["level_of_education_id"], name: "fk_person_birth_details_7_idx", using: :btree
+  add_index "person_birth_details", ["location_created_at"], name: "fk_person_birth_details_6_idx", using: :btree
+  add_index "person_birth_details", ["mode_of_delivery_id"], name: "fk_person_birth_details_5_idx", using: :btree
+  add_index "person_birth_details", ["national_serial_number"], name: "national_serial_number_UNIQUE", unique: true, using: :btree
+  add_index "person_birth_details", ["person_id"], name: "fk_person_birth_details_1_idx", using: :btree
+  add_index "person_birth_details", ["place_of_birth"], name: "fk_person_birth_details_4_idx", using: :btree
+  add_index "person_birth_details", ["type_of_birth"], name: "fk_person_birth_details_2_idx", using: :btree
+
   create_table "person_identifier_types", primary_key: "person_identifier_type_id", force: :cascade do |t|
     t.string   "name",        limit: 45,              null: false
     t.string   "description", limit: 100
@@ -199,67 +299,18 @@ end
   end
 
   create_table "person_identifiers", primary_key: "person_identifier_id", force: :cascade do |t|
-    t.integer  "person_id",                limit: 4,               null: false
+    t.integer  "person_id",                 limit: 4,               null: false
     t.integer  "person_identifier_type_id", limit: 4,               null: false
-    t.integer  "voided",                   limit: 1,   default: 0, null: false
-    t.string   "value",                    limit: 100,             null: false
-    t.integer  "voided_by",                limit: 4
+    t.integer  "voided",                    limit: 1,   default: 0, null: false
+    t.string   "value",                     limit: 100,             null: false
+    t.integer  "voided_by",                 limit: 4
     t.datetime "date_voided"
-    t.datetime "created_at",                                       null: false
-    t.datetime "updated_at",                                       null: false
+    t.datetime "created_at",                                        null: false
+    t.datetime "updated_at",                                        null: false
   end
 
-  add_index "person_identifiers", ["person_identifier_type_id"], name: "fk_person_identifiers_2_idx", using: :btree
   add_index "person_identifiers", ["person_id"], name: "fk_person_identifiers_1_idx", using: :btree
-
-  create_table "person_birth_details", primary_key: "person_birth_details_id", force: :cascade do |t|
-    t.integer  "person_id",                               limit: 4,              null: false
-    t.integer  "place_of_birth",                          limit: 4,              null: false
-    t.integer  "district_of_birth",                       limit: 4,              null: false
-    t.integer  "birth_location_id",                       limit: 4,              null: false
-    t.string   "other_birth_location",                    limit: 45
-    t.float    "birth_weight",                            limit: 24
-    t.integer  "type_of_birth",                           limit: 4,              null: false
-    t.integer  "parents_married_to_each_other",           limit: 1,  default: 0, null: false
-    t.date     "date_of_marriage"
-    t.integer  "gestation_at_birth",                      limit: 4
-    t.integer  "number_of_prenatal_visits",               limit: 4
-    t.integer  "month_prenatal_care_started",             limit: 4
-    t.integer  "mode_of_delivery_id",                     limit: 4,              null: false
-    t.integer  "number_of_children_born_alive_inclusive", limit: 4,  default: 1, null: false
-    t.integer  "number_of_children_born_still_alive",     limit: 4,  default: 1, null: false
-    t.integer  "level_of_education_id",                   limit: 4,              null: false
-    t.string   "district_id_number",                      limit: 20
-    t.integer  "national_serial_number",                  limit: 4
-    t.integer  "court_order_attached",                    limit: 1,  default: 0, null: false
-    t.integer  "parents_signed",                          limit: 1,  default: 0, null: false
-    t.date     "acknowledgement_of_receipt_date",                                null: false
-    t.string   "facility_serial_number",                  limit: 30
-    t.integer  "adoption_court_order",                    limit: 1,  default: 0, null: false
-    t.integer  "birth_registration_type_id",              limit: 4,              null: false
-    t.integer  "location_created_at",                     limit: 4
-    t.integer  "form_signed",                             limit: 1,  default: 0, null: false
-    t.string   "informant_relationship_to_person",         limit: 255
-    t.string   "other_informant_relationship_to_person",  limit: 255
-    t.string   "informant_designation",                    limit: 255
-    t.string   "level",                                 limit: 10
-    t.date     "date_registered",                                                null: false
-    t.integer  "creator",     limit: 4,     null: false
-    t.datetime "created_at",                                                     null: false
-    t.datetime "updated_at",                                                     null: false
-  end
-
-  add_index "person_birth_details", ["birth_location_id"], name: "fk_person_birth_details_3_idx", using: :btree
-  add_index "person_birth_details", ["birth_registration_type_id"], name: "fk_person_birth_details_8_idx", using: :btree
-  add_index "person_birth_details", ["district_id_number"], name: "district_id_number_UNIQUE", unique: true, using: :btree
-  add_index "person_birth_details", ["facility_serial_number"], name: "facility_serial_number_UNIQUE", unique: true, using: :btree
-  add_index "person_birth_details", ["level_of_education_id"], name: "fk_person_birth_details_7_idx", using: :btree
-  add_index "person_birth_details", ["location_created_at"], name: "fk_person_birth_details_6_idx", using: :btree
-  add_index "person_birth_details", ["mode_of_delivery_id"], name: "fk_person_birth_details_5_idx", using: :btree
-  add_index "person_birth_details", ["national_serial_number"], name: "national_serial_number_UNIQUE", unique: true, using: :btree
-  add_index "person_birth_details", ["person_id"], name: "fk_person_birth_details_1_idx", using: :btree
-  add_index "person_birth_details", ["place_of_birth"], name: "fk_person_birth_details_4_idx", using: :btree
-  add_index "person_birth_details", ["type_of_birth"], name: "fk_person_birth_details_2_idx", using: :btree
+  add_index "person_identifiers", ["person_identifier_type_id"], name: "fk_person_identifiers_2_idx", using: :btree
 
   create_table "person_name", primary_key: "person_name_id", force: :cascade do |t|
     t.integer  "person_id",   limit: 4,               null: false
@@ -341,12 +392,33 @@ end
     t.datetime "date_voided"
   end
 
+  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
+    t.integer  "person_id",   limit: 4,                 null: false
+    t.string   "resolved",    limit: 1,   default: "0", null: false
+    t.string   "decision",    limit: 255
+    t.string   "comment",     limit: 255
+    t.datetime "resolved_at"
+    t.datetime "created_at"
+  end
+
+  add_index "potential_duplicates", ["person_id"], name: "fk_potential_duplicates_1", using: :btree
+
   create_table "role", primary_key: "role_id", force: :cascade do |t|
-    t.string  "role",  limit: 50, default: "", null: false
+    t.string "role",  limit: 50, default: "", null: false
     t.string "level", limit: 10
   end
 
   add_index "role", ["role_id"], name: "fk_user_role_1_idx", using: :btree
+
+  create_table "sessions", force: :cascade do |t|
+    t.string   "session_id", limit: 255,   null: false
+    t.text     "data",       limit: 65535
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "sessions", ["session_id"], name: "index_sessions_on_session_id", unique: true, using: :btree
+  add_index "sessions", ["updated_at"], name: "index_sessions_on_updated_at", using: :btree
 
   create_table "statuses", primary_key: "status_id", force: :cascade do |t|
     t.string   "name",        limit: 45
@@ -386,68 +458,18 @@ end
     t.datetime "created_at"
   end
 
-  ############################ Resoving Potential Duplicate tables ##########################################################
-
-  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
-    t.integer  "person_id", limit: 4, null: false
-    t.string   "resolved",      limit: 1,   default: 0,     null: false
-    t.string   "decision",      limit: 255
-    t.string   "comment",      limit: 255
-    t.datetime "resolved_at"
-    t.datetime "created_at"
-  end
-
-  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
-
-  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
-    t.integer  "person_id", limit: 4
-    t.integer   "potential_duplicate_id",      limit: 4
-    t.datetime "created_at"
-  end
-
-  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
-  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
-
-
-  create_table "global_property", primary_key: "property", force: :cascade do |t|
-    t.string   "value", limit: 50,                  null: false
-    t.string   "uuid",  limit: 38,                  null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
-
-  create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
-    t.string  "name", limit: 20
-    t.integer "creator", limit: 11
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
-    t.integer   "audit_trail_type_id", limit: 11, null: false
-    t.string    "table_name", limit: 100, null: false
-    t.integer   "table_row_id", limit: 11, null:false
-    t.string    "field", limit:50
-    t.string    "previous_value", limit: 255
-    t.string    "current_value", limit: 255
-    t.string    "comment", limit: 255
-    t.integer   "location_id", limit: 11, null:false
-    t.integer   "creator", limit: 11
-    t.datetime  "created_at"
-    t.datetime  "updated_at"
-  end
-
-  ##########################################################################################################################
-
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
+  add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
+  add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
+  add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
+  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
   add_foreign_key "identifier_allocation_queue", "core_person", column: "person_id", primary_key: "person_id", name: "fk_identifier_allocation_queue_1"
-  add_foreign_key "identifier_allocation_queue", "person_identifier_types", column: "person_identifier_type_id", primary_key: "person_identifier_type_id", name: "fk_identifier_allocation_queue_2"
+  add_foreign_key "identifier_allocation_queue", "person_identifier_types", primary_key: "person_identifier_type_id", name: "fk_identifier_allocation_queue_2"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
   add_foreign_key "location_tag_map", "location_tag", primary_key: "location_tag_id", name: "fk_location_tag_map_2"
   add_foreign_key "person", "core_person", column: "person_id", primary_key: "person_id", name: "fk_person_1"
@@ -478,13 +500,9 @@ end
   add_foreign_key "person_relationship", "core_person", column: "person_a", primary_key: "person_id", name: "fk_person_relationship_1"
   add_foreign_key "person_relationship", "core_person", column: "person_b", primary_key: "person_id", name: "fk_person_relationship_2"
   add_foreign_key "person_relationship", "person_relationship_types", primary_key: "person_relationship_type_id", name: "fk_person_relationship_3"
+  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
   add_foreign_key "user_role", "role", primary_key: "role_id", name: "fk_user_role_2"
   add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
-
-  add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
-  add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
-  add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
-
 end

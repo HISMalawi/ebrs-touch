@@ -1093,8 +1093,23 @@ class PersonController < ApplicationController
   end
 
   def amend_field
-    raise params.inspect
+    fields = params[:fields].split(",")
     
+    if fields.include? "Name"
+    end
+    if fields.include? "Date of birth"
+    end
+    if fields.include? "Sex"
+    end
+    if fields.include? "Place of birth"
+    end
+    if fields.include? "Name of mother"
+      
+    end
+    if fields.include? "Name of father"
+      
+    end
+    raise params.inspect   
   end
 
   def reprint_case

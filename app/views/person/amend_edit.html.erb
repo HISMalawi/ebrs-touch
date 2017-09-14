@@ -6,7 +6,8 @@
 </script>
 <form method="get" action="/person/amend_field">
 	<input type="hidde" name="id" value="<%= params[:id]%>">
-	<input type="hidden" name="person[birth_district]" id="person_birth_district" value="<%= Location.current_district %>">
+	<input type="hidden" name="person[birth_district]" id="person_birth_district" value="<%= Location.current_district.name %>">
+	<input type="hidden" name="fields" value="<%=params[:fields].join(',')%>">
 	<% if params[:fields].include? "Name" %>
 	<fieldset >
       <legend><font size='5' style=''>Details of Child</font></legend>
