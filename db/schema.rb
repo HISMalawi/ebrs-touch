@@ -13,6 +13,31 @@
 
 ActiveRecord::Schema.define(version: 20170912104756) do
 
+  create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
+    t.string   "name",       limit: 20
+    t.integer  "creator",    limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
+    t.integer  "audit_trail_type_id", limit: 4,   null: false
+    t.string   "table_name",          limit: 100, null: false
+    t.integer  "table_row_id",        limit: 4,   null: false
+    t.string   "field",               limit: 50
+    t.string   "previous_value",      limit: 255
+    t.string   "current_value",       limit: 255
+    t.string   "comment",             limit: 255
+    t.integer  "location_id",         limit: 4,   null: false
+    t.integer  "creator",             limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "audit_trails", ["audit_trail_type_id"], name: "fk_audit_trails_1", using: :btree
+  add_index "audit_trails", ["creator"], name: "fk_audit_trails_3", using: :btree
+  add_index "audit_trails", ["location_id"], name: "fk_audit_trails_2", using: :btree
+
   create_table "birth_registration_type", primary_key: "birth_registration_type_id", force: :cascade do |t|
     t.string   "name",        limit: 45,                  null: false
     t.boolean  "voided",                  default: false, null: false
@@ -433,65 +458,13 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at"
   end
 
-  ############################ Resoving Potential Duplicate tables ##########################################################
-
-  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
-    t.integer  "person_id", limit: 4, null: false
-    t.string   "resolved",      limit: 1,   default: 0,     null: false
-    t.string   "decision",      limit: 255
-    t.string   "comment",      limit: 255
-    t.datetime "resolved_at"
-    t.datetime "created_at"
-  end
-
-  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
-
-  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
-    t.integer  "person_id", limit: 4
-    t.integer   "potential_duplicate_id",      limit: 4
-    t.datetime "created_at"
-  end
-
-  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
-  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
-
-
-  create_table "global_property", primary_key: "property", force: :cascade do |t|
-    t.string   "value", limit: 50,                  null: false
-    t.string   "uuid",  limit: 38,                  null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
-
-  create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
-    t.string  "name", limit: 20
-    t.integer "creator", limit: 11
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
-    t.integer   "audit_trail_type_id", limit: 11, null: false
-    t.string    "table_name", limit: 100, null: false
-    t.integer   "table_row_id", limit: 11, null:false
-    t.string    "field", limit:50
-    t.string    "previous_value", limit: 255
-    t.string    "current_value", limit: 255
-    t.string    "comment", limit: 255
-    t.integer   "location_id", limit: 11, null:false
-    t.integer   "creator", limit: 11
-    t.datetime  "created_at"
-    t.datetime  "updated_at"
-  end
-
-  ##########################################################################################################################
-
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
+  add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
+  add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
+  add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
   add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
   add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
@@ -532,9 +505,4 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"
   add_foreign_key "users", "users", column: "voided_by", primary_key: "user_id", name: "fk_users_2"
-
-  add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
-  add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
-  add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
-
 end
