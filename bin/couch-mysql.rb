@@ -74,6 +74,7 @@ class Methods
       begin
         data = runner.query(query)
       rescue => error
+
         data = query + "       \n\n" + error.to_s
         File.open("#{Dir.pwd}/public/errors/#{person_id}", 'w') { |file| file.write(data) }
       end
@@ -87,61 +88,57 @@ class Methods
     person_id = doc['_id']
 
     self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
-    table = doc['change_agent']
-    return nil if table.blank?
     doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
-    data = doc[table]
+    doc.each do |table, data_list|
+      data_list.each do |data|
+        p_key = data.keys[0]
+        p_value = data[p_key]
+        return nil if p_value.blank?
 
-    p_key = data.keys[0]
-    p_value = data[p_key]
-    return nil if p_value.blank?
+        rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
+        if !rows.blank?
+          row = rows[0]
+          update_query = "UPDATE #{table} SET "
+          data.each do |k, v|
+            next if ['null', 'nil'].include?(v) && row[k].blank?
+            next if k.to_s == p_key.to_s
 
-    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
+            if !v.blank?
+              update_query += " #{k} = \"#{v}\", "
+            else
+              update_query += " #{k} = NULL, "
+            end
+          end
+          update_query = update_query.strip.sub(/\,$/, '')
+          update_query += " WHERE #{p_key} = '#{p_value}' "
 
-    if !rows.blank?
-      row = rows[0]
-      update_query = "UPDATE #{table} SET "
-      data.each do |k, v|
-        next if ['null', 'nil'].include?(v) && row[k].blank?
-        next if k.to_s == p_key.to_s
-
-        if !v.blank?
-          update_query += " #{k} = \"#{v}\", "
+          self.qry(client, update_query, person_id)
         else
-          update_query += " #{k} = NULL, "
+          insert_query = "INSERT INTO #{table} ("
+          keys = []
+          values = []
+
+          data.each do |k, v|
+
+            if !v.blank?
+              v = "\"#{v}\""
+            else
+              v = " NULL "
+            end
+
+            keys << k
+            values << v
+          end
+
+          insert_query += (keys.join(', ') + " ) VALUES (" )
+          insert_query += ( values.join(",")) + ")"
+          self.qry(client, insert_query, person_id)
+          self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
         end
       end
-      update_query = update_query.strip.sub(/\,$/, '')
-      update_query += " WHERE #{p_key} = '#{p_value}' "
-
-      self.qry(client, update_query, person_id)
-    else
-      insert_query = "INSERT INTO #{table} ("
-      keys = []
-      values = []
-
-      data.each do |k, v|
-
-        if !v.blank?
-          v = "\"#{v}\""
-        else
-          v = " NULL "
-        end
-
-        keys << k
-        values << v
-      end
-
-      insert_query += (keys.join(', ') + " ) VALUES (" )
-      insert_query += ( values.join(",")) + ")"
-
-      self.qry(client, insert_query, person_id)
-      self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
-
     end
   end
-
-end
+  end
 
 changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}" do
   # Which database should we connect to?
