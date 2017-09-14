@@ -14,20 +14,21 @@ module EbrsAttribute
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
-
+    
     person_id = hash['person_id']
     person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.find(hash['person_name_id']).person_id rescue nil if person_id.blank? && hash['person_name_id'].present?
     person_id = User.find(hash['user_id']).person_id rescue nil if person_id.blank? && hash['user_id'].present?
     id = person_id.to_s if !person_id.blank?
-
+    
     return nil if id.blank?
 
     h = Pusher.database.get(id) rescue nil
     if h.present?
       h[self.class.table_name] = [] if h[self.class.table_name].blank?
       h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
-      h[self.class.table_name] << hash
+
+      h[self.class.table_name] = hash
     else
 
       district_id = Location.find(SETTINGS['location_id']).parent_location

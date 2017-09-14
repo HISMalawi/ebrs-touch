@@ -47,7 +47,19 @@
 					<tr onmousedown="amendField('Name')">
 						<th>Name</th>
 						<td><%= @name.first_name %> <%= @name.last_name %></td>
-						<td></td>
+						<td>
+						<% if @person_prev_values['first_name'].present? %>
+							<%= @person_prev_values['first_name'] %>
+						<%else%>
+							<%= @name.first_name %> 
+						<%end%>
+						<% if @person_prev_values['last_name'].present? %>
+							<%= @person_prev_values['last_name'] %>
+						<%else%>
+							<%= @name.last_name %>
+						<%end%>
+							
+						</td>
 					</tr>
 					<tr onmousedown="amendField('Date of birth')">
 						<th >Date of birth</th>
