@@ -25,12 +25,9 @@ module EbrsAttribute
 
     h = Pusher.database.get(id) rescue nil
     if h.present?
-      h[self.class.table_name] = {} if h[self.class.table_name].blank?
+      h[self.class.table_name] = [] if h[self.class.table_name].blank?
       h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
-
-      hash.keys.each do |k|
-        h[self.class.table_name][k] = hash[k]
-      end
+      h[self.class.table_name] << hash
     else
 
       district_id = Location.find(SETTINGS['location_id']).parent_location
@@ -40,7 +37,7 @@ module EbrsAttribute
           'type' => 'data',
           'location_id' => SETTINGS['location_id'],
           'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
-          self.class.table_name => hash
+          self.class.table_name => [hash]
       }
       h = Pusher.new(temp_hash)
     end
