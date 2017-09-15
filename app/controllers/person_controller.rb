@@ -1062,17 +1062,24 @@ class PersonController < ApplicationController
 
   def ammend_case
     @person = Person.find(params[:id])
-    
+    @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
 
     @name = @person.person_names.last
     @person_prev_values = {}
-    name_fields = ['first_name','last_name','middle_name',"gender"]
+    name_fields = ['first_name','last_name','middle_name',"gender","birthdate"]
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
         if trail.present?
             @person_prev_values[field] = trail.previous_value
         end
+    end
+
+    if @person_prev_values['first_name'].present? || @person_prev_values['last_name'].present?
+        name = "#{@person_prev_values['first_name'].present? ? @person_prev_values['first_name'] : @name.first_name} "+
+               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')}" +
+               "#{@person_prev_values['last_name'].present? ? @person_prev_values['last_name'] : @name.last_name}"
+        @person_prev_values["person_name"] = name
     end
     @address = @person.addresses.last
 
@@ -1086,6 +1093,13 @@ class PersonController < ApplicationController
         end
     end
 
+    if @mother_prev_values['first_name'].present? || @mother_prev_values['last_name'].present?
+        mother_name = "#{@mother_prev_values['first_name'].present? ? @mother_prev_values['first_name'] : @mother_name.first_name} "+
+               "#{@mother_prev_values['middle_name'].present? ? @mother_prev_values['middle_name'] : (@mother_name.middle_name rescue '')}" +
+               "#{@mother_prev_values['last_name'].present? ? @mother_prev_values['last_name'] : @mother_name.last_name}"
+        @person_prev_values["mother_name"] = mother_name
+    end
+
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
     @father_prev_values = {}
@@ -1096,6 +1110,14 @@ class PersonController < ApplicationController
             @father_prev_values[field] = trail.previous_value
         end
     end
+
+    if @father_prev_values['first_name'].present? || @father_prev_values['last_name'].present?
+        father_name = "#{@father_prev_values['first_name'].present? ? @father_prev_values['first_name'] : @father_name.first_name} "+
+               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')}" +
+               "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
+        @person_prev_values["father_name"] = mother_name
+    end 
+
     @section = 'Ammend Case'
     render :layout => "facility"
   end
@@ -1131,11 +1153,11 @@ class PersonController < ApplicationController
     end
     if fields.include? "Date of birth"
         person = Person.find(params[:id])
-        person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated] rescue 0))
+        person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated]? params[:person][:birthdate_estimated] : 0))
     end
     if fields.include? "Sex"
        person = Person.find(params[:id])
-        person.update_attributes(gende: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated] rescue 0))
+        person.update_attributes(gender: params[:person][:gender])
     end
     if fields.include? "Place of birth"
     end
