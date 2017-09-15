@@ -16,6 +16,8 @@
     <%(@users || []).each_with_index do |record, i|
       names = record.core_person.person_name
       name = "#{names.first_name} #{names.last_name}"
+      next if record.user_role.blank?
+
     %>
       <tr>
         <td style="text-align: left;"><%= (i+1) %></td>

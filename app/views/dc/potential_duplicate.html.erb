@@ -442,14 +442,27 @@
 					 "decision=DUPLICATE&next_path=<%=params[:next_path]%>'";
 		var action = "window.location.href='/add_duplicate_comment/<%=params[:id]%>?"+
 					   "decision=NOT DUPLICATE&next_path=<%=params[:next_path]%>'"
-		showMsgForAction("Decision", action, "600px", "Resolve duplicate", noaction)
+		showMsgForAction("Decision", action, "600px", "Resolve duplicate", "chooseRecord()","Record is not duplicate","Record is duplicate")
 	}
 
 	function viewComment(){
 		showMsgPop("<%=  @potential_records.comment%>", "Comment","600px", null)
 	}
 
-	function showMsgForAction(msg, action, width, title, noAction) {
+  function chooseRecord(){
+    var noaction = "window.location.href='/add_duplicate_comment/<%=params[:id]%>?"+
+           "decision=DUPLICATE&next_path=<%=params[:next_path]%>'";
+    var action = "window.location.href='/add_duplicate_comment/<%=@similar_records[params[:index].to_i][:id]%>?"+
+           "decision=DUPLICATE&next_path=<%=params[:next_path]%>'";
+    var status = "<%=@similar_records[params[:index].to_i][:status] %>"
+    if(status =="DC-ACTIVE"){
+          showMsgForAction("", action, "600px", "Choose record to void", noaction,"Existing","Duplicate")
+    }else{
+        eval(noaction);
+    }
+  }
+
+	function showMsgForAction(msg, action, width, title, noAction,actionTitle, noactionTitle) {
 
         showShield(undefined, true);
 
@@ -546,7 +559,7 @@
 
         var btnApprove = document.createElement("button");
         btnApprove.className = "green";
-        btnApprove.innerHTML = "Record is not a duplicate";
+        btnApprove.innerHTML = (actionTitle? actionTitle : "Action");
         btnApprove.id = "reject"
         btnApprove.style.cursor = "pointer";
         btnApprove.style.fontSize = "14px";
@@ -561,7 +574,7 @@
 
         var btnNo = document.createElement("button");
         btnNo.className = "blue";
-        btnNo.innerHTML = "Record is a duplicate";
+        btnNo.innerHTML = (noactionTitle? noactionTitle : "No action");
         btnNo.id = "approve"
         btnNo.style.cursor = "pointer";
         btnNo.style.fontSize = "14px";

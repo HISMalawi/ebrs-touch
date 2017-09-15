@@ -11,7 +11,9 @@
 
  <% if @folders.include?("Birth Report") %>
 
-			<div class="button child_menu manage_cases " tag=0 title="View Complete Cases">
+			<div class="button child_menu manage_cases "
+                 onmousedown = "window.location = '/reports/report_date_range' "
+                 tag=0 title="View Complete Cases">
 				<table style="text-align: left;">
 					<tr>
 						<td rowspan="2">
@@ -19,7 +21,7 @@
                           <span class="count"></span>
 						</td>
 						<td style="height: 30px;">
-						  Birth Report
+						  Births Report
 						</td>
 					</tr>
 					<tr>

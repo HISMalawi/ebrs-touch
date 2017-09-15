@@ -1,0 +1,18 @@
+ <%= form_tag("/person/do_reprint", method: "get") do %>
+ <input name="id" type="hidden" value="<%= params['person_id'] %>">
+<fieldset>
+	 <legend><font size='5' style='border: 2px;'>Enter Reason for Re-print Request</font></legend>
+	 <div class="field">
+	 		<label for="reason">Enter Reason for Re-print Request: </label>
+	 		<select id="reason" name="reason">
+                <option></option>
+                <option>Lost</option>
+                <option>Damaged</option>
+            </select>
+	 </div>
+</fieldset>
+<% end %>
+<script type="text/javascript">
+	init();
+    cancelDestination = '<%= request.referrer%>'
+</script>

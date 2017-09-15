@@ -1,0 +1,74 @@
+<style type="text/css">
+    #table{
+        font-size: 1em;
+        color: darkslategray;
+    }
+    #table th{
+        border: 1px solid #d3d3d3;
+        background: #d3d3d3;
+        width: 2%;
+        color: #3465a4;
+    }
+    #table td{
+       border: 1px solid #d3d3d3;
+    }
+
+    .cat{
+      font-weight: bold;
+    }
+    .mintable{
+      width: 100%; 
+      border:none;
+      border-collapse: collapse;
+    }
+    .mintable td, .mintable th{
+        width: 33.33333% !important;
+        text-align: right;
+        padding-right: 10%;
+    }
+</style>
+<div id="default" style="width: 100%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:1%;">
+<table id='table' style="width: 100%;" cellpadding="5" cellspacing="0">
+
+  <thead>
+        <tr>
+          <th>Category</th>
+          <th>Sub category</th>
+          <th>Female</th>
+          <th>Male</th>
+          <th>Total</th>
+        </tr>
+  </thead>
+
+  <% @data.each do |cat, data|
+  %>
+      <tr>
+        <td>
+          <%= cat%>
+        </td>
+        <td style="padding:0">
+            <table style="width: 100%; border:none; border-collapse: collapse; ">
+                <% data.each do |k, sub_data|
+                %>
+                    <tr><td><%= k%></td></tr>
+                <% end
+                %>
+            </table>
+        </td>
+        <td colspan="3" style="padding:0">
+            <table class="mintable">
+                <% data.each do |k, sub_data|
+                %>  
+                    <tr>
+                        <td><%= sub_data['Female']%></td>
+                        <td><%= sub_data['Male']%></td>
+                        <td><%= sub_data['Female'].to_i + sub_data['Male'].to_i %></td>
+                      </tr>
+                <% end
+                %>
+            </table>
+        </td>
+      </tr>
+  <% end %>
+</table>
+</div>

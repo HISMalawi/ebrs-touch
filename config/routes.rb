@@ -135,7 +135,10 @@ Rails.application.routes.draw do
   get 'person/lost_and_damaged_cases'
   get 'person/ammendment_cases'
   get 'person/ammend_case'
-  get 'person/do_ammend'
+  get '/person/amend_edit/:id'=> 'person#amend_edit'
+  get '/person/amend_field'
+  get 'person/reprint_case'
+  get 'person/do_reprint'
   get '/search' => 'dc#search'
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'
@@ -146,8 +149,12 @@ Rails.application.routes.draw do
 
   get "/comments/:id" => 'dc#comments'
 
+  get 'reports/births_report'
+  get 'reports/report'
+  get 'reports/report_date_range'
+  get 'reports/filter'
+  get 'reports/rfilter'
   get '/update_person' => 'person#update_person'
-
   post '/update' => "person#update"
 
   resources :person
