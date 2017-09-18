@@ -1052,7 +1052,7 @@ class PersonController < ApplicationController
 
 
   def ammendment_cases
-    @states = ['DC-AMMEND']
+    @states = ['DC-AMEND']
     @section = "Ammendments"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
@@ -1191,8 +1191,17 @@ class PersonController < ApplicationController
     redirect_to "/person/ammend_case?id=#{params[:id]}" 
   end
 
+  def amendiment_comment
+      render :layout => "touch"
+  end
   def reprint_case
     @section = "Re-pring case"
+  end
+
+  def do_amend
+    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}");
+
+    redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
 
   def do_reprint

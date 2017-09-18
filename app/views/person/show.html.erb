@@ -239,11 +239,11 @@
                 style=""
                 onclick="reprint();">Re-print</button>
     </td>
-    <td id="Ammend" style="display:<%= display%>;">
-        <button id="btnAmmend"
+    <td id="Amend" style="display:<%= display%>;">
+        <button id="btnAmend"
                 class="green"
                 style=""
-                onclick="ammend();">Ammend</button>
+                onclick="amend();">Amend</button>
     </td>
 
       <td id="Mark Pendingdddd" style="display:none">
@@ -280,6 +280,13 @@
           <% end %>
 
           submitSummary(link);
+      }
+
+      function amend(){
+          var action = "window.location = '/person/ammend_case?id=<%=params[:id]%>&next_path=<%=params[:next_path]%>'";
+
+          showMsgForAction("Click \"Yes\" to amend record", action, "200px", "Amendment action", null);
+          
       }
 
       function submitSummary(action) {

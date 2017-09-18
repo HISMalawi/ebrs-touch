@@ -16,8 +16,8 @@ DC ,HQ OPEN,DC_ASK,DC-ASK,Deprecated
 DC,POTENTIAL-DUPLICATE,VOIDED,DC-VOIDED,A voided duplicate record at DC
 DC,DC OPEN,POTENTIAL DUPLICATE,DC-POTENTIAL DUPLICATE,A potential duplicate record at DC
 DC,,,DC-PENDING, A record to be reviewed by ADR
+DC,,,DC-AMEND,A record that has been ammended at DC
 DC,,,DC-EXACT DUPLICATE,Exact duplicate record at DC
-DC,,,DC-AMMEND,A record that has been ammended at DC
 HQ,VOIDED,CLOSED,HQ-VOIDED,A voided record at HQ
 HQ,HQ OPEN,GRANTED,HQ-GRANTED,Deprecated
 HQ,HQ OPEN,REJECTED,HQ-REJECTED,Deprecated
@@ -39,5 +39,9 @@ HQ,DUPLICATE,VOIDED,HQ-VOIDED,A voided record at HQ
 HQ,DC OPEN,GRANTED,DC-GRANTED,Deprecated
 HQ,DC OPEN,REJECTED,DC-REJECTED,A record that has finally been rejected at HQ
 HQ,HQ OPEN,POTENTIAL DUPLICATE,HQ-POTENTIAL DUPLICATE,A record that has been marked as a potential duplicate at HQ
-HQ,,,HQ-DUPLICATE,A confirmed as a duplicate by DS
+HQ,,,HQ-DUPLICATE,A confirmed as a duplicate by DM
+HQ,,,HQ-VOIDED DUPLICATE,Record that is duplicate and voided by DS at HQ
 HQ,,,HQ-EXACT DUPLICATE,An exact duplicate at HQ
+HQ,,,HQ-NOT DUPLICATE-TBA,Record confirmed to be not duplicate by DS at HQ
+HQ,,,HQ-NOT DUPLICATE,Record confirmed to be not duplicate by DM at HQ
+HQ,,,DC-VERIFY DUPLICATE,Record sent to DC by DS after being caught as duplicate
