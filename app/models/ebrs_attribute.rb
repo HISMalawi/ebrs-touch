@@ -28,7 +28,7 @@ module EbrsAttribute
       h[self.class.table_name] = [] if h[self.class.table_name].blank?
       h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
 
-      h[self.class.table_name] = hash
+      h[self.class.table_name] << hash
     else
 
       district_id = Location.find(SETTINGS['location_id']).parent_location
