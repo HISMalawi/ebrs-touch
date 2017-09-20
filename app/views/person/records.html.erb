@@ -203,16 +203,13 @@ function initTable(){
                                     '</td>';
 
                             json['data'][i][last_index] +=
-                                    '<td class="action-button"> ' +
+                                    '<td class="Edit_Record action-button"> ' +
                                     '<div onclick="javascript:location=\'/person/' + person_id + '/edit?next_path=<%= request.path%> \'"     ' +
                                     '    class="action-btn btn btn-success btn-xs">' +
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
-                            <%if false%>
-                            json['data'][i][last_index] += '<td class="act-btn"><div class="checkbox">' +
-                                    '<label><input class=\'multi-check\' person_id = "' + person_id +  '" onchange="checkSelections();" type="checkbox" value=""></label> </div></td>';
-                            <% end %>
+                         
                             json['data'][i][last_index] += "</table>"
                         }
                         return JSON.stringify( json );
