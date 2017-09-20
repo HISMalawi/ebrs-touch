@@ -1,4 +1,4 @@
-<% if request.referrer.match("/search")
+<% if (request.referrer.match("/search") rescue false)
     session['list_url'] = '/search'
    else
      session['list_url'] = request.path
@@ -30,7 +30,10 @@
     .action-button div{
         margin: 2px !important;
     }
-
+    #birth_type, #example_filter{
+        margin-left: 15px;
+        float: right;
+    }
 </style>
 <div class='data-table-container'>
 
@@ -41,6 +44,7 @@
         <th style="text-align: left;">BEN</th>
       <% end %>
       <th style="text-align: left;min-width:16%;">Name</th>
+      <th style="text-align: left;min-width:16%;">Birthdate</th>
       <th style="text-align: left;min-width:16%;">Mother's Details</th>
       <th style="text-align: left; min-width:16%;">Father's Details</th>
       <th style="text-align: center; min-width:16%;">Reporting Date</th>
@@ -96,7 +100,15 @@
 </table>
 
 </div>
-
+<select id="birth_type" label="Birth Type" onchange="reloadDataTable(this)" style="width: 200px !important;
+        padding: 5px; margin-left: 60px; float: left;font-size: 20px;border-radius: 5px;"
+        >
+  <option value="All">Select Category</option>
+  <option>Normal</option>
+  <option>Abandoned</option>
+  <option>Adopted</option>
+  <option>Orphaned</option>
+</select>
 <script>
 
 <%
@@ -109,53 +121,97 @@
 <% end %>
 
 var table ;
+
 $(document).ready(function() {
-    table = $('#example').DataTable( {
-           "pageLength": 5,
-           "processing": true,
-        });
-    var filter = __$("example_filter");
-    var search = filter.getElementsByTagName("input")[0];
+    initTable();
+
+    var holder = __$('example_filter');
+    holder.appendChild(__$('birth_type'));
+
+    var search =__$('example_filter').getElementsByTagName("input")[0];
     search.setAttribute("onclick","changeFocusToMe(this)");
     searchData(search)
 
-
 } );
 
-var search_value = ""
+search_value = '';
+var ctrl;
 
-function searchData(element){
-    if (element.value == 0 || search_value == element.value){
-        setTimeout(function(){
+function searchData(element) {
+    if (element.value == 0 || search_value == element.value) {
+        setTimeout(function () {
             searchData(element);
-        },100)
-    }else{
+        }, 100)
+    } else {
         search_value = element.value
-        table.search(search_value).draw() ;
-        setTimeout(function(){
+        table.search(search_value).draw();
+        setTimeout(function () {
             searchData(element);
-        },100)
+        }, 100)
     }
+}
+
+
+var url = "/person/paginated_data";
+
+function initTable(){
+    table =  $('#example').DataTable(
+            {
+                "processing": true,
+                "serverSide": true,
+                'pageLength': 5,
+                "ordering": false,
+                "ajax": {
+                    "url": url,
+                    "data": function(d){
+                        d.type = __$('birth_type').value;
+                        d.statuses = "<%= @states.join(',')%>",
+                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>"
+                    },
+                    dataFilter: function(data){
+                        var json = jQuery.parseJSON( data );
+                        for(var i = 0; i < json['data'].length; i ++){
+                            var last_index = json['data'][i].length - 1;
+                            var person_id = json['data'][i][last_index]
+                            json['data'][i][last_index] =   '<td class="act-btn"> ' +
+                                    '<button onclick="javascript:location=\'/show_person/' + person_id + ' \'"     ' +
+                                    '    class="action-btn btn btn-success btn-xs"><i class="fa fa-eye"></i></button></td>';
+
+                            <% if admin? %>
+                            json['data'][i][last_index] += '<td class="act-btn">' +
+                                    '<button onclick="javascript:location=\'/edit/' + person_id + ' \'"' +
+                                    'class=" hidden action-btn btn btn-primary btn-xs"><i class="fa fa-pencil"></i></button></td>' +
+                                    '<td class="act-btn"><button onclick="javascript:location=\'/void/' + person_id + '\'"' +
+                                    'class="action-btn btn btn-danger btn-xs"><i class="fa fa-trash-o"></i></button></td>'
+                            <% end %>
+
+                            <%if false%>
+                            json['data'][i][last_index] += '<td class="act-btn"><div class="checkbox">' +
+                                    '<label><input class=\'multi-check\' person_id = "' + person_id +  '" onchange="checkSelections();" type="checkbox" value=""></label> </div></td>';
+                            <% end %>
+                        }
+                        return JSON.stringify( json );
+                    }
+                }}
+    );
+}
+
+function reloadDataTable(node){
+    table.ajax.reload();
 }
 
 function changeFocusToMe(control){
 
     if(control) {
-
+        ctrl = control;
         if(__$("cursor_for_" + control.id)){
-
             if(__$("cursor")){
+                    __$("cursor_for_" + control.id).appendChild(__$("cursor"));
 
-                __$("cursor_for_" + control.id).appendChild(__$("cursor"));
-
-            }
-
+                }
         }
-
         showKeyboard(control)
-
-        }
-
     }
+}
 
 </script>
