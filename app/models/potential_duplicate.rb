@@ -6,4 +6,5 @@ class PotentialDuplicate < ActiveRecord::Base
     def create_duplicate(id)
     	DuplicateRecord.create(potential_duplicate_id: self.id, person_id: id , created_at:(Time.now))
     end
+    include EbrsAttribute
 end

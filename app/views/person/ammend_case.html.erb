@@ -46,18 +46,45 @@
 					</tr>
 					<tr onmousedown="amendField('Name')">
 						<th>Name</th>
-						<td><%= @name.first_name %> <%= @name.last_name %></td>
-						<td></td>
+						<% if @person_prev_values["person_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["person_name"] %>	
+							</td>
+							<td><%= @name.first_name %> <%= @name.last_name %></td>
+						<%else%>
+							<td><%= @name.first_name %> <%= @name.last_name %></td>
+							<td></td>
+						<%end%>
+
 					</tr>
 					<tr onmousedown="amendField('Date of birth')">
 						<th >Date of birth</th>
-						<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
-						<td></td>
+						<% if @person_prev_values['birthdate'].present? %>
+							<td style="text-decoration: line-through">
+								<%= @person.birthdate.to_date.strftime('%d/%b/%Y') %>
+								
+							</td>
+							<td><%= @person_prev_values['birthdate']? @person_prev_values['birthdate'].to_date.strftime('%d/%b/%Y') : "" %></td>
+						<%else%>
+							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
+							<td></td>
+						<%end%>
+						
 					</tr>
 					<tr onmousedown="amendField('Sex')">
 						<th >Sex</th>
-						<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
-						<td></td>
+						<% if @person_prev_values['gender'].present? %>
+							<td style="text-decoration: line-through">
+								<%= @person.gender=='M' ? 'Male' : 'Female' %>
+							</td>
+							<td>
+								<%= @person_prev_values['gender'] == 'M' ? 'Male' : @person_prev_values['gender'] == 'F' ? 'Female' : '' %>
+							</td>
+						<%else%>
+							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
+							<td></td>
+						<%end%>
+
 					</tr>
 					<tr onmousedown="amendField('Place of birth')">
 						<th >Place of birth</th>
@@ -66,13 +93,28 @@
 					</tr>
 					<tr onmousedown="amendField('Name of mother')">
 						<th >Name of mother</th>
-						<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
-						<td></td>
+						<% if @person_prev_values["mother_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["mother_name"] %>	
+							</td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
+						<%else%>
+							<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
+							<td></td>
+						<%end%>
 					</tr>
 					<tr onmousedown="amendField('Name of father')">
 						<th >Name of father</th>
-						<td><%= @father_name.first_name rescue 'N/A' %> <%= @father_name.last_name rescue '' %></td>
-						<td></td>
+						<% if @person_prev_values["father_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["father_name"] %>	
+							</td>
+							<td><%= @father_name.first_name rescue 'N/A'%> 
+								<%= @father_name.last_name  rescue ''%></td>
+						<%else%>
+							<td><%= @father_name.first_name rescue 'N/A' %> <%= @father_name.last_name rescue '' %></td>
+							<td></td>
+						<%end%>
 					</tr>
 					<tr onmousedown="amendField('Date of registration')">
 						<th>Date of registration</th>
@@ -82,14 +124,22 @@
 
 			</tbody>
 </table>
+<button id="btnNext"
+        class='blue'
+        style="position: absolute; right: 160px; bottom: 20px;"
+        onclick="proceedReprint()">Proceed to Reprint</button>
+
 <script type="text/javascript">
 	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
 	function amendField(field){
 		if(can_not_amend.indexOf(field) < 0){
 				window.location = "/person/amend_edit/<%=params[:id]%>?fields[]="+field
 		}else{
-				alert("Can not amend "+field);
+				showMsg("Can not amend "+field)
 		}
 
+	}
+	function proceedReprint(){
+		window.location ="/person/amendiment_comment?id=<%=params[:id]%>&next_path=<%=params[:next_path]%>"
 	}
 </script>

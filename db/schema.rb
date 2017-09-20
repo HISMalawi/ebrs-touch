@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
     t.integer  "audit_trail_type_id", limit: 4,   null: false
+    t.integer  "person_id",           limit: 4,   null: false
     t.string   "table_name",          limit: 100, null: false
     t.integer  "table_row_id",        limit: 4,   null: false
     t.string   "field",               limit: 50
@@ -37,6 +38,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "audit_trails", ["audit_trail_type_id"], name: "fk_audit_trails_1", using: :btree
   add_index "audit_trails", ["creator"], name: "fk_audit_trails_3", using: :btree
   add_index "audit_trails", ["location_id"], name: "fk_audit_trails_2", using: :btree
+  add_index "audit_trails", ["person_id"], name: "fk_audit_trails_4", using: :btree
 
   create_table "birth_registration_type", primary_key: "birth_registration_type_id", force: :cascade do |t|
     t.string   "name",        limit: 45,                  null: false
@@ -448,6 +450,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
+  add_foreign_key "audit_trails", "core_person", column: "person_id", primary_key: "person_id", name: "fk_audit_trails_4"
   add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
   add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"

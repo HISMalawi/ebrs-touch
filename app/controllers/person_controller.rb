@@ -1052,7 +1052,7 @@ class PersonController < ApplicationController
 
 
   def ammendment_cases
-    @states = ['DC-AMMEND']
+    @states = ['DC-AMEND']
     @section = "Ammendments"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
@@ -1062,16 +1062,61 @@ class PersonController < ApplicationController
 
   def ammend_case
     @person = Person.find(params[:id])
-    
+    @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+
     @name = @person.person_names.last
+    @person_prev_values = {}
+    name_fields = ['first_name','last_name','middle_name',"gender","birthdate"]
+    name_fields.each do |field|
+        trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
+        if trail.present?
+            @person_prev_values[field] = trail.previous_value
+        end
+    end
+
+    if @person_prev_values['first_name'].present? || @person_prev_values['last_name'].present?
+        name = "#{@person_prev_values['first_name'].present? ? @person_prev_values['first_name'] : @name.first_name} "+
+               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')}" +
+               "#{@person_prev_values['last_name'].present? ? @person_prev_values['last_name'] : @name.last_name}"
+        @person_prev_values["person_name"] = name
+    end
     @address = @person.addresses.last
 
     @mother_person = @person.mother
     @mother_name = @mother_person.person_names.last rescue nil
+    @mother_prev_values = {}
+    name_fields.each do |field|
+        trail = AuditTrail.where(person_id: @mother_person.id, field: field).order('created_at').last
+        if trail.present?
+            @mother_prev_values[field] = trail.previous_value
+        end
+    end
+
+    if @mother_prev_values['first_name'].present? || @mother_prev_values['last_name'].present?
+        mother_name = "#{@mother_prev_values['first_name'].present? ? @mother_prev_values['first_name'] : @mother_name.first_name} "+
+               "#{@mother_prev_values['middle_name'].present? ? @mother_prev_values['middle_name'] : (@mother_name.middle_name rescue '')}" +
+               "#{@mother_prev_values['last_name'].present? ? @mother_prev_values['last_name'] : @mother_name.last_name}"
+        @person_prev_values["mother_name"] = mother_name
+    end
 
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
+    @father_prev_values = {}
+    name_fields.each do |field|
+        break if @father_person.blank?
+        trail = AuditTrail.where(person_id: @father_person.id, field: field).order('created_at').last
+        if trail.present?
+            @father_prev_values[field] = trail.previous_value
+        end
+    end
+
+    if @father_prev_values['first_name'].present? || @father_prev_values['last_name'].present?
+        father_name = "#{@father_prev_values['first_name'].present? ? @father_prev_values['first_name'] : @father_name.first_name} "+
+               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')}" +
+               "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
+        @person_prev_values["father_name"] = mother_name
+    end 
 
     @section = 'Ammend Case'
     render :layout => "facility"
@@ -1096,24 +1141,67 @@ class PersonController < ApplicationController
     fields = params[:fields].split(",")
     
     if fields.include? "Name"
+      person_name = PersonName.find_by_person_id(params[:id])
+      person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+      person_name = PersonName.create(person_id: params[:id],
+            first_name: params[:person][:first_name],
+            last_name: params[:person][:last_name])
+
+      PersonNameCode.create(person_name_id: person_name.person_name_id,
+            first_name_code: params[:person][:first_name].soundex,
+            last_name_code: params[:person][:last_name].soundex )
     end
     if fields.include? "Date of birth"
+        person = Person.find(params[:id])
+        person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated]? params[:person][:birthdate_estimated] : 0))
     end
     if fields.include? "Sex"
+       person = Person.find(params[:id])
+        person.update_attributes(gender: params[:person][:gender])
     end
     if fields.include? "Place of birth"
     end
     if fields.include? "Name of mother"
-      
+        person = Person.find(params[:id])
+        person_mother_name = person.mother.person_names.first
+        person_mother_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+        person_mother_name = PersonName.create(person_id: person.mother.id,
+            first_name: params[:person][:mother][:first_name],
+            last_name: params[:person][:mother][:last_name])
+
+        PersonNameCode.create(person_name_id: person_mother_name.person_name_id,
+            first_name_code: params[:person][:mother][:first_name].soundex,
+            last_name_code: params[:person][:mother][:last_name].soundex )
     end
     if fields.include? "Name of father"
-      
+        person = Person.find(params[:id])
+        person_father_name = person.father.person_names.first
+
+        if person_father_name.present?
+          person_father_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+        end
+        person_father_name = PersonName.create(person_id: person.mother.id,
+              first_name: params[:person][:father][:first_name],
+              last_name: params[:person][:father][:last_name])
+
+        PersonNameCode.create(person_name_id: person_father_name.person_name_id,
+              first_name_code: params[:person][:father][:first_name].soundex,
+              last_name_code: params[:person][:father][:last_name].soundex )
     end
-    raise params.inspect   
+    redirect_to "/person/ammend_case?id=#{params[:id]}" 
   end
 
+  def amendiment_comment
+      render :layout => "touch"
+  end
   def reprint_case
     @section = "Re-pring case"
+  end
+
+  def do_amend
+    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}");
+
+    redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
 
   def do_reprint
