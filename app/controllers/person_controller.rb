@@ -738,7 +738,7 @@ class PersonController < ApplicationController
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
    
     render :template => "person/records", :layout => "data_table"
   end
@@ -1225,4 +1225,74 @@ class PersonController < ApplicationController
   end
   #########################################################################
 
+  def paginated_data
+    params[:statuses] = [] if params[:statuses].blank?
+    states = params[:statuses].split(',')
+    types = []
+
+    search_val = params[:search][:value] rescue nil
+    search_val = '_' if search_val.blank?
+    if !params[:start].blank?
+
+      state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
+
+      if if params[:type] == 'All'
+        types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
+      else
+        types=[params[:type]]
+      end
+
+      person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
+
+      d = Person.order(" n.first_name, n.last_name, cp.created_at ")
+      .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
+              INNER JOIN person_name n ON person.person_id = n.person_id
+              INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
+              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
+      .where(" prs.status_id IN (#{state_ids.join(', ')})
+              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
+              AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
+                person.birthdate, person.gender) REGEXP '#{search_val}' ")
+
+      total = d.select(" count(*) c ")[0]['c'] rescue 0
+      page = (params[:start].to_i / params[:length].to_i) + 1
+
+      data = d.group(" prs.person_id ")
+
+      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_registered ")
+      data = data.page(page)
+      .per_page(params[:length].to_i)
+
+      @records = []
+      data.each do |p|
+        mother = PersonService.mother(p.person_id)
+        father = PersonService.father(p.person_id)
+        details = PersonBirthDetail.find_by_person_id(p.person_id)
+
+        name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
+        mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+        father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+        row = []
+        row = [p.ben] if params[:assign_ben] == 'true'
+        row = row + [
+            "#{name} (#{p.gender})",
+            p.birthdate.strftime('%d/%b/%Y'),
+            father_name,
+            mother_name,
+            p.date_registered.strftime('%d/%b/%Y'),
+            Status.find(p.status_id).name,
+            p.person_id
+        ]
+        @records << row
+      end
+
+      render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => total,
+          "recordsFiltered" => total,
+          "data" => @records}.to_json and return
+    end
+
+  end
+end
 end

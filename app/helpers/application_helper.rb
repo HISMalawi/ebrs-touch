@@ -20,4 +20,8 @@ module ApplicationHelper
     return Location.find(SETTINGS['district_id']).name rescue nil    
   end
 
+  def admin?
+    ((User.current.user_role.role.role.strip.downcase.match(/Administrator/i) rescue false) ? true : false)
+  end
+
 end
