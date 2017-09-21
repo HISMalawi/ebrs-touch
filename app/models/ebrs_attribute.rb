@@ -44,6 +44,7 @@ module EbrsAttribute
     end
 
     h['change_agent'] = self.class.table_name
+    h['ip_addresses'] = Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.map(&:ip_address)
     h.save
   end
 
@@ -100,6 +101,7 @@ module EbrsAttribute
 
 
   def create_audit_trail
+    return false
     if !["audit_trails","person_name_code"].include? self.class.table_name 
       if self.prev.present?
           fields = self.attributes.keys
