@@ -50,7 +50,6 @@ class Methods
     begin
       data = runner.query(query)
     rescue
-      sleep(2)
       #reconnect to mysql
       couch_mysql_path = Dir.pwd + "/config/database.yml"
       db_settings = YAML.load_file(couch_mysql_path)
@@ -86,11 +85,34 @@ class Methods
   def self.update_doc(doc)
     client = $client
     person_id = doc['_id']
+    change_agent = doc['change_agent']
+    return nil if doc['change_location_id'].present? && (doc['change_location_id'].to_s == SETTINGS['location_id'])
 
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
+    temp = {}
+    if !doc['ip_addresses'].blank? && !doc['district_id'].blank?
+      data = YAML.load_file("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml") rescue {}
+      if data.blank?
+        data = {}
+      end
+      temp = data
+      if temp[doc['district_id'].to_i].blank?
+        temp[doc['district_id'].to_i] = {}
+      end
+      temp[doc['district_id'].to_i]['ip_addresses'] = doc['ip_addresses']
+
+      File.open("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml","w") do |file|
+        YAML.dump(data, file)
+        file.close
+      end
+    end
+
+    #self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
+
     doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
+
     doc.each do |table, data_list|
-      data_list.each do |data|
+      next if table != change_agent
+      [data_list.last].each do |data|
         p_key = data.keys[0]
         p_value = data[p_key]
         return nil if p_value.blank?
@@ -133,12 +155,11 @@ class Methods
           insert_query += (keys.join(', ') + " ) VALUES (" )
           insert_query += ( values.join(",")) + ")"
           self.qry(client, insert_query, person_id)
-          self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
         end
       end
     end
   end
-  end
+end
 
 changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}" do
   # Which database should we connect to?

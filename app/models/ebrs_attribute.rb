@@ -46,6 +46,7 @@ module EbrsAttribute
     adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip| "#{ip.ip_address}:#{port}"}
 
     h['change_agent'] = self.class.table_name
+    h['change_location_id'] = SETTINGS['location_id']
     h['ip_addresses'] = adrs
     h.save
   end
