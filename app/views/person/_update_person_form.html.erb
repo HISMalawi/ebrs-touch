@@ -104,7 +104,7 @@
 
     </fieldset>
 
-    <% elsif ["birth_details_hospital_of_birth","child_hospital_of_birth","child_birth_address","child_birth_district","child_birth_ta","child_birth_village","child_other_birth_place_details"].include? @field  %>
+    <% elsif ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
@@ -172,7 +172,7 @@
 
     </fieldset>
 
-    <% elsif ["child_birth_weight","child_type_of_birth","child_other_type_of_birth","child_parents_married_to_each_other","child_date_of_marriage" ].include? @field  %>
+    <% elsif ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type","birth_details_court_order_attached","birth_details_parents_signed" ].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
@@ -267,7 +267,7 @@
     </fieldset>
 
     <!-- Mother -->
-  <% elsif ["child_mother_last_name","child_mother_first_name", "child_mother_middle_name", "child_mother_id_number" ].include? @field  %>
+  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number" ].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
@@ -328,7 +328,7 @@
 
     </fieldset>
 
-  <% elsif ["child_mother_birthdate","child_mother_citizenship"].include? @field  %>
+  <% elsif ["mother_birth_date","mother_citizenship"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
@@ -366,7 +366,7 @@
 
     </fieldset>
 
-  <% elsif ["child_mother_current_district","child_mother_current_ta", "child_mother_current_village"].include? @field  %>
+  <% elsif ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village"].include? @field  %>
     
     <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'">
       <legend><font size='5' style='border: 2px;'>Details of Mother continued: Physical residential address</font></legend>
