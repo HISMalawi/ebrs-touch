@@ -1,3 +1,3 @@
-CouchSQL.perform_in(3)
+CouchSQL.perform_in(2)
 
 

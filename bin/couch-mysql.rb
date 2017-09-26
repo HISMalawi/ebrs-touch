@@ -1,8 +1,5 @@
-
-require 'couch_tap'
+require 'rest-client'
 require "yaml"
-require 'mysql2'
-require 'rails'
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -13,7 +10,7 @@ $settings = settings
 $app_mode = settings['application_mode']
 $app_mode = 'HQ' if $app_mode.blank?
 
-couch_db_settings = db_settings[Rails.env]
+couch_db_settings = db_settings['production']
 
 couch_protocol = couch_db_settings["protocol"]
 couch_username = couch_db_settings["username"]
@@ -25,7 +22,7 @@ couch_port = couch_db_settings["port"]
 
 couch_mysql_path = Dir.pwd + "/config/database.yml"
 db_settings = YAML.load_file(couch_mysql_path)
-mysql_db_settings = db_settings[Rails.env]
+mysql_db_settings = db_settings['production']
 
 mysql_username = mysql_db_settings["username"]
 mysql_password = mysql_db_settings["password"]
@@ -35,136 +32,93 @@ mysql_port = mysql_db_settings["port"] || '3306'
 mysql_adapter = mysql_db_settings["adapter"]
 #reading db_mapping
 
-$client = Mysql2::Client.new(:host => mysql_host,
-                             :username => mysql_username,
-                             :password => mysql_password,
-                             :database => mysql_db,
-                             :read_timeout => 60,
-                             :write_timeout => 60,
-                             :connect_timeout => 60,
-                             :reconnect => true
-)
 
 class Methods
-  def self.qry(runner, query, person_id=nil)
-
-    begin
-      data = runner.query(query)
-    rescue
-      #reconnect to mysql
-      couch_mysql_path = Dir.pwd + "/config/database.yml"
-      db_settings = YAML.load_file(couch_mysql_path)
-      db_settings = YAML.load_file(couch_mysql_path)
-      mysql_db_settings = db_settings[Rails.env]
-      mysql_username = mysql_db_settings["username"]
-      mysql_password = mysql_db_settings["password"]
-      mysql_host = mysql_db_settings["host"] || '0.0.0.0'
-      mysql_db = mysql_db_settings["database"]
-
-      runner = Mysql2::Client.new(:host => mysql_host,
-                                  :username => mysql_username,
-                                  :password => mysql_password,
-                                  :database => mysql_db,
-                                  :read_timeout => 60,
-                                  :write_timeout => 60,
-                                  :connect_timeout => 60,
-                                  :reconnect => true
-      )
-
-      begin
-        data = runner.query(query)
-      rescue => error
-
-        data = query + "       \n\n" + error.to_s
-        File.open("#{Dir.pwd}/public/errors/#{person_id}", 'w') { |file| file.write(data) }
-      end
-    end
-
-    data
-  end
-
-  def self.update_doc(doc)
-    client = $client
+  def self.update_doc(doc, seq)
     person_id = doc['_id']
     change_agent = doc['change_agent']
-    return nil if doc['change_location_id'].present? && (doc['change_location_id'].to_s == $settings['location_id'].to_s)
 
-    temp = {}
-    if !doc['ip_addresses'].blank? && !doc['district_id'].blank?
-      data = YAML.load_file("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml") rescue {}
-      if data.blank?
-        data = {}
-      end
-      temp = data
-      if temp[doc['district_id'].to_i].blank?
-        temp[doc['district_id'].to_i] = {}
-      end
-      temp[doc['district_id'].to_i]['ip_addresses'] = doc['ip_addresses']
+    if doc['change_location_id'].present? && (doc['change_location_id'].to_s != $settings['location_id'].to_s)
+      temp = {}
+      if !doc['ip_addresses'].blank? && !doc['district_id'].blank?
+        data = YAML.load_file("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml") rescue {}
+        if data.blank?
+          data = {}
+        end
+        temp = data
+        if temp[doc['district_id'].to_i].blank?
+          temp[doc['district_id'].to_i] = {}
+        end
+        temp[doc['district_id'].to_i]['ip_addresses'] = doc['ip_addresses']
 
-      File.open("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml","w") do |file|
-        YAML.dump(data, file)
-        file.close
-      end
-    end
-
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
-
-    data = doc[change_agent]
-    table = change_agent
-
-    p_key = data.keys[0]
-    p_value = data[p_key]
-    return nil if p_value.blank?
-
-    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
-    if !rows.blank?
-      row = rows[0]
-      update_query = "UPDATE #{table} SET "
-      data.each do |k, v|
-        next if ['null', 'nil'].include?(v) && row[k].blank?
-        next if k.to_s == p_key.to_s
-
-        if !v.blank?
-          update_query += " #{k} = \"#{v}\", "
-        else
-          update_query += " #{k} = NULL, "
+        File.open("#{Dir.pwd}/public/sites/#{doc['district_id']}.yml","w") do |file|
+          YAML.dump(data, file)
+          file.close
         end
       end
+
+      data = doc[change_agent]
+      table = change_agent
+
+      p_key = data.keys[0]
+      p_value = data[p_key]
+      return nil if p_value.blank?
+
+      update_query = " UPDATE "
+      data.each do |k, v|
+        next if ['null', 'nil'].include?(v)
+        next if k.to_s == p_key.to_s
+        (!v.blank?) ? (update_query += " #{k} = \"#{v}\", ") :  (update_query += " #{k} = NULL, ")
+      end
       update_query = update_query.strip.sub(/\,$/, '')
-      update_query += " WHERE #{p_key} = '#{p_value}' "
-      self.qry(client, update_query, person_id)
-    else
+
       insert_query = "INSERT INTO #{table} ("
       keys = []
       values = []
 
       data.each do |k, v|
-
-        if !v.blank?
-          v = "\"#{v}\""
-        else
-          v = " NULL "
-        end
-
+        v = (!v.blank?) ? "\"#{v}\"" : " NULL "
         keys << k
         values << v
       end
 
       insert_query += (keys.join(', ') + " ) VALUES (" )
       insert_query += ( values.join(",")) + ")"
-      self.qry(client, insert_query, person_id)
+      query = "#{insert_query} ON DUPLICATE KEY #{update_query};"
+
+      open("#{Dir.pwd}/public/query.sql", 'a') do |f|
+        f << "#{query}"
+      end
     end
-
-    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
-
   end
 end
 
-changes "http://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}" do
-  # Which database should we connect to?
-  database "#{mysql_adapter}://#{mysql_username}:#{mysql_password}@#{mysql_host}:#{mysql_port}/#{mysql_db}"
-  document 'type' => 'data' do |doc|
-    Methods.update_doc(doc.document)
-  end
+seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couch_sequence LIMIT 1'`.split("\n").last rescue nil
+changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=10000&since=#{seq}"
+data = JSON.parse(RestClient.get(changes_link)) rescue {}
+
+seq = 0 if seq.blank?
+open("#{Dir.pwd}/public/query.sql","w") do |file|
+  file.write('')
 end
+
+data['results'].each do |result|
+  seq = result['seq']
+  Methods.update_doc(result['doc'], seq)
+end
+
+
+%x[
+   mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=0"
+]
+%x[
+  mysql -u #{mysql_username} -p#{mysql_password} #{mysql_db} < #{Dir.pwd}/public/query.sql
+]
+%x[
+  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=1"
+]
+
+%x[
+  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couch_sequence SET seq=#{seq}"
+]
 
