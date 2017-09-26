@@ -435,7 +435,28 @@ class PersonController < ApplicationController
   end
 
   def update
-    raise params.inspect  
+    if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
+      person_name = PersonName.find_by_person_id(params[:id])
+      person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+      person_name = PersonName.create(person_id: params[:id],
+            first_name: params[:person][:first_name],
+            last_name: params[:person][:last_name])
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+    end
+    if ["child_birthdate","child_gender"].include?(params[:field])
+      person = Person.find(params[:id])
+      if params[:person][:gender][0] != person.gender
+        person.gender = params[:person][:gender][0]
+        person.save
+      end
+
+      if params[:person][:birthdate].to_date.to_s != person.birthdate.to_date.to_s
+        person.birthdate = params[:person][:birthdate].to_date.to_s
+        person.save
+      end
+       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+    end
+    
   end   
 
   def person_for_elastic_search(params)
@@ -871,7 +892,7 @@ class PersonController < ApplicationController
             {
                 ["Birth weight (kg)","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_weight"] => "#{@birth_details.birth_weight rescue nil}",
                 ["Type of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_type"] => "#{@birth_details.birth_type.name rescue nil}",
-                ["Other birth specified","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details"] => "#{@birth_details.other_type_of_birth rescue nil}"
+                ["Other birth specified","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_birth_type"] => "#{@birth_details.other_type_of_birth rescue nil}"
             },
             {
                 ["Are the parents married to each other?" ,"/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_parents_married_to_each_other"] => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
@@ -1146,10 +1167,6 @@ class PersonController < ApplicationController
       person_name = PersonName.create(person_id: params[:id],
             first_name: params[:person][:first_name],
             last_name: params[:person][:last_name])
-
-      PersonNameCode.create(person_name_id: person_name.person_name_id,
-            first_name_code: params[:person][:first_name].soundex,
-            last_name_code: params[:person][:last_name].soundex )
     end
     if fields.include? "Date of birth"
         person = Person.find(params[:id])
