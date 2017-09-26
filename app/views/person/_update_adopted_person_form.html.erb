@@ -29,6 +29,15 @@
         min-width: 100%;
     }*/
 </style>
+<script type="text/javascript">
+    var facility_type = "<%= SETTINGS['application_mode']%>"
+    String.prototype.capitalize = function(lower) {
+        return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    };
+    String.prototype.capitalizeAll = function(){
+      return this.toUpperCase();
+    };
+</script>
 
 <%= form_for :child, url: {action: "update_child", params: {id: @child.id, field: @field}} do |f| %>
     <% unless params[:next_path].blank? %>

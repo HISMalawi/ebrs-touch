@@ -27,6 +27,15 @@
         min-width: 100%;
     }*/
 </style>
+<script type="text/javascript">
+    var facility_type = "<%= SETTINGS['application_mode']%>"
+    String.prototype.capitalize = function(lower) {
+        return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    };
+    String.prototype.capitalizeAll = function(){
+      return this.toUpperCase();
+    };
+</script>
 
 <%= form_for :person, :url => {:controller => "person", :action => "update", params: {id: @person.id, field: @field}} do |f| %>
 
@@ -111,7 +120,7 @@
 
       <div class="field">
         <label for="place_of_birth">Place of birth</label><br>
-        <select id="place_of_birth" name="place_of_birth" class="input_cell" >
+        <select id="place_of_birth" name="person[place_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person.place_of_birth rescue nil) == "Home" ? "selected" : "") %> >Home</option>
           <option <%= ((@person.place_of_birth rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
@@ -120,9 +129,10 @@
       </div>
 
       <div class="field">
-        <label for="birth_district">Birth District</label><br>
+        <label for="person_birth_district">Birth District</label><br>
 
-        <input id="birth_district"
+        <input id="person_birth_district"
+               name="person[birth_district]"
         			 type="text"
         			 condition="<%= @person.place_of_birth != 'Hospital' %>"
         			 ajaxURL = "/search_by_district"
@@ -131,10 +141,11 @@
       </div>
       
       <div class="field">
-        <label for="hospital_of_birth">Name of Hospital</label>
+        <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
         <input type="text" 
-               id="hospital_of_birth"
+               id="person_hospital_of_birth"
+               name="person[hospital_of_birth]"
                class ="input_cell"
                condition ="<%= @person.place_of_birth == 'Hospital' %>"
                ajaxURL = "/search_by_hospital" >
@@ -144,7 +155,7 @@
         <label for="person_birth_ta">T/A</label>
         <br>
         <input type="text" 
-               name="birth_ta]" 
+               name="person[birth_ta]" 
                id="person_birth_ta"
                class = "input_cell"
                condition="<%= @person.place_of_birth == 'Home' %>"
@@ -164,7 +175,7 @@
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
         <input type="text" 
-               name="other_birth_place_details" 
+               name="person[other_birth_place_details]" 
                class ="input_cell" 
                condition="<%= @person.place_of_birth == 'Other' %>"
                id="person_other_birth_place_details">

@@ -408,7 +408,9 @@ class PersonController < ApplicationController
   def update_person
 
     @person = Person.find(params[:id])
-    
+
+    @core_person = CorePerson.find(params[:id])
+
     @person_details = PersonBirthDetail.find_by_person_id(params[:id])
     
     @person_name = PersonName.find_by_person_id(params[:id])
@@ -416,6 +418,41 @@ class PersonController < ApplicationController
     @person_mother_name = @person.mother.person_names.first rescue nil
 
     @person_father_name = @person.father.person_names.first rescue nil
+
+    #New Variables
+
+    @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
+    @name = @person.person_names.last
+    @address = @person.addresses.last
+
+    @mother_person = @person.mother
+    @mother_address = @mother_person.addresses.last rescue nil
+    @mother_name = @mother_person.person_names.last rescue nil
+
+    @father_person = @person.father
+    @father_address = @father_person.addresses.last rescue nil
+    @father_name = @father_person.person_names.last rescue nil
+
+    @informant_person = @person.informant rescue nil
+    @informant_address = @informant_person.addresses.last rescue nil
+    @informant_name = @informant_person.person_names.last rescue nil
+
+    @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
+    days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
+    @delayed =  days_gone > 42 ? "Yes" : "No"
+    location = Location.find(SETTINGS['location_id'])
+    facility_code = location.code
+    birth_loc = Location.find(@birth_details.birth_location_id)
+
+    birth_location = birth_loc.name rescue nil
+
+    @place_of_birth = birth_loc.name rescue nil
+
+    if birth_location == 'Other' && @birth_details.other_birth_location.present?
+      @birth_details.other_birth_location
+    end
+
+    @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
 
     #raise PersonBirthDetail.find_by_person_id(params[:id]).birth_place.inspect
 
@@ -456,7 +493,49 @@ class PersonController < ApplicationController
       end
        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
     end
-    
+    if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
+      if params[:person][:place_of_birth] == 'Home'
+        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+        ta_id = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
+        village_id = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
+        location_id = [village_id, ta_id, district_id].compact.first #Notice the order
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.save
+
+      elsif params[:person][:place_of_birth] == 'Hospital'
+        map =  {'Mzuzu City' => 'Mzimba',
+                'Lilongwe City' => 'Lilongwe',
+                'Zomba City' => 'Zomba',
+                'Blantyre City' => 'Blantyre'}
+
+        person[:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+
+        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+        location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', district_id)
+
+        location_id = [location_id, district_id].compact.first
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.save
+
+      else #Other
+        location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
+        other_place_of_birth = params[:person][:other_birth_place_details]
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.other_birth_location = other_birth_location
+        birth_details.save
+      end
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      #raise params.inspect
+    end
+    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include?(params[:field])
+      raise params.inspect
+    end
   end   
 
   def person_for_elastic_search(params)
