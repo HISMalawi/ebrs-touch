@@ -83,9 +83,9 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
   end
-  
+
   change_column :identifier_allocation_queue, :identifier_allocation_queue_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
- 
+
   add_index "identifier_allocation_queue", ["person_id"], name: "fk_identifier_allocation_queue_1_idx", using: :btree
   add_index "identifier_allocation_queue", ["person_identifier_type_id"], name: "fk_identifier_allocation_queue_2", using: :btree
 
@@ -168,7 +168,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                                null: false
     t.datetime "updated_at",                                null: false
   end
-  
+
   change_column  :person, :person_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   create_table "person_addresses", primary_key: "person_addresses_id", force: :cascade do |t|
@@ -192,7 +192,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
   end
-  
+
   change_column  :person_addresses, :person_addresses_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_addresses", ["citizenship"], name: "fk_person_addresses_8_idx", using: :btree
@@ -224,7 +224,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                                       null: false
     t.datetime "updated_at",                                       null: false
   end
-  
+
   change_column  :person_attributes, :person_attribute_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_attributes", ["person_attribute_type_id"], name: "fk_person_attributes_2_idx", using: :btree
@@ -294,7 +294,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                                                      null: false
     t.datetime "updated_at",                                                      null: false
   end
-  
+
   change_column  :person_birth_details, :person_birth_details_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_birth_details", ["birth_location_id"], name: "fk_person_birth_details_3_idx", using: :btree
@@ -330,6 +330,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "person_name", ["voided_by"], name: "fk_person_name_2_idx", using: :btree
 
   create_table "person_name_code", primary_key: "person_name_code_id", force: :cascade do |t|
+    t.bigint  "person_name_code_id",   limit: 4,  null: false
     t.bigint  "person_name_id",   limit: 4,  null: false
     t.string   "first_name_code",  limit: 10, null: false
     t.string   "middle_name_code", limit: 10
@@ -366,7 +367,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                            null: false
     t.datetime "updated_at",                            null: false
   end
-  
+
   change_column  :person_relationship, :person_relationship_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_relationship", ["person_a"], name: "fk_person_relationship_1_idx", using: :btree
@@ -380,7 +381,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
   end
-  
+
   create_table "person_type", primary_key: "person_type_id", force: :cascade do |t|
     t.string "name",        limit: 45, null: false
     t.string "description", limit: 45
