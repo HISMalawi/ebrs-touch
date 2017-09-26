@@ -10,25 +10,17 @@ end
 module EbrsAttribute
 
   def send_data(hash)
-
+    id = "#{self.class.table_name}_#{self.id}"
+    hash = hash.as_json
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
-    
-    person_id = hash['person_id']
-    person_id = hash['person_a'] if person_id.blank?
-    person_id = PersonName.find(hash['person_name_id']).person_id rescue nil if person_id.blank? && hash['person_name_id'].present?
-    person_id = User.find(hash['user_id']).person_id rescue nil if person_id.blank? && hash['user_id'].present?
-    id = person_id.to_s if !person_id.blank?
-    
-    return nil if id.blank?
 
     h = Pusher.database.get(id) rescue nil
     if h.present?
-      h[self.class.table_name] = [] if h[self.class.table_name].blank?
       h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
 
-      h[self.class.table_name] << hash
+      h[self.class.table_name] = hash
     else
 
       district_id = Location.find(SETTINGS['location_id']).parent_location
@@ -38,7 +30,7 @@ module EbrsAttribute
           'type' => 'data',
           'location_id' => SETTINGS['location_id'],
           'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
-          self.class.table_name => [hash]
+          self.class.table_name => hash
       }
       h = Pusher.new(temp_hash)
     end
@@ -46,6 +38,7 @@ module EbrsAttribute
     adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip| "#{ip.ip_address}:#{port}"}
 
     h['change_agent'] = self.class.table_name
+    h['change_location_id'] = SETTINGS['location_id']
     h['ip_addresses'] = adrs
     h.save
   end
@@ -95,12 +88,8 @@ module EbrsAttribute
   end
 
   def create_or_update_in_couch
-    data = self
-    transformed_data = data.as_json
-    send_data(transformed_data)
+    send_data(self)
   end
-
-
 
   def create_audit_trail
 
