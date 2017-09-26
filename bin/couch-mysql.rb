@@ -9,6 +9,7 @@ db_settings = YAML.load_file(couch_mysql_path)
 
 settings_path = Dir.pwd + "/config/settings.yml"
 settings = YAML.load_file(settings_path)
+$settings = settings
 $app_mode = settings['application_mode']
 $app_mode = 'HQ' if $app_mode.blank?
 
@@ -86,7 +87,7 @@ class Methods
     client = $client
     person_id = doc['_id']
     change_agent = doc['change_agent']
-    return nil if doc['change_location_id'].present? && (doc['change_location_id'].to_s == SETTINGS['location_id'])
+    return nil if doc['change_location_id'].present? && (doc['change_location_id'].to_s == $settings['location_id'].to_s)
 
     temp = {}
     if !doc['ip_addresses'].blank? && !doc['district_id'].blank?
@@ -106,58 +107,56 @@ class Methods
       end
     end
 
-    #self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 0", person_id)
 
-    doc = doc.reject{|k, v| ['_id', '_rev', 'type', 'change_agent', 'location_id', 'district_id'].include?(k)}
+    data = doc[change_agent]
+    table = change_agent
 
-    doc.each do |table, data_list|
-      next if table != change_agent
-      [data_list.last].each do |data|
-        p_key = data.keys[0]
-        p_value = data[p_key]
-        return nil if p_value.blank?
+    p_key = data.keys[0]
+    p_value = data[p_key]
+    return nil if p_value.blank?
 
-        rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
-        if !rows.blank?
-          row = rows[0]
-          update_query = "UPDATE #{table} SET "
-          data.each do |k, v|
-            next if ['null', 'nil'].include?(v) && row[k].blank?
-            next if k.to_s == p_key.to_s
+    rows = self.qry(client, "SELECT * FROM #{table} WHERE #{p_key} = '#{p_value}' LIMIT 1").each(:as => :hash) rescue []
+    if !rows.blank?
+      row = rows[0]
+      update_query = "UPDATE #{table} SET "
+      data.each do |k, v|
+        next if ['null', 'nil'].include?(v) && row[k].blank?
+        next if k.to_s == p_key.to_s
 
-            if !v.blank?
-              update_query += " #{k} = \"#{v}\", "
-            else
-              update_query += " #{k} = NULL, "
-            end
-          end
-          update_query = update_query.strip.sub(/\,$/, '')
-          update_query += " WHERE #{p_key} = '#{p_value}' "
-
-          self.qry(client, update_query, person_id)
+        if !v.blank?
+          update_query += " #{k} = \"#{v}\", "
         else
-          insert_query = "INSERT INTO #{table} ("
-          keys = []
-          values = []
-
-          data.each do |k, v|
-
-            if !v.blank?
-              v = "\"#{v}\""
-            else
-              v = " NULL "
-            end
-
-            keys << k
-            values << v
-          end
-
-          insert_query += (keys.join(', ') + " ) VALUES (" )
-          insert_query += ( values.join(",")) + ")"
-          self.qry(client, insert_query, person_id)
+          update_query += " #{k} = NULL, "
         end
       end
+      update_query = update_query.strip.sub(/\,$/, '')
+      update_query += " WHERE #{p_key} = '#{p_value}' "
+      self.qry(client, update_query, person_id)
+    else
+      insert_query = "INSERT INTO #{table} ("
+      keys = []
+      values = []
+
+      data.each do |k, v|
+
+        if !v.blank?
+          v = "\"#{v}\""
+        else
+          v = " NULL "
+        end
+
+        keys << k
+        values << v
+      end
+
+      insert_query += (keys.join(', ') + " ) VALUES (" )
+      insert_query += ( values.join(",")) + ")"
+      self.qry(client, insert_query, person_id)
     end
+
+    self.qry(client, "SET FOREIGN_KEY_CHECKS = 1", person_id)
+
   end
 end
 
