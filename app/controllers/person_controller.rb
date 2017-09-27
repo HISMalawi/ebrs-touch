@@ -408,7 +408,9 @@ class PersonController < ApplicationController
   def update_person
 
     @person = Person.find(params[:id])
-    
+
+    @core_person = CorePerson.find(params[:id])
+
     @person_details = PersonBirthDetail.find_by_person_id(params[:id])
     
     @person_name = PersonName.find_by_person_id(params[:id])
@@ -416,6 +418,41 @@ class PersonController < ApplicationController
     @person_mother_name = @person.mother.person_names.first rescue nil
 
     @person_father_name = @person.father.person_names.first rescue nil
+
+    #New Variables
+
+    @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
+    @name = @person.person_names.last
+    @address = @person.addresses.last
+
+    @mother_person = @person.mother
+    @mother_address = @mother_person.addresses.last rescue nil
+    @mother_name = @mother_person.person_names.last rescue nil
+
+    @father_person = @person.father
+    @father_address = @father_person.addresses.last rescue nil
+    @father_name = @father_person.person_names.last rescue nil
+
+    @informant_person = @person.informant rescue nil
+    @informant_address = @informant_person.addresses.last rescue nil
+    @informant_name = @informant_person.person_names.last rescue nil
+
+    @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
+    days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
+    @delayed =  days_gone > 42 ? "Yes" : "No"
+    location = Location.find(SETTINGS['location_id'])
+    facility_code = location.code
+    birth_loc = Location.find(@birth_details.birth_location_id)
+
+    birth_location = birth_loc.name rescue nil
+
+    @place_of_birth = birth_loc.name rescue nil
+
+    if birth_location == 'Other' && @birth_details.other_birth_location.present?
+      @birth_details.other_birth_location
+    end
+
+    @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
 
     #raise PersonBirthDetail.find_by_person_id(params[:id]).birth_place.inspect
 
@@ -435,7 +472,70 @@ class PersonController < ApplicationController
   end
 
   def update
-    raise params.inspect  
+    if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
+      person_name = PersonName.find_by_person_id(params[:id])
+      person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+      person_name = PersonName.create(person_id: params[:id],
+            first_name: params[:person][:first_name],
+            last_name: params[:person][:last_name])
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+    end
+    if ["child_birthdate","child_gender"].include?(params[:field])
+      person = Person.find(params[:id])
+      if params[:person][:gender][0] != person.gender
+        person.gender = params[:person][:gender][0]
+        person.save
+      end
+
+      if params[:person][:birthdate].to_date.to_s != person.birthdate.to_date.to_s
+        person.birthdate = params[:person][:birthdate].to_date.to_s
+        person.save
+      end
+       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+    end
+    if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
+      if params[:person][:place_of_birth] == 'Home'
+        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+        ta_id = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
+        village_id = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
+        location_id = [village_id, ta_id, district_id].compact.first #Notice the order
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.save
+
+      elsif params[:person][:place_of_birth] == 'Hospital'
+        map =  {'Mzuzu City' => 'Mzimba',
+                'Lilongwe City' => 'Lilongwe',
+                'Zomba City' => 'Zomba',
+                'Blantyre City' => 'Blantyre'}
+
+        person[:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+
+        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+        location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', district_id)
+
+        location_id = [location_id, district_id].compact.first
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.save
+
+      else #Other
+        location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
+        other_place_of_birth = params[:person][:other_birth_place_details]
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        birth_details.birth_location_id = location_id
+        birth_details.other_birth_location = other_birth_location
+        birth_details.save
+      end
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      #raise params.inspect
+    end
+    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include?(params[:field])
+      raise params.inspect
+    end
   end   
 
   def person_for_elastic_search(params)
@@ -738,7 +838,7 @@ class PersonController < ApplicationController
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
    
     render :template => "person/records", :layout => "data_table"
   end
@@ -871,7 +971,7 @@ class PersonController < ApplicationController
             {
                 ["Birth weight (kg)","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_weight"] => "#{@birth_details.birth_weight rescue nil}",
                 ["Type of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_type"] => "#{@birth_details.birth_type.name rescue nil}",
-                ["Other birth specified","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details"] => "#{@birth_details.other_type_of_birth rescue nil}"
+                ["Other birth specified","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_birth_type"] => "#{@birth_details.other_type_of_birth rescue nil}"
             },
             {
                 ["Are the parents married to each other?" ,"/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_parents_married_to_each_other"] => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
@@ -1052,7 +1152,7 @@ class PersonController < ApplicationController
 
 
   def ammendment_cases
-    @states = ['DC-AMMEND']
+    @states = ['DC-AMEND']
     @section = "Ammendments"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
@@ -1062,17 +1162,24 @@ class PersonController < ApplicationController
 
   def ammend_case
     @person = Person.find(params[:id])
-    
+    @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
 
     @name = @person.person_names.last
     @person_prev_values = {}
-    name_fields = ['first_name','last_name','middle_name',"gender"]
+    name_fields = ['first_name','last_name','middle_name',"gender","birthdate"]
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
         if trail.present?
             @person_prev_values[field] = trail.previous_value
         end
+    end
+
+    if @person_prev_values['first_name'].present? || @person_prev_values['last_name'].present?
+        name = "#{@person_prev_values['first_name'].present? ? @person_prev_values['first_name'] : @name.first_name} "+
+               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')}" +
+               "#{@person_prev_values['last_name'].present? ? @person_prev_values['last_name'] : @name.last_name}"
+        @person_prev_values["person_name"] = name
     end
     @address = @person.addresses.last
 
@@ -1086,6 +1193,13 @@ class PersonController < ApplicationController
         end
     end
 
+    if @mother_prev_values['first_name'].present? || @mother_prev_values['last_name'].present?
+        mother_name = "#{@mother_prev_values['first_name'].present? ? @mother_prev_values['first_name'] : @mother_name.first_name} "+
+               "#{@mother_prev_values['middle_name'].present? ? @mother_prev_values['middle_name'] : (@mother_name.middle_name rescue '')}" +
+               "#{@mother_prev_values['last_name'].present? ? @mother_prev_values['last_name'] : @mother_name.last_name}"
+        @person_prev_values["mother_name"] = mother_name
+    end
+
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
     @father_prev_values = {}
@@ -1096,6 +1210,14 @@ class PersonController < ApplicationController
             @father_prev_values[field] = trail.previous_value
         end
     end
+
+    if @father_prev_values['first_name'].present? || @father_prev_values['last_name'].present?
+        father_name = "#{@father_prev_values['first_name'].present? ? @father_prev_values['first_name'] : @father_name.first_name} "+
+               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')}" +
+               "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
+        @person_prev_values["father_name"] = mother_name
+    end 
+
     @section = 'Ammend Case'
     render :layout => "facility"
   end
@@ -1124,18 +1246,14 @@ class PersonController < ApplicationController
       person_name = PersonName.create(person_id: params[:id],
             first_name: params[:person][:first_name],
             last_name: params[:person][:last_name])
-
-      PersonNameCode.create(person_name_id: person_name.person_name_id,
-            first_name_code: params[:person][:first_name].soundex,
-            last_name_code: params[:person][:last_name].soundex )
     end
     if fields.include? "Date of birth"
         person = Person.find(params[:id])
-        person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated] rescue 0))
+        person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated]? params[:person][:birthdate_estimated] : 0))
     end
     if fields.include? "Sex"
        person = Person.find(params[:id])
-        person.update_attributes(gende: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated] rescue 0))
+        person.update_attributes(gender: params[:person][:gender])
     end
     if fields.include? "Place of birth"
     end
@@ -1169,8 +1287,17 @@ class PersonController < ApplicationController
     redirect_to "/person/ammend_case?id=#{params[:id]}" 
   end
 
+  def amendiment_comment
+      render :layout => "touch"
+  end
   def reprint_case
     @section = "Re-pring case"
+  end
+
+  def do_amend
+    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}");
+
+    redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
 
   def do_reprint
@@ -1194,4 +1321,74 @@ class PersonController < ApplicationController
   end
   #########################################################################
 
+  def paginated_data
+    params[:statuses] = [] if params[:statuses].blank?
+    states = params[:statuses].split(',')
+    types = []
+
+    search_val = params[:search][:value] rescue nil
+    search_val = '_' if search_val.blank?
+    if !params[:start].blank?
+
+      state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
+
+      if if params[:type] == 'All'
+        types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
+      else
+        types=[params[:type]]
+      end
+
+      person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
+
+      d = Person.order(" n.first_name, n.last_name, cp.created_at ")
+      .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
+              INNER JOIN person_name n ON person.person_id = n.person_id
+              INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
+              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
+      .where(" prs.status_id IN (#{state_ids.join(', ')})
+              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
+              AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
+                person.birthdate, person.gender) REGEXP '#{search_val}' ")
+
+      total = d.select(" count(*) c ")[0]['c'] rescue 0
+      page = (params[:start].to_i / params[:length].to_i) + 1
+
+      data = d.group(" prs.person_id ")
+
+      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_registered ")
+      data = data.page(page)
+      .per_page(params[:length].to_i)
+
+      @records = []
+      data.each do |p|
+        mother = PersonService.mother(p.person_id)
+        father = PersonService.father(p.person_id)
+        details = PersonBirthDetail.find_by_person_id(p.person_id)
+
+        name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
+        mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+        father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+        row = []
+        row = [p.ben] if params[:assign_ben] == 'true'
+        row = row + [
+            "#{name} (#{p.gender})",
+            p.birthdate.strftime('%d/%b/%Y'),
+            father_name,
+            mother_name,
+            p.date_registered.strftime('%d/%b/%Y'),
+            Status.find(p.status_id).name,
+            p.person_id
+        ]
+        @records << row
+      end
+
+      render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => total,
+          "recordsFiltered" => total,
+          "data" => @records}.to_json and return
+    end
+
+  end
+end
 end

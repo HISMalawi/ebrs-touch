@@ -80,3 +80,4 @@ gem 'sucker_punch', '~> 2.0'
 
 gem "faker", "~> 1.6.6"
 
+gem "will_paginate", "3.1.6"

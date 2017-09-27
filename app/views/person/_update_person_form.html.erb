@@ -27,6 +27,15 @@
         min-width: 100%;
     }*/
 </style>
+<script type="text/javascript">
+    var facility_type = "<%= SETTINGS['application_mode']%>"
+    String.prototype.capitalize = function(lower) {
+        return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    };
+    String.prototype.capitalizeAll = function(){
+      return this.toUpperCase();
+    };
+</script>
 
 <%= form_for :person, :url => {:controller => "person", :action => "update", params: {id: @person.id, field: @field}} do |f| %>
 
@@ -104,14 +113,14 @@
 
     </fieldset>
 
-    <% elsif ["birth_details_hospital_of_birth","child_hospital_of_birth","child_birth_address","child_birth_district","child_birth_ta","child_birth_village","child_other_birth_place_details"].include? @field  %>
+    <% elsif ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
       <div class="field">
         <label for="place_of_birth">Place of birth</label><br>
-        <select id="place_of_birth" name="place_of_birth" class="input_cell" >
+        <select id="place_of_birth" name="person[place_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person.place_of_birth rescue nil) == "Home" ? "selected" : "") %> >Home</option>
           <option <%= ((@person.place_of_birth rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
@@ -120,9 +129,10 @@
       </div>
 
       <div class="field">
-        <label for="birth_district">Birth District</label><br>
+        <label for="person_birth_district">Birth District</label><br>
 
-        <input id="birth_district"
+        <input id="person_birth_district"
+               name="person[birth_district]"
         			 type="text"
         			 condition="<%= @person.place_of_birth != 'Hospital' %>"
         			 ajaxURL = "/search_by_district"
@@ -131,10 +141,11 @@
       </div>
       
       <div class="field">
-        <label for="hospital_of_birth">Name of Hospital</label>
+        <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
         <input type="text" 
-               id="hospital_of_birth"
+               id="person_hospital_of_birth"
+               name="person[hospital_of_birth]"
                class ="input_cell"
                condition ="<%= @person.place_of_birth == 'Hospital' %>"
                ajaxURL = "/search_by_hospital" >
@@ -144,7 +155,7 @@
         <label for="person_birth_ta">T/A</label>
         <br>
         <input type="text" 
-               name="birth_ta]" 
+               name="person[birth_ta]" 
                id="person_birth_ta"
                class = "input_cell"
                condition="<%= @person.place_of_birth == 'Home' %>"
@@ -164,7 +175,7 @@
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
         <input type="text" 
-               name="other_birth_place_details" 
+               name="person[other_birth_place_details]" 
                class ="input_cell" 
                condition="<%= @person.place_of_birth == 'Other' %>"
                id="person_other_birth_place_details">
@@ -172,7 +183,7 @@
 
     </fieldset>
 
-    <% elsif ["child_birth_weight","child_type_of_birth","child_other_type_of_birth","child_parents_married_to_each_other","child_date_of_marriage" ].include? @field  %>
+    <% elsif ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
@@ -216,37 +227,36 @@
         <input type="text" name ="other_type_of_birth" id="person_other_type_of_birth" class ="input_cell" condition ="__$('person_type_of_birth').value.trim() == 'Other'" optional=true >
       </div>
 
-      <div class="field">
-        <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
-        <br>
-        <select id="person_parents_married_to_each_other" name="person[parents_married_to_each_other]" class="input_cell" >
-          <option></option>
-          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
-          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="person_date_of_marriage">If yes, date of marriage</label>
-        <br>
-        <input type="text" name="person[date_of_marriage]"
-                          id="person_date_of_marriage"
-                          class="input_cell"
-													condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
-													fieldtype="date"
-													optional=true
-                        >
-      </div>
-
 
 
     </fieldset>
-  <% elsif ["child_court_order_attached","child_parents_signed" ].include? @field  %>    
-    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'No'">
-      <legend><font size='5' style='border: 2px;'>Acknowledgment of Paternity: person born out of wedlock</font></legend>
-
+  <% elsif ["birth_details_court_order_attached","birth_details_parents_signed","birth_details_parents_married_to_each_other","birth_details_date_of_marriage"  ].include? @field  %>  
+    <fieldset>
+        <legend><font size='5' style='border: 2px;'>Parent's marriage details</font></legend>
+        <div class="field">
+          <label for="person_parents_married_to_each_other">Are the parents married to each other?</label>
+          <br>
+          <select id="person_parents_married_to_each_other" name="person[parents_married_to_each_other]" class="input_cell" >
+            <option></option>
+            <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+            <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="person_date_of_marriage">If yes, date of marriage</label>
+          <br>
+          <input type="text" name="person[date_of_marriage]"
+                            id="person_date_of_marriage"
+                            class="input_cell"
+                            condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+                            fieldtype="date"
+                            optional=truecondition="__$('person_parents_married_to_each_other').value.trim() == 'No'"
+                          >
+      </div>
       <div class="field">
         <label for="person_court_order_attached">Court order attached?</label><br>
-        <select id="person_court_order_attached" name="person[court_order_attached]" class="input_cell">
+        <select id="person_court_order_attached" name="person[court_order_attached]" class="input_cell"
+          condition="__$('person_parents_married_to_each_other').value.trim() == 'No'">
           <option></option>
           <option  <%= ((@person[court_order_attached] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option  <%= ((@person[court_order_attached] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -267,7 +277,7 @@
     </fieldset>
 
     <!-- Mother -->
-  <% elsif ["child_mother_last_name","child_mother_first_name", "child_mother_middle_name", "child_mother_id_number" ].include? @field  %>
+  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number" ].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
@@ -328,7 +338,7 @@
 
     </fieldset>
 
-  <% elsif ["child_mother_birthdate","child_mother_citizenship"].include? @field  %>
+  <% elsif ["mother_birth_date","mother_citizenship"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
@@ -366,7 +376,7 @@
 
     </fieldset>
 
-  <% elsif ["child_mother_current_district","child_mother_current_ta", "child_mother_current_village"].include? @field  %>
+  <% elsif ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village"].include? @field  %>
     
     <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'">
       <legend><font size='5' style='border: 2px;'>Details of Mother continued: Physical residential address</font></legend>
@@ -400,7 +410,7 @@
       </div>
 
     </fieldset>
-
+  
 <% elsif ["child_mother_residential_country","child_mother_foreigner_current_district", "child_mother_foreigner_current_village", "child_mother_foreigner_current_ta"].include? @field  %>
     
      <fieldset condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'">
@@ -564,7 +574,7 @@
 
     </fieldset>
 
-  <% elsif ["child_gestation_at_birth","child_number_of_prenatal_visits", "child_month_prenatal_care_started","child_mode_of_delivery"].include? @field  %>
+  <% elsif ["birth_details_gestation_at_birth","birth_details_number_of_prenatal_visits", "birth_details_month_prenatal_care_started","birth_details_mode_of_delivery"].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
@@ -600,7 +610,7 @@
 
       </fieldset>
       
-<% elsif ["child_number_of_children_born_alive_inclusive","child_number_of_children_born_still_alive","child_level_of_education"].include? @field  %>
+<% elsif ["birth_details_number_of_children_born_alive_inclusive","birth_details_number_of_children_born_still_alive","birth_details_level_of_education"].include? @field  %>
       
       <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
@@ -658,7 +668,7 @@
 
     </fieldset>
 
-<% elsif ["child_father_last_name","child_father_first_name","child_father_middle_name", "child_father_id_number"].include? @field  %>
+<% elsif ["father_last_name","father_first_name","father_middle_name", "father_id_number"].include? @field  %>
     
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
       <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
@@ -721,7 +731,7 @@
 
     </fieldset>
 
-<% elsif ["child_father_birthdate","child_father_first_name","child_father_middle_name", "child_father_citizenship"].include? @field  %>
+<% elsif ["father_birthdate","father_first_name","father_middle_name", "father_citizenship"].include? @field  %>
 
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" >
       <legend><font size='5' style='border: 2px;'>Details of Father continued</font></legend>
@@ -765,7 +775,7 @@
 
     </fieldset>
 
-<% elsif ["child_father_current_district","child_father_current_ta","child_father_current_village"].include? @field  %>
+<% elsif ["father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
 
     <fieldset condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
@@ -863,7 +873,7 @@
 
     </fieldset>
 
-<% elsif ["child_father_home_district","child_father_home_ta","child_father_home_village"].include? @field  %>
+<% elsif ["father_address_home_district","father_address_home_ta","father_address_home_village"].include? @field  %>
     
     <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Home Address</font></legend>
@@ -920,7 +930,7 @@
 
     </fieldset>
 
-    <% elsif ["child_informant_last_name","child_informant_first_name","child_informant_middle_name", "child_informant_id_number", "child_informant_relationship_to_child"].include? @field  %>
+    <% elsif ["informant_last_name","informant_first_name","informant_middle_name", "informant_id_number", "informant_relationship"].include? @field  %>
     
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant</font></legend>
@@ -1024,7 +1034,7 @@
 
     </fieldset>
 
-    <% elsif ["child_informant_current_district","child_informant_current_ta","child_informant_current_village", "child_informant_addressline1", "child_informant_addressline2", "child_informant_phone_number"].include? @field  %>
+    <% elsif ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address", "informant_cell_phone_number", "child_informant_phone_number"].include? @field  %>
         
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
@@ -1059,7 +1069,7 @@
 
       </fieldset>
 
-<% elsif ["child_form_signed","child_acknowledgement_of_receipt_date"].include? @field  %>     
+<% elsif ["birth_details_form_signed","child_acknowledgement_of_receipt_date"].include? @field  %>     
       
       <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued.. </font></legend>

@@ -15,25 +15,27 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
     t.string   "name",       limit: 20
-    t.integer  "creator",    limit: 4
+    t.bigint  "creator",    limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
     t.integer  "audit_trail_type_id", limit: 4,   null: false
-    t.integer  "person_id",           limit: 4,   null: false
+    t.bigint  "person_id",           limit: 4,   null: false
     t.string   "table_name",          limit: 100, null: false
-    t.integer  "table_row_id",        limit: 4,   null: false
+    t.bigint  "table_row_id",        limit: 4,   null: false
     t.string   "field",               limit: 50
     t.string   "previous_value",      limit: 255
     t.string   "current_value",       limit: 255
     t.string   "comment",             limit: 255
     t.integer  "location_id",         limit: 4,   null: false
-    t.integer  "creator",             limit: 4
+    t.bigint  "creator",             limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  change_column :audit_trails, :audit_trail_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "audit_trails", ["audit_trail_type_id"], name: "fk_audit_trails_1", using: :btree
   add_index "audit_trails", ["creator"], name: "fk_audit_trails_3", using: :btree
@@ -44,7 +46,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "name",        limit: 45,                  null: false
     t.boolean  "voided",                  default: false, null: false
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -57,17 +59,12 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "updated_at",               null: false
   end
 
+
+  change_column :core_person, :person_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
   add_index "core_person", ["person_id"], name: "person_id_UNIQUE", unique: true, using: :btree
   add_index "core_person", ["person_type_id"], name: "fk_core_person_1_idx", using: :btree
 
-  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
-    t.integer  "person_id",              limit: 4
-    t.integer  "potential_duplicate_id", limit: 4
-    t.datetime "created_at"
-  end
-
-  add_index "duplicate_records", ["person_id"], name: "fk_duplicate_records_2", using: :btree
-  add_index "duplicate_records", ["potential_duplicate_id"], name: "fk_duplicate_records_1", using: :btree
 
   create_table "global_property", primary_key: "property", force: :cascade do |t|
     t.string   "value",      limit: 50, null: false
@@ -79,14 +76,16 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
 
   create_table "identifier_allocation_queue", primary_key: "identifier_allocation_queue_id", force: :cascade do |t|
-    t.integer  "person_id",                 limit: 4,             null: false
+    t.bigint  "person_id",       limit: 4,               null: false
     t.integer  "person_identifier_type_id", limit: 4,             null: false
     t.integer  "assigned",                  limit: 1, default: 0, null: false
-    t.integer  "creator",                   limit: 4,             null: false
+    t.bigint  "creator",                   limit: 4,             null: false
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
   end
-
+  
+  change_column :identifier_allocation_queue, :identifier_allocation_queue_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+ 
   add_index "identifier_allocation_queue", ["person_id"], name: "fk_identifier_allocation_queue_1_idx", using: :btree
   add_index "identifier_allocation_queue", ["person_identifier_type_id"], name: "fk_identifier_allocation_queue_2", using: :btree
 
@@ -97,7 +96,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "updated_at",                          null: false
     t.integer  "voided",      limit: 1,   default: 0, null: false
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
   end
 
@@ -109,16 +108,16 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "country",         limit: 50
     t.string   "latitude",        limit: 50
     t.string   "longitude",       limit: 50
-    t.integer  "creator",         limit: 4,   default: 0,     null: false
+    t.bigint  "creator",         limit: 4,   default: 0,     null: false
     t.datetime "created_at",                                  null: false
     t.string   "county_district", limit: 255
     t.boolean  "voided",                      default: false, null: false
-    t.integer  "voided_by",       limit: 4
+    t.bigint  "voided_by",       limit: 4
     t.datetime "date_voided"
     t.string   "void_reason",     limit: 255
     t.integer  "parent_location", limit: 4
     t.string   "uuid",            limit: 38,                  null: false
-    t.integer  "changed_by",      limit: 4
+    t.bigint  "changed_by",      limit: 4
     t.datetime "changed_at"
   end
 
@@ -134,7 +133,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "name",        limit: 45,              null: false
     t.string   "description", limit: 100
     t.integer  "voided",      limit: 1,   default: 0, null: false
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.string   "void_reason", limit: 45
     t.datetime "date_voided"
     t.datetime "created_at",                          null: false
@@ -158,7 +157,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "updated_at",                          null: false
     t.integer  "voided",      limit: 1,   default: 0, null: false
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
   end
 
@@ -169,9 +168,11 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                                null: false
     t.datetime "updated_at",                                null: false
   end
+  
+  change_column  :person, :person_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   create_table "person_addresses", primary_key: "person_addresses_id", force: :cascade do |t|
-    t.integer  "person_id",              limit: 4,   null: false
+    t.bigint  "person_id",              limit: 4,   null: false
     t.integer  "current_village",        limit: 4
     t.string   "current_village_other",  limit: 255
     t.integer  "current_ta",             limit: 4
@@ -191,6 +192,8 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
   end
+  
+  change_column  :person_addresses, :person_addresses_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_addresses", ["citizenship"], name: "fk_person_addresses_8_idx", using: :btree
   add_index "person_addresses", ["current_district"], name: "fk_person_addresses_4_idx", using: :btree
@@ -205,31 +208,61 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "name",        limit: 45,              null: false
     t.string   "description", limit: 100
     t.integer  "voided",      limit: 1,   default: 0, null: false
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
   end
 
   create_table "person_attributes", primary_key: "person_attribute_id", force: :cascade do |t|
-    t.integer  "person_id",                limit: 4,               null: false
+    t.bigint  "person_id",                limit: 4,               null: false
     t.integer  "person_attribute_type_id", limit: 4,               null: false
     t.integer  "voided",                   limit: 1,   default: 0, null: false
     t.string   "value",                    limit: 100,             null: false
-    t.integer  "voided_by",                limit: 4
+    t.bigint  "voided_by",                limit: 4
     t.datetime "date_voided"
     t.datetime "created_at",                                       null: false
     t.datetime "updated_at",                                       null: false
   end
+  
+  change_column  :person_attributes, :person_attribute_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_attributes", ["person_attribute_type_id"], name: "fk_person_attributes_2_idx", using: :btree
   add_index "person_attributes", ["person_id"], name: "fk_person_attributes_1_idx", using: :btree
 
+  create_table "person_identifier_types", primary_key: "person_identifier_type_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,              null: false
+    t.string   "description", limit: 100
+    t.integer  "voided",      limit: 1,   default: 0, null: false
+    t.bigint  "voided_by",   limit: 4
+    t.datetime "date_voided"
+    t.string   "document_id", limit: 100
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  create_table "person_identifiers", primary_key: "person_identifier_id", force: :cascade do |t|
+    t.bigint  "person_id",                limit: 4,               null: false
+    t.integer  "person_identifier_type_id", limit: 4,               null: false
+    t.integer  "voided",                   limit: 1,   default: 0, null: false
+    t.string   "value",                    limit: 100,             null: false
+    t.bigint  "voided_by",                limit: 4
+    t.datetime "date_voided"
+    t.string   "document_id", limit: 100
+    t.datetime "created_at",                                       null: false
+    t.datetime "updated_at",                                       null: false
+  end
+
+  change_column  :person_identifiers, :person_identifier_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
+  add_index "person_identifiers", ["person_identifier_type_id"], name: "fk_person_identifiers_2_idx", using: :btree
+  add_index "person_identifiers", ["person_id"], name: "fk_person_identifiers_1_idx", using: :btree
+
   create_table "person_birth_details", primary_key: "person_birth_details_id", force: :cascade do |t|
-    t.integer  "person_id",                               limit: 4,               null: false
-    t.integer  "place_of_birth",                          limit: 4,               null: false
-    t.integer  "district_of_birth",                       limit: 4,               null: false
-    t.integer  "birth_location_id",                       limit: 4,               null: false
+    t.bigint  "person_id",                               limit: 4,              null: false
+    t.integer  "place_of_birth",                          limit: 4,              null: false
+    t.integer  "district_of_birth",                       limit: 4,              null: false
+    t.integer  "birth_location_id",                       limit: 4,              null: false
     t.string   "other_birth_location",                    limit: 45
     t.float    "birth_weight",                            limit: 24
     t.integer  "type_of_birth",                           limit: 4,               null: false
@@ -257,10 +290,12 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "informant_designation",                   limit: 255
     t.string   "level",                                   limit: 10
     t.date     "date_registered",                                                 null: false
-    t.integer  "creator",                                 limit: 4,               null: false
+    t.bigint  "creator",                                 limit: 4,               null: false
     t.datetime "created_at",                                                      null: false
     t.datetime "updated_at",                                                      null: false
   end
+  
+  change_column  :person_birth_details, :person_birth_details_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_birth_details", ["birth_location_id"], name: "fk_person_birth_details_3_idx", using: :btree
   add_index "person_birth_details", ["birth_registration_type_id"], name: "fk_person_birth_details_8_idx", using: :btree
@@ -275,48 +310,27 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "person_birth_details", ["place_of_birth"], name: "fk_person_birth_details_4_idx", using: :btree
   add_index "person_birth_details", ["type_of_birth"], name: "fk_person_birth_details_2_idx", using: :btree
 
-  create_table "person_identifier_types", primary_key: "person_identifier_type_id", force: :cascade do |t|
-    t.string   "name",        limit: 45,              null: false
-    t.string   "description", limit: 100
-    t.integer  "voided",      limit: 1,   default: 0, null: false
-    t.integer  "voided_by",   limit: 4
-    t.datetime "date_voided"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
-  end
-
-  create_table "person_identifiers", primary_key: "person_identifier_id", force: :cascade do |t|
-    t.integer  "person_id",                 limit: 4,               null: false
-    t.integer  "person_identifier_type_id", limit: 4,               null: false
-    t.integer  "voided",                    limit: 1,   default: 0, null: false
-    t.string   "value",                     limit: 100,             null: false
-    t.integer  "voided_by",                 limit: 4
-    t.datetime "date_voided"
-    t.datetime "created_at",                                        null: false
-    t.datetime "updated_at",                                        null: false
-  end
-
-  add_index "person_identifiers", ["person_id"], name: "fk_person_identifiers_1_idx", using: :btree
-  add_index "person_identifiers", ["person_identifier_type_id"], name: "fk_person_identifiers_2_idx", using: :btree
 
   create_table "person_name", primary_key: "person_name_id", force: :cascade do |t|
-    t.integer  "person_id",   limit: 4,               null: false
+    t.bigint  "person_id",   limit: 4,               null: false
     t.string   "first_name",  limit: 50,              null: false
     t.string   "middle_name", limit: 50
     t.string   "last_name",   limit: 50,              null: false
     t.integer  "voided",      limit: 1,   default: 0, null: false
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
   end
 
+  change_column  :person_name, :person_name_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
   add_index "person_name", ["person_id"], name: "fk_person_name_1_idx", using: :btree
   add_index "person_name", ["voided_by"], name: "fk_person_name_2_idx", using: :btree
 
   create_table "person_name_code", primary_key: "person_name_code_id", force: :cascade do |t|
-    t.integer  "person_name_id",   limit: 4,  null: false
+    t.bigint  "person_name_id",   limit: 4,  null: false
     t.string   "first_name_code",  limit: 10, null: false
     t.string   "middle_name_code", limit: 10
     t.string   "last_name_code",   limit: 10, null: false
@@ -328,28 +342,32 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   create_table "person_record_statuses", primary_key: "person_record_status_id", force: :cascade do |t|
     t.integer  "status_id",   limit: 4,     null: false
-    t.integer  "person_id",   limit: 4,     null: false
-    t.integer  "creator",     limit: 4,     null: false
+    t.bigint  "person_id",   limit: 4,     null: false
+    t.bigint  "creator",     limit: 4,     null: false
     t.integer  "voided",      limit: 1
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
     t.text     "comments",    limit: 65535
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
   end
 
+  change_column  :person_record_statuses, :person_record_status_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
   add_index "person_record_statuses", ["person_id"], name: "fk_person_record_statuses_1_idx", using: :btree
   add_index "person_record_statuses", ["status_id"], name: "fk_person_record_statuses_2_idx", using: :btree
   add_index "person_record_statuses", ["voided_by"], name: "fk_person_record_statuses_3_idx", using: :btree
 
   create_table "person_relationship", primary_key: "person_relationship_id", force: :cascade do |t|
-    t.integer  "person_a",                    limit: 4, null: false
-    t.integer  "person_b",                    limit: 4, null: false
+    t.bigint  "person_a",                    limit: 4, null: false
+    t.bigint  "person_b",                    limit: 4, null: false
     t.integer  "person_relationship_type_id", limit: 4, null: false
     t.datetime "created_at",                            null: false
     t.datetime "updated_at",                            null: false
   end
+  
+  change_column  :person_relationship, :person_relationship_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_relationship", ["person_a"], name: "fk_person_relationship_1_idx", using: :btree
   add_index "person_relationship", ["person_b"], name: "fk_person_relationship_2_idx", using: :btree
@@ -359,10 +377,10 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "name",        limit: 25,             null: false
     t.integer  "voided",      limit: 1,  default: 0, null: false
     t.string   "description", limit: 45
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
   end
-
+  
   create_table "person_type", primary_key: "person_type_id", force: :cascade do |t|
     t.string "name",        limit: 45, null: false
     t.string "description", limit: 45
@@ -375,20 +393,9 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "updated_at",                          null: false
     t.integer  "voided",      limit: 1,   default: 0, null: false
     t.string   "void_reason", limit: 100
-    t.integer  "voided_by",   limit: 4
+    t.bigint  "voided_by",   limit: 4
     t.datetime "date_voided"
   end
-
-  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
-    t.integer  "person_id",   limit: 4,                 null: false
-    t.string   "resolved",    limit: 1,   default: "0", null: false
-    t.string   "decision",    limit: 255
-    t.string   "comment",     limit: 255
-    t.datetime "resolved_at"
-    t.datetime "created_at"
-  end
-
-  add_index "potential_duplicates", ["person_id"], name: "fk_potential_duplicates_1", using: :btree
 
   create_table "role", primary_key: "role_id", force: :cascade do |t|
     t.string "role",  limit: 50, default: "", null: false
@@ -415,7 +422,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   end
 
   create_table "user_role", primary_key: "user_role_id", force: :cascade do |t|
-    t.integer "user_id", limit: 4, null: false
+    t.bigint "user_id", limit: 4, null: false
     t.integer "role_id", limit: 4, null: false
   end
 
@@ -427,23 +434,64 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "username",           limit: 50,                  null: false
     t.string   "plain_password",     limit: 255
     t.string   "password_hash",      limit: 255
-    t.integer  "creator",            limit: 4,   default: 0,     null: false
-    t.integer  "person_id",          limit: 4
+    t.bigint  "creator",            limit: 4,   default: 0,     null: false
+    t.bigint  "person_id",          limit: 4
     t.integer  "active",             limit: 1,   default: 1,     null: false
     t.string   "un_or_block_reason", limit: 225
     t.integer  "voided",             limit: 1,   default: 0,     null: false
-    t.integer  "voided_by",          limit: 4
+    t.bigint  "voided_by",          limit: 4
     t.datetime "date_voided"
     t.string   "void_reason",        limit: 255
     t.string   "email",              limit: 225
     t.integer  "notify",             limit: 1,   default: 0,     null: false
     t.string   "preferred_keyboard", limit: 10,  default: "abc", null: false
-    t.integer  "password_attempt",   limit: 4,   default: 0
+    t.bigint  "password_attempt",   limit: 4,   default: 0
     t.datetime "last_password_date"
     t.string   "uuid",               limit: 38,                  null: false
     t.datetime "updated_at"
     t.datetime "created_at"
   end
+
+  change_column  :users, :user_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
+
+  ############################ Resoving Potential Duplicate tables ##########################################################
+
+  create_table "potential_duplicates", primary_key: "potential_duplicate_id", force: :cascade do |t|
+    t.bigint  "person_id", limit: 4, null: false
+    t.string   "resolved",      limit: 1,   default: 0,     null: false
+    t.string   "decision",      limit: 255
+    t.string   "comment",      limit: 255
+    t.datetime "resolved_at"
+    t.datetime "created_at"
+  end
+
+  change_column  :potential_duplicates, :potential_duplicate_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
+  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
+
+  create_table "duplicate_records", primary_key: "duplicate_record_id", force: :cascade do |t|
+    t.bigint  "person_id", limit: 4
+    t.bigint   "potential_duplicate_id",      limit: 4
+    t.datetime "created_at"
+  end
+
+  change_column  :duplicate_records, :duplicate_record_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
+  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
+  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+
+
+  create_table "global_property", primary_key: "property", force: :cascade do |t|
+    t.string   "value", limit: 50,                  null: false
+    t.string   "uuid",  limit: 38,                  null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "global_property", ["property"], name: "fk_global_property_1_idx", using: :btree
+
+  ##########################################################################################################################
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
   add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
@@ -454,8 +502,8 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_foreign_key "audit_trails", "location", primary_key: "location_id", name: "fk_audit_trails_2"
   add_foreign_key "audit_trails", "users", column: "creator", primary_key: "user_id", name: "fk_audit_trails_3"
   add_foreign_key "core_person", "person_type", primary_key: "person_type_id", name: "fk_core_person_1"
-  add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
-  add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
+  #add_foreign_key "duplicate_records", "person", primary_key: "person_id", name: "fk_duplicate_records_2"
+  #add_foreign_key "duplicate_records", "potential_duplicates", primary_key: "potential_duplicate_id", name: "fk_duplicate_records_1"
   add_foreign_key "identifier_allocation_queue", "core_person", column: "person_id", primary_key: "person_id", name: "fk_identifier_allocation_queue_1"
   add_foreign_key "identifier_allocation_queue", "person_identifier_types", primary_key: "person_identifier_type_id", name: "fk_identifier_allocation_queue_2"
   add_foreign_key "location_tag_map", "location", primary_key: "location_id", name: "fk_location_tag_map_1"
@@ -488,7 +536,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_foreign_key "person_relationship", "core_person", column: "person_a", primary_key: "person_id", name: "fk_person_relationship_1"
   add_foreign_key "person_relationship", "core_person", column: "person_b", primary_key: "person_id", name: "fk_person_relationship_2"
   add_foreign_key "person_relationship", "person_relationship_types", primary_key: "person_relationship_type_id", name: "fk_person_relationship_3"
-  add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
+  #add_foreign_key "potential_duplicates", "person", primary_key: "person_id", name: "fk_potential_duplicates_1"
   add_foreign_key "user_role", "role", primary_key: "role_id", name: "fk_user_role_2"
   add_foreign_key "user_role", "users", primary_key: "user_id", name: "fk_user_role_1"
   add_foreign_key "users", "core_person", column: "person_id", primary_key: "person_id", name: "fk_users_1"

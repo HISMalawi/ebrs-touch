@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   #Displays All Users whose status = Active
   def view
 
-    @users = User.all.each
+    @users = User.where(location_id: SETTINGS['location_id'])
 
     @section = "View Users"
 
@@ -177,7 +177,7 @@ class UsersController < ApplicationController
 
     results = []
 
-    users = User.all
+    users = User.where(location_id: SETTINGS['location_id'])
       users.each do |user|
     	next if user.core_person.blank? || user.core_person.person_name.blank?
 
