@@ -266,6 +266,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "other_birth_location",                    limit: 45
     t.float    "birth_weight",                            limit: 24
     t.integer  "type_of_birth",                           limit: 4,               null: false
+    t.string   "other_type_of_birth"                      limit: 255
     t.integer  "parents_married_to_each_other",           limit: 1,   default: 0, null: false
     t.date     "date_of_marriage"
     t.integer  "gestation_at_birth",                      limit: 4

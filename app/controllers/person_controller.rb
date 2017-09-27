@@ -534,8 +534,66 @@ class PersonController < ApplicationController
       #raise params.inspect
     end
     if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include?(params[:field])
+      birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+      if params[:person][:birth_weight].present? && birth_details.birth_weight.to_i != params[:person][:birth_weight].to_i
+        birth_details.birth_weight = params[:person][:birth_weight]
+      end
+
+
+      if params[:person][:type_of_birth].present?
+        person_type_of_birth = PersonTypeOfBirth.where(name: params[:person][:type_of_birth]).last.person_type_of_birth_id
+        birth_details.type_of_birth = person_type_of_birth
+        if params[:person][:type_of_birth] == "Other"
+          birth_details.other_type_of_birth = params[:person][:other_type_of_birth]
+        end
+      end
+
+      if birth_details.save
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      end
+    end
+
+    if ["birth_details_court_order_attached","birth_details_parents_signed","birth_details_parents_married_to_each_other","birth_details_date_of_marriage"  ].include?(params[:field])
       raise params.inspect
     end
+
+    if ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number" ].include?(params[:field])
+      raise params.inspect
+    end
+
+    if ["mother_birth_date","mother_citizenship"].include?(params[:field])
+      
+    end
+
+    if ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village"].include?(params[:field])
+      
+    end
+
+    if ["father_birthdate","father_first_name","father_middle_name", "father_citizenship"].include?(params[:field])
+      
+    end
+
+    if ["father_address_current_district","father_address_current_ta","father_address_current_village"].include?(params[:field])
+      
+    end
+
+    if ["father_address_home_district","father_address_home_ta","father_address_home_village"].include?(params[:field])
+      
+    end
+
+    if ["informant_last_name","informant_first_name","informant_middle_name", "informant_id_number", "informant_relationship"].include?(params[:field])
+      
+    end
+
+
+    if ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address", "informant_cell_phone_number", "child_informant_phone_number"].include?(params[:field])
+      
+    end
+
+    if ["birth_details_form_signed","child_acknowledgement_of_receipt_date"].include?(params[:field])
+      
+    end
+
   end   
 
   def person_for_elastic_search(params)
@@ -1042,7 +1100,7 @@ class PersonController < ApplicationController
             {
                 ["District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_district"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
                 ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_ta"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
-                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
             }
         ],
         "Details of Child's Informant" => [

@@ -224,7 +224,7 @@
       <div class="field">
         <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
         <br>
-        <input type="text" name ="other_type_of_birth" id="person_other_type_of_birth" class ="input_cell" condition ="__$('person_type_of_birth').value.trim() == 'Other'" optional=true >
+        <input type="text" name ="person[other_type_of_birth]" id="person_other_type_of_birth" class ="input_cell" condition ="__$('person_type_of_birth').value.trim() == 'Other'" optional=true >
       </div>
 
 
@@ -450,7 +450,7 @@
       </div>
     </fieldset>
 
-<% elsif ["child_mother_home_district","child_mother_home_ta", "child_mother_home_village"].include? @field  %>
+<% elsif ["mother_address_home_district","mother_address_home_ta", "mother_address_home_village"].include? @field  %>
 
     <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian'">
       <legend><font size='5' style='border: 2px;'>Details of Mother continued: Home address</font></legend>
