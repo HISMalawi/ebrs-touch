@@ -332,8 +332,7 @@ class PersonController < ApplicationController
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
-  
+    #@records = PersonService.query_for_display(@states)
     
     render :template => "person/records", :layout => "data_table"
 
@@ -868,7 +867,7 @@ class PersonController < ApplicationController
     @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -877,7 +876,7 @@ class PersonController < ApplicationController
     @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -886,7 +885,7 @@ class PersonController < ApplicationController
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -895,7 +894,7 @@ class PersonController < ApplicationController
     @section = "Rejected Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -904,7 +903,7 @@ class PersonController < ApplicationController
     @section = "Rejected Cases at HQ"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1128,7 +1127,7 @@ class PersonController < ApplicationController
     @section = "Printed Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1137,7 +1136,7 @@ class PersonController < ApplicationController
     @section = "Voided Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1147,7 +1146,7 @@ class PersonController < ApplicationController
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+   # @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1156,7 +1155,7 @@ class PersonController < ApplicationController
     @section = "Voided Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1166,7 +1165,7 @@ class PersonController < ApplicationController
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1176,7 +1175,7 @@ class PersonController < ApplicationController
     @section = "Ammendments"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
