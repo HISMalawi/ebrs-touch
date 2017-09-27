@@ -1,4 +1,3 @@
-# eBRS-HQ-2.0i
 The order of SETTING up EBRS is 
   HQ to DC to FC
 Metadata is moved from HQ to DC and FC
