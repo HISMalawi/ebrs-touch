@@ -294,26 +294,6 @@
     </div>
 <% end %>
 
-<% if @folders.include?("View Synced Records") %>
-    <div style="display:none" class="button child_menu manage_cases" onclick="window.location = '/dc/sync'" tag=0 title="Synchronize with HQ">
-      <table style="text-align: left;">
-        <tr>
-          <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>
-          </td>
-          <td style="height: 30px;">
-            View Sync
-          </td>
-        </tr>
-        <tr>
-          <td style="font-size: 11px; font-style: italic;">
-            Synchronizing data with <%= {'DC' => 'HQ', 'FC' => 'DC'}[SETTINGS['application_mode']]%> from this office.
-          </td>
-        </tr>
-      </table>
-    </div>
-<%end %>
-
 <% if @folders.include?("Ammendment Requests") %>
 
     <div class="button parent_menu" onclick="window.location = '/manage_requests'" tag=1>
@@ -485,7 +465,7 @@
 <% end %>
 
 <% if @folders.include?("View Synced Records") %>
-    <div class="button child_menu manage_cases" onclick="" tag=0 title="Synchronize with HQ">
+    <div class="button child_menu manage_cases" onclick="window.location='/syncs'" tag=0 title="Synchronize with HQ">
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
