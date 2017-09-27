@@ -13,6 +13,10 @@
 
 ActiveRecord::Schema.define(version: 20170912104756) do
 
+  create_table "couchdb_sequence", primary_key: "couchdb_sequence_id", force: :cascade do |t|
+    t.bigint "seq", limit: 4, null: false
+  end
+
   create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
     t.string   "name",       limit: 20
     t.bigint  "creator",    limit: 4
@@ -330,7 +334,6 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   add_index "person_name", ["voided_by"], name: "fk_person_name_2_idx", using: :btree
 
   create_table "person_name_code", primary_key: "person_name_code_id", force: :cascade do |t|
-    t.bigint  "person_name_code_id",   limit: 4,  null: false
     t.bigint  "person_name_id",   limit: 4,  null: false
     t.string   "first_name_code",  limit: 10, null: false
     t.string   "middle_name_code", limit: 10
@@ -338,6 +341,8 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
   end
+
+  change_column  :person_name_code, :person_name_code_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
   add_index "person_name_code", ["person_name_id"], name: "fk_person_name_code_1_idx", using: :btree
 

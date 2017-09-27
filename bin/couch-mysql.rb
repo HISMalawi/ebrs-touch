@@ -93,16 +93,17 @@ class Methods
   end
 end
 
-seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couch_sequence LIMIT 1'`.split("\n").last rescue nil
+seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couchdb_sequence LIMIT 1'`.split("\n").last rescue nil
 changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=10000&since=#{seq}"
-data = JSON.parse(RestClient.get(changes_link)) rescue {}
+data = JSON.parse(RestClient.get(changes_link))  rescue {}
 
 seq = 0 if seq.blank?
+
 open("#{Dir.pwd}/public/query.sql","w") do |file|
   file.write('')
 end
 
-data['results'].each do |result|
+(data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq)
 end
@@ -119,6 +120,6 @@ end
 ]
 
 %x[
-  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couch_sequence SET seq=#{seq}"
+  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couchdb_sequence SET seq=#{seq}"
 ]
 
