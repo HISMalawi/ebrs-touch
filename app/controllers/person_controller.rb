@@ -5,8 +5,28 @@ class PersonController < ApplicationController
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
+
     render :layout => 'facility'
-    
+  end
+
+  def get_sync_status
+    sync_progress  = '<span color: red !important>Sync Status: Offline</span>'
+    @database = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
+    source    = "#{@database['host']}:#{@database['port']}/#{@database['prefix']}_#{@database['suffix']}/"
+    target    = "#{SETTINGS['sync_host']}/#{SETTINGS['sync_database']}/"
+    data_link = "curl -X GET #{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_active_tasks"
+
+    tasks     = JSON.parse(`#{data_link}`) rescue {}
+    tasks.each do |task|
+
+      next if task['type'] != 'replication'
+      next if task['source'].split("@").last.strip != source.strip
+      next if task['target'].split("@").last.strip != target.strip
+
+      sync_progress = "Sync Status: #{task['progress']}%"
+    end
+
+    render text: sync_progress
   end
 
   def loc(id, tag=nil)
@@ -312,8 +332,7 @@ class PersonController < ApplicationController
     @section = "New Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
-  
+    #@records = PersonService.query_for_display(@states)
     
     render :template => "person/records", :layout => "data_table"
 
@@ -1056,7 +1075,7 @@ class PersonController < ApplicationController
     @section = "Complete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1065,7 +1084,7 @@ class PersonController < ApplicationController
     @section = "Incomplete Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @targeturl = "/manage_cases"
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1074,7 +1093,7 @@ class PersonController < ApplicationController
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1083,7 +1102,7 @@ class PersonController < ApplicationController
     @section = "Rejected Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1092,7 +1111,7 @@ class PersonController < ApplicationController
     @section = "Rejected Cases at HQ"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1316,7 +1335,7 @@ class PersonController < ApplicationController
     @section = "Printed Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1325,7 +1344,7 @@ class PersonController < ApplicationController
     @section = "Voided Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1335,7 +1354,7 @@ class PersonController < ApplicationController
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+   # @records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1344,7 +1363,7 @@ class PersonController < ApplicationController
     @section = "Voided Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1354,7 +1373,7 @@ class PersonController < ApplicationController
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
 
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
@@ -1364,7 +1383,7 @@ class PersonController < ApplicationController
     @section = "Ammendments"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    @records = PersonService.query_for_display(@states)
+    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
 
