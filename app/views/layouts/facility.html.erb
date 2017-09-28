@@ -177,10 +177,10 @@ function displaySyncStatus(){
                         }
                         __$('sync_status').innerHTML = result;
 
-                        setTimeout(function(){displaySyncStatus()}, 2000)
+                        setTimeout(function(){displaySyncStatus()}, 5000)
                     },
                     error: function(err){
-                        setTimeout(function(){displaySyncStatus()}, 5000)
+                        setTimeout(function(){displaySyncStatus()}, 15000)
                     }
                 }
         )
