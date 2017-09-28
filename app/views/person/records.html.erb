@@ -198,6 +198,7 @@ function initTable(){
                             json['data'][i][last_index] +=
                                     '<td class="action-button"> ' +
                                         '<div onclick="javascript:location=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
+                                            'url=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
                                             '    class="action-btn btn btn-success btn-xs">' +
                                             '<%= image_tag "view.png", class: 'btn-images' %></div>' +
                                     '</td>';
@@ -205,6 +206,7 @@ function initTable(){
                             json['data'][i][last_index] +=
                                     '<td class="Edit_Record action-button"> ' +
                                     '<div onclick="javascript:location=\'/person/' + person_id + '/edit?next_path=<%= request.path%> \'"     ' +
+                                    'url=\'/person/' + person_id + '/edit?next_path=<%= request.path%> \'"     ' +
                                     '    class="action-btn btn btn-success btn-xs">' +
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';

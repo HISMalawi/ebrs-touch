@@ -93,6 +93,15 @@ module Lib
               person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
       )
     end
+
+    if mother[:id_number].present?
+       
+        PersonIdentifier.create(
+                  person_id: mother_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: mother[:id_number]
+          )
+    end
     mother_person
   end
 
@@ -165,6 +174,15 @@ module Lib
               person_a: person.id, person_b: father_person.person_id,
               person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
       )
+    end
+
+    if father[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: father_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: father[:id_number]
+          )
     end
     father_person
   end
@@ -250,6 +268,14 @@ module Lib
       )
     end
 
+    if informant[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: informant_person.id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: informant[:id_number]
+          )
+    end
     informant_person
   end
 

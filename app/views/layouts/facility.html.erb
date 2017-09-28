@@ -35,6 +35,9 @@
           background: white;
       }
 
+      #spin{
+          display: none !important;
+      }
   </style>
 
   <script>
@@ -49,6 +52,8 @@
     <div style="display: table-row;">
       <div style="display: table-cell; border-bottom: 1px solid #3465a4; height: 80px; vertical-align: middle; color: #3465a4; font-size: 36px;">
         <table style="float: right; margin-right: 5px;" cellpadding="5">
+          <div id="sync_status" style="display: inline-block; float: left;height: 40px; width: 250px; color: green;font-size: 19px;
+                  padding-top: 20px;padding-left: 20px;"></div>
           <tr>
             <td style="vertical-align: middle;">
               <div style="border: 1px solid dimgray; color: dimgray; border-radius: 20px; padding: 2px; font-size: 0.4em;
@@ -161,10 +166,27 @@
 
 }
 
+function displaySyncStatus(){
+        jQuery.ajax({
+                    url: "/person/get_sync_status",
+                    success: function (result) {
+                        if(result.match("Offline")){
+                            __$('sync_status').style.color = "red";
+                        }else{
+                            __$('sync_status').style.color = "green";
+                        }
+                        __$('sync_status').innerHTML = result;
 
-    // setTimeout("resize()", 10);
+                        setTimeout(function(){displaySyncStatus()}, 5000)
+                    },
+                    error: function(err){
+                        setTimeout(function(){displaySyncStatus()}, 15000)
+                    }
+                }
+        )
+}
 
-   // resize();
+setTimeout(function(){displaySyncStatus()}, 50)
 
 </script>
 

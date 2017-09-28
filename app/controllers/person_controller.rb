@@ -474,10 +474,13 @@ class PersonController < ApplicationController
   def update
     if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
       person_name = PersonName.find_by_person_id(params[:id])
-      person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
-      person_name = PersonName.create(person_id: params[:id],
-            first_name: params[:person][:first_name],
-            last_name: params[:person][:last_name])
+      if params[:person][:first_name] != person_name.first_name  || params[:person][:last_name] != person_name.last_name || params[:person][:middle_name] != person_name.middle_name
+        person_name.update_attributes(voided: true, void_reason: 'General edit')
+        person_name = PersonName.create(person_id: params[:id],
+              first_name: params[:person][:first_name],
+              middle_name: params[:person][:middle_name],
+              last_name: params[:person][:last_name])
+      end
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
     end
     if ["child_birthdate","child_gender"].include?(params[:field])
@@ -533,8 +536,10 @@ class PersonController < ApplicationController
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
       #raise params.inspect
     end
-    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include?(params[:field])
+    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type","birth_details_gestation_at_birth","birth_details_number_of_prenatal_visits", "birth_details_month_prenatal_care_started","birth_details_mode_of_delivery"].include?(params[:field])
+   
       birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+
       if params[:person][:birth_weight].present? && birth_details.birth_weight.to_i != params[:person][:birth_weight].to_i
         birth_details.birth_weight = params[:person][:birth_weight]
       end
@@ -548,17 +553,108 @@ class PersonController < ApplicationController
         end
       end
 
+      if params[:person][:gestation_at_birth].present?
+        birth_details.gestation_at_birth = params[:person][:gestation_at_birth]
+      end
+
+      if params[:person][:number_of_prenatal_visits].present?
+        birth_details.number_of_prenatal_visits = params[:person][:number_of_prenatal_visits]
+      end
+
+      if params[:person][:month_prenatal_care_started].present?
+        birth_details.month_prenatal_care_started = params[:person][:month_prenatal_care_started]
+      end
+
+      if params[:person][:mode_of_delivery].present?
+        delivery_mode = ModeOfDelivery.find_by_name(params[:person][:mode_of_delivery]).id
+        birth_details.mode_of_delivery_id = delivery_mode
+      end
+
       if birth_details.save
         redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
       end
     end
 
+    if ["birth_details_number_of_children_born_alive_inclusive","birth_details_number_of_children_born_still_alive","birth_details_level_of_education"].include?(params[:field])
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+
+        if params[:person][:number_of_children_born_still_alive].present?
+           birth_details.number_of_children_born_still_alive = params[:person][:number_of_children_born_still_alive]
+        end
+        
+        if params[:person][:number_of_children_born_alive_inclusive].present?
+          birth_details.number_of_children_born_alive_inclusive = params[:person][:number_of_children_born_alive_inclusive]
+        end
+
+        if params[:person][:level_of_education].present?
+            level_of_education = LevelOfEducation.find_by_name(params[:person][:level_of_education]).id
+            birth_details.level_of_education_id = level_of_education
+        end
+
+        if birth_details.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+        end
+    end
+
     if ["birth_details_court_order_attached","birth_details_parents_signed","birth_details_parents_married_to_each_other","birth_details_date_of_marriage"  ].include?(params[:field])
-      raise params.inspect
+      birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+      if params[:person][:parents_married_to_each_other].present? 
+          birth_details.parents_married_to_each_other = (params[:person][:parents_married_to_each_other] == "Yes" ? 1 : 0)
+          if params[:person][:parents_married_to_each_other] == "Yes"
+            birth_details.court_order_attached = 0
+            birth_details.parents_signed = 0
+          end
+      end
+
+      if params[:person][:date_of_marriage].present?
+          if params[:person][:parents_married_to_each_other] == "No"
+            birth_details.date_of_marriage =  nil
+          else  
+            birth_details.date_of_marriage = params[:person][:date_of_marriage].to_date.to_s rescue nil
+          end
+          
+      end
+
+      if params[:person][:court_order_attached].present?
+        birth_details.court_order_attached = (params[:person][:court_order_attached] == "Yes" ? 1 : 0)
+      end
+
+      if params[:person][:parents_signed].present?
+        birth_details.parents_signed = (params[:person][:parents_signed] == "Yes" ? 1 : 0)
+      end
+
+      if birth_details.save
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      end
     end
 
     if ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number" ].include?(params[:field])
-      raise params.inspect
+          person_mother = Person.find(params[:id]).mother
+          person_mother_name = PersonName.find_by_person_id(person_mother.id)
+          if params[:person][:mother][:first_name] != person_mother_name.first_name  || params[:person][:mother][:last_name] != person_mother_name.last_name || params[:person][:mother][:middle_name] != person_mother_name.middle_name
+            person_mother_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_mother_name = PersonName.create(person_id: person_mother.id,
+                  first_name: params[:person][:mother][:first_name],
+                  middle_name: params[:person][:mother][:middle_name],
+                  last_name: params[:person][:mother][:last_name])
+          end
+          
+          if params[:person][:mother][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              mother_identifier = PersonIdentifier.where(person_id: person_mother.id, person_identifier_type_id: identifier_type).last
+              
+              if mother_identifier.present?
+                 mother_identifier.update_attributes(value: params[:person][:mother][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:mother][:id_number]
+                  )
+              end
+          end
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
     end
 
     if ["mother_birth_date","mother_citizenship"].include?(params[:field])
@@ -569,7 +665,36 @@ class PersonController < ApplicationController
       
     end
 
-    if ["father_birthdate","father_first_name","father_middle_name", "father_citizenship"].include?(params[:field])
+    if ["father_last_name","father_first_name","father_middle_name", "father_id_number"].include?(params[:field])
+          person_father = Person.find(params[:id]).father
+          person_father_name = PersonName.find_by_person_id(person_father.id)
+          if params[:person][:father][:first_name] != person_father_name.first_name  || params[:person][:father][:last_name] != person_father_name.last_name || params[:person][:father][:middle_name] != person_father_name.middle_name
+            person_father_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_father_name = PersonName.create(person_id: person_father.id,
+                  first_name: params[:person][:father][:first_name],
+                  middle_name: params[:person][:father][:middle_name],
+                  last_name: params[:person][:father][:last_name])
+          end
+          
+          if params[:person][:father][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              father_identifier = PersonIdentifier.where(person_id: person_father.id, person_identifier_type_id: identifier_type).last
+              
+              if father_identifier.present?
+                 father_identifier.update_attributes(value: params[:person][:mother][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:father][:id_number]
+                  )
+              end
+          end
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+    end
+
+    if ["father_birthdate","father_citizenship"].include?(params[:field])
       
     end
 
@@ -582,7 +707,32 @@ class PersonController < ApplicationController
     end
 
     if ["informant_last_name","informant_first_name","informant_middle_name", "informant_id_number", "informant_relationship"].include?(params[:field])
-      
+          person_informant = Person.find(params[:id]).informant
+          person_informant_name = PersonName.find_by_person_id(person_informant.id)
+          if params[:person][:informant][:first_name] != person_informant_name.first_name  || params[:person][:informant][:last_name] != person_informant_name.last_name || params[:person][:informant][:middle_name] != person_informant_name.middle_name
+            person_informant_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_informant_name = PersonName.create(person_id: person_informant.id,
+                  first_name: params[:person][:informant][:first_name],
+                  middle_name: params[:person][:informant][:middle_name],
+                  last_name: params[:person][:informant][:last_name])
+          end
+          
+          if params[:person][:informant][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              informant_identifier = PersonIdentifier.where(person_id: person_father.id, person_identifier_type_id: identifier_type).last
+              
+              if father_identifier.present?
+                 father_identifier.update_attributes(value: params[:person][:informant][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:informant][:id_number]
+                  )
+              end
+          end
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
     end
 
 

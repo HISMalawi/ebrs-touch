@@ -270,7 +270,7 @@ def incomplete_case_comment
       @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
     }
 
-    @records = PersonService.query_for_display(@states, types=['Abandoned'])
+    #@records = PersonService.query_for_display(@states, types=['Abandoned'])
     @section = "Abandoned Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
@@ -282,7 +282,6 @@ def incomplete_case_comment
       @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
     }
 
-    @records = PersonService.query_for_display(@states, types=['Adopted'])
     @section = "Adopted Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
@@ -290,7 +289,6 @@ def incomplete_case_comment
 
   def orphaned_cases
     @states = Status.all.map(&:name)
-    @records = PersonService.query_for_display(@states, types=['Orphaned'])
     @section = "Orphaned Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
