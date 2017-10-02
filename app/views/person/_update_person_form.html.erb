@@ -277,7 +277,7 @@
     </fieldset>
 
     <!-- Mother -->
-  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number" ].include? @field  %>
+  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number","mother_birth_date"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
@@ -329,19 +329,11 @@
                name="person[mother][id_number]"
                type="text"
                tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id')"
-               value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
                length = 8
                optional="true" />
 
       </div>
-
-    </fieldset>
-
-  <% elsif ["mother_birth_date","mother_citizenship"].include? @field  %>
-
-    <fieldset>
-      <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
 
       <div class="field">
         <label for="person_mother_birthdate">Date of Birth</label>
@@ -351,15 +343,20 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
-                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
+                tt_onLoad="dateInterval('person_mother_birthdate');"
                 optional="true"
                  />
 
         <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
-
       </div>
+
+    </fieldset>
+
+  <% elsif ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village","mother_citizenship"].include? @field  %>
+    
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Mother continued: Physical residential address</font></legend>
 
       <div class="field">
         <label for="person_mother_citizenship">Nationality</label><br>
@@ -373,14 +370,6 @@
                value="<%= @person[:mother][:residential_country] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_country" />
       </div>
-
-    </fieldset>
-
-  <% elsif ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village"].include? @field  %>
-    
-    <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'">
-      <legend><font size='5' style='border: 2px;'>Details of Mother continued: Physical residential address</font></legend>
-
 
 
       <div class="field">
@@ -451,30 +440,14 @@
     </fieldset>
 
 <% elsif ["mother_address_home_district","mother_address_home_ta", "mother_address_home_village"].include? @field  %>
-
-    <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian'">
+  
+    <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother continued: Home address</font></legend>
-
-
-      <div class="field">
-        <label for="home_address_same_as_physical">Home address same as the physical address?</label>
-        <br>
-        <select id="home_address_same_as_physical"
-		name="home_address_same_as_physical"
-                condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
-		class="input_cell"
-         	tt_onUnload="if(__$('textForhome_address_same_as_physical').value.trim() == 'Yes'){loadMothersAddress();} else {unloadMothersAddress();}" />
-          	<option></option>
-          	<option value="Yes" >Yes</option>
-          	<option value="No" >No</option>
-        </select>
-      </div>
 
       <div class="field">
         <label for="person_mother_home_district">District</label><br>
         <input id="person_mother_home_district"
 	       name="person[mother][home_district]"
-               condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
 	       type="text"
 	       value="<%= @person[:mother][:home_district] rescue nil %>"
                class="input_cell"
@@ -487,7 +460,6 @@
         <label for="person_mother_home_ta">T/A</label><br>
         <input id="person_mother_home_ta"
 	       name="person[mother][home_ta]"
-	       condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
 	       type="text"
 	       value="<%= @person[:mother][:home_ta] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_ta"
@@ -499,7 +471,6 @@
         <label for="person_mother_home_village">Village</label><br>
         <input id="person_mother_home_village"
                name="person[mother][home_village]"
-               condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
                type="text"
                value="<%= @person[:mother][:home_village] rescue nil %>"
                class="input_cell"
@@ -716,18 +687,11 @@
                optional="true"/>
       </div>
 
-    </fieldset>
-
-<% elsif ["father_birthdate","father_citizenship"].include? @field  %>
-
-    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" >
-      <legend><font size='5' style='border: 2px;'>Details of Father continued</font></legend>
-
       <div class="field">
         <label for="person_father_birthdate">Date of Birth</label><br>
 
         <input id="person_father_birthdate" name="person[father][birthdate]" type="text"
-      	       value="<%= @person[:father][:birthdate] rescue nil %>"
+               value="<%= @person[:father][:birthdate] rescue nil %>"
                class="input_cell"
                fieldtype="date"
                optional="true"
@@ -738,6 +702,13 @@
         <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden" condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" optional='true'/>
 
       </div>
+
+    </fieldset>
+
+<% elsif ["father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
+
+    <fieldset condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
+      <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
 
       <div class="field">
         <label for="person_father_citizenship">Nationality</label><br>
@@ -759,14 +730,7 @@
                class="input_cell" ajaxURL="/search_by_country"
          />
       </div>
-
-    </fieldset>
-
-<% elsif ["father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
-
-    <fieldset condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
-      <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
-
+      
       <div class="field">
         <label for="same_address_with_mother">Same as mother's?</label><br>
         <br>
@@ -1021,7 +985,7 @@
 
     </fieldset>
 
-    <% elsif ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address", "informant_cell_phone_number", "child_informant_phone_number"].include? @field  %>
+    <% elsif ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address"].include? @field  %>
         
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
@@ -1056,7 +1020,7 @@
 
       </fieldset>
 
-<% elsif ["birth_details_form_signed","child_acknowledgement_of_receipt_date"].include? @field  %>     
+<% elsif ["informant_cell_phone_number","birth_details_form_signed","child_acknowledgement_of_receipt_date"].include? @field  %>     
       
       <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Informant continued.. </font></legend>
@@ -1065,7 +1029,7 @@
 
         <label for="person_informant_phone_number">Phone Number</label><br>
 
-        <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
+        <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"informant_address_home_district
                class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" />
 
       </div>
@@ -1074,7 +1038,7 @@
         <label for="form_signed">Has the form been signed by the Informant?</label>
         <br>
         <select id="form_signed" name="person[form_signed]" 
-            class="input_cell" tt_onUnLoad = "summaryFields()">
+            class="input_cell">
           <option></option>
           <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
           <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
@@ -1090,25 +1054,10 @@
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_acknowledgement_of_receipt_date');",
-                          :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
                           :absolute_max => Date.today.strftime('%Y-%m-%d')) rescue "" %>  
 
       </div>
-
-      <div class="field">
-        <label for="person_copy_mother_name">Replace person Surname with Mother Maiden Surname?</label>
-        <br>
-        <select id="person_copy_mother_name"
-		            name="copy_mother_name"
-		            class="input_cell"
-                tt_onUnload="if(__$('textForperson_copy_mother_name').value.trim() == 'Yes'){copyMothersName();}">
-          	<option></option>
-          	<option value="Yes">Yes</option>
-          	<option value="No">No</option>
-        </select>
-      </div>
-
     </fieldset>
 
     <div class="actions">
