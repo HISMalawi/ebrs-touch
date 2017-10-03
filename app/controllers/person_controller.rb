@@ -491,6 +491,7 @@ class PersonController < ApplicationController
   end
 
   def update
+
     if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
       person_name = PersonName.find_by_person_id(params[:id])
       if params[:person][:first_name] != person_name.first_name  || params[:person][:last_name] != person_name.last_name || params[:person][:middle_name] != person_name.middle_name
@@ -502,6 +503,7 @@ class PersonController < ApplicationController
       end
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
+
     if ["child_birthdate","child_gender"].include?(params[:field])
       person = Person.find(params[:id])
       if params[:person][:gender][0] != person.gender
@@ -515,6 +517,7 @@ class PersonController < ApplicationController
       end
        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
+
     if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
       if params[:person][:place_of_birth] == 'Home'
         district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
@@ -555,6 +558,7 @@ class PersonController < ApplicationController
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
       #raise params.inspect
     end
+
     if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type","birth_details_gestation_at_birth","birth_details_number_of_prenatal_visits", "birth_details_month_prenatal_care_started","birth_details_mode_of_delivery"].include?(params[:field])
    
       birth_details = PersonBirthDetail.where(person_id: params[:id]).last
@@ -758,7 +762,6 @@ class PersonController < ApplicationController
           redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
 
-
     if ["father_address_current_district","father_address_current_ta","father_address_current_village","father_citizenship"].include?(params[:field])
         person_father = Person.find(params[:id]).father
         person_address = PersonAddress.find_by_person_id(person_father.id)
@@ -829,8 +832,7 @@ class PersonController < ApplicationController
           redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
 
-
-    if ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address", "informant_cell_phone_number"].include?(params[:field])
+    if ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address"].include?(params[:field])
       person_informant = Person.find(params[:id]).informant
       person_address = PersonAddress.find_by_person_id(person_informant.id)      
       if params[:person][:informant][:current_district].present?
@@ -853,9 +855,9 @@ class PersonController < ApplicationController
       end  
 
     end
-
+   
     if ["informant_cell_phone_number","birth_details_form_signed","child_acknowledgement_of_receipt_date"].include?(params[:field])
-
+      
         person_informant = Person.find(params[:id]).informant
         if params[:person][:informant][:phone_number].present?
             informant_number = PersonAttribute.find_by_person_id(person_informant.id)
