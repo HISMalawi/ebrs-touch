@@ -86,21 +86,21 @@ module Lib
             :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
             :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
+
+        if mother[:id_number].present?
+       
+          PersonIdentifier.create(
+                    person_id: mother_person.person_id,
+                    person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                    value: mother[:id_number]
+            )
+        end
     end
     unless mother_person.blank?
       PersonRelationship.create(
               person_a: person.id, person_b: mother_person.person_id,
               person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
       )
-    end
-
-    if mother[:id_number].present?
-       
-        PersonIdentifier.create(
-                  person_id: mother_person.person_id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: mother[:id_number]
-          )
     end
     mother_person
   end
@@ -168,6 +168,14 @@ module Lib
           :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
           :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
+      if father[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: father_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: father[:id_number]
+          )
+      end
     end
     unless father_person.blank?
       PersonRelationship.create(
@@ -176,14 +184,6 @@ module Lib
       )
     end
 
-    if father[:id_number].present?
-        
-        PersonIdentifier.create(
-                  person_id: father_person.person_id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: father[:id_number]
-          )
-    end
     father_person
   end
 
@@ -251,7 +251,14 @@ module Lib
           :address_line_1         => informant[:addressline1],
           :address_line_2         => informant[:addressline2]
       )
-
+      if informant[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: informant_person.id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: informant[:id_number]
+          )
+      end
     end
 
     PersonRelationship.create(
@@ -268,14 +275,7 @@ module Lib
       )
     end
 
-    if informant[:id_number].present?
-        
-        PersonIdentifier.create(
-                  person_id: informant_person.id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: informant[:id_number]
-          )
-    end
+
     informant_person
   end
 
