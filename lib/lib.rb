@@ -345,6 +345,7 @@ module Lib
     else
         birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
     end
+    
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
