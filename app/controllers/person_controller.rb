@@ -340,7 +340,11 @@ class PersonController < ApplicationController
 
   def new
 
-    @current_district = Location.find(SETTINGS['location_id']).district rescue nil
+    if  SETTINGS["application_mode"] == "FC"
+        @current_district = Location.find(Location.find(SETTINGS["location_id"]).parent_location).name
+    else
+        @current_district = Location.find(SETTINGS['location_id']).name rescue nil
+    end
 
     $prev_child_id = params[:id]
 

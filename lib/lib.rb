@@ -340,13 +340,17 @@ module Lib
       rel = params[:person][:informant][:relationship_to_person] rescue nil
     end
 
-
+    if  SETTINGS["application_mode"] == "FC"
+        birth_district_id = Location.find(Location.find(SETTINGS["location_id"]).parent_location).id
+    else
+        birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
+    end
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
         place_of_birth:                           place_of_birth_id,
         birth_location_id:                        location_id,
-        district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
+        district_of_birth:                        birth_district_id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,
