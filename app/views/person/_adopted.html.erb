@@ -2663,7 +2663,7 @@
       
      if (place == 'district') {
      
-      __$('person_birth_district').value =  __$('person_bd_holder').value;
+      __$('person_birth_district').value = (__$('person_bd_holder') && __$('person_bd_holder').value ? __$('person_bd_holder').value : "<%= @current_district %>") ;
        
        
     
