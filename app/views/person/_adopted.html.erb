@@ -29,7 +29,7 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
-        <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
+    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
     <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
@@ -49,8 +49,6 @@
       <% end %>
       
       <input id="person_original_surname" type="hidden"/>
-      <%= f.hidden_field :birth_district, :value => @current_district %>
-
       <div class="field">
         <label for="person_last_name">Surname</label>
         <br>
@@ -175,7 +173,7 @@
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-               name="person[birth_district]"
+               name="person[bd_holder]"
                type="text"
                optional="true"
                ajaxURL = "/search_by_district"  
@@ -651,8 +649,7 @@
                class="input_cell"
                condition="false"
                optional="true"/>
-      </div>
-      
+      </div>    
     </fieldset>
     
     
@@ -1433,7 +1430,19 @@
 
       <div class="field">
         <label for="person_informant_current_district">District</label><br>
-        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district" />
+        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_ta').getAttribute('section'))][parseInt(__$('textForperson_informant_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_informant_current_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_current_ta">T/A</label><br>
+        <input id="person_informant_current_ta" name="person[informant][current_ta]" type="text" value="<%= @person[:informant][:current_ta] rescue nil %>" class="input_cell" ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_informant_current_village').getAttribute('section'))][parseInt(__$('textForperson_informant_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_informant_current_district').value + '&ta=' + __$('textForperson_informant_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_current_village">Village</label><br>
+        <input id="person_informant_current_village" name="person[informant][current_village]" type="text" value="<%= @person[:informant][:current_village] rescue nil %>" ajaxURL="/search_by_village" class="input_cell" optional="true"/>
       </div>
 
       <div class="field">
@@ -1456,7 +1465,7 @@
           <label for="person_informant_phone_number">Phone Number</label><br>
 
           <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
-                 class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" />
+                 class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" tt_onLoad="" />
 
         </div>
 
@@ -2654,13 +2663,13 @@
       
      if (place == 'district') {
      
-      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
+      __$('person_birth_district').value =  __$('person_bd_holder').value;
        
        
     
      } else {
      
-       __$('person_birth_district').value = "<%= Location.current_district.id %>" ;
+       __$('person_birth_district').value = "<%= @current_district %>" ;
       
      }
     }
