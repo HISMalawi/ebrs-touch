@@ -499,6 +499,7 @@ class PersonController < ApplicationController
               first_name: params[:person][:first_name],
               middle_name: params[:person][:middle_name],
               last_name: params[:person][:last_name])
+
       end
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
