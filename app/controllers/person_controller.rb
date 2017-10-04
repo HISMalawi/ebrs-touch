@@ -340,7 +340,11 @@ class PersonController < ApplicationController
 
   def new
 
-    @current_district = Location.find(SETTINGS['location_id']).district rescue nil
+    if  SETTINGS["application_mode"] == "FC"
+        @current_district = Location.find(Location.find(SETTINGS["location_id"]).parent_location).name
+    else
+        @current_district = Location.find(SETTINGS['location_id']).name rescue nil
+    end
 
     $prev_child_id = params[:id]
 
@@ -491,14 +495,20 @@ class PersonController < ApplicationController
   end
 
   def update
+
     if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
       person_name = PersonName.find_by_person_id(params[:id])
-      person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
-      person_name = PersonName.create(person_id: params[:id],
-            first_name: params[:person][:first_name],
-            last_name: params[:person][:last_name])
-      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      if params[:person][:first_name] != person_name.first_name  || params[:person][:last_name] != person_name.last_name || params[:person][:middle_name] != person_name.middle_name
+        person_name.update_attributes(voided: true, void_reason: 'General edit')
+        person_name = PersonName.create(person_id: params[:id],
+              first_name: params[:person][:first_name],
+              middle_name: params[:person][:middle_name],
+              last_name: params[:person][:last_name])
+
+      end
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
+
     if ["child_birthdate","child_gender"].include?(params[:field])
       person = Person.find(params[:id])
       if params[:person][:gender][0] != person.gender
@@ -510,8 +520,9 @@ class PersonController < ApplicationController
         person.birthdate = params[:person][:birthdate].to_date.to_s
         person.save
       end
-       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
+
     if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
       if params[:person][:place_of_birth] == 'Home'
         district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
@@ -549,12 +560,344 @@ class PersonController < ApplicationController
         birth_details.other_birth_location = other_birth_location
         birth_details.save
       end
-      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases"
+      redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
       #raise params.inspect
     end
-    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type"].include?(params[:field])
-      raise params.inspect
+
+    if ["birth_details_birth_weight","birth_details_birth_type","birth_details_other_birth_type","birth_details_gestation_at_birth","birth_details_number_of_prenatal_visits", "birth_details_month_prenatal_care_started","birth_details_mode_of_delivery"].include?(params[:field])
+   
+      birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+
+      if params[:person][:birth_weight].present? && birth_details.birth_weight.to_i != params[:person][:birth_weight].to_i
+        birth_details.birth_weight = params[:person][:birth_weight]
+      end
+
+
+      if params[:person][:type_of_birth].present?
+        person_type_of_birth = PersonTypeOfBirth.where(name: params[:person][:type_of_birth]).last.person_type_of_birth_id
+        birth_details.type_of_birth = person_type_of_birth
+        if params[:person][:type_of_birth] == "Other"
+          birth_details.other_type_of_birth = params[:person][:other_type_of_birth]
+        end
+      end
+
+      if params[:person][:gestation_at_birth].present?
+        birth_details.gestation_at_birth = params[:person][:gestation_at_birth]
+      end
+
+      if params[:person][:number_of_prenatal_visits].present?
+        birth_details.number_of_prenatal_visits = params[:person][:number_of_prenatal_visits]
+      end
+
+      if params[:person][:month_prenatal_care_started].present?
+        birth_details.month_prenatal_care_started = params[:person][:month_prenatal_care_started]
+      end
+
+      if params[:person][:mode_of_delivery].present?
+        delivery_mode = ModeOfDelivery.find_by_name(params[:person][:mode_of_delivery]).id
+        birth_details.mode_of_delivery_id = delivery_mode
+      end
+
+      if birth_details.save
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+      end
     end
+
+    if ["birth_details_number_of_children_born_alive_inclusive","birth_details_number_of_children_born_still_alive","birth_details_level_of_education"].include?(params[:field])
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+
+        if params[:person][:number_of_children_born_still_alive].present?
+           birth_details.number_of_children_born_still_alive = params[:person][:number_of_children_born_still_alive]
+        end
+        
+        if params[:person][:number_of_children_born_alive_inclusive].present?
+          birth_details.number_of_children_born_alive_inclusive = params[:person][:number_of_children_born_alive_inclusive]
+        end
+
+        if params[:person][:level_of_education].present?
+            level_of_education = LevelOfEducation.find_by_name(params[:person][:level_of_education]).id
+            birth_details.level_of_education_id = level_of_education
+        end
+
+        if birth_details.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+        end
+    end
+
+    if ["birth_details_court_order_attached","birth_details_parents_signed","birth_details_parents_married_to_each_other","birth_details_date_of_marriage"  ].include?(params[:field])
+      birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+      if params[:person][:parents_married_to_each_other].present? 
+          birth_details.parents_married_to_each_other = (params[:person][:parents_married_to_each_other] == "Yes" ? 1 : 0)
+          if params[:person][:parents_married_to_each_other] == "Yes"
+            birth_details.court_order_attached = 0
+            birth_details.parents_signed = 0
+          end
+      end
+
+      if params[:person][:date_of_marriage].present?
+          if params[:person][:parents_married_to_each_other] == "No"
+            birth_details.date_of_marriage =  nil
+          else  
+            birth_details.date_of_marriage = params[:person][:date_of_marriage].to_date.to_s rescue nil
+          end
+          
+      end
+
+      if params[:person][:court_order_attached].present?
+        birth_details.court_order_attached = (params[:person][:court_order_attached] == "Yes" ? 1 : 0)
+      end
+
+      if params[:person][:parents_signed].present?
+        birth_details.parents_signed = (params[:person][:parents_signed] == "Yes" ? 1 : 0)
+      end
+
+      if birth_details.save
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+      end
+    end
+
+    if ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number","mother_birth_date"].include?(params[:field])
+          person_mother = Person.find(params[:id]).mother
+          person_mother_name = PersonName.find_by_person_id(person_mother.id)
+          if params[:person][:mother][:first_name] != person_mother_name.first_name  || params[:person][:mother][:last_name] != person_mother_name.last_name || params[:person][:mother][:middle_name] != person_mother_name.middle_name
+            person_mother_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_mother_name = PersonName.create(person_id: person_mother.id,
+                  first_name: params[:person][:mother][:first_name],
+                  middle_name: params[:person][:mother][:middle_name],
+                  last_name: params[:person][:mother][:last_name])
+          end
+          
+          if params[:person][:mother][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              mother_identifier = PersonIdentifier.where(person_id: person_mother.id, person_identifier_type_id: identifier_type).last
+              
+              if mother_identifier.present?
+                 mother_identifier.update_attributes(value: params[:person][:mother][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:mother][:id_number]
+                  )
+              end
+          end
+
+          if params[:person][:mother][:birthdate].present?
+              person_mother.birthdate = params[:person][:mother][:birthdate].to_date.to_s
+              person_mother.save
+          end
+
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
+
+    if ["mother_address_current_district","mother_address_current_ta", "mother_address_current_village","mother_citizenship"].include?(params[:field])
+        person_mother = Person.find(params[:id]).mother
+        person_address = PersonAddress.find_by_person_id(person_mother.id)
+        if params[:person][:mother][:citizenship].present?
+          person_address.citizenship = Location.find_by_country(params[:person][:mother][:citizenship]).id
+        end
+        if params[:person][:mother][:residential_country].present?
+          person_address.residential_country = Location.find_by_name(params[:person][:mother][:residential_country]).id
+        end
+        if params[:person][:mother][:current_district].present?
+          person_address.current_district  = Location.find_by_name(params[:person][:mother][:current_district]).id
+        end
+        if params[:person][:mother][:current_ta].present?
+          person_address.current_ta = Location.find_by_name(params[:person][:mother][:current_district]).id
+        end
+        if params[:person][:mother][:current_village].present?
+          person_address.current_village = Location.find_by_name(params[:person][:mother][:current_village]).id
+        end
+        if person_address.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+        end
+    end
+
+    if ["mother_address_home_district","mother_address_home_ta", "mother_address_home_village"].include?(params[:field])
+        person_mother = Person.find(params[:id]).mother
+        person_address = PersonAddress.find_by_person_id(person_mother.id)
+
+        if params[:person][:mother][:home_district].present?
+          person_address.home_district  = Location.find_by_name(params[:person][:mother][:home_district]).id
+        end
+        if params[:person][:mother][:home_ta].present?
+          person_address.home_ta = Location.find_by_name(params[:person][:mother][:home_ta]).id
+        end
+        if params[:person][:mother][:home_village].present?
+          person_address.home_village = Location.find_by_name(params[:person][:mother][:home_village]).id
+        end
+        if person_address.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+        end
+    end
+
+    if ["father_last_name","father_first_name","father_middle_name", "father_id_number","mother_birth_date"].include?(params[:field])
+          person_father = Person.find(params[:id]).father
+          person_father_name = PersonName.find_by_person_id(person_father.id)
+          if params[:person][:father][:first_name] != person_father_name.first_name  || params[:person][:father][:last_name] != person_father_name.last_name || params[:person][:father][:middle_name] != person_father_name.middle_name
+            person_father_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_father_name = PersonName.create(person_id: person_father.id,
+                  first_name: params[:person][:father][:first_name],
+                  middle_name: params[:person][:father][:middle_name],
+                  last_name: params[:person][:father][:last_name])
+          end
+          
+          if params[:person][:father][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              father_identifier = PersonIdentifier.where(person_id: person_father.id, person_identifier_type_id: identifier_type).last
+              
+              if father_identifier.present?
+                 father_identifier.update_attributes(value: params[:person][:mother][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:father][:id_number]
+                  )
+              end
+          end
+
+          if params[:person][:father][:birthdate].present?
+              person_father.birthdate = params[:person][:father][:birthdate].to_date.to_s
+              person_father.save
+          end
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
+    if ["father_address_current_district","father_address_current_ta","father_address_current_village","father_citizenship"].include?(params[:field])
+        person_father = Person.find(params[:id]).father
+        person_address = PersonAddress.find_by_person_id(person_father.id)
+        if params[:person][:father][:citizenship].present?
+          person_address.citizenship = Location.find_by_country(params[:person][:father][:citizenship]).id
+        end
+        if params[:person][:father][:residential_country].present?
+          person_address.residential_country = Location.find_by_name(params[:person][:father][:residential_country]).id
+        end
+        if params[:person][:father][:current_district].present?
+          person_address.current_district  = Location.find_by_name(params[:person][:father][:current_district]).id
+        end
+        if params[:person][:father][:current_ta].present?
+          person_address.current_ta = Location.find_by_name(params[:person][:father][:current_district]).id
+        end
+        if params[:person][:father][:current_village].present?
+          person_address.current_village = Location.find_by_name(params[:person][:father][:current_village]).id
+        end
+        if person_address.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+        end
+    end
+
+    if ["father_address_home_district","father_address_home_ta","father_address_home_village"].include?(params[:field])
+        person_father = Person.find(params[:id]).father
+        person_address = PersonAddress.find_by_person_id(person_father.id)
+
+        if params[:person][:father][:home_district].present?
+          person_address.home_district  = Location.find_by_name(params[:person][:father][:home_district]).id
+        end
+        if params[:person][:father][:home_ta].present?
+          person_address.home_ta = Location.find_by_name(params[:person][:father][:home_ta]).id
+        end
+        if params[:person][:father][:home_village].present?
+          person_address.home_village = Location.find_by_name(params[:person][:father][:home_village]).id
+        end
+        if person_address.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+        end      
+    end
+
+    if ["informant_last_name","informant_first_name","informant_middle_name", "informant_id_number", "informant_relationship"].include?(params[:field])
+          person_informant = Person.find(params[:id]).informant
+          person_informant_name = PersonName.find_by_person_id(person_informant.id)
+          if params[:person][:informant][:first_name] != person_informant_name.first_name  || params[:person][:informant][:last_name] != person_informant_name.last_name || params[:person][:informant][:middle_name] != person_informant_name.middle_name
+            person_informant_name.update_attributes(voided: true, void_reason: 'General edit')
+            person_informant_name = PersonName.create(person_id: person_informant.id,
+                  first_name: params[:person][:informant][:first_name],
+                  middle_name: params[:person][:informant][:middle_name],
+                  last_name: params[:person][:informant][:last_name])
+          end
+          
+          if params[:person][:informant][:id_number].present?
+              identifier_type = PersonIdentifierType.find_by_name("National ID Number").id
+              
+              informant_identifier = PersonIdentifier.where(person_id: person_father.id, person_identifier_type_id: identifier_type).last
+              
+              if father_identifier.present?
+                 father_identifier.update_attributes(value: params[:person][:informant][:id_number])
+              else
+                PersonIdentifier.create(
+                          person_id: mother_person.person_id,
+                          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                          value: params[:person][:informant][:id_number]
+                  )
+              end
+          end
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
+    if ["informant_address_home_district","informant_address_home_ta","informant_address_home_village", "informant_address"].include?(params[:field])
+      person_informant = Person.find(params[:id]).informant
+      person_address = PersonAddress.find_by_person_id(person_informant.id)      
+      if params[:person][:informant][:current_district].present?
+          person_address.current_district  = Location.find_by_name(params[:person][:informant][:current_district]).id
+      end
+      if params[:person][:informant][:current_ta].present?
+          person_address.current_ta = Location.find_by_name(params[:person][:informant][:current_ta]).id
+      end
+      if params[:person][:informant][:current_village].present?
+          person_address.current_village = Location.find_by_name(params[:person][:informant][:current_village]).id
+      end
+      if params[:person][:informant][:addressline1].present?
+          person_address.address_line_1 = params[:person][:informant][:addressline1]
+      end
+      if params[:person][:informant][:addressline2].present?
+         person_address.address_line_2 = params[:person][:informant][:addressline2]
+      end
+      if person_address.save
+          redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+      end  
+
+    end
+   
+    if ["informant_cell_phone_number","birth_details_form_signed","child_acknowledgement_of_receipt_date"].include?(params[:field])
+      
+        person_informant = Person.find(params[:id]).informant
+        if params[:person][:informant][:phone_number].present?
+            informant_number = PersonAttribute.find_by_person_id(person_informant.id)
+            if informant_number.blank?
+                  PersonAttribute.create(
+                      :person_id                => person_informant.id,
+                      :person_attribute_type_id => PersonAttributeType.where(name: 'cell phone number').last.id,
+                      :value                    => params[:person][:informant][:phone_number],
+                      :voided                   => 0
+                  )
+            else
+                informant_number.voided = 0
+                informant_number.save
+                PersonAttribute.create(
+                      :person_id                => person_informant.id,
+                      :person_attribute_type_id => PersonAttributeType.where(name: 'cell phone number').last.id,
+                      :value                    => params[:person][:informant][:phone_number],
+                      :voided                   => 0
+                  )
+
+            end
+        end
+
+        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        if params[:person][:form_signed].present?
+          birth_details.form_signed = (params[:person][:form_signed] == "Yes" ? 1 : 0)
+          birth_details.save
+        end
+        if params[:person][:acknowledgement_of_receipt_date].present?
+          birth_details.acknowledgement_of_receipt_date = params[:person][:acknowledgement_of_receipt_date].to_date.to_s
+          birth_details.save
+        end
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
   end   
 
   def person_for_elastic_search(params)
@@ -1061,7 +1404,7 @@ class PersonController < ApplicationController
             {
                 ["District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_district"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
                 ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_ta"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
-                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
             }
         ],
         "Details of Child's Informant" => [

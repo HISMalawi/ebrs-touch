@@ -90,7 +90,7 @@
                           :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
-
+        <%= f.hidden_field :birth_district, :value => @current_district %>
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
@@ -157,7 +157,7 @@
       <div class="field">
         <label for="person_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <input type="text" name="date_of_marriage"
+        <input type="text" name="person[date_of_marriage]"
                           id="person_date_of_marriage"
                           class="input_cell"
                           condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
@@ -1389,9 +1389,9 @@
 
         __$("person_place_of_birth").value = "This Hospital";
 
-        __$("person_hospital_of_birth").value = "<%= facility.name rescue nil %>";
+        __$("person_hospital_of_birth").value = "<%= Location.current.name %>";
 
-        __$("person_birth_district").value = "<%= district.name rescue nil %>";
+        __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
     }
 
     function loadHealthFacility() {
@@ -1402,13 +1402,13 @@
 
      if(__$("person_place_of_birth").value == "This Hospital") {
 
-      __$("textForperson_hospital_of_birth").value = "<%= facility_name  %>";
+      __$("textForperson_hospital_of_birth").value = "<%= Location.current.name %>";
 
-      __$("person_hospital_of_birth").value = "<%= facility_name %>";
+      __$("person_hospital_of_birth").value = "<%= Location.current.name %>";
 
-      __$("textForperson_birth_district").value = "<%= district_name%>";
+      __$("textForperson_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
-      __$("person_birth_district").value = "<%= district_name%>";
+      __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
       //autoNavigate("textForperson_hospital_of_birth");
 
@@ -1421,9 +1421,9 @@
 
       __$("person_hospital_of_birth").value = "";
 
-      __$("textForperson_birth_district").value = "<%= district_name%>";
+      __$("textForperson_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
-      __$("person_birth_district").value = "<%= district_name%>";
+      __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
     }
 

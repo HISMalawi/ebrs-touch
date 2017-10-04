@@ -170,6 +170,9 @@ function displaySyncStatus(){
         jQuery.ajax({
                     url: "/person/get_sync_status",
                     success: function (result) {
+                        if(!__$('sync_status')){
+                           return;   
+                        }
                         if(result.match("Offline")){
                             __$('sync_status').style.color = "red";
                         }else{

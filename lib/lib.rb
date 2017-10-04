@@ -86,6 +86,15 @@ module Lib
             :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
             :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
+
+        if mother[:id_number].present?
+       
+          PersonIdentifier.create(
+                    person_id: mother_person.person_id,
+                    person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                    value: mother[:id_number]
+            )
+        end
     end
     unless mother_person.blank?
       PersonRelationship.create(
@@ -159,6 +168,14 @@ module Lib
           :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
           :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
+      if father[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: father_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: father[:id_number]
+          )
+      end
     end
     unless father_person.blank?
       PersonRelationship.create(
@@ -166,6 +183,7 @@ module Lib
               person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
       )
     end
+
     father_person
   end
 
@@ -233,7 +251,14 @@ module Lib
           :address_line_1         => informant[:addressline1],
           :address_line_2         => informant[:addressline2]
       )
-
+      if informant[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: informant_person.id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: informant[:id_number]
+          )
+      end
     end
 
     PersonRelationship.create(
@@ -249,6 +274,7 @@ module Lib
           :voided                   => 0
       )
     end
+
 
     informant_person
   end
@@ -314,13 +340,18 @@ module Lib
       rel = params[:person][:informant][:relationship_to_person] rescue nil
     end
 
-
+    if  SETTINGS["application_mode"] == "FC"
+        birth_district_id = Location.find(Location.find(SETTINGS["location_id"]).parent_location).id
+    else
+        birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
+    end
+    
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
         place_of_birth:                           place_of_birth_id,
         birth_location_id:                        location_id,
-        district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
+        district_of_birth:                        birth_district_id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,

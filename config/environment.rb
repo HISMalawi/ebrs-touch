@@ -6,4 +6,5 @@ Rails.application.initialize!
 require "bantu_soundex"
 require "csv"
 require "simple_elastic_search"
+require "levenshtein"
 
