@@ -1005,7 +1005,7 @@ class PersonController < ApplicationController
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
-                      "middle_name" => (params[:middle_name] rescue nil),
+                      "middle_name" => (psimilararams[:middle_name] rescue nil),
                       "gender" => params[:gender],
                       "district" => params[:birth_district],
                       "birthdate"=> birthdate.to_date.strftime('%Y-%m-%d'),
@@ -1057,14 +1057,14 @@ class PersonController < ApplicationController
     if params["last_name"]
       data = PersonName.where("last_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:last_name).uniq.join("\n") and return
+        render text: data.collect(&:last_name).sort.uniq.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
       data = PersonName.where("first_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:first_name).uniq.join("\n") and return
+        render text: data.collect(&:first_name).sort.uniq.join("\n") and return
       else
         render text: "" and return
       end

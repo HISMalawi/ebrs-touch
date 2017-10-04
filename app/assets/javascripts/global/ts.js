@@ -5865,40 +5865,92 @@ function duplicatesPopup(data,checkbox){
 
         var table = document.createElement("table");
         table.style.marginTop = "0.5%";
-        table.style.border = "1px solid gray";
         table.style.height = "400px";
-        table.style.width = "98%";
+        table.style.width = "100%";
         table.style.margin ="auto";
         div.appendChild(table);
 
         var tr = document.createElement("tr");
         tr.style.height = "30px";
         table.appendChild(tr);
+
         var th =  document.createElement("th");
-        th.colSpan = "3";
+        th.colSpan = "5";
         th.style.padding = "0.8em";
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
         th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
         tr.appendChild(th);
+
+        var tr = document.createElement("tr");
+        tr.style.backgroundColor ="#e0dcdc"
+        table.appendChild(tr);
+
+        tr.style.height = "15px";
+
+        var th = document.createElement("th");
+        th.innerHTML = "#";
+        th.style.padding = "0.5em"
+        th.style.float ="left"
+        tr.appendChild(th)
+
+
+        var th = document.createElement("th");
+        th.innerHTML = "Name(Sex)";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Date of Birth";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Mother's name";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Father's name";
+        tr.appendChild(th);
+
+
         if(people){
             for(var i = 0; i < people.length ; i++){
               var tr = document.createElement("tr");
               table.appendChild(tr);
-              tr.style.height = "25px";
-              var td = document.createElement("td");
-              td.style.borderBottom = "1px dotted gray";
-              td.style.width = "5%";
-              td.style.padding = "0.5em";
-              td.innerHTML = (i + 1);
+              tr.style.height = "15px";
 
-              tr.appendChild(td);
               var td = document.createElement("td");
-              td.style.padding = "0.5em";
+              td.style.borderBottom = "1px solid gray";
+              td.style.width = "5%";
+              td.innerHTML = (i + 1);
+              td.style.padding = "0.5em"
+              tr.appendChild(td);
+
+
+              var td = document.createElement("td");
               td.style.textAlign = "center";
-              td.style.borderBottom = "1px dotted gray";
-              td.innerHTML =people[i]["_source"]["content"];
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = people[i]["_source"]["first_name"]+" "+ people[i]["_source"]["last_name"] + "("+people[i]["_source"]["gender"].split("")[0]+")";
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = new Date(people[i]["_source"]["birthdate"]).format();
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = (people[i]["_source"]["mother_first_name"] ? people[i]["_source"]["mother_first_name"] : "") +
+                             " " +(people[i]["_source"]["mother_last_name"]? people[i]["_source"]["mother_last_name"] : "N/A");
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+               td.innerHTML = (people[i]["_source"]["father_first_name"] ? people[i]["_source"]["father_first_name"] : "") +
+                              " "+(people[i]["_source"]["father_last_name"]? people[i]["_source"]["father_last_name"] : "N/A");
               tr.appendChild(td);
             }
         }
