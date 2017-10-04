@@ -39,7 +39,7 @@
 		  <div class="field">
 		    <label for="hospital_of_birth">Hospital of Birth</label>
 		    <br>
-		    <input type="text" name="hospital_of_birth" id="hospital_of_birth" class="input_cell" condition="__$('filters').value == 'Hospital of Birth'" ajaxURL = "/search_by_hospital" optional=true>
+		    <input type="text" name="hospital_of_birth" id="hospital_of_birth" class="input_cell" condition="__$('filters').value == 'Hospital of Birth'" ajaxURL = "/search_by_hospital?district=<%=@district%>" optional=true>
 		  </div>
 	</fieldset>
 	<fieldset>
