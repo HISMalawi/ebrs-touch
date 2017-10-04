@@ -1,3 +1,69 @@
+<style>
+    .even, .odd{
+        background: white !important;
+    }
+    .t-data{
+        border: 1px dotted #d3d3d3;
+        background: white;
+    }
+    th{
+        background-color: lightsteelblue !important;
+        color: black;
+        padding: 10px !important;
+    }
+    #birth_type, #example_filter{
+        margin-left: 15px;
+        float: right;
+        background:white;
+    }
+
+    #example_filter input{
+        margin-bottom: 10px;
+        font-size: 20px;
+        padding: 5px;
+        float: right;
+        width: 250px;
+        margin-left: 20px;
+        margin-right: 30px;
+    }
+
+    #example_filter label{
+        float: right;
+    }
+    .action-button{
+        width: 70px !important;
+        border-bottom: 1px solid ghostwhite !important;
+    }
+
+    .action-button div{
+        margin: 2px !important;
+        border-left: 1px solid #d3d3d3;
+    }
+
+    .action-button:hover, .action-button div:hover,
+    .action-button:active, .action-button div:active,
+    .white:hover, .white:active{
+        background: white !important;
+    }
+
+    .paginate_button{
+        font-size: 17px;
+        font-weight: bold;
+        padding: 13px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+    td, td button{
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+
+    .action-btn{
+        width: 50px;
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+</style>
 
 <div class='data-table-container'>
 
@@ -41,13 +107,13 @@
         <td>
           <table style="width: 100%; text-align: center; border-style: none;">
             <tr>
-              <td><button class="btn btn-info" onmousedown="javascript:location='/users/<%=record.id%>';">
+              <td class="action-btn"><button class="btn btn-info" onmousedown="javascript:location='/users/<%=record.id%>';">
                 <%= image_tag "view.png", class: 'btn-images' %></button>
               </td>
-              <td><button class="btn btn-warning" onmousedown="javascript:location='/users/<%=record.id%>/edit';">
+              <td  class="action-btn"><button class="btn btn-warning" onmousedown="javascript:location='/users/<%=record.id%>/edit';">
                 <%= image_tag "edit.png", class: 'btn-images' %></button>
                </td>
-              <td>
+              <td  class="action-btn">
                 <%if User.current.id == record.id %>
                  <button class="btn btn-info"  onclick="dontVoid()">
                   <%= image_tag "unvoidable.png", class: 'btn-images' %></button>

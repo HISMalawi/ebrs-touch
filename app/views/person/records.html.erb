@@ -7,7 +7,9 @@
 
 
 <style>
-
+    .even, .odd{
+        background: white !important;
+    }
     .t-data{
         border: 1px dotted #d3d3d3;
         background: white;
@@ -43,6 +45,13 @@
 
     .action-button div{
         margin: 2px !important;
+        border-left: 1px solid #d3d3d3;
+    }
+
+    .action-button:hover, .action-button div:hover,
+    .action-button:active, .action-button div:active,
+    .white:hover, .white:active{
+        background: white !important;
     }
 
      .paginate_button{
@@ -52,6 +61,7 @@
          padding-left: 16px !important;
          padding-right: 16px !important;
      }
+
 
 </style>
 <div class='data-table-container'>
@@ -194,7 +204,7 @@ function initTable(){
                         for(var i = 0; i < json['data'].length; i ++){
                             var last_index = json['data'][i].length - 1;
                             var person_id = json['data'][i][last_index];
-                            json['data'][i][last_index] = "<table>"
+                            json['data'][i][last_index] = "<table><tr class='white'>"
                             json['data'][i][last_index] +=
                                     '<td class="action-button"> ' +
                                         '<div onclick="javascript:location=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
@@ -212,7 +222,7 @@ function initTable(){
                                     '</td>';
 
                          
-                            json['data'][i][last_index] += "</table>"
+                            json['data'][i][last_index] += "</tr></table>"
                         }
                         return JSON.stringify( json );
                     }
