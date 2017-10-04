@@ -26,15 +26,17 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   create_table "audit_trails", primary_key: "audit_trail_id", force: :cascade do |t|
     t.integer  "audit_trail_type_id", limit: 4,   null: false
-    t.bigint  "person_id",           limit: 4,   null: false
-    t.string   "table_name",          limit: 100, null: false
-    t.bigint  "table_row_id",        limit: 4,   null: false
+    t.bigint   "person_id",           limit: 4,   null: false
+    t.string   "table_name",          limit: 100
+    t.bigint   "table_row_id",        limit: 4
     t.string   "field",               limit: 50
     t.string   "previous_value",      limit: 255
     t.string   "current_value",       limit: 255
     t.string   "comment",             limit: 255
     t.integer  "location_id",         limit: 4,   null: false
-    t.bigint  "creator",             limit: 4
+    t.string   "ip_address"
+    t.string   "mac_address"
+    t.bigint   "creator",             limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -270,7 +272,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "other_birth_location",                    limit: 45
     t.float    "birth_weight",                            limit: 24
     t.integer  "type_of_birth",                           limit: 4,               null: false
-    t.string   "other_type_of_birth",                     limit: 255
+    t.string   "other_type_of_birth",                      limit: 255
     t.integer  "parents_married_to_each_other",           limit: 1,   default: 0, null: false
     t.date     "date_of_marriage"
     t.integer  "gestation_at_birth",                      limit: 4
