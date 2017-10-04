@@ -64,7 +64,7 @@
 
 </style>
 <script>
-
+var dataTable;
 function dataT(){          
   dataTable = jQuery('#report').dataTable({
       dom: 'Bfrtip',
@@ -128,34 +128,43 @@ function fetchData() {
 </table>
 
 <script>
+
   dataT();
   jQuery(document).ready(function(){
         fetchData();
-        var search =__$('example_filter').getElementsByTagName("input")[0];
+        var search =__$('report_filter').getElementsByTagName("input")[0];
         search.setAttribute("onclick","changeFocusToMe(this)");
         searchData(search)
   })
-  $(document).ready(function() {
-    initTable();
 
+  function changeFocusToMe(control){
 
+      if(control) {
+          ctrl = control;
+          if(__$("cursor_for_" + control.id)){
+              if(__$("cursor")){
+                      __$("cursor_for_" + control.id).appendChild(__$("cursor"));
 
-    } );
+                  }
+          }
+          showKeyboard(control)
+      }
+  }
 
-    search_value = '';
-    var ctrl;
+  search_value = '';
 
-    function searchData(element) {
+  function searchData(element) {
         if (element.value == 0 || search_value == element.value) {
             setTimeout(function () {
                 searchData(element);
             }, 100)
         } else {
             search_value = element.value
-            table.search(search_value).draw();
+            dataTable.search(search_value).draw();
             setTimeout(function () {
                 searchData(element);
             }, 100)
         }
-    }
+  }
+
 </script>
