@@ -53,9 +53,9 @@ def view_duplicates
 
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
    @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def view_hq_duplicates
@@ -63,9 +63,9 @@ def view_hq_duplicates
     @states = ['DC-VERIFY DUPLICATE']
     @section = "Duplicates from HQ"
     @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def potential_duplicate

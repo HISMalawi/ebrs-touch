@@ -184,6 +184,7 @@ function searchData(element) {
 
 var url = "/person/paginated_data";
 <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+
   %>
 function initTable(){
     table =  $('#example').DataTable(
@@ -221,7 +222,7 @@ function initTable(){
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
-                         
+
                             json['data'][i][last_index] += "</tr></table>"
                         }
                         return JSON.stringify( json );
