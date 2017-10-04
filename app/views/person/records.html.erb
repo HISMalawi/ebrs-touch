@@ -181,10 +181,14 @@ function searchData(element) {
     }
 }
 
-
+var data = {};
 var url = "/person/paginated_data";
-<% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+<% if params[:action] == 'searched_cases'%>
+var url = "/person/paginated_search_data";
 
+<% end %>
+
+<% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
   %>
 function initTable(){
     table =  $('#example').DataTable(
@@ -198,7 +202,8 @@ function initTable(){
                     "data": function(d){
                         d.type = __$('birth_type').value;
                         d.statuses = "<%= @states.join(',')%>",
-                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>"
+                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>",
+                        d.data = data
                     },
                     dataFilter: function(data){
                         var json = jQuery.parseJSON( data );
@@ -250,3 +255,12 @@ function changeFocusToMe(control){
 }
 
 </script>
+
+<% if params[:action] == 'searched_cases'%>
+    <style>
+        #example_processing, #spin{
+            display: none !important;
+        }
+
+    </style>
+<% end %>

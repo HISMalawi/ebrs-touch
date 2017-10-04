@@ -302,7 +302,7 @@ def incomplete_case_comment
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
                 "Place of Birth", 'Record Status'
                 ]
-    @statuses = Status.all.map(&:name)
+    @statuses = Status.all.map(&:name).sort
     users = User.find_by_sql(
         "SELECT u.username, u.person_id FROM users u
           INNER JOIN user_role ur ON ur.user_id = u.user_id
