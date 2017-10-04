@@ -272,7 +272,7 @@ class PersonController < ApplicationController
           person["last_name"] =  @name.last_name rescue ''
           person["middle_name"] = @name.middle_name rescue ''
           person["gender"] = (@person.gender == 'F' ? 'Female' : 'Male')
-          person["birthdate"]= @person.birthdate.to_date
+          person["birthdate"]= @person.birthdate.to_date.strftime('%Y-%m-%d')
           person["birthdate_estimated"] = @person.birthdate_estimated
           person["nationality"]=  @mother_person.citizenship
           person["place_of_birth"] = @place_of_birth
@@ -907,7 +907,7 @@ class PersonController < ApplicationController
       person["last_name"] =  params[:person][:last_name]
       person["middle_name"] = params[:person][:middle_name]
       person["gender"] = params[:person][:gender]
-      person["birthdate"]= params[:person][:birthdate]
+      person["birthdate"]= params[:person][:birthdate].to_date.strftime('%Y-%m-%d')
       person["birthdate_estimated"] = params[:person][:birthdate_estimated]
 
       if is_twin_or_triplet(params[:person][:type_of_birth].to_s)
@@ -1002,7 +1002,7 @@ class PersonController < ApplicationController
                       "middle_name" => (params[:middle_name] rescue nil),
                       "gender" => params[:gender],
                       "district" => params[:birth_district],
-                      "birthdate"=> birthdate,
+                      "birthdate"=> birthdate.to_date.strftime('%Y-%m-%d'),
                       "mother_last_name" => (params[:mother_last_name] rescue nil),
                       "mother_middle_name" => (params[:mother_middle_name] rescue nil),
                       "mother_first_name" => (params[:mother_first_name] rescue nil),
