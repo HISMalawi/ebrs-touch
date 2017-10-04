@@ -53,6 +53,12 @@ class PersonController < ApplicationController
       @targeturl = params[:next_path]
     end
 
+    @status = PersonRecordStatus.status(params[:id])
+
+    if ["DC-POTENTIAL DUPLICATE","FC-POTENTIAL DUPLICATE","FC-EXACT DUPLICATE"].include? @status
+        redirect_to "/potential/duplicate/#{params[:id]}?next_path=/view_duplicates&index=0" and return
+    end
+
     @section = "View Record"
 
     @person = Person.find(params[:id])
