@@ -61,7 +61,9 @@
          padding-left: 16px !important;
          padding-right: 16px !important;
      }
-
+     .Edit_Record{
+         display: none;
+     }
 
 </style>
 <div class='data-table-container'>
@@ -140,15 +142,6 @@
   <option>Orphaned</option>
 </select>
 <script>
-
-<%
-  (@actions || []).each do |action|
-  next if (SETTINGS['enable_role_privileges'] == false)
-%>
-    var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
-    $("." + clas).show();
-
-<% end %>
 
 var table ;
 
@@ -254,11 +247,24 @@ function changeFocusToMe(control){
     }
 }
 
+setInterval(function(){
+    <%
+      (@actions || []).each do |action|
+      next if (SETTINGS['enable_role_privileges'] == false)
+    %>
+        var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
+        $("." + clas).show();
+        <% end %>
+    }, 200)
+
 </script>
 
 <% if params[:action] == 'searched_cases'%>
     <style>
         #example_processing, #spin{
+            display: none !important;
+        }
+        .Edit_Record{
             display: none !important;
         }
 
