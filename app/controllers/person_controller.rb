@@ -1700,7 +1700,7 @@ class PersonController < ApplicationController
 
       state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
 
-      if if params[:type] == 'All'
+      if params[:type] == 'All'
         types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
       else
         types=[params[:type]]
@@ -1758,5 +1758,11 @@ class PersonController < ApplicationController
     end
 
   end
-end
+
+  def paginated_search_data
+    filters = JSON.parse(params['data']) rescue {}
+    @records = PersonService.search_results(filters, params)
+
+    render text: @records.to_json
+  end
 end

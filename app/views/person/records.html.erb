@@ -61,7 +61,9 @@
          padding-left: 16px !important;
          padding-right: 16px !important;
      }
-
+     .Edit_Record{
+         display: none;
+     }
 
 </style>
 <div class='data-table-container'>
@@ -141,15 +143,6 @@
 </select>
 <script>
 
-<%
-  (@actions || []).each do |action|
-  next if (SETTINGS['enable_role_privileges'] == false)
-%>
-    var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
-    $("." + clas).show();
-
-<% end %>
-
 var table ;
 
 $(document).ready(function() {
@@ -181,10 +174,14 @@ function searchData(element) {
     }
 }
 
-
+var data = {};
 var url = "/person/paginated_data";
-<% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
+<% if params[:action] == 'searched_cases'%>
+var url = "/person/paginated_search_data";
 
+<% end %>
+
+<% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
   %>
 function initTable(){
     table =  $('#example').DataTable(
@@ -198,7 +195,8 @@ function initTable(){
                     "data": function(d){
                         d.type = __$('birth_type').value;
                         d.statuses = "<%= @states.join(',')%>",
-                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>"
+                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>",
+                        d.data = data
                     },
                     dataFilter: function(data){
                         var json = jQuery.parseJSON( data );
@@ -249,4 +247,26 @@ function changeFocusToMe(control){
     }
 }
 
+setInterval(function(){
+    <%
+      (@actions || []).each do |action|
+      next if (SETTINGS['enable_role_privileges'] == false)
+    %>
+        var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
+        $("." + clas).show();
+        <% end %>
+    }, 200)
+
 </script>
+
+<% if params[:action] == 'searched_cases'%>
+    <style>
+        #example_processing, #spin{
+            display: none !important;
+        }
+        .Edit_Record{
+            display: none !important;
+        }
+
+    </style>
+<% end %>

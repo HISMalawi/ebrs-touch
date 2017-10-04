@@ -160,6 +160,8 @@ Rails.application.routes.draw do
   post '/update' => "person#update"
 
   get '/person/paginated_data'
+  get '/person/paginated_search_data'
+
   resources :person
 
   resources :users
