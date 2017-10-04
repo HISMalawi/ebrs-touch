@@ -121,7 +121,7 @@ class SimpleElasticSearch
       return elastic_search_index
   end
 
-  def self.add(person)
+  def self.add_back(person)
     #puts self.elastic_format(person)
    puts `#{self.elastic_format(person)}`
   end
@@ -176,11 +176,37 @@ class SimpleElasticSearch
       potential_duplicates = []
       hits = self.query("coded_content",query_string,precision,10,0)["data"]
       
-      hits.each do |hit|
-        potential_duplicates << hit if hit["_id"].squish !=(person["person_id"].squish rescue nil)
-      end
+      #hits.each do |hit|
+        #potential_duplicates << hit if hit["_id"].squish !=(person["person_id"].squish rescue nil)
+      #end
+      potential_duplicates = SimpleElasticSearch.white_similarity(person,hits,precision)
 
       return potential_duplicates
+  end
+  def self.white_similarity(person, hits,precision)
+    potential_duplicates = []
+    content =  "#{person["first_name"]} #{person["last_name"]} #{self.format_content(person)}"
+    hits.each do |hit|
+      next if hit["_id"].squish ==(person["person_id"].squish rescue nil)
+      hit_content = hit["_source"]["content"]
+      potential_duplicates <<  hit if WhiteSimilarity.similarity(content, hit_content) >= (precision/100)
+    end
+    return potential_duplicates
+  end
+
+  def self.add(person)
+    content =  self.format_content(person)
+    
+    registration_district = person["district"]
+
+    coded_content = "#{person["first_name"].soundex} #{person["last_name"].soundex} #{self.format_coded_content(person)}"
+    person["content"] = "#{self.escape_single_quotes(person["first_name"])} #{self.escape_single_quotes(person["last_name"])} #{content}"
+    person["coded_content"] = coded_content
+    create_string = self.escape_single_quotes(person.as_json.to_json)
+    create_query = "curl -XPUT 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{person['id']}'  -d '
+                #{create_string}'"
+    `#{create_query}`             
+    return self.find(person["id"])
   end
 
   #Retriving record from elastic research
@@ -188,7 +214,7 @@ class SimpleElasticSearch
     find_query = "curl -XGET 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{id}' "
     begin
       record = JSON.parse(`#{find_query}`)
-      return record["_source"].merge({"id" => record["_id"]})
+      return record["_source"].merge({"id" => record["_id"]}) 
     rescue Exception => e
       return {}
     end
