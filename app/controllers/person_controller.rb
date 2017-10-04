@@ -1735,8 +1735,8 @@ class PersonController < ApplicationController
         row = row + [
             "#{name} (#{p.gender})",
             p.birthdate.strftime('%d/%b/%Y'),
-            father_name,
             mother_name,
+            father_name,
             p.date_registered.strftime('%d/%b/%Y'),
             Status.find(p.status_id).name,
             p.person_id
