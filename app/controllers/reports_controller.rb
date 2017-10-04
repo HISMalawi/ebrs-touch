@@ -62,6 +62,6 @@ class ReportsController < ApplicationController
 
   private
   def filters
-      ["Record Status","Date Registration Range"]
+      ["Record Status","Date Reported Range","Date Registered Range"]
   end
 end

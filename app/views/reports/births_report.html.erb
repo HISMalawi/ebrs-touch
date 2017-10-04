@@ -210,8 +210,6 @@
             var data_keys = Object.keys(data);
             
             for(var j = 0 ; j < data_keys.length ; j++){
-                    if (data_keys[j] =="filter_name")
-                        continue
                     url = url+"&"+data_keys[j]+"="+data[data_keys[j]];
             }
         }
