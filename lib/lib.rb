@@ -370,9 +370,9 @@ module Lib
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          rel,
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
-        acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
+        acknowledgement_of_receipt_date:          Date.today.to_s,
         location_created_at:                      SETTINGS['location_id'],
-        date_registered:                          (Date.today.to_s)
+        date_reported:                            (params[:person][:date_reported].to_date rescue Date.today.to_s)
     )
 
     return details

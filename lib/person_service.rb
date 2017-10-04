@@ -241,7 +241,7 @@ module PersonService
 
     data = main.group(" prs.person_id ")
 
-    data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_registered ")
+    data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_reported")
     data = data.page(page)
     .per_page(params[:length].to_i)
 
@@ -261,7 +261,7 @@ module PersonService
           p.birthdate.strftime('%d/%b/%Y'),
           mother_name,
           father_name,
-          p.date_registered.strftime('%d/%b/%Y'),
+          p.date_reported.strftime('%d/%b/%Y'),
           Status.find(p.status_id).name,
           p.person_id
       ]

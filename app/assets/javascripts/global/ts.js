@@ -6014,7 +6014,13 @@ function getUrlVars()
     }
     return vars;
 }
-
+function canSearchPotential(data){
+    if(!data.exact && facility_type == "FC"){
+        return false;
+    }else{
+        return true;
+    }
+}
 function submitAfterSummary() {
     
     /*summaryHash = {
@@ -6058,7 +6064,7 @@ function submitAfterSummary() {
     $.getJSON("/search_similar_record",data,function(response){
 
         
-        if(response.response && response.response.length != 0){
+        if(response.response && response.response.length != 0 && canSearchPotential(response)){
             
             duplicatesPopup(response);
 
