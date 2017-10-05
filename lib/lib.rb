@@ -100,7 +100,7 @@ module Lib
           PersonIdentifier.create(
                     person_id: mother_person.person_id,
                     person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                    value: mother[:id_number]
+                    value: mother[:id_number].upcase
             )
         end
     end
@@ -190,7 +190,7 @@ module Lib
         PersonIdentifier.create(
                   person_id: father_person.person_id,
                   person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: father[:id_number]
+                  value: father[:id_number].upcase
           )
       end
     end
@@ -281,7 +281,7 @@ module Lib
         PersonIdentifier.create(
                   person_id: informant_person.id,
                   person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: informant[:id_number]
+                  value: informant[:id_number].upcase
           )
       end
     end

@@ -1769,11 +1769,16 @@ class PersonController < ApplicationController
   def search_by_nid
     data = []
     nid_type_id = PersonIdentifierType.where(name: "National ID Number").last.id
+
     nids = PersonIdentifier.where(person_identifier_type_id: nid_type_id, voided: 0, value: params[:nid])
+
     nids.each do |id|
       person = Person.find(id.person_id)
-      next if person.gender == params[:gender]
+
+      #next if ((['F', 'M'].include?(person.gender) && person.gender == params[:gender]) rescue false)
       name = PersonName.where(person_id: id.person_id).last
+      next if name.blank?
+
       address = PersonAddress.where(person_id: id.person_id).last
 
       data << {

@@ -57,6 +57,10 @@
     .badge .header{
         background: ghostwhite;
     }
+
+    #textForperson_mother_id_number, #textForperson_father_id_number, #textForperson_informant_id_number{
+        text-transform: uppercase;
+    }
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
@@ -2140,7 +2144,8 @@
 
 control = null;
 function fetchByNID(id, gender, input_id){
-    control = validationControl
+    control = validationControl;
+    __$(id).value = __$(id).value.toUpperCase();
     var nid = __$(id).value;
 
     __$(input_id).value = '';
@@ -2153,9 +2158,8 @@ function fetchByNID(id, gender, input_id){
     __$('shield1').style.display = 'block';
     __$('popup1').style.display = 'block';
 
-
     jQuery.ajax({
-        url: "/person/search_by_nid?nid=" + nid + "&gender=" + gender,
+        url: ("/person/search_by_nid?nid=" + nid + "&gender=" + gender),
         success: function(data){
           data = JSON.parse(data);
 
