@@ -4,13 +4,17 @@ class CouchSQL
 
   def perform()
     begin
+      FileUtils.touch("#{Rails.root}/public/tap_sentinel")
+
       load "#{Rails.root}/bin/couch-mysql.rb"
     rescue => e
-      puts "#{e.to_s}"
-      CouchSQL.perform_in(5)
+      SuckerPunch.logger.info "=========Error #{e.to_s}"
+      CouchSQL.perform_in(2)
     end
+
+    CouchSQL.perform_in(2)
   end
 
-  CouchSQL.perform_in(2)
+
 end
 
