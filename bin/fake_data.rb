@@ -68,8 +68,8 @@ def setup_data
    court_order_attached: "No", 
    parents_signed: "No", 
    mother:{
-     last_name: mother_last_name, 
-     first_name:  mother_first_name, 
+     last_name: Faker::Name.last_name, 
+     first_name: Faker::Name.first_name, 
      middle_name: "", 
      birthdate: birthdate1.strftime('%d/%b/%Y'), 
      birthdate_estimated: "", 
@@ -114,7 +114,8 @@ def setup_data
    registration_type: "No", 
    copy_mother_name: "No", 
    controller: "person", 
-   action: "create"
+   action: "create",
+   date_reported: Date.today.to_s
   }
 
   return data
