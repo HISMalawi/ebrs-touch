@@ -67,7 +67,7 @@ class ReportsController < ApplicationController
         @district = Location.find(SETTINGS["location_id"]).name
         filters << "Record Status"
         filters << "Date Registered Range"
-        filters << "Hospital of Birth"
+        filters << "Place of Birth"
         filters << "Age"
       end
       

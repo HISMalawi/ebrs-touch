@@ -93,7 +93,7 @@
 </table>
 <div id='shieldd' style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;z-index: 2000; background: black; opacity: 0.3; display: none">
 </div>
-<iframe id="report_frame" src="/reports/report?start_date=<%=params[:start_date]%>&end_date=<%=params[:end_date]%>" style="width:100%; border:none;height:425px"></iframe>
+<iframe id="report_frame" src="/reports/report?date_reported_range[start_date]=<%=DateTime.now.strftime('%Y-%m-%d')%>&date_reported_range[end_date]=<%=DateTime.now.strftime('%Y-%m-%d')%>" style="width:100%; border:none;height:425px"></iframe>
 <script type="text/javascript">
     function capitalize(string){
         string = string.replace(/\_/g, ' ');
@@ -208,9 +208,9 @@
         for(var i = 0; i < badges.length; i++){
             var data = JSON.parse(badges[i].getAttribute('data'));
             var data_keys = Object.keys(data);
-            
+            var current_filter = data["filter_name"].toLowerCase().split(" ").join("_")
             for(var j = 0 ; j < data_keys.length ; j++){
-                    url = url+"&"+data_keys[j]+"="+data[data_keys[j]];
+                    url = url+"&"+current_filter+"["+data_keys[j]+"]"+"="+data[data_keys[j]];
             }
         }
         if(badges.length > 0){
