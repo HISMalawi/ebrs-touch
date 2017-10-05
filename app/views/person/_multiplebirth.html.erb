@@ -127,6 +127,7 @@
 
         <input type=""  fieldtype="date" id="person_birthdate" name="person[birthdate]" 
                value = "<%= @person.core_person.person.birthdate.to_date.strftime('%d/%b/%Y') %>"
+               absolute_min = "<%=( @person.core_person.person.birthdate.to_date - 2.days).strftime('%d/%b/%Y') %>"
                absolute_max ="<%= Date.today.strftime('%Y/%m/%d') %>"
                tt_onLoad = "dateInterval('person_birthdate')"
                >
