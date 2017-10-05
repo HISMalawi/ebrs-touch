@@ -1,0 +1,47 @@
+Location,RecordStatus,RequestStatus,Status,Description
+FC,DC OPEN,ACTIVE,DC-ACTIVE,Record initial state
+FC,POTENTIAL DUPLICATE,ACTIVE,FC-POTENTIAL DUPLICATE,Record initial state if record is a potential duplicate
+FC,,,FC-EXACT DUPLICATE,Exact duplicate record at FC
+DC,DC OPEN,IN-COMPLETE,DC-INCOMPLETE,Incomplete record
+DC,DC OPEN,COMPLETE,DC-COMPLETE,Complete record
+DC,,,DC-PENDING,A record thats pending for approval
+DC,DC OPEN,DUPLICATE,DC-DUPLICATE,Duplicate record
+DC,HQ OPEN,ACTIVE,HQ-ACTIVE,"Approved record at DC, accessible at HQ. Initial state for record at HQ"
+DC,HQ OPEN,RE-APPROVED,HQ-RE-APPROVED,Record  that was has been re-approved at DC on request and now accessible at HQ
+DC,VOIDED,CLOSED,DC-VOIDED,"A record that has been voided, final state"
+,,,DC-RE-OPENED,A record that has been re-opened at DC
+,,,DC-LOST,A certificate that was lost and re-opened at DC
+,,,DC-DAMAGED,A certificate that was damaged and re-opened at DC
+DC ,HQ OPEN,DC_ASK,DC-ASK,Deprecated
+DC,POTENTIAL-DUPLICATE,VOIDED,DC-VOIDED,A voided duplicate record at DC
+DC,DC OPEN,POTENTIAL DUPLICATE,DC-POTENTIAL DUPLICATE,A potential duplicate record at DC
+DC,,,DC-PENDING, A record to be reviewed by ADR
+DC,,,DC-AMEND,A record that has been ammended at DC
+DC,,,DC-EXACT DUPLICATE,Exact duplicate record at DC
+HQ,VOIDED,CLOSED,HQ-VOIDED,A voided record at HQ
+HQ,HQ OPEN,GRANTED,HQ-GRANTED,Deprecated
+HQ,HQ OPEN,REJECTED,HQ-REJECTED,Deprecated
+HQ,PRINTED,CLOSED,HQ-PRINTED,A printed record at HQ
+HQ,PRINTED,DISPATCHED,HQ-DISPATCHED,A dispatched record at HQ
+HQ,HQ OPEN,COMPLETE,HQ-INCOMPLETE-TBA,A record that is ready for approved by DM
+HQ,HQ OPEN,COMPLETE,HQ-COMPLETE,A record that is ready for approved by DM
+,,,HQ-CONFLICT-DUPLICATE,A conflicting duplicate
+HQ,HQ OPEN,CAN PRINT,HQ-CAN-PRINT,A record that is ready for printing at HQ
+HQ ,HQ OPEN,CAN REJECT,HQ-CAN-REJECT,"Record that can be rejected for editing, must be approved by supervisor for it to be fully rejected"
+HQ,HQ OPEN,APPROVED,HQ-APPROVED,"Record that has been approve at HQ, then it must be approved for printing and be on print queue"
+HQ,HQ OPEN,TBA-CONFLICT,HQ-CONFLICT,Record that the data supervisor and data manager have not agreed on.
+HQ,HQ OPEN,TBA-POTENTIAL DUPLICATE,HQ-POTENTIAL DUPLICATE-TBA,A potential duplicate record that the data supervisor and data manager have not agreed on.
+HQ,HQ OPEN,CAN VOID,HQ-CAN-VOID,A record that can be voided at HQ
+HQ,HQ OPEN,INCOMPLETE,HQ-INCOMPLETE,A record that is incomplete at HQ
+HQ,HQ OPEN,RE-PRINT,HQ-RE-PRINT,I record that has to be reprinted at HQ
+HQ,HQ OPEN,CAN RE_PRINT,HQ-CAN-RE-PRINT,I record that can be reprinted at HQ
+HQ,DUPLICATE,VOIDED,HQ-VOIDED,A voided record at HQ
+HQ,DC OPEN,GRANTED,DC-GRANTED,Deprecated
+HQ,DC OPEN,REJECTED,DC-REJECTED,A record that has finally been rejected at HQ
+HQ,HQ OPEN,POTENTIAL DUPLICATE,HQ-POTENTIAL DUPLICATE,A record that has been marked as a potential duplicate at HQ
+HQ,,,HQ-DUPLICATE,A confirmed as a duplicate by DM
+HQ,,,HQ-VOIDED DUPLICATE,Record that is duplicate and voided by DS at HQ
+HQ,,,HQ-EXACT DUPLICATE,An exact duplicate at HQ
+HQ,,,HQ-NOT DUPLICATE-TBA,Record confirmed to be not duplicate by DS at HQ
+HQ,,,HQ-NOT DUPLICATE,Record confirmed to be not duplicate by DM at HQ
+HQ,,,DC-VERIFY DUPLICATE,Record sent to DC by DS after being caught as duplicate

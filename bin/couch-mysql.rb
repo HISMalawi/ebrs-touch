@@ -94,10 +94,12 @@ class Methods
 end
 
 seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couchdb_sequence LIMIT 1'`.split("\n").last rescue nil
-changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=10000&since=#{seq}"
-data = JSON.parse(RestClient.get(changes_link))  rescue {}
 
 seq = 0 if seq.blank?
+
+changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=10000&since=#{seq}"
+
+data = JSON.parse(RestClient.get(changes_link))  rescue {}
 
 open("#{Dir.pwd}/public/query.sql","w") do |file|
   file.write('')
