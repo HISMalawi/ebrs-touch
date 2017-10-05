@@ -612,7 +612,7 @@
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
         <input type="text" name="gestation_at_birth" class ="input_cell" fieldtype ="number" min =36
-                            absolute_min =23 max =42 absolute_max =45 optional="true" id="person_gestation_at_birth">
+                            absolute_min =30 max =42 absolute_max =45 optional="true" id="person_gestation_at_birth">
       </div>
       <div class="field">
         <label for ="number_of_prenatal_visits">Number of prenatal visits</label>
@@ -1237,15 +1237,19 @@
     var date_estimate;
     function reportingDate(){
 
-      commence = new Date(8 + '/' + 1 + '/' + 2015);
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
 
-      original = new Date(6 + '/' + 15 + '/' + 2015);
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
 
       if (original < commence){
         commence = original;
       }
-
-      return original.getDate() + "/" + months[original.getMonth()] + "/" + original.getFullYear();
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
 
     }
 

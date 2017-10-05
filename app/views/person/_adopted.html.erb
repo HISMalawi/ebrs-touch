@@ -1511,15 +1511,19 @@
 
     function reportingDate(){
 
-      commence = new Date(8 + '/' + 1 + '/' + 2015);
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
 
-      original = new Date(6 + '/' + 15 + '/' + 2015);
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
 
       if (original < commence){
         commence = original;
       }
-
-      return original.getDate() + "/" + months[original.getMonth()] + "/" + original.getFullYear();
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
 
     }
 
