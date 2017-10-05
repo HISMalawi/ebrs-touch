@@ -1005,7 +1005,7 @@ class PersonController < ApplicationController
       person = {
                       "first_name"=>params[:first_name], 
                       "last_name" => params[:last_name],
-                      "middle_name" => (params[:middle_name] rescue nil),
+                      "middle_name" => (psimilararams[:middle_name] rescue nil),
                       "gender" => params[:gender],
                       "district" => params[:birth_district],
                       "birthdate"=> birthdate.to_date.strftime('%Y-%m-%d'),
@@ -1057,14 +1057,14 @@ class PersonController < ApplicationController
     if params["last_name"]
       data = PersonName.where("last_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:last_name).uniq.join("\n") and return
+        render text: data.collect(&:last_name).sort.uniq.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
       data = PersonName.where("first_name LIKE (?)", "#{params[:search]}%")
       if data.present?
-        render text: data.collect(&:first_name).uniq.join("\n") and return
+        render text: data.collect(&:first_name).sort.uniq.join("\n") and return
       else
         render text: "" and return
       end
@@ -1723,7 +1723,7 @@ class PersonController < ApplicationController
 
       data = d.group(" prs.person_id ")
 
-      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_registered ")
+      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_reported ")
       data = data.page(page)
       .per_page(params[:length].to_i)
 
@@ -1743,7 +1743,7 @@ class PersonController < ApplicationController
             p.birthdate.strftime('%d/%b/%Y'),
             mother_name,
             father_name,
-            p.date_registered.strftime('%d/%b/%Y'),
+            p.date_reported.strftime('%d/%b/%Y'),
             Status.find(p.status_id).name,
             p.person_id
         ]

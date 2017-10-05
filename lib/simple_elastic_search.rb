@@ -189,7 +189,12 @@ class SimpleElasticSearch
     hits.each do |hit|
       next if hit["_id"].squish ==(person["person_id"].squish rescue nil)
       hit_content = hit["_source"]["content"]
-      potential_duplicates <<  hit if WhiteSimilarity.similarity(content, hit_content) >= (precision/100)
+      if precision.to_i == 100
+          similarity = 0.95
+      else
+        similarity = precision / 100
+      end
+      potential_duplicates <<  hit if true || WhiteSimilarity.similarity(content, hit_content) >= similarity
     end
     return potential_duplicates
   end

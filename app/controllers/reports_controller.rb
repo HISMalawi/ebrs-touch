@@ -20,7 +20,7 @@ class ReportsController < ApplicationController
   def report
     status = (params[:status].present? ? params[:status] : "Reported")
 
-    @data = Report.births_report(params[:start_date], params[:end_date],status)
+    @data = Report.births_report(params)
     render :layout =>false
   end
 
@@ -32,7 +32,7 @@ class ReportsController < ApplicationController
 
   def filter
     @filter = params[:filter]
-    @filters = filters
+    @filters = get_filters
     @statuses = Status.all.map(&:name)
     users = User.find_by_sql(
         "SELECT u.username, u.person_id FROM users u
@@ -43,7 +43,7 @@ class ReportsController < ApplicationController
   end
 
   def rfilter
-      @filters = filters
+      @filters = get_filters
   end
 
   def user_audit_trail
@@ -61,7 +61,15 @@ class ReportsController < ApplicationController
   end
 
   private
-  def filters
-      ["Record Status","Date Registration Range"]
+  def get_filters
+      filters = ["Date Reported Range"]
+      if SETTINGS["application_mode"] == "DC"
+        @district = Location.find(SETTINGS["location_id"]).name
+        filters << "Record Status"
+        filters << "Date Registered Range"
+        filters << "Place of Birth"
+        filters << "Age"
+      end
+      
   end
 end

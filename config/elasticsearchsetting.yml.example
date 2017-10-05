@@ -1,4 +1,5 @@
 elasticsearch:
+  protocol: http
   index: ebrs_dc_2_0
   type : child
   port: 9200
