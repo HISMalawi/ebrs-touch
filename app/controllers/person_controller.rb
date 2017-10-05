@@ -1775,7 +1775,7 @@ class PersonController < ApplicationController
     nids.each do |id|
       person = Person.find(id.person_id)
 
-      #next if ((['F', 'M'].include?(person.gender) && person.gender == params[:gender]) rescue false)
+      next if (person.gender.to_s != params[:gender].to_s)
       name = PersonName.where(person_id: id.person_id).last
       next if name.blank?
 
