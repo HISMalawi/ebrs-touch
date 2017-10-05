@@ -3995,6 +3995,15 @@ function gotoQuestion(pos, section) {
 
     var fields = navigablefieldsets[section];
 
+
+    if (fields[pos]){
+        if (fields[pos].getAttribute("tt_BeforeUnload") != null) {
+
+            var val = eval(fields[pos].getAttribute("tt_BeforeUnload"));
+
+        }
+    }
+
     if (fields[pos]){
         if (fields[pos].getAttribute("tt_onUnload") != null) {
 

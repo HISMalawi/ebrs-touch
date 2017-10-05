@@ -163,6 +163,7 @@ Rails.application.routes.draw do
 
   get '/person/paginated_data'
   get '/person/paginated_search_data'
+  get '/person/search_by_nid'
 
   resources :person
 

@@ -1765,4 +1765,29 @@ class PersonController < ApplicationController
 
     render text: @records.to_json
   end
+
+  def search_by_nid
+    data = []
+    nid_type_id = PersonIdentifierType.where(name: "National ID Number").last.id
+    nids = PersonIdentifier.where(person_identifier_type_id: nid_type_id, voided: 0, value: params[:nid])
+    nids.each do |id|
+      person = Person.find(id.person_id)
+      next if person.gender == params[:gender]
+      name = PersonName.where(person_id: id.person_id).last
+      address = PersonAddress.where(person_id: id.person_id).last
+
+      data << {
+          'first_name'    => (name.first_name rescue ''),
+          'last_name'     => (name.last_name rescue ''),
+          'gender'        => (({'F' => 'Female', 'M' => 'Male'}[person.gender]) rescue nil),
+          'birthdate'     =>  (person.birthdate.strftime("%d-%b-%Y") rescue nil),
+          'home_district' => (Location.find(address.home_district).name rescue nil),
+          'home_ta'       => (Location.find(address.home_ta).name rescue nil),
+          'home_village'  => (Location.find(address.home_village).name rescue nil),
+          'person_id'     => id.person_id
+      }
+    end
+
+    render text: data.to_json
+  end
 end
