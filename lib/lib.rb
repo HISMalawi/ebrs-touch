@@ -24,7 +24,15 @@ module Lib
   end
 
   def self.new_mother(person, params,mother_type)
-    
+
+    if !params[:mother_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:mother_id],
+          person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
+      )
+      return nil
+    end
+
     if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
@@ -92,7 +100,7 @@ module Lib
           PersonIdentifier.create(
                     person_id: mother_person.person_id,
                     person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                    value: mother[:id_number]
+                    value: mother[:id_number].upcase
             )
         end
     end
@@ -106,6 +114,15 @@ module Lib
   end
 
   def self.new_father(person, params, father_type)
+
+    if !params[:father_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:father_id],
+          person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
+      )
+      return nil
+    end
+
     if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
@@ -173,7 +190,7 @@ module Lib
         PersonIdentifier.create(
                   person_id: father_person.person_id,
                   person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: father[:id_number]
+                  value: father[:id_number].upcase
           )
       end
     end
@@ -188,6 +205,14 @@ module Lib
   end
 
   def self.new_informant(person, params)
+
+    if !params[:informant_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:informant_id],
+          person_relationship_type_id: PersonRelationType.where(name: "Informant").last.id
+      )
+      return nil
+    end
 
     informant_person = nil; core_person = nil
 
@@ -256,7 +281,7 @@ module Lib
         PersonIdentifier.create(
                   person_id: informant_person.id,
                   person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: informant[:id_number]
+                  value: informant[:id_number].upcase
           )
       end
     end
