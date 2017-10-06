@@ -1029,7 +1029,7 @@
         <label for="person_date_reported">Date of Reporting</label>
         <br>
         <input type="hidden" name="registration_type" id="registration_type">
-        <%= (f.text_field :acknowledgement_of_receipt_date,
+        <%= (f.text_field :date_reported,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",

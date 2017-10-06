@@ -5889,7 +5889,7 @@ function duplicatesPopup(data,checkbox){
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
-        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
+        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)"+(data.exact ? " <br/>click \"Proceed\" and the record will not be save" : "");
         tr.appendChild(th);
 
         var tr = document.createElement("tr");
