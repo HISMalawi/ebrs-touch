@@ -273,7 +273,7 @@ class PersonController < ApplicationController
         if @person.present? && SETTINGS['potential_search'] && SETTINGS['application_mode'] =="DC"
 
           person = {}
-          person["person_id"] = @person.person_id.to_s
+          person["id"] = @person.person_id.to_s
           person["first_name"]= @name.first_name rescue ''
           person["last_name"] =  @name.last_name rescue ''
           person["middle_name"] = @name.middle_name rescue ''

@@ -187,7 +187,7 @@ class SimpleElasticSearch
     potential_duplicates = []
     content =  "#{person["first_name"]} #{person["last_name"]} #{self.format_content(person)}"
     hits.each do |hit|
-      next if hit["_id"].squish ==(person["person_id"].squish rescue nil)
+      next if hit["_id"].squish ==(person["id"].squish rescue nil)
       hit_content = hit["_source"]["content"]
       if precision.to_i == 100
           similarity = 0.95
