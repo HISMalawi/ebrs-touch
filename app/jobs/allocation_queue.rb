@@ -6,7 +6,7 @@ class AllocationQueue
 
     FileUtils.touch("#{Rails.root}/public/sentinel")
 
-    ActiveRecord::Base.logger.level = 1
+    ActiveRecord::Base.logger.level = 3
     queue = []
     queue = IdentifierAllocationQueue.where(assigned: 0) if (SETTINGS['assign_ben'] != false)
 
@@ -83,6 +83,7 @@ class AllocationQueue
       AllocationQueue.perform_in(1.5)
     end
 
+    ActiveRecord::Base.logger.level = 3
     AllocationQueue.perform_in(1.5)
   end
 

@@ -3,6 +3,7 @@ class CouchSQL
   workers 1
 
   def perform()
+    ActiveRecord::Base.logger.level = 3
     begin
       FileUtils.touch("#{Rails.root}/public/tap_sentinel")
 
@@ -12,6 +13,7 @@ class CouchSQL
       CouchSQL.perform_in(2)
     end
 
+    ActiveRecord::Base.logger.level = 1
     CouchSQL.perform_in(2)
   end
 
