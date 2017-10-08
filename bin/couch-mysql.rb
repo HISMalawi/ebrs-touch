@@ -1,6 +1,8 @@
 require 'rest-client'
 require "yaml"
 
+ActiveRecord::Base.logger.level = 3
+
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
 
@@ -28,13 +30,27 @@ mysql_username = mysql_db_settings["username"]
 mysql_password = mysql_db_settings["password"]
 mysql_host = mysql_db_settings["host"] || '0.0.0.0'
 mysql_db = mysql_db_settings["database"]
+
+$mysql_username = mysql_db_settings["username"]
+$mysql_password = mysql_db_settings["password"]
+$mysql_host = mysql_db_settings["host"] || '0.0.0.0'
+$mysql_db = mysql_db_settings["database"]
 mysql_port = mysql_db_settings["port"] || '3306'
 mysql_adapter = mysql_db_settings["adapter"]
 #reading db_mapping
 
+$models = {}
+
+Rails.application.eager_load!
+ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
+  $models[eval(n).table_name] = n
+end
+
 
 class Methods
   def self.update_doc(doc, seq)
+    FileUtils.touch("#{Rails.root}/public/tap_sentinel")
+
     person_id = doc['_id']
     change_agent = doc['change_agent']
 
@@ -56,39 +72,45 @@ class Methods
           file.close
         end
       end
-
+      %x[
+        mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=0"
+      ]
       data = doc[change_agent]
       table = change_agent
 
       p_key = data.keys[0]
       p_value = data[p_key]
-      return nil if p_value.blank?
 
-      update_query = " UPDATE "
-      data.each do |k, v|
-        next if ['null', 'nil'].include?(v)
-        next if k.to_s == p_key.to_s
-        (!v.blank?) ? (update_query += " #{k} = \"#{v}\", ") :  (update_query += " #{k} = NULL, ")
+      begin
+        record = eval($models[table]).find(p_value) rescue nil
+        if !record.blank?
+          record.update_columns(data)
+        else
+          record =  eval($models[table]).new(data)
+          record.save
+        end
+      rescue
+        sleep(1)
+        begin
+        record = eval($models[table]).find(p_value) rescue nil
+          if !record.blank?
+            record.update_columns(data)
+          else
+            record =  eval($models[table]).new(data)
+            record.save
+          end
+        rescue => e
+          id = "#{table}_#{p_value}"
+          open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
+            f << "#{record}"
+            f << "\n\n#{e}"
+          end
+        end
       end
-      update_query = update_query.strip.sub(/\,$/, '')
 
-      insert_query = "INSERT INTO #{table} ("
-      keys = []
-      values = []
-
-      data.each do |k, v|
-        v = (!v.blank?) ? "\"#{v}\"" : " NULL "
-        keys << k
-        values << v
-      end
-
-      insert_query += (keys.join(', ') + " ) VALUES (" )
-      insert_query += ( values.join(",")) + ")"
-      query = "#{insert_query} ON DUPLICATE KEY #{update_query};"
-
-      open("#{Dir.pwd}/public/query.sql", 'a') do |f|
-        f << "#{query}"
-      end
+      %x[
+        mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=1"
+      ]
     end
   end
 end
@@ -97,19 +119,16 @@ seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db
 
 seq = 0 if seq.blank?
 
-changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=10000&since=#{seq}"
+changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=1000&since=#{seq}"
 
 data = JSON.parse(RestClient.get(changes_link))  rescue {}
-
-open("#{Dir.pwd}/public/query.sql","w") do |file|
-  file.write('')
-end
 
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq)
 end
 
+=begin
 
 %x[
    mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=0"
@@ -120,8 +139,12 @@ end
 %x[
   mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=1"
 ]
+=end
 
 %x[
   mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couchdb_sequence SET seq=#{seq}"
 ]
 
+ActiveRecord::Base.logger.level = 1
+
+CouchSQL.perform_in(2)
