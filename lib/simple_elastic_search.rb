@@ -208,7 +208,7 @@ class SimpleElasticSearch
     person["content"] = "#{self.escape_single_quotes(person["first_name"])} #{self.escape_single_quotes(person["last_name"])} #{content}"
     person["coded_content"] = coded_content
     create_string = self.escape_single_quotes(person.as_json.to_json)
-    create_query = "curl -XPUT 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{person['id']}'  -d '
+    create_query = "curl -s -XPUT 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{person['id']}'  -d '
                 #{create_string}'"
     `#{create_query}`             
     return self.find(person["id"])
@@ -216,7 +216,7 @@ class SimpleElasticSearch
 
   #Retriving record from elastic research
   def self.find(id)
-    find_query = "curl -XGET 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{id}' "
+    find_query = "curl -s -XGET 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{id}' "
     begin
       record = JSON.parse(`#{find_query}`)
       return record["_source"].merge({"id" => record["_id"]}) 
