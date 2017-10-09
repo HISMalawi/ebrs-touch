@@ -282,17 +282,37 @@ class PersonController < ApplicationController
           person["birthdate_estimated"] = @person.birthdate_estimated
           person["nationality"]=  @mother_person.citizenship rescue nil
           person["place_of_birth"] = @place_of_birth
+
           if  birth_loc.district.present?
             person["district"] = birth_loc.district
           else
             person["district"] = "Lilongwe"
           end      
+
           person["mother_first_name"]= @mother_name.first_name rescue ''
           person["mother_last_name"] =  @mother_name.last_name  rescue ''
           person["mother_middle_name"] = @mother_name.middle_name rescue '' 
+
+          person["mother_home_district"] = Location.find(@mother_person.addresses.last.home_district).name rescue nil
+          person["mother_home_ta"] = Location.find(@mother_person.addresses.last.home_ta).name rescue nil
+          person["mother_home_village"] = Location.find(@mother_person.addresses.last.home_village).name rescue nil
+
+          person["mother_current_district"] = Location.find(@mother_person.addresses.last.current_district).name rescue nil
+          person["mother_current_ta"] = Location.find(@mother_person.addresses.last.current_ta).name rescue nil
+          person["mother_current_village"] = Location.find(@mother_person.addresses.last.current_village).name rescue nil
+
+
           person["father_first_name"]= @father_name.first_name  rescue ''
           person["father_last_name"] =  @father_name.last_name  rescue ''
           person["father_middle_name"] = @father_name.middle_name  rescue ''
+
+          person["father_home_district"] = Location.find(@father_person.addresses.last.home_district).name rescue nil
+          person["father_home_ta"] = Location.find(@father_person.addresses.last.home_ta).name rescue nil
+          person["father_home_village"] = Location.find(@father_person.addresses.last.home_village).name rescue nil
+
+          person["father_current_district"] = Location.find(@father_person.addresses.last.current_district).name rescue nil
+          person["father_current_ta"] = Location.find(@father_person.addresses.last.current_ta).name rescue nil
+          person["father_current_village"] = Location.find(@father_person.addresses.last.current_village).name rescue nil
         
           SimpleElasticSearch.add(person)
 
@@ -409,7 +429,7 @@ class PersonController < ApplicationController
 
     #To be contued
     if @person.present? && SETTINGS['potential_search']
-      SimpleElasticSearch.add(person_for_elastic_search(params))
+      SimpleElasticSearch.add(person_for_elastic_search(@person,params))
     else
 
     end
@@ -906,9 +926,9 @@ class PersonController < ApplicationController
 
   end   
 
-  def person_for_elastic_search(params)
+  def person_for_elastic_search(core_person,params)
       person = {}
-      person["id"] = @person.person_id
+      person["id"] = core_person.person_id
       person["first_name"]= params[:person][:first_name]
       person["last_name"] =  params[:person][:last_name]
       person["middle_name"] = params[:person][:middle_name]
@@ -934,6 +954,14 @@ class PersonController < ApplicationController
          person["mother_last_name"] =   mother_name.last_name rescue ""
          person["mother_middle_name"] =  mother_name.first_name rescue ""
 
+         person["mother_home_district"] = Location.find(mother.addresses.last.home_district).name rescue nil
+         person["mother_home_ta"] = Location.find(mother.addresses.last.home_ta).name rescue nil
+         person["mother_home_village"] = Location.find(mother.addresses.last.home_village).name rescue nil
+
+         person["mother_current_district"] = Location.find(mother.addresses.last.current_district).name rescue nil
+         person["mother_current_ta"] = Location.find(mother.addresses.last.current_ta).name rescue nil
+         person["mother_current_village"] = Location.find(mother.addresses.last.current_village).name rescue nil
+
          if params[:relationship] == "opharned" || params[:relationship] == "adopted"
            father = prev_child.adoptive_father
          else
@@ -950,6 +978,14 @@ class PersonController < ApplicationController
          person["father_last_name"] =   father_name.last_name rescue ""
          person["father_middle_name"] = father_name.first_name rescue ""
 
+         person["father_home_district"] = Location.find(father.addresses.last.home_district).name rescue nil
+         person["father_home_ta"] = Location.find(father.addresses.last.home_ta).name rescue nil
+         person["father_home_village"] = Location.find(father.addresses.last.home_village).name rescue nil
+
+         person["father_current_district"] = Location.find(father.addresses.last.current_district).name rescue nil
+         person["father_current_ta"] = Location.find(father.addresses.last.current_ta).name rescue nil
+         person["father_current_village"] = Location.find(father.addresses.last.current_village).name rescue nil
+
          birth_details = prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_i).first
          person["place_of_birth"] = Location.find(birth_details.place_of_birth).name
          person["district"] = Location.find(birth_details.district_of_birth).name
@@ -963,9 +999,26 @@ class PersonController < ApplicationController
         person["mother_first_name"]= params[:person][:mother][:first_name] rescue nil
         person["mother_last_name"] =  params[:person][:mother][:last_name] rescue nil
         person["mother_middle_name"] = params[:person][:mother][:middle_name] rescue nil
+
+        person["mother_home_district"] = params[:person][:mother][:home_district] rescue nil
+        person["mother_home_ta"] = params[:person][:mother][:home_ta] rescue nil
+        person["mother_home_village"] = params[:person][:mother][:home_village] rescue nil
+         
+        person["mother_current_district"] = params[:person][:mother][:home_district] rescue nil
+        person["mother_current_ta"] = params[:person][:mother][:home_ta] rescue nil
+        person["mother_current_village"] = params[:person][:mother][:home_village] rescue nil
+
         person["father_first_name"]= params[:person][:father][:first_name] rescue nil
         person["father_last_name"] =  params[:person][:father][:last_name] rescue nil
         person["father_middle_name"] = params[:person][:father][:middle_name] rescue nil
+
+        person["father_home_district"] = params[:person][:father][:home_district] rescue nil
+        person["father_home_ta"] = params[:person][:father][:home_ta] rescue nil
+        person["father_home_village"] = params[:person][:father][:home_village] rescue nil
+         
+        person["father_current_district"] = params[:person][:father][:home_district] rescue nil
+        person["father_current_ta"] = params[:person][:father][:home_ta] rescue nil
+        person["father_current_village"] = params[:person][:father][:home_village] rescue nil
 
       end
       return person
