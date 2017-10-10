@@ -230,6 +230,7 @@ module Lib
          informant_person = person.mother
       end
     elsif params[:informant_same_as_father] == 'Yes'
+
       if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_father
       else

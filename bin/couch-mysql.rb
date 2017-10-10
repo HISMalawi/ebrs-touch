@@ -100,7 +100,7 @@ class Methods
             record.save
           end
         rescue => e
-          id = "#{table}_#{p_value}"
+          id = "#{table}_#{p_value}_#{seq}"
           open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
             f << "#{record}"
             f << "\n\n#{e}"
@@ -126,6 +126,35 @@ data = JSON.parse(RestClient.get(changes_link))  rescue {}
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq)
+end
+
+#RESOLVE PREVIOUS ERRORS
+errored = Dir.entries("#{Rails.root}/public/errors/")
+(errored || []).each do |e|
+  s = e.split(/\_/).last
+  next if !s.match(/\d+/)
+  s = s.to_i - 1
+
+  changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&since=#{s}&limit=1"
+  record = JSON.parse(RestClient.get(changes_link))['results'].last['doc']  rescue {}
+  table_name = record['change_agent']
+  data = record[table_name]
+  p_key = data.keys.first rescue next
+  p_value = data[p_key]
+
+  record = eval($models[table_name]).find(p_value) rescue nil
+  if !record.blank?
+    record.update_columns(data)
+  else
+    record =  eval($models[table_name]).new(data)
+    if record.save
+      `rm #{Rails.root}/public/errors/#{e}`
+    end
+  end
+
+  %x[
+    mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=1"
+  ]
 end
 
 =begin

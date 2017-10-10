@@ -25,7 +25,7 @@ module PersonService
         if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
           adoptive_mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
         end
-        if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+        if params[:foster_parents] == "Both" || params[:foster_parents] =="Father"
           adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
         end
         informant = Lib.new_informant(person, params)
