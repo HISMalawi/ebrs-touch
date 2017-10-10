@@ -43,6 +43,7 @@ class ReportsController < ApplicationController
   end
 
   def rfilter
+
       @filters = get_filters
   end
 
@@ -70,6 +71,6 @@ class ReportsController < ApplicationController
         filters << "Place of Birth"
         filters << "Age"
       end
-      
+      return filters
   end
 end
