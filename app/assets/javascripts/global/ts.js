@@ -5889,7 +5889,7 @@ function duplicatesPopup(data,checkbox){
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
-        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)"+(data.exact ? " <br/>click \"Proceed\" and the record will not be save" : "");
+        th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
         tr.appendChild(th);
 
         var tr = document.createElement("tr");
@@ -5971,44 +5971,60 @@ function duplicatesPopup(data,checkbox){
         footdiv.style.height = "25%";
         footdiv.style.textAlign = "center";
         div.appendChild(footdiv);
+        if(facility_type  =="FC"){
+            var ok = document.createElement("button");
+            ok.innerHTML = "Cancel";
+            ok.className = "red";
+            ok.id = "popup.ok"
+            ok.style.height = "40px";
+            ok.style.width = "15%"
+            ok.onclick = function () {
+               ids = people.map(function(person){
+                    return person["_id"]
+               }).join("|");
+               __$("person_duplicate").value = ids;
 
-        var cancel = document.createElement("button");
-        cancel.innerHTML = "Cancel";
-        cancel.className = "red";
-        cancel.id = "popup.cancel"
-        cancel.style.height = "40px";
-        cancel.style.width = "15%"
-        cancel.style.marginRight ="10%";
-        cancel.onclick = function () {
-           document.body.removeChild(shield);
-        }
-        footdiv.appendChild(cancel);
-
-        var ok = document.createElement("button");
-        ok.innerHTML = "Proceed";
-        ok.className = "blue";
-        ok.id = "popup.ok"
-        ok.style.height = "40px";
-        ok.style.width = "15%"
-        ok.onclick = function () {
-           ids = people.map(function(person){
-                return person["_id"]
-           }).join("|");
-           __$("person_duplicate").value = ids;
-
-           __$("person_is_exact_duplicate").value = data.exact
-           if(data.exact && facility_type  =="FC"){
+               __$("person_is_exact_duplicate").value = data.exact
                window.location.href = "/"
-           }else{
+            }
+            footdiv.appendChild(ok);
+
+        }else{
+
+            var cancel = document.createElement("button");
+            cancel.innerHTML = "Cancel";
+            cancel.className = "red";
+            cancel.id = "popup.cancel"
+            cancel.style.height = "40px";
+            cancel.style.width = "15%"
+            cancel.style.marginRight ="10%";
+            cancel.onclick = function () {
                document.body.removeChild(shield);
-               document.forms[0].submit();            
-           }
+            }
+            footdiv.appendChild(cancel);
+
+            var ok = document.createElement("button");
+            ok.innerHTML = "Proceed";
+            ok.className = "blue";
+            ok.id = "popup.ok"
+            ok.style.height = "40px";
+            ok.style.width = "15%"
+            ok.onclick = function () {
+               ids = people.map(function(person){
+                    return person["_id"]
+               }).join("|");
+               __$("person_duplicate").value = ids;
+
+               __$("person_is_exact_duplicate").value = data.exact
+               if(data.exact && facility_type  =="FC"){
+                   window.location.href = "/"
+               }else{
+                   document.body.removeChild(shield);
+                   document.forms[0].submit();            
+               }
+            }
+            footdiv.appendChild(ok);
         }
-        footdiv.appendChild(ok);
-
-
-
-
 }
 
 function getUrlVars()

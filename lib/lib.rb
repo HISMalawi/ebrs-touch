@@ -144,7 +144,7 @@ module Lib
 
       father_person = Person.create(
           :person_id          => core_person.id,
-          :gender             => 'F',
+          :gender             => 'M',
           :birthdate          => (father[:birthdate].blank? ? "1900-01-01" : father[:birthdate].to_date),
           :birthdate_estimated => (father[:birthdate].blank? ? 1 : 0)
       )
