@@ -7,7 +7,9 @@
 
 
 <style>
-
+    .even, .odd{
+        background: white !important;
+    }
     .t-data{
         border: 1px dotted #d3d3d3;
         background: white;
@@ -43,6 +45,13 @@
 
     .action-button div{
         margin: 2px !important;
+        border-left: 1px solid #d3d3d3;
+    }
+
+    .action-button:hover, .action-button div:hover,
+    .action-button:active, .action-button div:active,
+    .white:hover, .white:active{
+        background: white !important;
     }
 
      .paginate_button{
@@ -51,6 +60,9 @@
          padding: 13px !important;
          padding-left: 16px !important;
          padding-right: 16px !important;
+     }
+     .Edit_Record{
+         display: none;
      }
 
 </style>
@@ -131,15 +143,6 @@
 </select>
 <script>
 
-<%
-  (@actions || []).each do |action|
-  next if (SETTINGS['enable_role_privileges'] == false)
-%>
-    var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
-    $("." + clas).show();
-
-<% end %>
-
 var table ;
 
 $(document).ready(function() {
@@ -171,8 +174,13 @@ function searchData(element) {
     }
 }
 
-
+var data = {};
 var url = "/person/paginated_data";
+<% if params[:action] == 'searched_cases'%>
+var url = "/person/paginated_search_data";
+
+<% end %>
+
 <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
   %>
 function initTable(){
@@ -187,14 +195,15 @@ function initTable(){
                     "data": function(d){
                         d.type = __$('birth_type').value;
                         d.statuses = "<%= @states.join(',')%>",
-                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>"
+                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>",
+                        d.data = data
                     },
                     dataFilter: function(data){
                         var json = jQuery.parseJSON( data );
                         for(var i = 0; i < json['data'].length; i ++){
                             var last_index = json['data'][i].length - 1;
                             var person_id = json['data'][i][last_index];
-                            json['data'][i][last_index] = "<table>"
+                            json['data'][i][last_index] = "<table><tr class='white'>"
                             json['data'][i][last_index] +=
                                     '<td class="action-button"> ' +
                                         '<div onclick="javascript:location=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
@@ -211,8 +220,8 @@ function initTable(){
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
-                         
-                            json['data'][i][last_index] += "</table>"
+
+                            json['data'][i][last_index] += "</tr></table>"
                         }
                         return JSON.stringify( json );
                     }
@@ -238,4 +247,35 @@ function changeFocusToMe(control){
     }
 }
 
+setInterval(function(){
+    <%
+      (@actions || []).each do |action|
+      next if (SETTINGS['enable_role_privileges'] == false)
+    %>
+        var clas = "<%= action['button_name'].gsub(/\s+/, '_') %>";
+        $("." + clas).show();
+        <% end %>
+    }, 200)
+
 </script>
+
+<% if params[:action] == 'searched_cases'%>
+    <style>
+        #example_processing, #spin{
+            display: none !important;
+        }
+        .Edit_Record{
+            display: none !important;
+        }
+
+    </style>
+<% end %>
+
+<% if SETTINGS['application_mode'] == 'FC' %>
+    <style>
+        #birth_type{
+            display: none !important;
+        }
+
+    </style>
+<% end %>

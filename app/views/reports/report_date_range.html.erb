@@ -1,4 +1,4 @@
-<form action="/reports/births_report" method='GET'>
+<form action="<%= params[:target_action].present? ? params[:target_action] :'/reports/births_report'%>" method='GET'>
 <fieldset>
   <legend><font size='5'>Select report range</font></legend>
 

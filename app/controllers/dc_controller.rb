@@ -53,9 +53,9 @@ def view_duplicates
 
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
    @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def view_hq_duplicates
@@ -63,9 +63,9 @@ def view_hq_duplicates
     @states = ['DC-VERIFY DUPLICATE']
     @section = "Duplicates from HQ"
     @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def potential_duplicate
@@ -302,7 +302,7 @@ def incomplete_case_comment
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
                 "Place of Birth", 'Record Status'
                 ]
-    @statuses = Status.all.map(&:name)
+    @statuses = Status.all.map(&:name).sort
     users = User.find_by_sql(
         "SELECT u.username, u.person_id FROM users u
           INNER JOIN user_role ur ON ur.user_id = u.user_id

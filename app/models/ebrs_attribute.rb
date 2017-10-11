@@ -35,7 +35,8 @@ module EbrsAttribute
       h = Pusher.new(temp_hash)
     end
     port=    YAML.load_file(Rails.root.join('config','couchdb.yml'))[Rails.env]['port']
-    adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip| "#{ip.ip_address}:#{port}"}
+    adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip|
+      "#{ip.ip_address}:#{port}"}.reject{|ip| !ip.match(/\d+\.\d+\.\d+\.\d+\:\d+/)}
 
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']

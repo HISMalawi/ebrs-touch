@@ -27,7 +27,6 @@
         min-width: 100%;
     }*/
 </style>
-
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 
     <fieldset>
@@ -87,10 +86,10 @@
                           :absolute_max => Date.today.strftime('%Y/%m/%d'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_birthdate')",
-                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
+                          :tt_onUnload => "__$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
-
+        <%= f.hidden_field :birth_district, :value => @current_district %>
       </div>
       <div class="field">
         <label for="person_gender">Sex</label><br>
@@ -157,7 +156,7 @@
       <div class="field">
         <label for="person_date_of_marriage">If yes, date of marriage</label>
         <br>
-        <input type="text" name="date_of_marriage"
+        <input type="text" name="person[date_of_marriage]"
                           id="person_date_of_marriage"
                           class="input_cell"
                           condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
@@ -492,7 +491,7 @@
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
        <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
-                class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
+                class="input_cell" absolute_min="30" min="36" absolute_max="45" max="42" optional="true" >
       </div>
       <div class="field">
         <label for="person_number_of_prenatal_visits">Number of prenatal visits</label>
@@ -950,14 +949,14 @@
       </div>
 
        <div class="field">
-        <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
+        <label for="person_date_reported">Date of Reporting</label>
         <br>
          <input type="hidden" name="registration_type" id="registration_type">
-        <%= (f.text_field :acknowledgement_of_receipt_date,
+        <%= (f.text_field :date_reported,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onLoad =>"dateInterval('person_acknowledgement_of_receipt_date');",
+                          :tt_onLoad =>"dateInterval('person_date_reported');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate();',
                           :absolute_max => Date.today.strftime('%Y-%m-%d')) rescue "" %>  
@@ -987,15 +986,19 @@
 <script>
     function reportingDate(){
 
-      commence = new Date(8 + '/' + 1 + '/' + 2015);
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
 
-      original = new Date(6 + '/' + 15 + '/' + 2015);
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
 
       if (original < commence){
         commence = original;
       }
-
-      return original.getDate() + "/" + months[original.getMonth()] + "/" + original.getFullYear();
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
 
     }
 
@@ -1389,9 +1392,9 @@
 
         __$("person_place_of_birth").value = "This Hospital";
 
-        __$("person_hospital_of_birth").value = "<%= facility.name rescue nil %>";
+        __$("person_hospital_of_birth").value = "<%= Location.current.name %>";
 
-        __$("person_birth_district").value = "<%= district.name rescue nil %>";
+        __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
     }
 
     function loadHealthFacility() {
@@ -1402,13 +1405,13 @@
 
      if(__$("person_place_of_birth").value == "This Hospital") {
 
-      __$("textForperson_hospital_of_birth").value = "<%= facility_name  %>";
+      __$("textForperson_hospital_of_birth").value = "<%= Location.current.name %>";
 
-      __$("person_hospital_of_birth").value = "<%= facility_name %>";
+      __$("person_hospital_of_birth").value = "<%= Location.current.name %>";
 
-      __$("textForperson_birth_district").value = "<%= district_name%>";
+      __$("textForperson_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
-      __$("person_birth_district").value = "<%= district_name%>";
+      __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
       //autoNavigate("textForperson_hospital_of_birth");
 
@@ -1421,9 +1424,9 @@
 
       __$("person_hospital_of_birth").value = "";
 
-      __$("textForperson_birth_district").value = "<%= district_name%>";
+      __$("textForperson_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
-      __$("person_birth_district").value = "<%= district_name%>";
+      __$("person_birth_district").value = "<%=Location.find(Location.current.parent_location).name%>";
 
     }
 
@@ -1909,7 +1912,7 @@
     {
         var person_dob = handleDate(__$('person_birthdate').value);
 
-        if (((Date.parse(__$('person_acknowledgement_of_receipt_date').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
+        if (((Date.parse(__$('person_date_reported').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
         {
             __$('registration_type').value = 'Yes'
         }

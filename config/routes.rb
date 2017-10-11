@@ -156,10 +156,15 @@ Rails.application.routes.draw do
   get 'reports/report_date_range'
   get 'reports/filter'
   get 'reports/rfilter'
+  get "/user_audit_trail" =>"reports#user_audit_trail"
+  get "/get_user_audit_trail" => "reports#get_user_audit_trail"
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"
 
   get '/person/paginated_data'
+  get '/person/paginated_search_data'
+  get '/person/search_by_nid'
+
   resources :person
 
   resources :users

@@ -127,6 +127,7 @@
 
         <input type=""  fieldtype="date" id="person_birthdate" name="person[birthdate]" 
                value = "<%= @person.core_person.person.birthdate.to_date.strftime('%d/%b/%Y') %>"
+               absolute_min = "<%=( @person.core_person.person.birthdate.to_date - 2.days).strftime('%d/%b/%Y') %>"
                absolute_max ="<%= Date.today.strftime('%Y/%m/%d') %>"
                tt_onLoad = "dateInterval('person_birthdate')"
                >
@@ -442,7 +443,7 @@
             }
         }
 
-        if (((Date.parse(__$('person_acknowledgement_of_receipt_date').value) - Date.parse((dob[0] + "/" + dob[1] + "/" + dob[2])))/ (1000 * 60 * 60 * 24)) > 42)
+        if (((Date.parse(__$('person_date_reported').value) - Date.parse((dob[0] + "/" + dob[1] + "/" + dob[2])))/ (1000 * 60 * 60 * 24)) > 42)
         {
             __$('registration_type').value = 'Yes'
         }

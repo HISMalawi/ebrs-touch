@@ -1,0 +1,2763 @@
+<style>
+    fieldset {
+        margin: 20px;
+        border-radius: 5px;
+        border: 1px solid #3465a4;
+        padding: 20px;
+    }
+
+    legend {
+        font-size: 18px;
+        font-weight: normal;
+        color: #3465a4;
+    }
+
+    div.field {
+        font-weight: normal;
+        display: inline-block;
+        margin: 10px;
+        color: #000;
+    }
+
+    select {
+        min-width: 100%;
+    }
+
+    /*input {
+        min-width: 100%;
+    }*/
+</style>
+
+<%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+    <input type="hidden" name="number_of_children_born_alive_inclusive" value="1" />
+    <input type="hidden" fieldtype="number" name="number_of_children_born_still_alive" id="person_number_of_children_born_still_alive" value="1"/>
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
+
+      <%= f.hidden_field :_rev rescue "" %>
+      
+      <input id="person_duplicate" name="person[duplicate]" type="hidden" />
+
+      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
+      
+      <input id="person_relationship" name="person[relationship]" value="adopted" type="hidden" />
+      
+      <% if flash[:error] == "Similar" %>
+      
+      	<input id="person_potentialduplicate" name="person[potentialduplicate]" value="potentialduplicate" type="hidden"/>
+      
+      <% end %>
+      
+      <input id="person_original_surname" type="hidden"/>
+      <%= f.hidden_field :birth_district, :value => @current_district %>
+
+      <div class="field">
+        <label for="person_last_name">Surname</label>
+        <br>
+        <%= (f.text_field :last_name,
+        :class => "input_cell",
+        :word_min_length => 2,
+        :ajaxURL => "/get_last_names",
+        :tt_onLoad => "checkSpace('person_last_name');validateNameLength('person','person_last_name',1)",
+        :tt_onUnload => 'setTimeout("checkChanges(' + 'person_last_name' + ')", 1000)') rescue "" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :first_name %>
+        <br>
+        <%= (f.text_field :first_name,
+        :class => "input_cell",
+        :word_min_length => 2,
+        :ajaxURL => "/get_first_names",
+        :tt_onLoad => "checkSpace('person_first_name');validateNameLength('person','person_first_name',2)",
+        :tt_onUnload => 'setTimeout("checkChanges(' + 'person_first_name' + ')", 1000)') rescue "" %>
+      </div>
+      <div class="field">
+        <label for="person_middle_name">Other Names</label>
+        <br>
+        <%= (f.text_field :middle_name, :word_min_length => 2,:class => "input_cell", :ajaxURL => "/get_first_names", :tt_onLoad => "checkSpace('person_middle_name');validateNameLength('person','person_middle_name',3)",:optional => :true) rescue "" %>
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
+
+      <div class="field">
+        <label for="person_birthdate">Date of Birth</label>
+        <br>
+        
+        <%= (f.text_field :birthdate,
+                          :class => "input_cell",
+                          :value => Date.today.strftime('%d/%b/%Y'),
+                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
+                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
+                          :fieldtype => "date",
+                          :tt_onLoad =>"dateInterval('person_birthdate')",
+                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
+
+        <%= f.hidden_field :birthdate_estimated rescue "" %>
+        <%= f.hidden_field :birth_district, :value => @current_district %>
+
+      </div>
+      <div class="field">
+        <label for="person_gender">Sex</label><br>
+        <select id="person_gender" name="person[gender]" class="input_cell">
+          <option></option>
+          <option <%= ((@person[:gender] rescue nil) == "Female" ? "selected" : "") %> >Female</option>
+          <option <%= ((@person[:gender] rescue nil) == "Male" ? "selected" : "") %> >Male</option>
+        </select>	
+      </div>
+      
+      <div class="field">
+        <label for="person_adoption_court_order">Adoption Court Order Attached?</label><br>
+        <select id="person_adoption_court_order" name="person[adoption_court_order]" class="input_cell">
+          <option></option>
+          <option  <%= ((@person[adoption_court_order] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option  <%= ((@person[adoption_court_order] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="biological_parents">Biological Parents</label>
+        <br>
+        <select id="biological_parents"
+								name="biological_parents"
+								class="input_cell" />
+          	<option></option>
+          	<option value="None">None</option>
+          	<option value="Mother">Mother</option>
+          	<option value="Father">Father</option>
+          	<option value="Both">Both</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="foster_parents">Adoptive Parents</label>
+        <br>
+        <select id="foster_parents"
+								name="foster_parents"
+								class="input_cell" />
+          	<option></option>
+          	<option value="Mother">Mother</option>
+          	<option value="Father">Father</option>
+          	<option value="Both">Both</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label for="birth_place_details_available">Birth Details Available?</label>
+        <br>
+        <select id="birth_place_details_available"
+		            name="birth_place_details_available"
+		            class="input_cell" />
+          	<option></option>
+          	<option value="Yes">Yes</option>
+          	<option value="No">No</option>
+        </select>
+      </div>
+
+
+    </fieldset>
+
+    <fieldset condition="__$('birth_place_details_available').value == 'Yes';">
+      <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
+
+      <div class="field">
+        <label for="person_place_of_birth">Place of birth</label><br>
+        <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" optional="true" >
+          <option></option>
+          <option <%= ((@person[:place_of_birth] rescue nil) == "Home" ? "selected" : "") %> >Home</option>
+          <option <%= ((@person[:place_of_birth] rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
+          <option <%= ((@person[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+        
+      
+      <div class="field">
+        <label for="person_bd_holder">Birth District</label><br>
+
+        <input id="person_bd_holder"
+        			 name="person[birth_district]"
+        			 type="text"
+        			 condition="beforeLiveDate()"
+        			 optional="true"
+        			 ajaxURL = "/search_by_district"	
+               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
+        			 class="input_cell"
+                />
+
+      </div>
+
+      <div class="field">
+        <label for="person_hospital_of_birth">Name of Hospital</label>
+        <br>
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
+               class ="input_cell"
+               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
+               tt_onUnload = "setDistrict('district');",
+               ajaxURL = "/search_by_hospital" >
+      </div>
+
+      <div class="field">
+        <label for="person_birth_ta">T/A</label>
+        <br>
+        <input type="text" name="birth_ta" id="person_birth_ta"
+               class = "input_cell"
+               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+               ajaxURL = "/search_by_district"
+               tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
+               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
+      </div>
+      <div class="field">
+        <label for="person_birth_village">Village</label>
+        <br>
+        <input type="text" name="birth_village" class = "input_cell"
+               id="person_birth_village"
+               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+               ajaxURL = "/search_by_village">
+      </div>
+      <div class="field">
+        <label for="person_other_birth_place_details">Give Details</label>
+        <br>
+        <input type="text" name="other_birth_place_details"
+               class ="input_cell"
+               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'"
+               id="person_other_birth_place_details">
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
+
+      <div class="field">
+        <label for="person_birth_weight">Birth weight (in Kilogrammes)</label>
+        <br>
+        <input type="text" name="birth_weight"
+               id="person_birth_weight"
+               value = ""
+               placeholder = "0.000"
+               class = "input_cell"
+               fieldtype = "decimal"
+               regex = '^\d+\.\d{3}$'
+               regex_message = "Expecting baby weight to have 3 decimal places.\nAppend zero(s) to the weight for you?"
+               absolute_min = 0.7
+               absolute_max = 6
+               max = 4
+               min = 2.5
+               optional = true
+        >
+
+      </div>
+
+      <div class="field">
+        <label for="person_type_of_birth">Type of birth</label>
+        <br>
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell">
+          <option></option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Twin" ? "selected" : "") %> >Twin</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Twin" ? "selected" : "") %> >Second Twin</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Triplet" ? "selected" : "") %> >Triplet</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Second Triplet" ? "selected" : "") %> >Second Triplet</option>
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Third Triplet" ? "selected" : "") %> >Third Triplet</option>
+
+          <option <%= ((@person[:type_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
+        <br>
+        <input type="text" name="other_type_of_birth"
+               class = "input_cell"
+               id="person_other_type_of_birth"
+               condition = "__$('person_type_of_birth').value.trim() == 'Other'"
+               optional=true
+        >
+      </div>
+
+      <div class="field">
+        <label for="person_parents_married_to_each_other">Are the biological parents married to each other?</label>
+        <br>
+        <select id="person_parents_married_to_each_other" 
+        				name="person[parents_married_to_each_other]" 
+        				class="input_cell" 
+        				condition = "__$('biological_parents').value.trim().toLowerCase() == 'both'" >
+          <option></option>
+          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option <%= ((@person[:parents_married_to_each_other] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_date_of_marriage">If yes, date of marriage</label>
+        <br>
+        <input type="text" name="person[date_of_marriage]"
+               class = "input_cell"
+               id= "person_date_of_marriage"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && __$('biological_parents').value.trim().toLowerCase() == 'both'",
+               fieldtype = "date"
+               id="person_date_of_marriage"
+               absolute_max = "<%= Date.today.strftime('%Y/%m/%d') %>"
+               optional = true>
+        <%#grill=  :tt_onLoad => "validateDate(__$('person_birthdate'), __$('person_date_of_marriage'), 45, 3, 60, 0)") %>
+      </div>
+
+
+    </fieldset>
+
+    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'No'">
+      <legend><font size='5' style='border: 2px;'>Acknowledgment of Paternity: Child born out of wedlock</font></legend>
+
+      <div class="field">
+        <label for="person_court_order_attached">Court order attached?</label><br>
+        <select id="person_court_order_attached" name="person[court_order_attached]" class="input_cell">
+          <option></option>
+          <option  <%= ((@person[court_order_attached] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option  <%= ((@person[court_order_attached] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="person_parents_signed">Parents signed?</label>
+        <br>
+        <select id="person_parents_signed" name="person[parents_signed]" class="input_cell" condition="__$('person_court_order_attached').value.trim() == 'No'">
+          <option></option>
+          <option <%= ((@person[parents_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option <%= ((@person[parents_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+
+      </div>
+      
+    </fieldset>
+
+    <!-- Mother -->
+
+    <fieldset condition="__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother'">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Mother</font></legend>
+
+       <div class="field">
+        <label for="person_mother_last_name">Maiden Surname</label><br>
+
+        <input id="person_mother_last_name"
+               name="person[mother][last_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:mother][:last_name] rescue nil %>"
+               ajaxURL = "/get_last_names"
+               class="input_cell"
+               tt_onLoad = "checkSpace('person_mother_last_name');validateNameLength('person_mother','person_mother_last_name',1)"
+               tt_onUnload = "appendValue('person_mother_first_name'); setpersonName()" />
+
+      </div>
+
+      <div class="field">
+        <label for="person_mother_first_name">First Name</label><br>
+        <input id="person_mother_first_name" name="person[mother][first_name]"
+        type="text"
+        word_min_length = 2
+        value="<%= @person[:mother][:first_name] rescue nil %>"
+        ajaxURL = "/get_first_names"
+        class="input_cell"
+        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
+        tt_onUnload = "appendValue('person_mother_first_name')" />
+      </div>
+
+      <div class="field">
+        <label for="person_mother_middle_name">Other Name</label><br>
+        <input id="person_mother_middle_name"
+               name="person[mother][middle_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:mother][:middle_name] rescue nil %>"
+               class="input_cell"
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_id_number">ID Number</label><br>
+        <input id="person_mother_id_number"
+               name="person[mother][id_number]"
+               type="text"
+               value="<%= @person[:mother][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true" />
+
+      </div>
+
+    </fieldset>
+    
+    <!-- Address of mother -->
+    <fieldset condition="__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother'" >
+      <legend><font size='5' style='border: 2px;'>Details of Biological Mother continued</font></legend>
+
+      <div class="field">
+        <label for="person_mother_citizenship">Nationality</label><br>
+        <input id="person_mother_citizenship" 
+        			 name="person[mother][citizenship]" 
+        			 type="text" 
+        			 value="<%= @person[:mother][:citizenship] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_nationality" />
+      </div>
+      
+       <div class="field">
+        <label for="person_mother_local_residential_country">Country of Residence</label><br>
+        <input id="person_mother_local_residential_country" 
+               name="person[mother][residential_country]" 
+               type="text"
+               value="<%= @person[:mother][:residential_country] rescue nil %>"
+               class="input_cell" 
+               ajaxURL="/search_by_country" />
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother')">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Mother continued: Physical residential address</font></legend>
+
+     
+
+      <div class="field">
+        <label for="person_mother_current_district">District</label><br>
+        <input id="person_mother_current_district" 
+               name="person[mother][current_district]" 
+               type="text" 
+               value="<%= @person[:mother][:current_district] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_district"
+               condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_current_ta').getAttribute('section'))][parseInt(__$('textForperson_mother_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_mother_current_district').value);" 
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_current_ta">T/A or Area of Residence</label><br>
+        <input id="person_mother_current_ta" name="person[mother][current_ta]" type="text" value="<%= @person[:mother][:current_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_current_village').getAttribute('section'))][parseInt(__$('textForperson_mother_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_mother_current_district').value + '&ta=' + __$('textForperson_mother_current_ta').value);"    optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_current_village">Village/Town</label><br>
+        <input id="person_mother_current_village" name="person[mother][current_village]" type="text" value="<%= @person[:mother][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_local_residential_country').value.trim() == 'Malawi'"
+	      ajaxURL="/search_by_village" 
+	      optional="true"/>
+      </div>
+
+    </fieldset>
+
+     <fieldset condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother')">
+
+      <legend><font size='5' style='border: 2px;'>Details of Biological Mother continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="person_mother_foreigner_current_district">District/State</label><br>
+        <input id="person_mother_foreigner_current_district" name="person[mother][foreigner_current_district]" type="text"
+               value="<%= @person[:mother][:foreigner_current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_mother_foreigner_current_village">Village/Town</label><br>
+        <input id="person_mother_foreigner_current_village"
+               name="person[mother][foreigner_current_village]"
+	       type="text"
+	       value="<%= @person[:mother][:foreigner_current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_foreigner_current_ta">Address</label><br>
+        <input id="person_mother_foreigner_current_ta"
+	       name="person[mother][foreigner_current_ta]"
+	       type="text"
+               value="<%= @person[:mother][:foreigner_current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_local_residential_country').value.trim() != 'Malawi'"
+               optional="true"/>
+      </div>
+
+
+    </fieldset>
+
+
+    <fieldset condition="__$('person_mother_citizenship').value.trim() == 'Malawian' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother')">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Mother continued: Home address</font></legend>
+
+
+      <div class="field">
+        <label for="home_address_same_as_physical">Home address same as the physical address?</label>
+        <br>
+        <select id="home_address_same_as_physical"
+		name="home_address_same_as_physical"
+                condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+		class="input_cell"
+         	tt_onUnload="if(__$('textForhome_address_same_as_physical').value.trim() == 'Yes'){loadMothersAddress();} else {unloadMothersAddress();}" />
+          	<option></option>
+          	<option value="Yes" >Yes</option>
+          	<option value="No" >No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_home_district">District</label><br>
+        <input id="person_mother_home_district"
+	       name="person[mother][home_district]"
+               condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+	       type="text"
+	       value="<%= @person[:mother][:home_district] rescue nil %>"
+               class="input_cell"
+	       ajaxURL="/search_by_district"
+         tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_ta').getAttribute('section'))][parseInt(__$('textForperson_mother_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_mother_home_district').value);" 
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_home_ta">T/A</label><br>
+        <input id="person_mother_home_ta"
+	       name="person[mother][home_ta]"
+	       condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+	       type="text"
+	       value="<%= @person[:mother][:home_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_mother_home_village').getAttribute('section'))][parseInt(__$('textForperson_mother_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_mother_home_district').value + '&ta=' + __$('textForperson_mother_home_ta').value);" 
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_home_village">Village</label><br>
+        <input id="person_mother_home_village"
+               name="person[mother][home_village]"
+               condition="__$('person_mother_citizenship').value.trim() == 'Malawian'"
+               type="text"
+               value="<%= @person[:mother][:home_village] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_village"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+
+     <fieldset condition="__$('person_mother_citizenship').value.trim() != 'Malawian' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'mother')">
+
+      <legend><font size='5' style='border: 2px;'>Details of  Biological Mother continued: Home address</font></legend>
+
+       <div class="field">
+        <label for="foreigner_home_address_same_as_physical">Home address same as the physical address?</label>
+        <br>
+        <select id="foreigner_home_address_same_as_physical"
+		name="home_address_same_as_physical"
+                condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
+		class="input_cell"
+         	tt_onUnload="if(__$('textForforeigner_home_address_same_as_physical').value.trim() == 'Yes'){loadForeignMothersAddress();} else {unloadForeignMothersAddress();}" />
+          	<option></option>
+          	<option value="Yes" >Yes</option>
+          	<option value="No" >No</option>
+        </select>
+      </div>
+
+       <div class="field">
+        <label for="person_mother_home_country">Country</label><br>
+        <input id="person_mother_home_country" name="person[mother][home_country]" type="text"
+               value="<%= @person[:mother][:home_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+               condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_foreigner_home_district">District/State</label><br>
+        <input id="person_mother_foreigner_home_district" name="person[mother][foreigner_home_district]" type="text"
+               value="<%= @person[:mother][:foreigner_home_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_mother_foreigner_home_village">Village/Town</label><br>
+        <input id="person_mother_foreigner_home_village"
+               name="person[mother][foreigner_home_village]"
+	       type="text"
+	       value="<%= @person[:mother][:foreigner_home_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_mother_foreigner_home_ta">Address</label><br>
+        <input id="person_mother_foreigner_home_ta"
+	       name="person[mother][foreigner_home_ta]"
+	       type="text"
+               value="<%= @person[:mother][:foreigner_home_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+
+    </fieldset>
+
+    
+    <!--Address of mother -->
+    ##################################################################################################
+    
+    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'father')">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Father</font></legend>
+
+      <!-- Father -->
+
+       <div class="field">
+        <label for="person_father_last_name">Surname</label><br>
+        <input id="person_father_last_name"
+               name="person[father][last_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:father][:last_name] rescue nil %>"
+               tt_onUnload = "appendValue('person_father_last_name')"
+               ajaxURL = "/get_last_names"
+               class="input_cell"
+               tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+      </div>
+
+      <div class="field">
+        <label for="person_father_first_name">First Name</label><br>
+        <input id="person_father_first_name"
+                word_min_length = 2
+               name="person[father][first_name]"
+               type="text"
+               value="<%= @person[:father][:first_name] rescue nil %>"
+               tt_onUnload = "appendValue('person_father_first_name')"
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
+               class="input_cell"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+      </div>
+
+      <div class="field">
+        <label for="person_father_middle_name">Other Name</label><br>
+        <input id="person_father_middle_name"
+               name="person[father][middle_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:father][:middle_name] rescue nil %>"
+               ajaxURL = "/get_first_names"
+               class="input_cell"
+               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
+               optional="true"/>
+      </div>
+      <div class="field">
+        <label for="person_father_id_number">ID Number</label><br>
+        <input id="person_father_id_number"
+               name="person[father][id_number]"
+               type="text"
+               value="<%= @person[:father][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true"/>
+      </div>
+      
+    </fieldset>
+    
+    
+ <!-- Address of Biological father -->
+ <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'father')" >
+      <legend><font size='5' style='border: 2px;'>Details of Biological Father continued</font></legend>
+
+      <div class="field">
+        <label for="person_father_citizenship">Nationality</label><br>
+        <input id="person_father_citizenship"
+               name="person[father][citizenship]"
+               type="text"
+               value="<%= @person[:father][:citizenship] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_nationality" />
+      </div>
+      
+      
+      <div class="field">
+        <label for="person_father_residential_country">Country of Residence</label><br>
+        <input id="person_father_residential_country" name="person[father][residential_country]" type="text"
+               value="<%= @person[:father][:residential_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+         />
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('person_father_residential_country').value.trim() == 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'father')">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Father continued: Physical Residential Address</font></legend>
+
+      <div class="field">
+        <label for="same_address_with_mother">Same as mother's?</label><br>
+        <br>
+        <select id="same_address_with_mother"
+                name="same_address_with_mother"
+                class="input_cell"
+                tt_onUnload="nationality();">
+          <option></option>
+          <option value="Yes" >Yes</option>
+          <option value="No" >No</option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+        <label for="person_father_current_district">District</label><br>
+        <input id="person_father_current_district"
+               name="person[father][current_district]"
+               type="text"
+               value="<%= @person[:father][:current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);" 
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_father_current_ta">T/A or Area of Residence</label><br>
+        <input id="person_father_current_ta"
+               name="person[father][current_ta]"
+               type="text"
+               value="<%= @person[:father][:current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_village').getAttribute('section'))][parseInt(__$('textForperson_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_current_district').value + '&ta=' + __$('textForperson_father_current_ta').value);"
+               optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="person_father_current_village">Village/Town</label><br>
+        <input id="person_father_current_village"
+               name="person[father][current_village]"
+               type="text"
+               value="<%= @person[:father][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_village" optional="true" />
+      </div>
+
+    </fieldset>
+    
+    
+    <fieldset condition="__$('person_father_residential_country').value.trim() != 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'father')">
+
+      <legend><font size='5' style='border: 2px;'>Details of Biological Father continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="person_father_foreigner_current_district">District/State</label><br>
+        <input id="person_father_foreigner_current_district" name="person[father][foreigner_current_district]" type="text"
+               value="<%= @person[:father][:foreigner_current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_father_foreigner_current_village">Village/Town</label><br>
+        <input id="person_father_foreigner_current_village"
+               name="person[father][foreigner_current_village]"
+	       type="text"
+	       value="<%= @person[:father][:foreigner_current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_father_foreigner_current_ta">Address</label><br>
+        <input id="person_father_foreigner_current_ta"
+	       name="person[father][foreigner_current_ta]"
+	       type="text"
+               value="<%= @person[:father][:foreigner_current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && __$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               optional="true"/>
+      </div>
+
+
+    </fieldset>
+
+    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' && (__$('biological_parents').value.trim().toLowerCase() == 'both' || __$('biological_parents').value.trim().toLowerCase() == 'father')">
+      <legend><font size='5' style='border: 2px;'>Details of Biological Father continued: Home Address</font></legend>
+
+      <div class="field">
+        <label for="father_home_address_same_as_physical">Home address same as the physical address?</label>
+        <br>
+        <select id="father_home_address_same_as_physical"
+        name="home_address_same_as_physical"
+        condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+        class="input_cell"
+        tt_onUnload="if(__$('textForfather_home_address_same_as_physical').value.trim() == 'Yes'){loadFathersAddress();} else {unloadFathersAddress();}" />
+        <option></option>
+        <option value="Yes" >Yes</option>
+        <option value="No" >No</option>
+      </select>
+    </div>
+
+      <div class="field">
+        <label for="person_father_home_district">District</label><br>
+        <input id="person_father_home_district"
+               name="person[father][home_district]"
+               type="text"
+               value="<%= @person[:father][:home_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_home_ta').getAttribute('section'))][parseInt(__$('textForperson_father_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_home_district').value);" optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="person_father_home_ta">T/A</label><br>
+        <input id="person_father_home_ta"
+               name="person[father][home_ta]"
+               type="text"
+               value="<%= @person[:father][:home_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_home_village').getAttribute('section'))][parseInt(__$('textForperson_father_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_home_district').value + '&ta=' + __$('textForperson_father_home_ta').value);"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_father_home_village">Village</label><br>
+        <input id="person_father_home_village"
+               name="person[father][home_village]"
+               type="text"
+               value="<%= @person[:father][:home_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes'"
+               ajaxURL="/search_by_village" optional="true" />
+      </div>
+
+    </fieldset>
+
+ 
+ <!-- Address of Biological father -->   
+    
+ <!-- Foster Parents-->
+
+    <fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother</font></legend>
+
+      <div class="field">
+        <label for="person_foster_mother_last_name">Maiden Surname</label><br>
+
+        <input id="person_foster_mother_last_name"
+        			 name="person[foster_mother][last_name]"
+        			 type="text"
+               word_min_length = 2
+        			 value="<%= @person[:foster_mother][:last_name] rescue nil %>"
+        			 ajaxURL = "/get_last_names"
+        			 class="input_cell"
+               tt_onLoad = "checkSpace('person_foster_mother_last_name');validateNameLength('person_foster_mother','person_foster_mother_last_name',1)"
+               tt_onUnload = "appendValue('person_foster_mother_first_name');" />
+
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_first_name">First Name</label><br>
+        <input id="person_foster_mother_first_name" name="person[foster_mother][first_name]"
+                type="text"
+                word_min_length = 2
+                value="<%= @person[:foster_mother][:first_name] rescue nil %>"
+                ajaxURL = "/get_first_names"
+                class="input_cell"
+                tt_onLoad = "checkSpace('person_foster_mother_first_name');validateNameLength('person_foster_mother','person_foster_mother_first_name',2)"
+                tt_onUnload = "appendValue('person_foster_mother_first_name')" />
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_middle_name">Other Name</label><br>
+        <input id="person_foster_mother_middle_name"
+               name="person[foster_mother][middle_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:foster_mother][:middle_name] rescue nil %>"
+               class="input_cell"
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_foster_mother_middle_name');validateNameLength('person_foster_mother','person_foster_mother_middle_name',2)"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_id_number">ID Number</label><br>
+        <input id="person_foster_mother_id_number"
+               name="person[foster_mother][id_number]"
+               type="text"
+               value="<%= @person[:foster_mother][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true" />
+
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued</font></legend>
+
+      <div class="field">
+        <label for="person_foster_mother_birthdate">Date of Birth</label>
+        <br>
+
+        <input id="person_foster_mother_birthdate" name="person[foster_mother][birthdate]" type="text"
+                value="<%= @person[:foster_mother][:birthdate] rescue nil %>"
+                class="input_cell"
+                fieldtype="date"
+                optional="true"
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_foster_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_foster_mother_birthdate');" />
+
+        <input id="person_foster_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
+
+
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_citizenship">Nationality</label><br>
+        <input id="person_foster_mother_citizenship" 
+        			 name="person[foster_mother][citizenship]" 
+        			 type="text" 
+        			 value="<%= @person[:foster_mother][:citizenship] rescue nil %>"
+               class="input_cell" 
+               ajaxURL="/search_by_nationality" />
+      </div>
+      
+       <div class="field">
+        <label for="person_foster_mother_local_residential_country">Country of Residence</label><br>
+        <input id="person_foster_mother_local_residential_country" name="person[foster_mother][residential_country]" type="text"
+               value="<%= @person[:foster_mother][:residential_country] rescue nil %>"
+               class="input_cell" 
+               ajaxURL="/search_by_country" />
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('person_foster_mother_local_residential_country').value.trim() == 'Malawi' && (__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both')" >
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Physical residential address</font></legend>
+
+     
+
+      <div class="field">
+        <label for="person_foster_mother_current_district">District</label><br>
+        <input id="person_foster_mother_current_district" name="person[foster_mother][current_district]" type="text" value="<%= @person[:foster_mother][:current_district] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_district"
+               condition="__$('person_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_mother_current_ta').getAttribute('section'))][parseInt(__$('textForperson_foster_mother_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_foster_mother_current_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_current_ta">T/A or Area of Residence</label><br>
+        <input id="person_foster_mother_current_ta" name="person[foster_mother][current_ta]" type="text" value="<%= @person[:foster_mother][:current_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               condition="__$('person_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_mother_current_village').getAttribute('section'))][parseInt(__$('textForperson_foster_mother_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_foster_mother_current_district').value + '&ta=' + __$('textForperson_foster_mother_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_current_village">Village/Town</label><br>
+        <input id="person_foster_mother_current_village" name="person[foster_mother][current_village]" type="text" value="<%= @person[:foster_mother][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_local_residential_country').value.trim() == 'Malawi'"
+	      ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+    </fieldset>
+    
+     <fieldset condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian' && (__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both');">
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_current_district">District/State</label><br>
+        <input id="person_foster_mother_foreigner_current_district" name="person[foster_mother][foreigner_current_district]" type="text"
+               value="<%= @person[:foster_mother][:foreigner_current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_current_village">Village/Town</label><br>
+        <input id="person_foster_mother_foreigner_current_village"
+               name="person[foster_mother][foreigner_current_village]"
+	       type="text"
+	       value="<%= @person[:foster_mother][:foreigner_current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_current_ta">Address</label><br>
+        <input id="person_foster_mother_foreigner_current_ta"
+	       name="person[foster_mother][foreigner_current_ta]"
+	       type="text"
+               value="<%= @person[:foster_mother][:foreigner_current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('person_foster_mother_citizenship').value.trim() == 'Malawian' && (__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both');">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Home address</font></legend>
+
+
+      <div class="field">
+        <label for="home_address_same_as_physical_foster">Home address same as the physical address?</label>
+        <br>
+        <select id="home_address_same_as_physical_foster"
+		name="home_address_same_as_physical_foster"
+                condition="__$('person_foster_mother_citizenship').value.trim() == 'Malawian'"
+		class="input_cell"
+		
+         	tt_onUnload="if(__$('textForhome_address_same_as_physical_foster').value.trim() == 'Yes'){loadFosterMothersAddress();} else {unloadFosterMothersAddress();}" />
+		
+          	<option></option>
+          	<option value="Yes" >Yes</option>
+          	<option value="No" >No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_home_district">District</label><br>
+        <input id="person_foster_mother_home_district"
+	       name="person[foster_mother][home_district]"
+               condition="__$('person_foster_mother_citizenship').value.trim() == 'Malawian'"
+	       type="text"
+	       value="<%= @person[:foster_mother][:home_district] rescue nil %>"
+               class="input_cell"
+	       ajaxURL="/search_by_district"
+         tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_mother_home_ta').getAttribute('section'))][parseInt(__$('textForperson_foster_mother_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_foster_mother_home_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_home_ta">T/A</label><br>
+        <input id="person_foster_mother_home_ta"
+	       name="person[foster_mother][home_ta]"
+	       condition="__$('person_foster_mother_citizenship').value.trim() == 'Malawian'"
+	       type="text"
+	       value="<%= @person[:foster_mother][:home_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_mother_home_village').getAttribute('section'))][parseInt(__$('textForperson_foster_mother_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_foster_mother_home_district').value + '&ta=' + __$('textForperson_foster_mother_home_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_home_village">Village</label><br>
+        <input id="person_foster_mother_home_village"
+               name="person[foster_mother][home_village]"
+               condition="__$('person_foster_mother_citizenship').value.trim() == 'Malawian'"
+               type="text"
+               value="<%= @person[:foster_mother][:home_village] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_village"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+
+     <fieldset condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian' && (__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both');">
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Mother continued: Home address</font></legend>
+
+       <div class="field">
+        <label for="foreigner_home_address_same_as_physical_foster">Home address same as the physical address?</label>
+        <br>
+        <select id="foreigner_home_address_same_as_physical_foster"
+		name="home_address_same_as_physical"
+                condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+		class="input_cell"
+         	tt_onUnload= />
+          	<option></option>
+          	<option value="Yes" >Yes</option>
+          	<option value="No" >No</option>
+        </select>
+      </div>
+
+       <div class="field">
+        <label for="person_foster_mother_home_country">Country</label><br>
+        <input id="person_foster_mother_home_country" name="person[mother][home_country]" type="text"
+               value="<%= @person[:foster_mother][:home_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_home_district">District/State</label><br>
+        <input id="person_foster_mother_foreigner_home_district" name="person[foster_mother][foreigner_home_district]" type="text"
+               value="<%= @person[:foster_mother][:foreigner_home_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_home_village">Village/Town</label><br>
+        <input id="person_foster_mother_foreigner_home_village"
+               name="person[foster_mother][foreigner_home_village]"
+	       type="text"
+	       value="<%= @person[:foster_mother][:foreigner_home_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_mother_foreigner_home_ta">Address</label><br>
+        <input id="person_foster_mother_foreigner_home_ta"
+	       name="person[foster_mother][foreigner_home_ta]"
+	       type="text"
+               value="<%= @person[:foster_mother][:foreigner_home_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_mother_citizenship').value.trim() != 'Malawian'"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+<fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father</font></legend>
+
+      <!-- Father -->
+
+      <div class="field">
+        <label for="person_foster_father_last_name">Surname</label><br>
+        <input id="person_foster_father_last_name"
+               name="person[foster_father][last_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:foster_father][:last_name] rescue nil %>"
+               tt_onUnload = "appendValue('person_foster_father_last_name')"
+               ajaxURL = "/get_last_names"
+               tt_onLoad = "checkSpace('person_foster_father_last_name');validateNameLength('person_foster_father','person_foster_father_last_name',1)"
+               class="input_cell"
+        />
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_first_name">First Name</label><br>
+        <input id="person_foster_father_first_name"
+               name="person[foster_father][first_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:foster_father][:first_name] rescue nil %>"
+               tt_onUnload = "appendValue('person_foster_father_first_name')"
+               tt_onLoad = "checkSpace('person_foster_father_first_name');validateNameLength('person_foster_father','person_foster_father_first_name',2)"
+               ajaxURL = "/get_first_names"
+               class="input_cell"
+              />
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_middle_name">Other Name</label><br>
+        <input id="person_foster_father_middle_name"
+               name="person[foster_father][middle_name]"
+               type="text"
+               word_min_length = 2
+               value="<%= @person[:foster_father][:middle_name] rescue nil %>"
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_foster_father_middle_name');validateNameLength('person_foster_father','person_foster_father_middle_name',3)"
+               class="input_cell"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_id_number">ID Number</label><br>
+        <input id="person_foster_father_id_number"
+               name="person[foster_father][id_number]"
+               type="text"
+               value="<%= @person[:foster_father][:id_number] rescue nil %>"
+               class="input_cell"
+               condition="false"
+               optional="true"/>
+      </div>
+
+    </fieldset>
+
+    <fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued</font></legend>
+
+      <div class="field">
+        <label for="person_foster_father_birthdate">Date of Birth</label><br>
+
+        <input id="person_foster_father_birthdate" name="person[foster_father][birthdate]" type="text"
+      	       value="<%= @person[:foster_father][:birthdate] rescue nil %>"
+               class="input_cell"
+               fieldtype="date"
+               optional="true"
+               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_foster_father_birthdate'), 100, 14, 115, 8);dateInterval('person_foster_father_birthdate');" />
+
+        <input id="person_foster_father_birthdate_estimated" name="person[foster_father][birthdate_estimated]" type="hidden" optional='true'/>
+
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_citizenship">Nationality</label><br>
+        <input id="person_foster_father_citizenship"
+               name="person[foster_father][citizenship]"
+               type="text"
+               value="<%= @person[:foster_father][:citizenship] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_nationality" />
+      </div>
+      
+      
+      <div class="field">
+        <label for="person_foster_father_residential_country">Country of Residence</label><br>
+        <input id="person_foster_father_residential_country" name="person[foster_father][residential_country]" type="text"
+               value="<%= @person[:foster_father][:residential_country] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_country"
+         />
+      </div>
+
+    </fieldset>
+
+<fieldset condition="__$('person_foster_father_residential_country').value.trim() == 'Malawi' && (__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both');">
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued: Physical residential address</font></legend>
+
+     
+
+      <div class="field">
+        <label for="person_foster_father_current_district">District</label><br>
+        <input id="person_foster_father_current_district" name="person[foster_father][current_district]" type="text" value="<%= @person[:foster_father][:current_district] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_district"
+               condition="__$('person_foster_father_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_foster_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_foster_father_current_district').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_current_ta">T/A or Area of Residence</label><br>
+        <input id="person_foster_father_current_ta" name="person[foster_father][current_ta]" type="text" value="<%= @person[:foster_father][:current_ta] rescue nil %>"
+               class="input_cell" ajaxURL="/search_by_ta"
+               condition="__$('person_foster_father_residential_country').value.trim() == 'Malawi'"
+               tt_onLoad="clearRelated()"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_father_current_village').getAttribute('section'))][parseInt(__$('textForperson_foster_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_foster_father_current_district').value + '&ta=' + __$('textForperson_foster_father_current_ta').value);" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_current_village">Village/Town</label><br>
+        <input id="person_foster_father_current_village" name="person[foster_father][current_village]" type="text" value="<%= @person[:foster_father][:current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_father_residential_country').value.trim() == 'Malawi'"
+	      ajaxURL="/search_by_village" optional="true"/>
+      </div>
+
+    </fieldset>
+
+       
+    <fieldset condition="__$('person_foster_father_residential_country').value.trim() != 'Malawi' && (__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both');">
+
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued: Physical residential address</font></legend>
+
+      <div class="field">
+        <label for="person_foster_father_foreigner_current_district">District/State</label><br>
+        <input id="person_foster_father_foreigner_current_district" name="person[foster_father][foreigner_current_district]" type="text"
+               value="<%= @person[:foster_father][:foreigner_current_district] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_father_residential_country').value.trim() != 'Malawi'"
+               optional="true"/>
+      </div>
+
+
+      <div class="field">
+        <label for="person_foster_father_foreigner_current_village">Village/Town</label><br>
+        <input id="person_foster_father_foreigner_current_village"
+               name="person[foster_father][foreigner_current_village]"
+	       type="text"
+	       value="<%= @person[:foster_father][:foreigner_current_village] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_father_residential_country').value.trim() != 'Malawi'"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_foreigner_current_ta">Address</label><br>
+        <input id="person_foster_father_foreigner_current_ta"
+	       name="person[foster_father][foreigner_current_ta]"
+	       type="text"
+               value="<%= @person[:foster_father][:foreigner_current_ta] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_foster_father_residential_country').value.trim() != 'Malawi'"
+               optional="true"/>
+      </div>
+
+
+    </fieldset>
+
+    <fieldset condition="__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+      <legend><font size='5' style='border: 2px;'>Details of Adoptive Father continued: Home Address</font></legend>
+
+      <div class="field">
+        <label for="foster_father_home_address_same_as_physical">Home address same as the physical address?</label>
+        <br>
+        <select id="foster_father_home_address_same_as_physical"
+        name="home_address_same_as_physical"
+        class="input_cell" 
+        tt_onUnload="if(__$('textForfoster_father_home_address_same_as_physical').value.trim() == 'Yes'){loadFosterFathersAddress();} else {unloadFosterFathersAddress();}" />
+        <option></option>
+        <option value="Yes" >Yes</option>
+        <option value="No" >No</option>
+      </select>
+    </div>
+
+      <div class="field">
+        <label for="person_foster_father_home_district">District</label><br>
+        <input id="person_foster_father_home_district"
+               name="person[foster_father][home_district]"
+               type="text"
+               value="<%= @person[:foster_father][:home_district] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_district"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_father_home_ta').getAttribute('section'))][parseInt(__$('textForperson_foster_father_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_foster_father_home_district').value);" optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_home_ta">T/A</label><br>
+        <input id="person_foster_father_home_ta"
+               name="person[foster_father][home_ta]"
+               type="text"
+               value="<%= @person[:foster_father][:home_ta] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_ta"
+               tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_foster_father_home_village').getAttribute('section'))][parseInt(__$('textForperson_foster_father_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_foster_father_home_district').value + '&ta=' + __$('textForperson_foster_father_home_ta').value);"
+               optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_foster_father_home_village">Village</label><br>
+        <input id="person_foster_father_home_village"
+               name="person[foster_father][home_village]"
+               type="text"
+               value="<%= @person[:foster_father][:home_village] rescue nil %>"
+               class="input_cell"
+               ajaxURL="/search_by_village" optional="true" />
+      </div>
+
+    </fieldset>
+    <!-- Foster parents --> 
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Informant</font></legend>
+
+      <!-- Informant -->
+
+      <div class="field">
+        <label for="informant_same_as_mother">Adoptive Mother is informant?</label><br>
+        <select id="informant_same_as_mother" 
+           name="informant_same_as_mother"
+           class="input_cell" 
+           condition="__$('foster_parents').value.trim().toLowerCase() == 'mother' || __$('foster_parents').value.trim().toLowerCase() == 'both';"
+           tt_onUnload="if(__$('textForinformant_same_as_mother').value.trim() == 'Yes'){setTimeout(function(){loadFosterMothersDetails()}, 60);} else {unloadInformantsDetails();}">
+          <option></option>
+          <option value="Yes" >Yes</option>
+          <option value="No" >No</option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+        <label for="informant_same_as_father">Adoptive Father is informant?</label><br>
+        <select id="informant_same_as_father" name="informant_same_as_father" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFosterFathersDetails();} else {unloadInformantsDetails();}"
+           condition="__$('foster_parents').value.trim().toLowerCase() == 'father' || __$('foster_parents').value.trim().toLowerCase() == 'both';">
+          <option></option>
+          <option value="Yes" >Yes</option>
+          <option value="No" >No</option>
+
+        </select>
+
+
+     <div class="field">
+        <label for="person_informant_last_name">Surname</label><br>
+        <input id="person_informant_last_name"
+               name="person[informant][last_name]"
+               type="text"
+               word_min_length = 2
+               ajaxURL = "/get_last_names"
+               tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
+               value="<%= @person[:informant][:last_name] rescue nil %>"
+               class="input_cell"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_first_name">First Name</label><br>
+        <input id="person_informant_first_name"
+               name="person[informant][first_name]"
+               type="text"
+               word_min_length = 2
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
+               value="<%= @person[:informant][:first_name] rescue nil %>"
+               class="input_cell"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_middle_name">Other Name</label><br>
+        <input id="person_informant_middle_name"
+               name="person[informant][middle_name]"
+               type="text"
+               word_min_length = 2
+               ajaxURL = "/get_first_names"
+               tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
+               value="<%= @person[:informant][:middle_name] rescue nil %>"
+               class="input_cell" optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="person_informant_id_number">ID Number</label><br>
+        <input id="person_informant_id_number" 
+               name="person[informant][id_number]" 
+               type="text" 
+               value="<%= @person[:informant][:id_number] rescue nil %>"
+               class="input_cell" 
+               condition="false"
+               optional="true" />
+      </div>
+
+      <div class="field">
+        <label for="person_informant_relationship_to_person">Relationship To person</label><br>
+        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
+          <option></option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="other_informant_relationship_to_person">Specify Relationship</label><br>
+        <input id="other_informant_relationship_to_person"
+               name="person[informant][other_informant_relationship_to_person]"
+               type="text"
+               value="<%= @person[:informant][:other_informant_relationship_to_person] rescue nil %>"
+               class="input_cell"
+               condition="__$('person_informant_relationship_to_person').value.trim().toLowerCase() == 'other'"
+               />
+      </div>
+
+    </fieldset>
+<!--
+    //consider adding the Nationality and residence fields or the informant here...
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued ...</font></legend>
+
+    </fieldset>
+     -- >
+
+    <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued: Address</font></legend>
+
+      <div class="field">
+        <label for="person_informant_current_district">District</label><br>
+        <input id="person_informant_current_district" name="person[informant][current_district]" type="text" value="<%= @person[:informant][:current_district] rescue nil %>" class="input_cell" ajaxURL = "/search_by_district" />
+      </div>
+
+      <div class="field">
+        <label for="person_informant_addressline1">Postal Address</label><br>
+        <input id="person_informant_addressline1" name="person[informant][addressline1]" type="text" value="<%= @person[:informant][:addressline1] rescue nil %>" class="input_cell" placeholder= "e.g. P.O Box 31797 or Current Village" optional="true"/>
+      </div>
+
+      <div class="field">
+        <label for="person_informant_addressline2"></label><br>
+        <input id="person_informant_addressline2" name="person[informant][addressline2]" type="text" value="<%= @person[:informant][:addressline2] rescue nil %>"
+               class="input_cell" optional="true" placeholder= "Lilongwe 3" optional="true" />
+      </div>
+
+      </fieldset>
+      <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of Informant continued.. </font></legend>
+
+      <div class="field">
+
+        <label for="person_informant_phone_number">Phone Number</label><br>
+
+        <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
+               class="input_cell" optional='true' fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" />
+
+      </div>
+
+       <div class="field">
+        <label for="form_signed">Has the form been signed by the Informant?</label>
+        <br>
+        <select id="form_signed" name="person[form_signed]" 
+                class="input_cell" tt_onUnLoad="summaryFields()">
+          <option></option>
+          <option value="Yes" <%= ((@person[:form_signed] rescue nil) == "Yes" ? "selected" : "") %> >Yes</option>
+          <option value="No" <%= ((@person[:form_signed] rescue nil) == "No" ? "selected" : "") %> >No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
+        <br>
+        <input type="hidden" name="registration_type" id="registration_type">
+        <%= (f.text_field :acknowledgement_of_receipt_date,
+                          :id => "person_acknowledgement_of_receipt_date",
+                          :class => "input_cell",
+                          :value => Date.today.strftime('%d/%b/%Y'),
+                          :fieldtype => "date",
+                          :tt_onLoad => "dateInterval('person_acknowledgement_of_receipt_date');",
+                          :tt_onUnload => 'updateRegistrationType()',
+                          :absolute_min => 'reportingDate()',
+                          :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
+
+      </div>
+
+    </fieldset>
+
+    <div class="actions">
+      <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
+    </div>
+<% end %>
+
+<script>
+    function setpersonName() {
+
+       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+    }
+
+    function reportingDate(){
+
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
+
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
+
+      if (original < commence){
+        commence = original;
+      }
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
+
+    }
+
+    function appendValue(id){
+      setTimeout("checkChanges('" + id + "')", 1000);
+    }
+
+    function possibleChildren(obj, tag){
+
+      // This function assigns limits to a target element based on type of birth
+
+      var min = 1;
+      if (obj.value.match(/Twin/i)){
+
+        min = 2;
+
+      }else if (obj.value.match(/Triplet/i)){
+
+        min = 3;
+
+      }else if (obj.value.match(/Other/i)){
+
+        min = 4;
+
+      }
+
+      tag.setAttribute("absolute_min", min);
+
+    }
+
+    function validateDate(obj, tag, min, max, absoluteMin, absoluteMax){
+
+        // This function assigns limits to a target element based on parameters
+
+        ele = obj.value
+        ele = ele.split('/');
+
+        if (obj.value.match(/\W?/i)) {
+            if (ele[1] == '?') {
+                ele[0] = "1";
+                ele[1] = "07";
+            }
+            else if (ele[0] == '?') {
+                ele[1] = parseInt(monthNames[ele[1]]) + 1;
+                ele[1] = (ele[1] < 10 ? "0" + ele[1] : ele[1])
+                ele[0] = "15"
+            }
+        }
+        else {
+            ele[1] = parseInt(monthNames[ele[1]]);
+            ele[1] = ele[1] + 1
+
+            if (ele[1] < 10){
+                ele[1] = "0" + ele[1];
+            }
+        }
+
+        current = new Date(ele[1] + "/" + ele[0] + "/" + ele[2]);
+
+        yr1 = current.getFullYear() - min;
+        yr2 = current.getFullYear() - max;
+        yr3 = current.getFullYear() - absoluteMax;
+        yr4 = current.getFullYear() - absoluteMin;
+
+        min =  yr1 + '/' + ele[1] + '/' + ele[0];
+        max = yr2 + '/' + ele[1] + '/' + ele[0];
+        absoluteMax =  yr3 + '/' + ele[1] + '/' + ele[0];
+
+        if (parseInt(absoluteMin) > 0) {
+            absoluteMin =  yr4 + '/' + ele[1] + '/' + ele[0];
+        }else{
+            absoluteMin = "";
+        }
+
+
+        tag.setAttribute("min", min);
+        tag.setAttribute("max", max);
+        tag.setAttribute("absolute_max", absoluteMax);
+        tag.setAttribute("absolute_min", absoluteMin);
+
+    }
+
+
+    function nationality(){
+
+      if(__$('textForsame_address_with_mother').value.trim() == 'Yes' && __$('person_mother_citizenship').value.trim() == 'Malawian') {
+        copyMothersResidence();
+      }
+      else if (__$('textForsame_address_with_mother').value.trim() == 'Yes' && __$('person_mother_citizenship').value.trim() != 'Malawian'){
+        copyMothersForeignResidence()
+      }else {
+        deleteFathersResidence();
+      }
+    }
+
+    function copyMothersForeignResidence(){
+
+      if (__$("person_father_residential_country") && __$("textForperson_father_residential_country") && __$("person_mother_residential_country"))
+      {
+            __$("person_father_residential_country").value = __$("person_mother_residential_country").value;
+            __$("textForperson_father_residential_country").value = __$("person_mother_residential_country").value;
+      }
+
+      if (__$("person_father_current_district") && __$("person_mother_foreigner_current_district")){
+        __$("person_father_current_district").value = __$("person_mother_foreigner_current_district").value;
+
+        __$("textForperson_father_current_district").value = __$("person_mother_foreigner_current_district").value;
+      }
+
+      if (__$("person_father_current_village") && __$("person_mother_foreigner_current_village")){
+        __$("person_father_current_village").value = __$("person_mother_foreigner_current_village").value;
+
+        __$("textForperson_father_current_village").value = __$("person_mother_foreigner_current_village").value;
+      }
+
+      if (__$("person_father_current_ta") && __$("person_mother_foreigner_current_ta") && __$("textForperson_father_current_ta")) {
+
+        __$("person_father_current_ta").value = __$("person_mother_foreigner_current_ta").value;
+
+        __$("textForperson_father_current_ta").value = __$("person_mother_foreigner_current_ta").value;
+
+      }
+
+        var section =  parseInt(__$("textForperson_father_current_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        setTimeout(function() {
+            var section = parseInt(__$("textForfather_home_address_same_as_physical").getAttribute("section"));
+            var pos = parseInt(__$("textForfather_home_address_same_as_physical").getAttribute("pos"));
+            navigateTo(pos, section, false);
+        }, 25);
+    }
+
+    function autoNavigate(id){
+
+      var pos = parseInt(__$(id).getAttribute("pos")) + 1;
+
+      var section =  parseInt(__$(id).getAttribute("section"));
+
+      gotoQuestion(pos, section);
+
+    }
+
+    function copyMothersResidence() {
+
+        if (__$("person_father_residential_country") && __$("textForperson_father_residential_country") && __$("person_mother_local_residential_country"))
+        {
+            __$("person_father_residential_country").value = __$("person_mother_local_residential_country").value;
+            __$("textForperson_father_residential_country").value = __$("person_mother_local_residential_country").value;
+        }
+
+        if (__$("person_father_current_district") && __$("person_mother_current_district") && __$("textForperson_father_current_district")) {
+
+            __$("person_father_current_district").value = __$("person_mother_current_district").value;
+
+            __$("textForperson_father_current_district").value = __$("person_mother_current_district").value;
+
+        }
+
+        if (__$("person_father_current_ta") && __$("person_mother_current_ta") && __$("textForperson_father_current_ta")) {
+
+            __$("person_father_current_ta").value = __$("person_mother_current_ta").value;
+
+            __$("textForperson_father_current_ta").value = __$("person_mother_current_ta").value;
+
+        }
+
+        if (__$("person_father_current_village") && __$("person_mother_current_village") && __$("textForperson_father_current_village")) {
+
+            __$("person_father_current_village").value = __$("person_mother_current_village").value;
+
+            __$("textForperson_father_current_village").value = __$("person_mother_current_village").value;
+
+        }
+
+        var section =  parseInt(__$("textForperson_father_current_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        setTimeout(function() {
+            var section = parseInt(__$("textForfather_home_address_same_as_physical").getAttribute("section"));
+            var pos = parseInt(__$("textForfather_home_address_same_as_physical").getAttribute("pos"));
+            navigateTo(pos, section, false);
+        }, 25);
+
+    }
+
+    function loadFathersAddress(){
+
+      if (__$("person_father_current_district") && __$("person_father_home_district")  && __$("textForperson_father_home_district")) {
+
+        __$("person_father_home_district").value = __$("person_father_current_district").value;
+
+        __$("textForperson_father_home_district").value = __$("person_father_current_district").value;
+
+        //autoNavigate("textForperson_father_home_district");
+
+      }
+
+      if (__$("person_father_current_ta") && __$("person_father_home_ta") && __$("textForperson_father_home_ta")) {
+
+        __$("person_father_home_ta").value = __$("person_father_current_ta").value;
+
+        __$("textForperson_father_home_ta").value = __$("person_father_current_ta").value;
+
+        //  autoNavigate("textForperson_father_home_ta");
+      }
+
+      if (__$("person_father_current_village") && __$("person_father_home_village") && __$("textForperson_father_home_village")) {
+
+        __$("person_father_home_village").value = __$("person_father_current_village").value;
+
+         __$("textForperson_father_home_village").value = __$("person_father_current_village").value;
+
+        //autoNavigate("textForperson_father_home_village");
+      }
+
+
+        var section =  parseInt(__$("textForperson_father_home_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        setTimeout(function() {
+            var section = parseInt(__$("textForinformant_same_as_mother").getAttribute("section"));
+
+            navigateTo(0, section, false);
+        }, 25);
+    }
+
+    function unloadFathersAddress(){
+
+      if (__$("person_father_home_district") && __$("textForperson_father_home_district")) {
+
+        __$("person_father_home_district").value = "";
+
+        __$("textForperson_father_home_district").value = "";
+
+      }
+
+      if (__$("person_father_home_ta") && __$("textForperson_father_home_ta")) {
+
+        __$("person_father_home_ta").value = "";
+
+        __$("textForperson_father_home_ta").value = "";
+
+      }
+
+      if (__$("person_father_home_village") && __$("textForperson_father_home_village")) {
+
+        __$("person_father_home_village").value = "";
+
+        if (__$("textForperson_father_home_village"))
+        __$("textForperson_father_home_village").value = "";
+
+      }
+
+
+    }
+
+    function deleteFathersResidence(){
+
+        if (__$("person_father_residential_country") && __$("textForperson_father_residential_country"))
+        {
+            __$("person_father_residential_country").value = "";
+            __$("textForperson_father_residential_country").value = "";
+        }
+
+        if (__$("person_father_current_district") &&  __$("textForperson_father_current_district")) {
+
+            __$("person_father_current_district").value = "";
+
+            __$("textForperson_father_current_district").value = "";
+
+        }
+
+        if (__$("person_father_current_ta") && __$("textForperson_father_current_ta")) {
+
+            __$("person_father_current_ta").value = "";
+
+            __$("textForperson_father_current_ta").value = "";
+
+        }
+
+        if (__$("person_father_current_village") && __$("textForperson_father_current_village")) {
+
+            __$("person_father_current_village").value = "";
+
+            __$("textForperson_father_current_village").value = "";
+
+        }
+
+    }
+
+
+    function loadFathersDetails(){
+
+        if (__$("person_father_first_name") && __$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+            __$("person_informant_first_name").value = __$("person_father_first_name").value;
+
+            __$("textForperson_informant_first_name").value = __$("person_father_first_name").value;
+
+        }
+
+        if (__$("person_father_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
+
+            __$("person_informant_middle_name").value = __$("person_father_middle_name").value;
+
+            __$("textForperson_informant_middle_name").value = __$("person_father_middle_name").value;
+
+        }
+
+        if (__$("person_father_last_name") && __$("person_informant_last_name") && __$("textForperson_informant_last_name")) {
+
+            __$("person_informant_last_name").value = __$("person_father_last_name").value;
+
+            __$("textForperson_informant_last_name").value = __$("person_father_last_name").value;
+
+        }
+
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
+
+            __$("person_informant_relationship_to_person").value = "Father";
+
+            __$("textForperson_informant_relationship_to_person").value = "Father";
+
+        }
+
+        if (__$("person_father_current_district") && __$("person_informant_current_district")) {
+
+            __$("person_informant_current_district").value = __$("person_father_current_district").value;
+
+        }
+
+        if (__$("person_father_current_ta") && __$("person_informant_current_ta")) {
+
+            __$("person_informant_current_ta").value = __$("person_father_current_ta").value;
+
+        }
+
+        if (__$("person_father_current_village") && __$("person_informant_current_village")) {
+
+            __$("person_informant_current_village").value = __$("person_father_current_village").value;
+
+        }
+
+        if (__$("person_father_id_number")) {
+
+            __$("person_informant_id_number").value = __$("person_father_id_number").value;
+
+            __$("textForperson_informant_id_number").value = __$("person_father_id_number").value;
+
+
+        }
+
+        var section =  parseInt(__$("textForperson_informant_id_number").getAttribute("section"));
+        loadPage(section + 1);
+        var section =  parseInt(__$("textForperson_informant_addressline1").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_informant_addressline1").getAttribute("pos"));
+        navigateTo(pos, section, false);
+    }
+
+    function loadMothersAddress(){
+
+      if (__$("person_mother_current_district") && __$("person_mother_home_district")) {
+
+        __$("person_mother_home_district").value = __$("person_mother_current_district").value;
+
+        __$("textForperson_mother_home_district").value = __$("person_mother_current_district").value;
+
+        autoNavigate("textForperson_mother_home_district");
+
+      }
+
+      if (__$("person_mother_current_ta") && __$("person_mother_home_ta")) {
+
+        __$("person_mother_home_ta").value = __$("person_mother_current_ta").value;
+
+        __$("textForperson_mother_home_ta").value = __$("person_mother_current_ta").value;
+
+         autoNavigate("textForperson_mother_home_ta");
+
+      }
+
+      if (__$("person_mother_current_village") && __$("person_mother_home_village")) {
+
+        __$("person_mother_home_village").value = __$("person_mother_current_village").value;
+
+        //showMsg(__$("textForperson_mother_home_village").value);
+
+        //__$("textForperson_mother_home_village").value = __$("person_mother_current_village").value;
+
+        autoNavigate("textForperson_mother_home_village");
+      }
+
+        var section =  parseInt(__$("textForperson_mother_home_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
+        navigateTo(pos, section, false);
+
+    }
+
+    function unloadMothersAddress(){
+
+      if (__$("person_mother_home_district") && __$("textForperson_mother_home_district")) {
+
+        __$("person_mother_home_district").value = "";
+
+        __$("textForperson_mother_home_district").value = "";
+
+      }
+
+      if (__$("person_mother_home_ta") && __$("textForperson_mother_home_ta")) {
+
+        __$("person_mother_home_ta").value = "";
+
+        __$("textForperson_mother_home_ta").value = "";
+
+      }
+
+      if (__$("person_mother_home_village") && __$("textForperson_mother_home_village")) {
+
+        __$("person_mother_home_village").value = "";
+
+        __$("textForperson_mother_home_village").value = "";
+
+      }
+
+
+    }
+
+    function loadForeignMothersAddress(){
+
+      if (__$("person_mother_residential_country") && __$("person_mother_home_country")) {
+
+        __$("person_mother_home_country").value = __$("person_mother_residential_country").value;
+
+        __$("textForperson_mother_home_country").value = __$("person_mother_residential_country").value;
+
+        //autoNavigate("textForperson_mother_home_country");
+
+      }
+
+      if (__$("person_mother_foreigner_current_district") && __$("person_mother_foreigner_home_district")) {
+
+        __$("person_mother_foreigner_current_district").value = __$("person_mother_foreigner_current_district").value;
+
+        __$("textForperson_mother_foreigner_home_district").value = __$("person_mother_foreigner_current_district").value;
+
+        //autoNavigate("textForperson_mother_foregner_home_district");
+
+      }
+
+      if (__$("person_mother_foreigner_current_village") && __$("person_mother_foreigner_home_village")) {
+
+        __$("person_mother_foreigner_home_village").value = __$("person_mother_foreigner_current_village").value;
+
+        __$("textForperson_mother_foreigner_home_village").value = __$("person_mother_foreigner_current_village").value;
+
+        //autoNavigate("textForperson_mother_foreigner_home_village");
+
+      }
+
+      if (__$("person_mother_foreigner_current_ta") && __$("person_mother_foreigner_home_ta")) {
+
+        __$("person_mother_foreigner_home_ta").value = __$("person_mother_foreigner_current_ta").value;
+
+        __$("textForperson_mother_foreigner_home_ta").value = __$("person_mother_foreigner_current_ta").value;
+
+        //autoNavigate("textForperson_mother_foreigner_home_ta");
+
+      }
+
+        var section =  parseInt(__$("textForperson_mother_home_country").getAttribute("section"));
+        loadPage(section + 1);
+
+        var section =  parseInt(__$("textForperson_gestation_at_birth").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_gestation_at_birth").getAttribute("pos"));
+        navigateTo(pos, section, false);
+
+
+    }
+
+    function unloadForeignMothersAddress(){
+
+      if (__$("person_mother_home_country") && __$("textForperson_mother_home_country")) {
+
+        __$("person_mother_home_country").value = "";
+
+        __$("textForperson_mother_home_country").value = "";
+
+      }
+
+
+      if (__$("person_mother_foreigner_home_district") && __$("textForperson_mother_foreigner_home_district")) {
+
+        __$("person_mother_foreigner_home_district").value = "";
+
+        __$("textForperson_mother_foreigner_home_district").value = "";
+
+      }
+
+      if (__$("person_mother_foreigner_home_ta") && __$("textForperson_mother_foreigner_home_ta")) {
+
+        __$("person_mother_foreigner_home_ta").value = "";
+
+        __$("textForperson_mother_foreigner_home_ta").value = "";
+
+      }
+
+      if (__$("person_mother_foreigner_home_village") && __$("textForperson_mother_foreigner_home_village")) {
+
+        __$("person_mother_foreigner_home_village").value = "";
+
+        __$("textForperson_mother_foreigner_home_village").value = "";
+
+      }
+
+    }
+
+    function loadMothersDetails(){
+
+        if (__$("person_mother_first_name") && __$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+            __$("person_informant_first_name").value = __$("person_mother_first_name").value;
+
+            __$("textForperson_informant_first_name").value = __$("person_mother_first_name").value;
+
+        }
+
+        if (__$("person_mother_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
+
+            __$("person_informant_middle_name").value = __$("person_mother_middle_name").value;
+
+            __$("textForperson_informant_middle_name").value = __$("person_mother_middle_name").value;
+
+        }
+
+        if (__$("person_mother_last_name") && __$("person_informant_last_name") && __$("textForperson_informant_last_name")) {
+
+            __$("person_informant_last_name").value = __$("person_mother_last_name").value;
+
+            __$("textForperson_informant_last_name").value = __$("person_mother_last_name").value;
+
+        }
+
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
+
+            __$("person_informant_relationship_to_person").value = "Mother";
+
+            __$("textForperson_informant_relationship_to_person").value = "Mother";
+
+        }
+
+        if (__$("person_mother_current_district") && __$("person_informant_current_district")) {
+
+            __$("person_informant_current_district").value = __$("person_mother_current_district").value;
+
+        }
+
+        if (__$("person_mother_current_ta") && __$("person_informant_current_ta")) {
+
+            __$("person_informant_current_ta").value = __$("person_mother_current_ta").value;
+
+        }
+
+        if (__$("person_mother_current_village") && __$("person_informant_current_village")) {
+
+            __$("person_informant_current_village").value = __$("person_mother_current_village").value;
+
+        }
+
+        if (__$("person_mother_id_number")) {
+
+            __$("person_informant_id_number").value = __$("person_mother_id_number").value;
+
+            __$("textForperson_informant_id_number").value = __$("person_mother_id_number").value;
+
+        }
+
+        var section =  parseInt(__$("textForperson_informant_id_number").getAttribute("section"));
+        loadPage(section + 1);
+
+        var section =  parseInt(__$("textForperson_informant_addressline1").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_informant_addressline1").getAttribute("pos"));
+        navigateTo(pos, section, false);
+    }
+    
+    
+    function loadFosterMothersDetails(){
+
+        if (__$("person_foster_mother_first_name") && __$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+            __$("person_informant_first_name").value = __$("person_foster_mother_first_name").value;
+
+            __$("textForperson_informant_first_name").value = __$("person_foster_mother_first_name").value;
+
+        }
+
+        if (__$("person_foster_mother_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
+
+            __$("person_informant_middle_name").value = __$("person_foster_mother_middle_name").value;
+
+            __$("textForperson_informant_middle_name").value = __$("person_foster_mother_middle_name").value;
+
+        }
+
+        if (__$("person_foster_mother_last_name") && __$("person_informant_last_name") && __$("textForperson_informant_last_name")) {
+
+            __$("person_informant_last_name").value = __$("person_foster_mother_last_name").value;
+
+            __$("textForperson_informant_last_name").value = __$("person_foster_mother_last_name").value;
+
+        }
+
+        
+            __$("person_informant_relationship_to_person").value = "Mother";
+
+            __$("textForperson_informant_relationship_to_person").value = "Mother";
+
+
+        if (__$("person_foster_mother_current_district") && __$("person_informant_current_district")) {
+
+            __$("person_informant_current_district").value = __$("person_foster_mother_current_district").value;
+
+        }
+
+        if (__$("person_foster_mother_current_ta") && __$("person_informant_current_ta")) {
+
+            __$("person_informant_current_ta").value = __$("person_foster_mother_current_ta").value;
+
+        }
+
+        if (__$("person_foster_mother_current_village") && __$("person_informant_current_village")) {
+
+            __$("person_informant_current_village").value = __$("person_foster_mother_current_village").value;
+
+        }
+
+        if (__$("person_foster_mother_id_number")) {
+
+            __$("person_informant_id_number").value = __$("person_foster_mother_id_number").value;
+
+            __$("textForperson_informant_id_number").value = __$("person_foster_mother_id_number").value;
+
+        }
+
+        var section =  parseInt(__$("textForperson_informant_id_number").getAttribute("section"));
+        loadPage(section + 1);
+
+        var section =  parseInt(__$("textForperson_informant_addressline1").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_informant_addressline1").getAttribute("pos"));
+        navigateTo(pos, section, false);
+    }
+    
+    
+    function loadFosterFathersDetails(){
+
+        if (__$("person_foster_father_first_name") && __$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+            __$("person_informant_first_name").value = __$("person_foster_father_first_name").value;
+
+            __$("textForperson_informant_first_name").value = __$("person_foster_father_first_name").value;
+
+        }
+
+        if (__$("person_foster_father_middle_name") && __$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
+
+            __$("person_informant_middle_name").value = __$("person_foster_father_middle_name").value;
+
+            __$("textForperson_informant_middle_name").value = __$("person_foster_father_middle_name").value;
+
+        }
+
+        if (__$("person_foster_father_last_name") && __$("person_informant_last_name") && __$("textForperson_informant_last_name")) {
+
+            __$("person_informant_last_name").value = __$("person_foster_father_last_name").value;
+
+            __$("textForperson_informant_last_name").value = __$("person_foster_father_last_name").value;
+
+        }
+
+        
+
+            __$("person_informant_relationship_to_person").value = "Father";
+
+            __$("textForperson_informant_relationship_to_person").value = "Father";
+
+      
+
+        if (__$("person_foster_father_current_district") && __$("person_informant_current_district")) {
+
+            __$("person_informant_current_district").value = __$("person_foster_father_current_district").value;
+
+        }
+
+        if (__$("person_foster_father_current_ta") && __$("person_informant_current_ta")) {
+
+            __$("person_informant_current_ta").value = __$("person_foster_father_current_ta").value;
+
+        }
+
+        if (__$("person_foster_father_current_village") && __$("person_informant_current_village")) {
+
+            __$("person_informant_current_village").value = __$("person_foster_father_current_village").value;
+
+        }
+
+        if (__$("person_foster_father_id_number")) {
+
+            __$("person_informant_id_number").value = __$("person_foster_father_id_number").value;
+
+            __$("textForperson_informant_id_number").value = __$("person_foster_father_id_number").value;
+
+
+        }
+
+        var section =  parseInt(__$("textForperson_informant_id_number").getAttribute("section"));
+        loadPage(section + 1);
+        var section =  parseInt(__$("textForperson_informant_addressline1").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_informant_addressline1").getAttribute("pos"));
+        navigateTo(pos, section, false);
+    }
+
+    
+    function unloadInformantsDetails(){
+
+        if (__$("person_informant_first_name") && __$("textForperson_informant_first_name")) {
+
+            __$("person_informant_first_name").value = "";
+
+            __$("textForperson_informant_first_name").value = "";
+
+        }
+
+        if (__$("person_informant_middle_name") && __$("textForperson_informant_middle_name")) {
+
+            __$("person_informant_middle_name").value = "";
+
+            __$("textForperson_informant_middle_name").value = "";
+
+        }
+
+        if (__$("person_informant_last_name") && __$("textForperson_informant_last_name")) {
+
+            __$("person_informant_last_name").value = "";
+
+            __$("textForperson_informant_last_name").value = "";
+
+        }
+
+        if (__$("person_informant_relationship_to_person") && __$("textForperson_informant_relationship_to_person")) {
+
+            __$("person_informant_relationship_to_person").value = "";
+
+            __$("textForperson_informant_relationship_to_person").value = "";
+
+        }
+
+        if (__$("person_informant_current_district") && __$("textForperson_informant_current_district")) {
+
+            __$("person_informant_current_district").value = "";
+
+            __$("textForperson_informant_current_district").value = "";
+
+        }
+
+        if (__$("person_informant_current_ta") && __$("textForperson_informant_current_ta")) {
+
+            __$("person_informant_current_ta").value = "";
+
+            __$("textForperson_informant_current_ta").value = "";
+
+        }
+
+        if (__$("person_informant_current_village") && __$("textForperson_informant_current_village")) {
+
+            __$("person_informant_current_village").value = "";
+
+            __$("textForperson_informant_current_village").value = "";
+
+        }
+
+        if(__$("person_informant_id_number") && __$("textForperson_informant_id_number")) {
+
+             __$("person_informant_id_number").value = "";
+
+            __$("textForperson_informant_id_number").value = "";
+        }
+
+
+    }
+    
+    
+    function loadFosterMothersAddress(){
+
+      if (__$("person_foster_mother_current_district") && __$("person_foster_mother_home_district")) {
+
+        __$("person_foster_mother_home_district").value = __$("person_foster_mother_current_district").value;
+
+        __$("textForperson_foster_mother_home_district").value = __$("person_foster_mother_current_district").value;
+
+        autoNavigate("textForperson_foster_mother_home_district");
+
+      }
+
+      if (__$("person_foster_mother_current_ta") && __$("person_foster_mother_home_ta")) {
+
+        __$("person_foster_mother_home_ta").value = __$("person_foster_mother_current_ta").value;
+
+        __$("textForperson_foster_mother_home_ta").value = __$("person_foster_mother_current_ta").value;
+
+         autoNavigate("textForperson_foster_mother_home_ta");
+
+      }
+
+      if (__$("person_foster_mother_current_village") && __$("person_foster_mother_home_village")) {
+
+        __$("person_foster_mother_home_village").value = __$("person_foster_mother_current_village").value;
+
+        //showMsg(__$("textForperson_mother_home_village").value);
+
+        //__$("textForperson_mother_home_village").value = __$("person_mother_current_village").value;
+
+        autoNavigate("textForperson_foster_mother_home_village");
+      }
+
+        var section =  parseInt(__$("textForperson_foster_mother_home_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        var section =  parseInt(__$("textForperson_foster_father_last_name").getAttribute("section"));
+        var pos = parseInt(__$("textForperson_foster_father_last_name").getAttribute("pos"));
+        navigateTo(pos, section, false);
+
+    }
+
+    function unloadFosterMothersAddress(){
+
+      if (__$("person_foster_mother_home_district") && __$("textForperson_foster_mother_home_district")) {
+
+        __$("person_foster_mother_home_district").value = "";
+
+        __$("textForperson_foster_mother_home_district").value = "";
+
+      }
+
+      if (__$("person_foster_mother_home_ta") && __$("textForperson_foster_mother_home_ta")) {
+
+        __$("person_foster_mother_home_ta").value = "";
+
+        __$("textForperson_foster_mother_home_ta").value = "";
+
+      }
+
+      if (__$("person_foster_mother_home_village") && __$("textForperson_foster_mother_home_village")) {
+
+        __$("person_foster_mother_home_village").value = "";
+
+        __$("textForperson_foster_mother_home_village").value = "";
+
+      }
+
+
+    }
+    
+    
+    
+    function loadFosterFathersAddress(){
+
+      if (__$("person_foster_father_current_district") && __$("person_foster_father_home_district")  && __$("textForperson_foster_father_home_district")) {
+
+        __$("person_foster_father_home_district").value = __$("person_foster_father_current_district").value;
+
+        __$("textForperson_foster_father_home_district").value = __$("person_foster_father_current_district").value;
+
+        //autoNavigate("textForperson_father_home_district");
+
+      }
+
+      if (__$("person_foster_father_current_ta") && __$("person_foster_father_home_ta") && __$("textForperson_foster_father_home_ta")) {
+
+        __$("person_foster_father_home_ta").value = __$("person_foster_father_current_ta").value;
+
+        __$("textForperson_foster_father_home_ta").value = __$("person_foster_father_current_ta").value;
+
+        //  autoNavigate("textForperson_father_home_ta");
+      }
+
+      if (__$("person_foster_father_current_village") && __$("person_foster_father_home_village") && __$("textForperson_foster_father_home_village")) {
+
+        __$("person_foster_father_home_village").value = __$("person_foster_father_current_village").value;
+
+         __$("textForperson_foster_father_home_village").value = __$("person_foster_father_current_village").value;
+
+        //autoNavigate("textForperson_father_home_village");
+      }
+
+
+        var section =  parseInt(__$("textForperson_foster_father_home_district").getAttribute("section"));
+        loadPage(section + 1);
+
+        setTimeout(function() {
+            var section = parseInt(__$("textForinformant_same_as_mother").getAttribute("section"));
+
+            navigateTo(0, section, false);
+        }, 25);
+    }
+
+    function unloadFosterFathersAddress(){
+
+      if (__$("person_foster_father_home_district") && __$("textForperson_foster_father_home_district")) {
+
+        __$("person_foster_father_home_district").value = "";
+
+        __$("textForperson_foster_father_home_district").value = "";
+
+      }
+
+      if (__$("person_foster_father_home_ta") && __$("textForperson_foster_father_home_ta")) {
+
+        __$("person_foster_father_home_ta").value = "";
+
+        __$("textForperson_foster_father_home_ta").value = "";
+
+      }
+
+      if (__$("person_foster_father_home_village") && __$("textForperson_foster_father_home_village")) {
+
+        __$("person_foster_father_home_village").value = "";
+
+        if (__$("textForperson_foster_father_home_village"))
+        __$("textForperson_foster_father_home_village").value = "";
+
+      }
+
+
+    }
+    
+    
+    
+    function copyMothersName(){
+
+      __$("person_last_name").value =  __$("person_mother_last_name").value ;
+
+    }
+
+    function removeMothersName(){
+      if(__$("person_original_surname")) {
+      __$("person_last_name").value = __$("person_original_surname").value;
+
+      }
+    }
+
+
+    function setChildName() {
+       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+       }
+
+    init();
+
+
+    function clearRelated(){
+      if (__$('del')){
+      __$('del').onmousedown = function () {
+
+        if (target) {
+
+          if ("N/A" == target.value.trim()) {
+
+            target.value = "";
+
+          } else {
+
+            target.value = target.value.trim().substring(0, (target.value.trim().length - 1));
+
+          }
+
+          if(target.getAttribute("target") == "person_mother_current_district"){
+
+            __$("person_mother_current_ta").value = "";
+            __$("person_mother_current_village").value = "";
+
+            __$("textForperson_mother_current_ta").value = "";
+            __$("textForperson_mother_current_village").value = "";
+
+          }else if(target.getAttribute("target") == "person_mother_current_ta"){
+
+            __$("person_mother_current_village").value = "";
+
+            __$("textForperson_mother_current_village").value = "";
+
+          }else if(target.getAttribute("target") == "person_mother_home_district"){
+
+            __$("person_mother_home_ta").value = "";
+            __$("person_mother_home_village").value = "";
+
+            __$("textForperson_mother_home_ta").value = "";
+            __$("textForperson_mother_home_village").value = "";
+
+          }else if(target.getAttribute("target") == "person_mother_home_ta"){
+
+            __$("person_mother_home_village").value = "";
+
+            __$("textForperson_mother_home_village").value = "";
+
+          }
+
+
+          if(target.getAttribute("target")){
+
+            if(__$(target.getAttribute("target"))){
+
+              __$(target.getAttribute("target")).value = target.value;
+
+            }
+
+          }
+
+        }
+
+      }
+    }
+
+  }
+  
+  
+
+
+    function summaryFields(){
+          var full_place_of_birth;
+         
+          if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital') 
+          {
+            full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+              
+          }
+            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+          {
+            full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+          }
+          else {
+          
+            full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+          }
+
+
+          summaryHash = {
+                          "Child Name" : ["person_first_name","person_middle_name","person_last_name"],
+                          "Child Gender" : ["person_gender"],
+                          "Child Date of Birth" : ["person_birthdate"],
+                          "Place of Birth"    : ["person_place_of_birth"],
+                          "Location of Birth" : full_place_of_birth,
+                          "Mother " : ["person_mother_first_name", "person_mother_middle_name", "person_mother_last_name"],
+                          "Father" : ["person_father_first_name", "person_father_middle_name" ,"person_father_last_name"],
+                          "Adoptive Mother " : ["person_foster_mother_first_name", "person_foster_mother_middle_name", "person_foster_mother_last_name"],
+                          "Adoptive Father" : ["person_foster_father_first_name", "person_foster_father_middle_name" ,"person_foster_father_last_name"],
+                          "Form Signed by Informant?" : ["form_signed"],
+                          "Delayed Registration" : ['registration_type']
+                         };
+    }
+
+    function updateRegistrationType()
+    {
+        var person_dob = handleDate(__$('person_birthdate').value);
+
+        if (((Date.parse(__$('person_acknowledgement_of_receipt_date').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
+        {
+            __$('registration_type').value = 'Yes'
+        }
+        else
+        {
+            __$('registration_type').value = 'No'
+        }
+    }
+
+    function recalculateDateValidations(){
+
+        __$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());
+
+
+    }
+
+    showMessage();
+
+		function  showMessage() {
+
+				<% if @person.errors.any?
+          errors = []
+          errors << "<p>" + pluralize(@person.errors.count, "error") + " occured while saving this record:</p>"
+           @person.errors.full_messages.each do |message|
+             errors << "<li>" + message + "</li>"
+          end %>
+
+           showMsg('<%= errors.join.html_safe %>', true);
+
+        <% end %>
+
+     }
+
+    function checkWeddingDate( obj,parent)
+    {
+        if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
+        {
+            var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())
+            var dob = handleDate(obj.value.toString().trim())
+
+            if (((marriageDate - dob) / (365 * 24 * 60 * 60 * 1000)) <= 10){
+
+                showMsg("The age at marriage of " + parent + " is less than 10 years. Please verify date of marriage and birth.");
+            }
+        }
+    }
+
+    function handleDate(date){
+
+        ele = date.split('/');
+
+        if (date.match(/\W?/i)) {
+            if (ele[1] == '?') {
+                ele[0] = "1";
+                ele[1] = "07";
+            }
+            else if (ele[0] == '?') {
+                ele[1] = parseInt(monthNames[ele[1]]) + 1;
+                ele[1] = (ele[1] < 10 ? "0" + ele[1] : ele[1])
+                ele[0] = "15"
+            }
+        }
+        else {
+            ele[1] = parseInt(monthNames[ele[1]]);
+            ele[1] = ele[1] + 1
+
+            if (ele[1] < 10){
+                ele[1] = "0" + ele[1];
+            }
+        }
+        return new Date(ele[1] + "/" + ele[0] + "/" + ele[2]);
+
+    }
+    
+    function setDistrict(place) {
+      
+     if (place == 'district') {
+     
+      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district.id %>" ;
+       
+       
+    
+     } else {
+     
+       __$('person_birth_district').value = "<%= Location.current_district.id %>" ;
+      
+     }
+    }
+    
+    function beforeLiveDate(){
+      startDate = new Date("8/1/2015");
+     
+      if (handleDate(__$('person_birthdate').value.trim()) > startDate){
+       
+         return true;
+      
+      } else {
+      
+        return true;
+      }
+       
+    
+    }
+    /*summaryHash = {};
+
+    function loadFields(){
+
+        var fields = document.getElementsByClassName("input_cell");
+
+        for(var i = 0; i < fields.length; i++){
+
+            summaryHash[fields[i].id] = [fields[i].id];
+
+        }
+
+    }
+
+    loadFields();*/
+
+</script>

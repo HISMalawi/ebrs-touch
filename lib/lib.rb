@@ -24,7 +24,15 @@ module Lib
   end
 
   def self.new_mother(person, params,mother_type)
-    
+
+    if !params[:mother_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:mother_id],
+          person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
+      )
+      return nil
+    end
+
     if self.is_twin_or_triplet(params[:person][:type_of_birth])
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
@@ -86,6 +94,15 @@ module Lib
             :address_line_1         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil),
             :address_line_2         => (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
         )
+
+        if mother[:id_number].present?
+       
+          PersonIdentifier.create(
+                    person_id: mother_person.person_id,
+                    person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                    value: mother[:id_number].upcase
+            )
+        end
     end
     unless mother_person.blank?
       PersonRelationship.create(
@@ -93,19 +110,19 @@ module Lib
               person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
       )
     end
-
-    if mother[:id_number].present?
-       
-        PersonIdentifier.create(
-                  person_id: mother_person.person_id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: mother[:id_number]
-          )
-    end
     mother_person
   end
 
   def self.new_father(person, params, father_type)
+
+    if !params[:father_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:father_id],
+          person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
+      )
+      return nil
+    end
+
     if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
@@ -127,7 +144,7 @@ module Lib
 
       father_person = Person.create(
           :person_id          => core_person.id,
-          :gender             => 'F',
+          :gender             => 'M',
           :birthdate          => (father[:birthdate].blank? ? "1900-01-01" : father[:birthdate].to_date),
           :birthdate_estimated => (father[:birthdate].blank? ? 1 : 0)
       )
@@ -168,6 +185,14 @@ module Lib
           :address_line_1         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil),
           :address_line_2         => (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       )
+      if father[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: father_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: father[:id_number].upcase
+          )
+      end
     end
     unless father_person.blank?
       PersonRelationship.create(
@@ -176,18 +201,18 @@ module Lib
       )
     end
 
-    if father[:id_number].present?
-        
-        PersonIdentifier.create(
-                  person_id: father_person.person_id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: father[:id_number]
-          )
-    end
     father_person
   end
 
   def self.new_informant(person, params)
+
+    if !params[:informant_id].blank?
+      PersonRelationship.create(
+          person_a: person.id, person_b: params[:informant_id],
+          person_relationship_type_id: PersonRelationType.where(name: "Informant").last.id
+      )
+      return nil
+    end
 
     informant_person = nil; core_person = nil
 
@@ -205,6 +230,7 @@ module Lib
          informant_person = person.mother
       end
     elsif params[:informant_same_as_father] == 'Yes'
+
       if params[:person][:relationship] == "adopted"
           informant_person = person.adoptive_father
       else
@@ -251,7 +277,14 @@ module Lib
           :address_line_1         => informant[:addressline1],
           :address_line_2         => informant[:addressline2]
       )
-
+      if informant[:id_number].present?
+        
+        PersonIdentifier.create(
+                  person_id: informant_person.id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: informant[:id_number].upcase
+          )
+      end
     end
 
     PersonRelationship.create(
@@ -268,14 +301,7 @@ module Lib
       )
     end
 
-    if informant[:id_number].present?
-        
-        PersonIdentifier.create(
-                  person_id: informant_person.id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: informant[:id_number]
-          )
-    end
+
     informant_person
   end
 
@@ -340,13 +366,18 @@ module Lib
       rel = params[:person][:informant][:relationship_to_person] rescue nil
     end
 
-
+    if  SETTINGS["application_mode"] == "FC"
+        birth_district_id = Location.find(Location.find(SETTINGS["location_id"]).parent_location).id
+    else
+        birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
+    end
+    
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
         place_of_birth:                           place_of_birth_id,
         birth_location_id:                        location_id,
-        district_of_birth:                        Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id,
+        district_of_birth:                        birth_district_id,
         other_birth_location:                     other_place_of_birth,
         birth_weight:                             (person[:birth_weight].blank? ? nil : person[:birth_weight]),
         type_of_birth:                            type_of_birth_id,
@@ -365,9 +396,9 @@ module Lib
         informant_designation:                    (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil),
         informant_relationship_to_person:          rel,
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
-        acknowledgement_of_receipt_date:          (person[:acknowledgement_of_receipt_date].to_date rescue nil),
+        acknowledgement_of_receipt_date:          Date.today.to_s,
         location_created_at:                      SETTINGS['location_id'],
-        date_registered:                          (Date.today.to_s)
+        date_reported:                            (params[:person][:date_reported].to_date rescue Date.today.to_s)
     )
 
     return details
