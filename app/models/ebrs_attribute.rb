@@ -20,7 +20,6 @@ module EbrsAttribute
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
-
     h = Pusher.database.get(id) rescue nil
     if h.present?
       h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
@@ -37,7 +36,7 @@ module EbrsAttribute
           'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
           self.class.table_name => hash
       }
-      h = Pusher.new(temp_hash)
+      h = temp_hash
     end
     port=    YAML.load_file(Rails.root.join('config','couchdb.yml'))[Rails.env]['port']
     adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip|
@@ -46,7 +45,8 @@ module EbrsAttribute
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']
     h['ip_addresses'] = adrs
-    h.save
+
+    Pusher.database.save_doc(h)
   end
 
   def self.included(base)
