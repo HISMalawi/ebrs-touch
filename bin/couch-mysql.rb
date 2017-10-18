@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-ActiveRecord::Base.logger.level = 3
+ActiveRecord::Base.logger.level = 1 #3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
