@@ -298,7 +298,9 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "informant_designation",                   limit: 255
     t.string   "level",                                   limit: 10
     t.date     "date_reported",                                                   null: false
-    t.date     "date_registered"                                                
+    t.date     "date_registered"
+    t.string   "source_id"
+    t.integer  "flagged",                   limit: 1,   default: 0, null: false
     t.bigint   "creator",                                 limit: 4,               null: false
     t.datetime "created_at",                                                      null: false
     t.datetime "updated_at",                                                      null: false
@@ -499,7 +501,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "updated_at"
     t.datetime "created_at"
   end
-  
+
   add_foreign_key "barcode_identifiers", "person", primary_key: "person_id", name: "fk_barcode_identifiers_1"
   add_index "barcode_identifiers", ["value"], name: "value_UNIQUE", unique: true, using: :btree
   ##########################################################################################################################
