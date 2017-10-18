@@ -29,9 +29,6 @@ end
     retries_per_request: 10,
     http_connections: 30,
     filter: "MyLocation#{location_id}/my_location",
-    query_params: {
-        location_id: location_id.to_s
-    },
     continuous: true
 }.to_json}' "#{replicator}"]
 
