@@ -1,10 +1,15 @@
-
-SERVER = CouchRest.new
-configs = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
-DB = SERVER.database!("#{configs['prefix']}_#{configs['suffix']}")
-
-class Pusher < CouchRest::Document
-  use_database(DB)
+class Pusher <  CouchRest::Model::Base
+  configs = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
+  connection.update({
+                        :protocol => "#{configs['protocol']}",
+                        :host     => "#{configs['host']}",
+                        :port     => "#{configs['port']}",
+                        :prefix   => "#{configs['prefix']}",
+                        :suffix   => "#{configs['suffix']}",
+                        :join     => '_',
+                        :username => "#{configs['username']}",
+                        :password => "#{configs['password']}"
+                    })
 end
 
 module EbrsAttribute
@@ -16,23 +21,33 @@ module EbrsAttribute
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
 
+    district_id = nil
+    location_id = nil
+    person_id = hash['person_id']
+    if !person_id.blank?
+      p_id = "person_#{person_id}"
+      district_id = Pusher.database.get(p_id)['district_id'] rescue nil
+      location_id = Pusher.database.get(p_id)['location_id'] rescue nil
+    end
+
+    district_id = Location.find(SETTINGS['location_id']).parent_location unless !district_id.blank?
+    location_id = (SETTINGS['location_id']) unless !location_id.blank?
+
     h = Pusher.database.get(id) rescue nil
     if h.present?
-      h['location_id'] = SETTINGS['location_id'] if h['location_id'].blank?
-
+      h['location_id'] = location_id || h['location_id'] || SETTINGS['location_id']
+      h['district_id'] = district_id
       h[self.class.table_name] = hash
     else
-
-      district_id = Location.find(SETTINGS['location_id']).parent_location
 
       temp_hash = {
           '_id' => id,
           'type' => 'data',
-          'location_id' => SETTINGS['location_id'],
-          'district_id' => district_id.blank? ? SETTINGS['location_id'] : district_id,
+          'location_id' => location_id,
+          'district_id' => district_id,
           self.class.table_name => hash
       }
-      h = Pusher.new(temp_hash)
+      h = temp_hash
     end
     port=    YAML.load_file(Rails.root.join('config','couchdb.yml'))[Rails.env]['port']
     adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip|
@@ -41,7 +56,8 @@ module EbrsAttribute
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']
     h['ip_addresses'] = adrs
-    h.save
+
+    Pusher.database.save_doc(h)
   end
 
   def self.included(base)

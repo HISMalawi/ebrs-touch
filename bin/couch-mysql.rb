@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-ActiveRecord::Base.logger.level = 3
+ActiveRecord::Base.logger.level = 1 #3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -119,13 +119,13 @@ seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db
 
 seq = 0 if seq.blank?
 
-changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=1000&since=#{seq}"
+changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=100&since=#{seq}"
 
 data = JSON.parse(RestClient.get(changes_link))  rescue {}
 
 (data['results'] || []).each do |result|
   seq = result['seq']
-  Methods.update_doc(result['doc'], seq)
+  Methods.update_doc(result['doc'], seq) rescue next
 end
 
 #RESOLVE PREVIOUS ERRORS
