@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-#ActiveRecord::Base.logger.level = 3
+ActiveRecord::Base.logger.level = 3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -40,6 +40,7 @@ mysql_adapter = mysql_db_settings["adapter"]
 #reading db_mapping
 
 $models = {}
+
 
 Rails.application.eager_load!
 ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
@@ -116,18 +117,17 @@ end
 
 seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couchdb_sequence LIMIT 1'`.split("\n").last rescue nil
 
+
 seq = 0 if seq.blank?
 
-changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=100&since=#{seq}"
+changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=500&since=#{seq}"
 
-data = JSON.parse(`curl -s -X GET #{changes_link}`)  #rescue {}
-puts "#{data['results'].length} found" if data['results'].present?
+data = JSON.parse(RestClient.get(changes_link))
+
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq) rescue next
 end
-
-puts "seq: #{seq}"
 
 #RESOLVE PREVIOUS ERRORS
 errored = Dir.entries("#{Rails.root}/public/errors/")
