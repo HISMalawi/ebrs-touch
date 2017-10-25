@@ -1004,9 +1004,9 @@ class PersonController < ApplicationController
         person["mother_home_ta"] = params[:person][:mother][:home_ta] rescue nil
         person["mother_home_village"] = params[:person][:mother][:home_village] rescue nil
          
-        person["mother_current_district"] = params[:person][:mother][:home_district] rescue nil
-        person["mother_current_ta"] = params[:person][:mother][:home_ta] rescue nil
-        person["mother_current_village"] = params[:person][:mother][:home_village] rescue nil
+        person["mother_current_district"] = params[:person][:mother][:current_district] rescue nil
+        person["mother_current_ta"] = params[:person][:mother][:current_ta] rescue nil
+        person["mother_current_village"] = params[:person][:mother][:current_village] rescue nil
 
         person["father_first_name"]= params[:person][:father][:first_name] rescue nil
         person["father_last_name"] =  params[:person][:father][:last_name] rescue nil
@@ -1016,9 +1016,9 @@ class PersonController < ApplicationController
         person["father_home_ta"] = params[:person][:father][:home_ta] rescue nil
         person["father_home_village"] = params[:person][:father][:home_village] rescue nil
          
-        person["father_current_district"] = params[:person][:father][:home_district] rescue nil
-        person["father_current_ta"] = params[:person][:father][:home_ta] rescue nil
-        person["father_current_village"] = params[:person][:father][:home_village] rescue nil
+        person["father_current_district"] = params[:person][:father][:current_district] rescue nil
+        person["father_current_ta"] = params[:person][:father][:current_ta] rescue nil
+        person["father_current_village"] = params[:person][:father][:current_village] rescue nil
 
       end
       return person
