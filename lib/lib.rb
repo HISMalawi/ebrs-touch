@@ -82,7 +82,7 @@ module Lib
             :home_ta            => home_ta_id,
             :home_village       => home_village_id,
 
-            :current_district_other   => mother[:foreigner_home_district],
+            :current_district_other   => mother[:foreigner_current_district],
             :current_ta_other         => mother[:foreigner_current_ta],
             :current_village_other    => mother[:foreigner_current_village],
             :home_district_other      => mother[:foreigner_home_district],
@@ -173,7 +173,7 @@ module Lib
           :home_ta            => home_ta_id,
           :home_village       => home_village_id,
 
-          :current_district_other   => father[:foreigner_home_district],
+          :current_district_other   => father[:foreigner_current_district],
           :current_ta_other         => father[:foreigner_current_ta],
           :current_village_other    => father[:foreigner_current_village],
           :home_district_other      => father[:foreigner_home_district],
