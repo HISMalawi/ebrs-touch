@@ -238,7 +238,7 @@ class PersonController < ApplicationController
                 "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
-                "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                "Date Reported" => "#{@birth_details.date_reported.to_date.strftime('%d/%b/%Y') rescue ""}",
                 "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
                 ["Delayed Registration", "sub"] => "#{@delayed}"
             }

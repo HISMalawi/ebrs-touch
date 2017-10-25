@@ -21,7 +21,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.bigint  "page_size"
     t.bigint  "current_page"
     t.integer "file_number"
-  end
+  end  
 
   create_table "audit_trail_types", primary_key: "audit_trail_type_id", force: :cascade do |t|
     t.string   "name",       limit: 20
@@ -303,6 +303,8 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "other_informant_relationship_to_person",  limit: 255
     t.string   "informant_designation",                   limit: 255
     t.string   "level",                                   limit: 10
+    t.string   "source_id",                               limit: 255
+    t.integer  "flagged",                                 limit: 1,   default: 0, null: false
     t.date     "date_reported",                                                   null: false
     t.date     "date_registered"
     t.string   "source_id"
@@ -466,7 +468,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "preferred_keyboard", limit: 10,  default: "abc", null: false
     t.bigint  "password_attempt",   limit: 4,   default: 0
     t.datetime "last_password_date"
-    t.string   "uuid",               limit: 38,                  null: false
+    t.string   "uuid",               limit: 38
     t.datetime "updated_at"
     t.datetime "created_at"
   end
