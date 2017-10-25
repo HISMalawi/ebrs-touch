@@ -1,19 +1,21 @@
 class Report < ActiveRecord::Base
   def self.births_report(params)
+
     date_registered_filter = " "
 
     if params[:date_registered_range].present?
-        date_registered_filter = " AND DATE(pbd.date_registered) BETWEEN 
-              '#{params[:date_registered_range][:start_date].to_date.to_s}' 
-              AND '#{params[:date_registered_range][:start_date].to_date.to_s}' "
+        date_registered_filter = " AND DATE(pbd.date_registered) BETWEEN "+
+              "'#{params[:date_registered_range][:start_date].to_date.to_s}' "+
+              " AND '#{params[:date_registered_range][:end_date].to_date.to_s}' "
     end
 
     date_reported_filter = " "
 
     if params[:date_reported_range].present?
-        date_reported_filter = " AND DATE(pbd.date_reported) BETWEEN 
-              '#{params[:date_reported_range][:start_date].to_date.to_s}' 
-              AND '#{params[:date_reported_range][:start_date].to_date.to_s}' "
+        date_reported_filter = " AND DATE(pbd.date_reported) BETWEEN "+
+              "'#{params[:date_reported_range][:start_date].to_date.to_s}' "+
+              " AND '#{params[:date_reported_range][:end_date].to_date.to_s}' "
+        #raise date_reported_filter.inspect
     end
 
    
