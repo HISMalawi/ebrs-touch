@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-ActiveRecord::Base.logger.level = 1 #3
+#ActiveRecord::Base.logger.level = 3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -24,7 +24,7 @@ couch_port = couch_db_settings["port"]
 
 couch_mysql_path = Dir.pwd + "/config/database.yml"
 db_settings = YAML.load_file(couch_mysql_path)
-mysql_db_settings = db_settings['production']
+mysql_db_settings = db_settings[Rails.env]
 
 mysql_username = mysql_db_settings["username"]
 mysql_password = mysql_db_settings["password"]
@@ -90,7 +90,6 @@ class Methods
           record.save
         end
       rescue
-        sleep(1)
         begin
         record = eval($models[table]).find(p_value) rescue nil
           if !record.blank?
@@ -121,12 +120,14 @@ seq = 0 if seq.blank?
 
 changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=100&since=#{seq}"
 
-data = JSON.parse(RestClient.get(changes_link))  rescue {}
-
+data = JSON.parse(`curl -s -X GET #{changes_link}`)  #rescue {}
+puts "#{data['results'].length} found" if data['results'].present?
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq) rescue next
 end
+
+puts "seq: #{seq}"
 
 #RESOLVE PREVIOUS ERRORS
 errored = Dir.entries("#{Rails.root}/public/errors/")
