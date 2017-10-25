@@ -1796,7 +1796,7 @@ class PersonController < ApplicationController
             p.birthdate.strftime('%d/%b/%Y'),
             mother_name,
             father_name,
-            p.date_reported.strftime('%d/%b/%Y'),
+            (p.date_reported.strftime('%d/%b/%Y') rescue nil),
             Status.find(p.status_id).name,
             p.person_id
         ]

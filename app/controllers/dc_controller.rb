@@ -266,9 +266,16 @@ def incomplete_case_comment
 
   def abandoned_cases
     @states = []
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
+
+    @birth_type = "Abandoned"
+    #Status.all.map(&:name).each{|name|
+     # @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
+    #}
 
     #@records = PersonService.query_for_display(@states, types=['Abandoned'])
     @section = "Abandoned Cases"
@@ -278,17 +285,28 @@ def incomplete_case_comment
 
   def adopted_cases
     @states = []
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
 
+    @birth_type = "Adopted"
     @section = "Adopted Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
 
   def orphaned_cases
-    @states = Status.all.map(&:name)
+    @states = []
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
+
+    @birth_type = "Orphaned"
+
     @section = "Orphaned Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"

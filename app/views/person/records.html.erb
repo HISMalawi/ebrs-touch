@@ -135,11 +135,11 @@
         padding: 5px; margin-right: 20px; font-size: 20px;"
         >
   <option value="All">Select Category</option>
-  <option>From NID</option>
-  <option>Normal</option>
-  <option>Abandoned</option>
-  <option>Adopted</option>
-  <option>Orphaned</option>
+  <option id="nid" >From NID</option>
+  <option id="normal">Normal</option>
+  <option id="abandoned">Abandoned</option>
+  <option id="adopted">Adopted</option>
+  <option id="orphaned">Orphaned</option>
 </select>
 <script>
 
@@ -183,6 +183,12 @@ var url = "/person/paginated_search_data";
 
 <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'
   %>
+
+<% if !@birth_type.blank? %>
+   jQuery("#birth_type").find("#" + '<%= @birth_type.downcase%>').prop('selected', true);
+   jQuery("#birth_type").prop('disabled', true);
+<% end %>
+
 function initTable(){
     table =  $('#example').DataTable(
             {
