@@ -382,6 +382,24 @@
       <legend><font size='5' style='border: 2px;'>Details of Biological Mother continued</font></legend>
 
       <div class="field">
+        <label for="person_mother_birthdate">Date of Birth</label>
+        <br>
+
+        <input id="person_mother_birthdate" name="person[mother][birthdate]" type="text"
+                value="<%= @person[:mother][:birthdate] rescue nil %>"
+                class="input_cell"
+                fieldtype="date"
+                condition="__$('mother_id').value.trim().length == 0"
+                tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
+                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
+                optional="true"
+                 />
+
+        <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
+
+
+      </div>
+      <div class="field">
         <label for="person_mother_citizenship">Nationality</label><br>
         <input id="person_mother_citizenship" 
                name="person[mother][citizenship]" 
@@ -1494,6 +1512,19 @@
                             :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
 
         </div>
+        <div class="field">
+          <label for="person_copy_mother_name">Replace person Surname with Mother Maiden Surname?</label>
+          <br>
+          <select id="person_copy_mother_name"
+                  name="copy_mother_name"
+                  class="input_cell"
+                  tt_onUnload="if(__$('textForperson_copy_mother_name').value.trim() == 'Yes'){copyMothersName();}">
+              <option></option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+          </select>
+        </div>
+
     </fieldset>
 
     <div class="actions">
@@ -2625,8 +2656,15 @@
     {
         if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
         {
+
             var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())
+
             var dob = handleDate(obj.value.toString().trim())
+
+            if ((marriageDate - dob) < 0) {
+                 showMsg("The date of marriage for " + parent + " is date of birth. Please enter a valid date.");
+                 __$("textForperson_date_of_marriage").focus()
+            }
 
             if (((marriageDate - dob) / (365 * 24 * 60 * 60 * 1000)) <= 10){
 
@@ -2634,7 +2672,6 @@
             }
         }
     }
-
     function handleDate(date){
 
         ele = date.split('/');

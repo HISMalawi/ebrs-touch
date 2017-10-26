@@ -12,17 +12,17 @@ target = "#{SETTINGS['sync_protocol']}://#{SETTINGS['sync_username']}:#{SETTINGS
 replicator = "#{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_replicate"
 
 
-doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{source}/_design/MyLocation#{location_id}`)
+doc = JSON.parse(`cd #{Rails.root}/db && curl -s -H 'Content-Type: application/json' -X GET #{source}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @#{filter} #{source}/_design/MyLocation#{location_id}`
+`cd #{Rails.root}/db && curl -s -H 'Content-Type: application/json' -X PUT -d @#{filter} #{source}/_design/MyLocation#{location_id}`
 end
 
-doc = JSON.parse(`cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X GET #{target}/_design/MyLocation#{location_id}`)
+doc = JSON.parse(`cd #{Rails.root}/db && curl -s -H 'Content-Type: application/json' -X GET #{target}/_design/MyLocation#{location_id}`)
 if doc["error"].present?
-  `cd #{Rails.root}/db && curl -H 'Content-Type: application/json' -X PUT -d @#{filter} #{target}/_design/MyLocation#{location_id}`
+  `cd #{Rails.root}/db && curl -s -H 'Content-Type: application/json' -X PUT -d @#{filter} #{target}/_design/MyLocation#{location_id}`
 end
 
-%x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
+%x[curl -s -k -H 'Content-Type: application/json' -X POST -d '#{{
     source: source,
     target: target,
     connection_timeout: 10000,
@@ -31,7 +31,7 @@ end
     continuous: true
 }.to_json}' "#{replicator}"]
 
-%x[curl -k -H 'Content-Type: application/json' -X POST -d '#{{
+%x[curl -s -k -H 'Content-Type: application/json' -X POST -d '#{{
     source: target,
     target: source,
     connection_timeout: 10000,

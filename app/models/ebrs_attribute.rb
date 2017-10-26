@@ -30,8 +30,11 @@ module EbrsAttribute
       location_id = Pusher.database.get(p_id)['location_id'] rescue nil
     end
 
-    district_id = Location.find(SETTINGS['location_id']).parent_location unless !district_id.blank?
-    location_id = (SETTINGS['location_id']) unless !location_id.blank?
+    if district_id.blank?
+      district_id = SETTINGS['application_mode'] == 'FC' ? Location.find(SETTINGS['location_id']).parent_location : SETTINGS['location_id']
+    end
+
+    location_id = (SETTINGS['location_id']) if location_id.blank?
 
     h = Pusher.database.get(id) rescue nil
     if h.present?
@@ -112,24 +115,24 @@ module EbrsAttribute
 
     if !["audit_trails","person_name_code","core_person"].include? self.class.table_name
       if self.prev.present?
-          fields = self.attributes.keys
-          prev = self.prev
-          fields.each do |key|
-              next if ["created_at"].include? key
-              next if key.include? "password"
-              if prev[key] != self.attributes[key]
-                 AuditTrail.create(table_name: self.class.table_name,
-                          table_row_id:self.id,
-                          person_id: (self.person_id rescue (self.person.person_id rescue (self.user_id rescue self.person_a))),
-                          previous_value: prev[key],
-                          field: key,
-                          current_value: self.attributes[key],
-                          audit_trail_type_id: AuditTrailType.find_by_name("UPDATE").id,
-                          comment: "#{self.class.table_name.humanize} record updated")
-              else
-                next
-              end
+        fields = self.attributes.keys
+        prev = self.prev
+        fields.each do |key|
+          next if ["created_at"].include? key
+          next if key.include? "password"
+          if prev[key] != self.attributes[key]
+            AuditTrail.create(table_name: self.class.table_name,
+                              table_row_id:self.id,
+                              person_id: (self.person_id rescue (self.person.person_id rescue (self.user_id rescue self.person_a))),
+                              previous_value: prev[key],
+                              field: key,
+                              current_value: self.attributes[key],
+                              audit_trail_type_id: AuditTrailType.find_by_name("UPDATE").id,
+                              comment: "#{self.class.table_name.humanize} record updated")
+          else
+            next
           end
+        end
       else
         AuditTrail.create(table_name: self.class.table_name,
                           table_row_id:self.id,
@@ -140,39 +143,39 @@ module EbrsAttribute
     end
   end
   def create_method( name, &block )
-        self.class.send(:define_method, name, &block )
+    self.class.send(:define_method, name, &block )
   end
 
   def create_attr( name )
-        create_method( "#{name}=".to_sym ) { |val| 
-            instance_variable_set( "@" + name, val)
-        }
+    create_method( "#{name}=".to_sym ) { |val|
+      instance_variable_set( "@" + name, val)
+    }
 
-        create_method( name.to_sym ) { 
-            instance_variable_get( "@" + name ) 
-        }
+    create_method( name.to_sym ) {
+      instance_variable_get( "@" + name )
+    }
   end
   def keep_prev_value
-       self.create_attr("prev")
-       self.prev = nil
-       if self.class.table_name =="person_name"
-          last_name = ActiveRecord::Base.connection.select_all("SELECT * FROM person_name WHERE person_id=#{self.person_id} ORDER BY updated_at").last rescue nil
-          if last_name.present?
-            self.prev = self.class.new(last_name)
-          else
-            self.prev = nil
-          end
-       else 
-          self.prev = self.class.find(self.id) rescue nil        
-       end
+    self.create_attr("prev")
+    self.prev = nil
+    if self.class.table_name =="person_name"
+      last_name = ActiveRecord::Base.connection.select_all("SELECT * FROM person_name WHERE person_id=#{self.person_id} ORDER BY updated_at").last rescue nil
+      if last_name.present?
+        self.prev = self.class.new(last_name)
+      else
+        self.prev = nil
+      end
+    else
+      self.prev = self.class.find(self.id) rescue nil
+    end
   end
   def create_audit_trail_after_update
     if self.class.table_name != "audit_trails"
-        AuditTrail.create(table_name: self.class.table_name,
-                          table_row_id:self.id,
-                          person_id: (self.person_id rescue (self.person.person_id rescue self.user_id)),
-                          audit_trail_type_id: AuditTrailType.find_by_name("UPDATE").id,
-                          comment: "#{self.class.table_name.humanize} record created")
+      AuditTrail.create(table_name: self.class.table_name,
+                        table_row_id:self.id,
+                        person_id: (self.person_id rescue (self.person.person_id rescue self.user_id)),
+                        audit_trail_type_id: AuditTrailType.find_by_name("UPDATE").id,
+                        comment: "#{self.class.table_name.humanize} record created")
     end
   end
 

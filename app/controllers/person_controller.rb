@@ -238,7 +238,7 @@ class PersonController < ApplicationController
                 "Informant Signed?" => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
             },
             {
-                "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                "Date Reported" => "#{@birth_details.date_reported.to_date.strftime('%d/%b/%Y') rescue ""}",
                 "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
                 ["Delayed Registration", "sub"] => "#{@delayed}"
             }
@@ -1004,9 +1004,9 @@ class PersonController < ApplicationController
         person["mother_home_ta"] = params[:person][:mother][:home_ta] rescue nil
         person["mother_home_village"] = params[:person][:mother][:home_village] rescue nil
          
-        person["mother_current_district"] = params[:person][:mother][:home_district] rescue nil
-        person["mother_current_ta"] = params[:person][:mother][:home_ta] rescue nil
-        person["mother_current_village"] = params[:person][:mother][:home_village] rescue nil
+        person["mother_current_district"] = params[:person][:mother][:current_district] rescue nil
+        person["mother_current_ta"] = params[:person][:mother][:current_ta] rescue nil
+        person["mother_current_village"] = params[:person][:mother][:current_village] rescue nil
 
         person["father_first_name"]= params[:person][:father][:first_name] rescue nil
         person["father_last_name"] =  params[:person][:father][:last_name] rescue nil
@@ -1016,9 +1016,9 @@ class PersonController < ApplicationController
         person["father_home_ta"] = params[:person][:father][:home_ta] rescue nil
         person["father_home_village"] = params[:person][:father][:home_village] rescue nil
          
-        person["father_current_district"] = params[:person][:father][:home_district] rescue nil
-        person["father_current_ta"] = params[:person][:father][:home_ta] rescue nil
-        person["father_current_village"] = params[:person][:father][:home_village] rescue nil
+        person["father_current_district"] = params[:person][:father][:current_district] rescue nil
+        person["father_current_ta"] = params[:person][:father][:current_ta] rescue nil
+        person["father_current_village"] = params[:person][:father][:current_village] rescue nil
 
       end
       return person
@@ -1796,7 +1796,7 @@ class PersonController < ApplicationController
             p.birthdate.strftime('%d/%b/%Y'),
             mother_name,
             father_name,
-            p.date_reported.strftime('%d/%b/%Y'),
+            (p.date_reported.strftime('%d/%b/%Y') rescue nil),
             Status.find(p.status_id).name,
             p.person_id
         ]
