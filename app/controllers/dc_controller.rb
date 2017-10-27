@@ -203,6 +203,7 @@ def incomplete_case_comment
   end
 
   def pending_case
+    
     PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
     #PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
 
