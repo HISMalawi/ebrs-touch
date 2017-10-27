@@ -206,7 +206,7 @@
 <div id="footerButtons" style="position: absolute; right:170px; width: 75%; bottom: 16.5px;padding: 0px;border: ">
   <table style="padding: 0px; float: right;">
     <tr>
-
+    <% if @comments.present? %>
     <td id="View Comments" style="display:<%= display%>;">
       <button id="btnViewComment"
                  class="blue"
@@ -214,6 +214,7 @@
                  onclick="viewComment()">View Comments</button>
 
     </td>
+    <%end%>
     <td id="Reject" style="display:<%= display%>;">
         <button id="btnReject"
                 class="red"
