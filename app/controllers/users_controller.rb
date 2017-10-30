@@ -389,6 +389,8 @@ class UsersController < ApplicationController
 
   end
 
+
+
   def update_password
 
     user = User.current
@@ -407,6 +409,29 @@ class UsersController < ApplicationController
 
     render :text => result
 
+  end
+
+  def change_keyboard
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Change own password"))
+
+    @section = "Change Password"
+
+    @targeturl = "/"
+
+    @user = User.current
+
+    render :layout => "touch"
+
+  end
+
+  def update_keyboard
+      user = User.current
+      if user.present?
+          user.update_attributes(:preferred_keyboard => params[:keyboard].downcase)
+          redirect_to "/users/my_account"
+      else
+          redirect_to "/users/my_account"
+      end
   end
 
   private
