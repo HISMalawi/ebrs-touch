@@ -12,7 +12,15 @@ Rails.application.routes.draw do
   get 'users/new'
 
   get 'users/create'
+
+  get 'users/my_account'
+
+  get '/users/change_keyboard'
+
+  get "/users/update_keyboard"
+
   get '/person/get_sync_status'
+
   get "/block_user/:id" => "users#block_user"
 
   get "/unblock_user/:id" => "users#unblock_user"

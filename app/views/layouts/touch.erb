@@ -22,7 +22,12 @@
 
   </style>
   <script>
-      
+      var keyboard = "<%= User.current.preferred_keyboard %>"
+      if(keyboard == 'qwerty'){
+          currentKeysQWERTY = true
+      }else{
+          currentKeysQWERTY = false
+      }      
   </script>
 </head>
 <body onload="resize()" onresize="resize()">
