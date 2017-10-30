@@ -1,123 +1,47 @@
-<style>
-
-    .record td {
-        font-size: 18px;
-        font-style: italic;
-        color: #000;
+<style type="text/css">
+    #table{
+      width: 100%;
+      margin: auto;
+      border-collapse: collapse;
+    }
+    #table th {
+      padding: 1%;
+      font-size: 0.7em;
+      border: 1px solid #bdbfc2;
+      width: 50%;
+    }
+    #table td {
+      padding: 1%;
+      font-size: 0.7em;
+      border: 1px solid #bdbfc2;
+      width: 50%;
+      color: #646464
+    }
+    #table tr:nth-child(even) {
+      background: #eff0f2;
     }
 
-    .record td strong {
-        font-size: 14px;
-        font-style: normal;
-        color: #3465a4;
-    }
-
-    fieldset {
-        margin: 20px;
-        border-radius: 5px;
-        border: 1px solid #3465a4;
-        padding: 20px;
-    }
-
-    legend {
-        font-size: 18px;
-        font-weight: normal;
-        color: #3465a4;
+    #table tr:hover {
+      color:#3465a4;
     }
 
 </style>
+<div style="display: table; width: 100%; border-spacing: 20px; color: #3465a4; font-size: 32px; margin-top: 50px;">
+  <div style="width:15%;float:left;margin-right:5%">
+      <img src="/assets/user-png.png" style="width:80%;margin-left:15%">
+  </div>
+  <div style="width:75%;float:right;margin-left:5%;">
+    <table id="table">
+        <tr><th colspan="3" style="background:#366391;color:#ffffff">User details</th></tr>
+        <tr><td>Username</td><td><%= @user.username %></td></tr>
+        <tr><td>Name</td><td><%= @user.first_name %> <%= @user.last_name %></td></tr>
+        <tr><td>Role</td><td><%= @user.user_role.role.role %></td></tr>
+        <tr><td>Status</td><td><%= @user.active == 1? 'ACTIVE' : 'BLOCKED' %></td></tr>
+        <tr><td>Keyboard</td><td><%= @user.preferred_keyboard%> </td></tr>
+        <tr><td>Created at</td><td><%= @user.created_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
+        <tr><td>Updated at</td><td><%= @user.updated_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
+    </table>
+  </div>
+ 
 
-<fieldset>
-  <legend>
-    User Details
-  </legend>
-
-  <fieldset style="border: 1px solid #eee;">
-  <table class="record" style="margin: auto;" cellpadding="10" cellspacing="5">
-    <tr>
-      <td colspan="3">
-        <p id="notice"><%= notice %></p>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <strong>Username:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-        <%= @user.username %>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <strong>First Name:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-       <%= @person_name.first_name %>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <strong>Last Name:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-       <%= @person_name.last_name %>
-      </td>
-    </tr>
-
-
-    <tr>
-      <td>
-        <strong>Role:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-        <%= @user_role.role rescue '' %>
-      </td>
-    </tr>
-
-
-    <tr>
-      <td>
-        <strong>Created:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-        <%= @user.created_at.to_date.strftime("%d/%b/%Y") rescue nil %>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <strong>Updated:</strong>
-      </td>
-      <td>
-        :
-      </td>
-      <td>
-        <%= @user.updated_at.to_date.strftime("%d/%b/%Y") rescue nil %>
-      </td>
-    </tr>
-
-  </table>
-
-  </fieldset>
-
-  <fieldset style="border: 1px solid #eee;"></fieldset>
-
-</fieldset>
+</div>

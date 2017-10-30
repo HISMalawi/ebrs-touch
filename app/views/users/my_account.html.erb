@@ -5,14 +5,14 @@
       border-collapse: collapse;
     }
     #table th {
-      padding: 1.5%;
-      font-size: 0.8em;
+      padding: 1%;
+      font-size: 0.7em;
       border: 1px solid #bdbfc2;
       width: 50%;
     }
     #table td {
-      padding: 1.5%;
-      font-size: 0.8em;
+      padding: 1%;
+      font-size: 0.7em;
       border: 1px solid #bdbfc2;
       width: 50%;
       color: #646464
@@ -38,7 +38,8 @@
         <tr><td>Role</td><td><%= @user.user_role.role.role %></td></tr>
         <tr><td>Status</td><td><%= @user.active == 1? 'ACTIVE' : 'BLOCKED' %></td></tr>
         <tr><td>Keyboard</td><td><%= @user.preferred_keyboard%> </td></tr>
-
+        <tr><td>Created at</td><td><%= @user.created_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
+        <tr><td>Updated at</td><td><%= @user.updated_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
     </table>
   </div>
  
