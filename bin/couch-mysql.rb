@@ -49,6 +49,39 @@ end
 
 
 class Methods
+
+  def self.angry_save(doc)
+    min_order = ['core_person', 'person', 'user', 'user_role', 'person_birth_details', 'person_record_statuses', 'person_record_statuses']
+    min_order.each do |table|
+      next if doc[table].blank?
+      data = doc[table][doc[table].keys.last]
+      p_key = data.keys[0]
+      p_value = data[p_key]
+      record = eval($models[table]).find(p_value) rescue nil
+      if !record.blank?
+        record.update_columns(data)
+      else
+        record =  eval($models[table]).new(data)
+        record.save
+      end
+    end
+
+    full_order = doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id', 'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}
+    full_order.each do |table|
+      next if doc[table].blank?
+      data = doc[table][doc[table].keys.last]
+      p_key = data.keys[0]
+      p_value = data[p_key]
+      record = eval($models[table]).find(p_value) rescue nil
+      if !record.blank?
+        record.update_columns(data)
+      else
+        record =  eval($models[table]).new(data)
+        record.save
+      end
+    end
+  end
+
   def self.update_doc(doc, seq)
     FileUtils.touch("#{Rails.root}/public/tap_sentinel")
 
@@ -76,13 +109,15 @@ class Methods
       %x[
         mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=0"
       ]
-      data = doc[change_agent]
+
+      data = doc[change_agent][doc[change_agent].keys.last]
       table = change_agent
 
       p_key = data.keys[0]
       p_value = data[p_key]
 
       begin
+
         record = eval($models[table]).find(p_value) rescue nil
         if !record.blank?
           record.update_columns(data)
@@ -90,17 +125,12 @@ class Methods
           record =  eval($models[table]).new(data)
           record.save
         end
+
       rescue
         begin
-        record = eval($models[table]).find(p_value) rescue nil
-          if !record.blank?
-            record.update_columns(data)
-          else
-            record =  eval($models[table]).new(data)
-            record.save
-          end
+          self.angry_save(doc)
         rescue => e
-          id = "#{table}_#{p_value}_#{seq}"
+          id = "#{p_value}_#{seq}"
           open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
             f << "#{record}"
             f << "\n\n#{e}"
@@ -139,7 +169,7 @@ errored = Dir.entries("#{Rails.root}/public/errors/")
   changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&since=#{s}&limit=1"
   record = JSON.parse(RestClient.get(changes_link))['results'].last['doc']  rescue {}
   table_name = record['change_agent']
-  data = record[table_name]
+  data = record[table_name][record[table_name].keys.last]
   p_key = data.keys.first rescue next
   p_value = data[p_key]
 
