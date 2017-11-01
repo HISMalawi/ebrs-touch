@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-ActiveRecord::Base.logger.level = 3
+#ActiveRecord::Base.logger.level = 3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -49,6 +49,30 @@ end
 
 
 class Methods
+
+  def self.angry_save(doc)
+    ordered_keys = (['core_person', 'person', 'user', 'user_role'] +
+        doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id', 'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}).uniq
+    (ordered_keys || []).each do |table|
+      next if doc[table].blank?
+        doc[table].each do |p_value, data|
+        puts table
+        record = eval($models[table]).find(p_value) rescue nil
+        if !record.blank?
+          record.update_columns(data)
+        else
+          record =  eval($models[table]).new(data)
+          query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
+                                                                                 :arel_attributes_with_values_for_create,
+                                                                                 record.attribute_names)) }.to_sql
+  ActiveRecord::Base.connection.execute(<<-EOQ)
+  #{query}
+  EOQ
+        end
+      end
+    end
+  end
+
   def self.update_doc(doc, seq)
     FileUtils.touch("#{Rails.root}/public/tap_sentinel")
 
@@ -76,35 +100,15 @@ class Methods
       %x[
         mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=0"
       ]
-      data = doc[change_agent]
-      table = change_agent
-
-      p_key = data.keys[0]
-      p_value = data[p_key]
 
       begin
-        record = eval($models[table]).find(p_value) rescue nil
-        if !record.blank?
-          record.update_columns(data)
-        else
-          record =  eval($models[table]).new(data)
-          record.save
-        end
-      rescue
-        begin
-        record = eval($models[table]).find(p_value) rescue nil
-          if !record.blank?
-            record.update_columns(data)
-          else
-            record =  eval($models[table]).new(data)
-            record.save
-          end
-        rescue => e
-          id = "#{table}_#{p_value}_#{seq}"
-          open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
-            f << "#{record}"
-            f << "\n\n#{e}"
-          end
+        self.angry_save(doc)
+      rescue => e
+        puts e.to_s
+        id = "#{p_value}_#{seq}"
+        open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
+          f << "#{record}"
+          f << "\n\n#{e}"
         end
       end
 
@@ -115,65 +119,25 @@ class Methods
   end
 end
 
-seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couchdb_sequence LIMIT 1'`.split("\n").last rescue nil
-
+cseq = CouchdbSequence.last
+seq = cseq.seq rescue nil
+if cseq.blank?
+  CouchdbSequence.create(seq: 0)
+end
 
 seq = 0 if seq.blank?
 
 changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=500&since=#{seq}"
 
 data = JSON.parse(RestClient.get(changes_link))
-
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq) rescue next
 end
 
-#RESOLVE PREVIOUS ERRORS
-errored = Dir.entries("#{Rails.root}/public/errors/")
-(errored || []).each do |e|
-  s = e.split(/\_/).last
-  next if !s.match(/\d+/)
-  s = s.to_i - 1
-
-  changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&since=#{s}&limit=1"
-  record = JSON.parse(RestClient.get(changes_link))['results'].last['doc']  rescue {}
-  table_name = record['change_agent']
-  data = record[table_name]
-  p_key = data.keys.first rescue next
-  p_value = data[p_key]
-
-  record = eval($models[table_name]).find(p_value) rescue nil
-  if !record.blank?
-    record.update_columns(data)
-  else
-    record =  eval($models[table_name]).new(data)
-    if record.save
-      `rm #{Rails.root}/public/errors/#{e}`
-    end
-  end
-
-  %x[
-    mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=1"
-  ]
-end
-
-=begin
-
-%x[
-   mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=0"
-]
-%x[
-  mysql -u #{mysql_username} -p#{mysql_password} #{mysql_db} < #{Dir.pwd}/public/query.sql
-]
-%x[
-  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=1"
-]
-=end
-
-%x[
-  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couchdb_sequence SET seq=#{seq}"
-]
+cseq = CouchdbSequence.last
+cseq.seq = seq
+cseq.save
 
 ActiveRecord::Base.logger.level = 1
 
