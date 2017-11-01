@@ -59,6 +59,10 @@ class PersonController < ApplicationController
         redirect_to "/potential/duplicate/#{params[:id]}?next_path=/view_duplicates&index=0" and return
     end
 
+    if ["DC-AMEND"].include? @status
+      redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=/view_printed_cases" and return
+    end
+
     @section = "View Record"
 
     @person = Person.find(params[:id])
@@ -1583,6 +1587,11 @@ class PersonController < ApplicationController
 
   def ammend_case
     @person = Person.find(params[:id])
+    @status = PersonRecordStatus.status(@person.id)
+    if @status != "DC-AMEND"
+       PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
+    end
+
     @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
 
@@ -1713,16 +1722,23 @@ class PersonController < ApplicationController
   end
   def reprint_case
     @section = "Re-pring case"
+    render :layout =>"touch"
   end
 
   def do_amend
-    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}");
+    PersonRecordStatus.new_record_state(params['id'], "HQ-AMEND", "Amendment request; #{params['reason']}")
 
     redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
 
   def do_reprint
     PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
+
+    redirect_to session['list_url']
+  end
+
+  def approve_reprint_request
+    PersonRecordStatus.new_record_state(params['id'], "HQ-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
 
     redirect_to session['list_url']
   end
@@ -1767,7 +1783,7 @@ class PersonController < ApplicationController
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
       .where(" prs.status_id IN (#{state_ids.join(', ')})
-              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
+              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP '#{search_val}' ")
 

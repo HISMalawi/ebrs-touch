@@ -247,6 +247,12 @@
                 onclick="amend();">Amend</button>
     </td>
 
+    <td id="Send Request to HQ" style="display:<%= display%>;">
+        <button id="btnApprove-Reprint"
+                class="green"
+                style=""
+                onclick="approveReprint();">Send Request to HQ</button>
+    </td>
       <td id="Mark Pendingdddd" style="display:none">
         <button style="display:none" id="btnQuery"
                 class="blue"
@@ -288,6 +294,13 @@
 
           showMsgForAction("Click \"Yes\" to amend record", action, "200px", "Amendment action", null);
           
+      }
+
+      function approveReprint(){
+
+         var action = "window.location = '/person/approve_reprint_request?id=<%=params[:id]%>&reason="+"<%=@status%>".replace("DC-","")+"&next_path=<%=params[:next_path]%>'";
+         
+          showMsgForAction("Send request to HQ", action, "200px", "Amendment action", null);
       }
 
       function submitSummary(action) {

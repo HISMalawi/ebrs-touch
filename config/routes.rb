@@ -149,6 +149,7 @@ Rails.application.routes.draw do
   get '/person/do_amend'
   get 'person/reprint_case'
   get 'person/do_reprint'
+  get 'person/approve_reprint_request'
   get '/search' => 'dc#search'
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'

@@ -117,7 +117,7 @@ module PersonService
             INNER JOIN person_name n ON p.person_id = n.person_id
             INNER JOIN person_record_statuses prs ON p.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
             INNER JOIN person_birth_details pbd ON p.person_id = pbd.person_id
-          WHERE prs.status_id IN (#{state_ids.join(', ')})
+          WHERE prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
           GROUP BY prs.person_id
           ORDER BY p.updated_at DESC
@@ -231,7 +231,7 @@ module PersonService
             INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
 
     main = main.where(" COALESCE(prs.voided, 0) = 0
-            AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
+            AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
             #{entry_num_query} #{fac_serial_query} #{name_query} #{gender_query} #{place_of_birth_query} #{status_query}
            AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP '#{search_val}' ")
