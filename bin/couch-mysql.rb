@@ -51,34 +51,24 @@ end
 class Methods
 
   def self.angry_save(doc)
-    min_order = ['core_person', 'person', 'user', 'user_role', 'person_birth_details', 'person_record_statuses', 'person_record_statuses']
-    min_order.each do |table|
+    ordered_keys = (['core_person', 'person', 'user', 'user_role'] +
+        doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id', 'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}).uniq
+    (ordered_keys || []).each do |table|
       next if doc[table].blank?
-      data = doc[table][doc[table].keys.last]
-      p_key = data.keys[0]
-      p_value = data[p_key]
-      record = eval($models[table]).find(p_value) rescue nil
-      if !record.blank?
-        record.update_columns(data)
-      else
-        record =  eval($models[table]).new(data)
-        record.save
-      end
-    end
-
-    full_order = doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id', 'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}
-    full_order.each do |table|
-      next if table.match("audit")
-      next if doc[table].blank?
-      data = doc[table][doc[table].keys.last]
-      p_key = data.keys[0]
-      p_value = data[p_key]
-      record = eval($models[table]).find(p_value) rescue nil
-      if !record.blank?
-        record.update_columns(data)
-      else
-        record =  eval($models[table]).new(data)
-        record.save
+        doc[table].each do |p_value, data|
+        puts table
+        record = eval($models[table]).find(p_value) rescue nil
+        if !record.blank?
+          record.update_columns(data)
+        else
+          record =  eval($models[table]).new(data)
+          query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
+                                                                                 :arel_attributes_with_values_for_create,
+                                                                                 record.attribute_names)) }.to_sql
+  ActiveRecord::Base.connection.execute(<<-EOQ)
+  #{query}
+  EOQ
+        end
       end
     end
   end
@@ -111,35 +101,14 @@ class Methods
         mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=0"
       ]
 
-      (doc[change_agent] || []).each do |p_key, data|
-        table = change_agent
-        p_value = data[p_key]
-
-        begin
-
-          record = eval($models[table]).find(p_value) rescue nil
-          if !record.blank?
-            record.update_columns(data)
-          else
-            record =  eval($models[table]).new(data)
-            query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
-                                                                                   :arel_attributes_with_values_for_create,
-                                                                                   record.attribute_names)) }.to_sql
-            ActiveRecord::Base.connection.execute(<<-EOQ)
-#{query}
-            EOQ
-          end
-
-        rescue
-          begin
-            self.angry_save(doc)
-          rescue => e
-            id = "#{p_value}_#{seq}"
-            open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
-              f << "#{record}"
-              f << "\n\n#{e}"
-            end
-          end
+      begin
+        self.angry_save(doc)
+      rescue => e
+        puts e.to_s
+        id = "#{p_value}_#{seq}"
+        open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
+          f << "#{record}"
+          f << "\n\n#{e}"
         end
       end
 
