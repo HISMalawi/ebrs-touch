@@ -1,7 +1,7 @@
 require 'rest-client'
 require "yaml"
 
-ActiveRecord::Base.logger.level = 3
+#ActiveRecord::Base.logger.level = 3
 
 couch_mysql_path = Dir.pwd + "/config/couchdb.yml"
 db_settings = YAML.load_file(couch_mysql_path)
@@ -68,6 +68,7 @@ class Methods
 
     full_order = doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id', 'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}
     full_order.each do |table|
+      next if table.match("audit")
       next if doc[table].blank?
       data = doc[table][doc[table].keys.last]
       p_key = data.keys[0]
@@ -110,30 +111,34 @@ class Methods
         mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=0"
       ]
 
-      data = doc[change_agent][doc[change_agent].keys.last]
-      table = change_agent
+      (doc[change_agent] || []).each do |p_key, data|
+        table = change_agent
+        p_value = data[p_key]
 
-      p_key = data.keys[0]
-      p_value = data[p_key]
-
-      begin
-
-        record = eval($models[table]).find(p_value) rescue nil
-        if !record.blank?
-          record.update_columns(data)
-        else
-          record =  eval($models[table]).new(data)
-          record.save
-        end
-
-      rescue
         begin
-          self.angry_save(doc)
-        rescue => e
-          id = "#{p_value}_#{seq}"
-          open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
-            f << "#{record}"
-            f << "\n\n#{e}"
+
+          record = eval($models[table]).find(p_value) rescue nil
+          if !record.blank?
+            record.update_columns(data)
+          else
+            record =  eval($models[table]).new(data)
+            query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
+                                                                                   :arel_attributes_with_values_for_create,
+                                                                                   record.attribute_names)) }.to_sql
+            ActiveRecord::Base.connection.execute(<<-EOQ)
+#{query}
+            EOQ
+          end
+
+        rescue
+          begin
+            self.angry_save(doc)
+          rescue => e
+            id = "#{p_value}_#{seq}"
+            open("#{Dir.pwd}/public/errors/#{id}", 'a') do |f|
+              f << "#{record}"
+              f << "\n\n#{e}"
+            end
           end
         end
       end
@@ -145,20 +150,21 @@ class Methods
   end
 end
 
-seq = `mysql -u #{mysql_username} -p#{mysql_password} -h#{mysql_host} #{mysql_db} -e 'SELECT seq FROM couchdb_sequence LIMIT 1'`.split("\n").last rescue nil
-
+cseq = CouchdbSequence.last
+seq = cseq.seq rescue nil
+if cseq.blank?
+  CouchdbSequence.create(seq: 0)
+end
 
 seq = 0 if seq.blank?
 
 changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&limit=500&since=#{seq}"
 
 data = JSON.parse(RestClient.get(changes_link))
-
 (data['results'] || []).each do |result|
   seq = result['seq']
   Methods.update_doc(result['doc'], seq) rescue next
 end
-
 #RESOLVE PREVIOUS ERRORS
 errored = Dir.entries("#{Rails.root}/public/errors/")
 (errored || []).each do |e|
@@ -169,17 +175,30 @@ errored = Dir.entries("#{Rails.root}/public/errors/")
   changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&since=#{s}&limit=1"
   record = JSON.parse(RestClient.get(changes_link))['results'].last['doc']  rescue {}
   table_name = record['change_agent']
-  data = record[table_name][record[table_name].keys.last]
-  p_key = data.keys.first rescue next
-  p_value = data[p_key]
 
-  record = eval($models[table_name]).find(p_value) rescue nil
-  if !record.blank?
-    record.update_columns(data)
-  else
-    record =  eval($models[table_name]).new(data)
-    if record.save
+  (record[table_name] || []).each do |p_key, data|
+    p_value = data[p_key]
+
+    record = eval($models[table_name]).find(p_value) rescue nil
+    if !record.blank?
+      record.update_columns(data)
       `rm #{Rails.root}/public/errors/#{e}`
+    else
+      record =  eval($models[table_name]).new(data)
+      query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
+                                                                             :arel_attributes_with_values_for_create,
+                                                                             record.attribute_names)) }.to_sql
+
+      begin
+        ActiveRecord::Base.connection.execute(<<-EOQ)
+#{query}
+        EOQ
+
+        `rm #{Rails.root}/public/errors/#{e}`
+
+      rescue
+
+      end
     end
   end
 
@@ -188,22 +207,9 @@ errored = Dir.entries("#{Rails.root}/public/errors/")
   ]
 end
 
-=begin
-
-%x[
-   mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=0"
-]
-%x[
-  mysql -u #{mysql_username} -p#{mysql_password} #{mysql_db} < #{Dir.pwd}/public/query.sql
-]
-%x[
-  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} -e "SET GLOBAL foreign_key_checks=1"
-]
-=end
-
-%x[
-  mysql -h#{mysql_host} -u#{mysql_username} -p#{mysql_password} #{mysql_db} -e "UPDATE couchdb_sequence SET seq=#{seq}"
-]
+cseq = CouchdbSequence.last
+cseq.seq = seq
+cseq.save
 
 ActiveRecord::Base.logger.level = 1
 

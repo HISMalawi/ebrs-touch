@@ -14,7 +14,6 @@ end
 
 module EbrsAttribute
 
-
   def send_data(hash)
     raw_id = hash.id
     hash = hash.as_json
@@ -26,6 +25,8 @@ module EbrsAttribute
     location_id = nil
     person_id = hash['person_id']
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
+    person_id = User.where(user_id: hash['user_id']).first.person_id rescue nil if person_id.blank?
+
     created_at = PersonBirthDetail.where(person_id: person_id).last.location_created_at rescue nil
 
     if !created_at.blank?
@@ -79,7 +80,6 @@ module EbrsAttribute
 
     Pusher.database.save_doc(h)
   end
-
 
   def self.included(base)
     base.class_eval do
