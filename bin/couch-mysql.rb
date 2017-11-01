@@ -134,47 +134,6 @@ data = JSON.parse(RestClient.get(changes_link))
   seq = result['seq']
   Methods.update_doc(result['doc'], seq) rescue next
 end
-#RESOLVE PREVIOUS ERRORS
-errored = Dir.entries("#{Rails.root}/public/errors/")
-(errored || []).each do |e|
-  s = e.split(/\_/).last
-  next if !s.match(/\d+/)
-  s = s.to_i - 1
-
-  changes_link = "#{couch_protocol}://#{couch_username}:#{couch_password}@#{couch_host}:#{couch_port}/#{couch_db}/_changes?include_docs=true&since=#{s}&limit=1"
-  record = JSON.parse(RestClient.get(changes_link))['results'].last['doc']  rescue {}
-  table_name = record['change_agent']
-
-  (record[table_name] || []).each do |p_key, data|
-    p_value = data[p_key]
-
-    record = eval($models[table_name]).find(p_value) rescue nil
-    if !record.blank?
-      record.update_columns(data)
-      `rm #{Rails.root}/public/errors/#{e}`
-    else
-      record =  eval($models[table_name]).new(data)
-      query = record.class.arel_table.create_insert.tap { |im| im.insert(record.send(
-                                                                             :arel_attributes_with_values_for_create,
-                                                                             record.attribute_names)) }.to_sql
-
-      begin
-        ActiveRecord::Base.connection.execute(<<-EOQ)
-#{query}
-        EOQ
-
-        `rm #{Rails.root}/public/errors/#{e}`
-
-      rescue
-
-      end
-    end
-  end
-
-  %x[
-    mysql -h#{$mysql_host} -u#{$mysql_username} -p#{$mysql_password} -e "SET GLOBAL foreign_key_checks=1"
-  ]
-end
 
 cseq = CouchdbSequence.last
 cseq.seq = seq
