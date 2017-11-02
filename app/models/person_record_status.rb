@@ -7,6 +7,7 @@ class PersonRecordStatus < ActiveRecord::Base
     belongs_to :status, foreign_key: "status_id"
 
   def self.new_record_state(person_id, state, change_reason='', user_id=nil)
+    ActiveRecord::Base.transaction do
     user_id = User.current.id if user_id.blank?
     state_id = Status.where(:name => state).first.id
     trail = self.where(:person_id => person_id, :voided => 0)
@@ -25,10 +26,11 @@ class PersonRecordStatus < ActiveRecord::Base
         creator: user_id,
         comments: change_reason
     )
+    end
   end
 
   def self.status(person_id)
-    self.where(:person_id => person_id, :voided => 0).last.status.name
+    self.where(:person_id => person_id, :voided => 0).last.status.name rescue ""
   end
 
   def self.stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], approved=true)

@@ -183,9 +183,7 @@ def incomplete_case_comment
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
     end
 
-
-    render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
-    render :text =>  "/view_complete_cases"
+    render :text =>  session[:list_url]
   end
 
   ################################## Pending Cases actions ####################################################################
