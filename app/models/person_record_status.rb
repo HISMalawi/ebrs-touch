@@ -44,8 +44,8 @@ class PersonRecordStatus < ActiveRecord::Base
     end
 
     unless approved == false
-      excluded_states = ['HQ-REJECTED'].collect{|s| Status.find_by_name(s).id}
-        included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
+      excluded_states = ['HQ-REJECTED', 'HQ-VOIDED', 'HQ-PRINTED', 'HQ-DISPATCHED'].collect{|s| Status.find_by_name(s).id}
+      included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
 
       result['APPROVED BY ADR'] =  self.find_by_sql("
         SELECT COUNT(*) c FROM person_record_statuses s

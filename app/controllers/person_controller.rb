@@ -14,7 +14,7 @@ class PersonController < ApplicationController
     @database = YAML.load_file("#{Rails.root}/config/couchdb.yml")[Rails.env]
     source    = "#{@database['host']}:#{@database['port']}/#{@database['prefix']}_#{@database['suffix']}/"
     target    = "#{SETTINGS['sync_host']}/#{SETTINGS['sync_database']}/"
-    data_link = "curl -X GET #{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_active_tasks"
+    data_link = "curl -s -X GET #{@database['protocol']}://#{@database['username']}:#{@database['password']}@#{@database['host']}:#{@database['port']}/_active_tasks"
 
     tasks     = JSON.parse(`#{data_link}`) rescue {}
     tasks.each do |task|
@@ -1529,7 +1529,7 @@ class PersonController < ApplicationController
   end  
 
   def view_printed_cases
-    @states = ["HQ-PRINTED", 'HQ-DISPATCHED']
+    @states = ["HQ-PRINTED"]
     @section = "Printed Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
@@ -1547,7 +1547,7 @@ class PersonController < ApplicationController
   end
 
   def view_approved_cases
-    @states = Status.where("name like 'HQ-%' ").map(&:name) - ["HQ-REJECTED"]
+    @states = Status.where("name like 'HQ-%' ").map(&:name) - ['HQ-REJECTED', 'HQ-VOIDED', 'HQ-PRINTED', 'HQ-DISPATCHED']
     @section = "Approved Cases"
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)

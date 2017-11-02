@@ -6,8 +6,8 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_if_logged_in, :except => ['login', 'searched_cases']
 
-  before_filter :check_last_sync_time
-  before_filter :check_couch_loading
+  #before_filter :check_last_sync_time
+  #before_filter :check_couch_loading
 
   def check_last_sync_time
     last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time
