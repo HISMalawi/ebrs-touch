@@ -131,7 +131,7 @@ module EbrsAttribute
 
   def create_audit_trail
 
-    if !["audit_trails","person_name_code","core_person"].include? self.class.table_name
+    if !["audit_trails","person_name_code","core_person","person_record_status"].include? self.class.table_name
       if self.prev.present?
         fields = self.attributes.keys
         prev = self.prev

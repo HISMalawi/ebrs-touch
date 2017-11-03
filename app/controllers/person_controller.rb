@@ -329,8 +329,9 @@ class PersonController < ApplicationController
                 next if DuplicateRecord.where(person_id: person['person_id']).present?
                 @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
             end
+
             
-            if @results.present?
+            if @results.present? && !@birth_details.birth_type.name.to_s.downcase.include?("twin")
                potential_duplicate = PotentialDuplicate.create(person_id: @person.person_id,created_at: (Time.now))
                if potential_duplicate.present?
                      @results.each do |result|
