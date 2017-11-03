@@ -188,6 +188,7 @@ class SimpleElasticSearch
     content =  "#{person["first_name"]} #{person["last_name"]} #{self.format_content(person)}"
     hits.each do |hit|
       next if hit["_id"].squish ==(person["id"].squish rescue nil)
+      next if hit["_source"]["mother_last_name"].blank?
       hit_content = hit["_source"]["content"]
       if precision.to_i == 100
           similarity = 0.95

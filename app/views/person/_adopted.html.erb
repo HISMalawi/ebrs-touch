@@ -389,7 +389,7 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                condition="__$('mother_id').value.trim().length == 0"
+                condition="__$('mother_id') && __$('mother_id').value.trim().length == 0"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
                 optional="true"
