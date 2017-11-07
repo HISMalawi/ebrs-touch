@@ -1,30 +1,89 @@
 <style type="text/css">
-		#table{
-			width: 90%;
-			margin: auto;
-			margin-top: 2%;
-			border-collapse: collapse;
-			box
-		}
-		#table th {
-			padding: 1%;
-			border: 1px solid #bdbfc2;
-			width: 33.333%;
-		}
-		#table td {
-			padding: 1%;
-			border: 1px solid #bdbfc2;
-			text-align: center;
-			width: 33.333%
-		}
-		#table tr:nth-child(even) {
-			background: #eff0f2;
-		}
+	#table{
+		width: 90%;
+		margin: auto;
+		margin-top: 2%;
+		border-collapse: collapse;
+		box
+	}
+	#table th {
+		padding: 1%;
+		border: 1px solid #bdbfc2;
+		width: 33.333%;
+	}
+	#table td {
+		padding: 1%;
+		border: 1px solid #bdbfc2;
+		text-align: center;
+		width: 33.333%
+	}
+	#table tr:nth-child(even) {
+		background: #eff0f2;
+	}
 
-		#table tr:hover {
-			color:#3465a4;
-		}
+	#table tr:hover {
+		color:#3465a4;
+	}
+	#comment_popoup{
+	    width: 45%;
+	    height: 50%;
+	    position: absolute;;
+	    left: 25%;
+	    top: 20%;
+	    background: #eeeeef;
+	    border-radius: 2%;
+	    color: black;
+	    box-shadow: 5px 5px 2px #888888;
+	    visibility: hidden;
+	 }
+	 #title{
+	      width: 98%;
+	      margin:auto;
+	      margin-top: 0.8%;
+	      background: #345d8c;
+	      font-size: 150%;
+	      font-weight: bold;
+	      color: #FFFFFF;
+	      text-align: center;
+	      padding-top: 2%;
+	      padding-bottom: 2%;
+	      border-top-right-radius: 7%;
+	      border-top-left-radius: 7%;
+	      border-bottom: 2px solid #d9d8d7;
+	}
+	#comment{
+	      width: 98%;
+	      height: 50%;
+	      overflow-y: scroll;
+	}
+	#comment ul{
+	      list-style-type: none;
+	}
+	#comment ul > li{
+	      display: block;
+	      background: #FFFFFF;
+	      width:92%;
+	      padding: 1.5%;
+	      margin: auto;
+	      margin-top: 0%;
+	      border-radius: 3%;
+	      padding-left: 2.5%;
+	      border: 1px solid #d9d8d7;
+	}
+	#button{
+	      width: 100%;
+	      text-align: center;
+	      padding: 5%;
+	}
+
 </style>
+  <div id="comment_popoup">
+    <div id="title">Record Comments</div>
+    <div id="comment">
+
+    </div>
+    <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
+  </div>
 <table id="table">
 			<thead>
 					<tr>
@@ -35,7 +94,7 @@
 			</thead>
 			<tbody>
 					<tr onmousedown="amendField('Death Entry Number')">
-						<th >Death Entry Number</th>
+						<th >Birth Entry Number</th>
 						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
 						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
 					</tr>
@@ -124,10 +183,30 @@
 
 			</tbody>
 </table>
-<button id="btnNext"
-        class='blue'
-        style="position: absolute; right: 160px; bottom: 20px;"
-        onclick="proceedReprint()">Proceed to Reprint</button>
+
+ <table style="position: absolute; right: 160px; bottom: 20px;">
+ 	<tr>
+ 		<td>
+ 			 <button id="btnViewComment"
+                 class="blue"
+                 style=""
+                 onclick="viewComment()">View Comments</button>
+ 		</td>
+ 		<td>
+	 		<% if @status == "DC-AMEND" %>
+				<button id="btnApprove-Reprint"
+		                class="green"
+		                style=""
+		                onclick="approveAmendment();">Send Request to HQ</button>
+			<%else%>
+				<button id="btnNext"
+				        class='blue'
+				        onclick="proceedReprint()">Proceed Request</button>
+			<%end%>
+		</td>
+ 	</tr>
+	
+</table>
 
 <script type="text/javascript">
 	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
@@ -142,4 +221,63 @@
 	function proceedReprint(){
 		window.location ="/person/amendiment_comment?id=<%=params[:id]%>&next_path=<%=params[:next_path]%>"
 	}
+
+     function dismissComment(){
+          $("#comment_popoup").css("visibility","hidden");
+     }
+     function approveAmendment(){
+
+         var action = "window.location = '/person/approve_amendment_request?id=<%=params[:id]%>'";
+         
+          showMsgForAction("Send request to HQ", action, "200px", "Amendment action", null);
+      }
+	 function viewComment(hide){
+
+          var msg = "";
+
+          var parent = document.createElement("div");
+
+          var div = document.createElement("div");
+          div.style.height = "300px";
+          div.style.width = "700px";
+
+          jQuery('.extra-btn').remove();
+
+          var table = document.createElement("table");
+          table.style.width = "100%";
+
+          div.appendChild(table);
+
+          var tbody = document.createElement("tbody");
+
+          table.appendChild(tbody);
+
+          jQuery.ajax({
+              type: "GET",
+              url: "/comments/<%= @person.id %>",
+              data: "",
+              success: function(result){
+                  hideSpinner();
+                  $("#comment").empty();
+                  if (result.trim() == "<ul></ul>")
+                  {
+                      if(!hide) {
+                          $("#comment").append("<ul><li>No comment(s) as of now </li></ul>");
+                      }else{
+                          $("#button").hide();
+                          $("#title").html('Select reason for ammendment');
+                      }
+                  }else {
+                      $("#comment").append(result);
+                  }
+
+              }
+
+          });
+          parent.appendChild(div);
+          msg = parent.innerHTML;
+
+          hideSpinner();
+          $("#comment_popoup").css("visibility","visible");
+      }
 </script>

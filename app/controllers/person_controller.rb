@@ -1590,7 +1590,7 @@ class PersonController < ApplicationController
     @person = Person.find(params[:id])
     @status = PersonRecordStatus.status(@person.id)
     if @status != "DC-AMEND"
-       PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
+       #PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
     end
 
     @prev_details = {}
@@ -1727,7 +1727,7 @@ class PersonController < ApplicationController
   end
 
   def do_amend
-    PersonRecordStatus.new_record_state(params['id'], "HQ-AMEND", "Amendment request; #{params['reason']}")
+    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
 
     redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
@@ -1740,6 +1740,12 @@ class PersonController < ApplicationController
 
   def approve_reprint_request
     PersonRecordStatus.new_record_state(params['id'], "HQ-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
+
+    redirect_to session['list_url']
+  end
+
+  def approve_amendment_request
+    PersonRecordStatus.new_record_state(params['id'], "HQ-AMEND", "Amendment request; Verifed by ADR");
 
     redirect_to session['list_url']
   end
