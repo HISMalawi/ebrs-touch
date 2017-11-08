@@ -1115,16 +1115,16 @@ class PersonController < ApplicationController
   def get_names
     entry = params["search"].soundex
     if params["last_name"]
-      data = PersonName.where("last_name LIKE (?)", "#{params[:search]}%")
+      data = PersonName.find_by_sql(" SELECT last_name FROM person_name WHERE first_name LIKE '#{params[:search]}%' ORDER BY last_name LIMIT 10").map(&:first_name)
       if data.present?
-        render text: data.order('last_name').limit(10).collect(&:last_name).uniq.join("\n") and return
+        render text: data.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
-      data = PersonName.where("first_name LIKE (?)", "#{params[:search]}%")
+      data = PersonName.find_by_sql(" SELECT first_name FROM person_name WHERE first_name LIKE '#{params[:search]}%' ORDER BY first_name LIMIT 10").map(&:first_name)
       if data.present?
-        render text: data.order(' first_name ').limit(10).collect(&:first_name).sort.uniq.join("\n") and return
+        render text: data.join("\n") and return
       else
         render text: "" and return
       end
