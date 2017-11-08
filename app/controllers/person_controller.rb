@@ -18,7 +18,11 @@ class PersonController < ApplicationController
 
     tasks     = JSON.parse(`#{data_link}`) rescue {}
     tasks.each do |task|
-   
+      task['target'] = task['target'].gsub(/localhost|127\.0\.0\.1/, '0.0.0.0')
+      task['source'] = task['source'].gsub(/localhost|127\.0\.0\.1/, '0.0.0.0')
+      target = target.gsub(/localhost|127\.0\.0\.1/, '0.0.0.0')
+      source = source.gsub(/localhost|127\.0\.0\.1/, '0.0.0.0')
+
       next if task['type'] != 'replication'
       next if task['source'].split("@").last.strip != source.strip
       next if task['target'].split("@").last.strip != target.strip
