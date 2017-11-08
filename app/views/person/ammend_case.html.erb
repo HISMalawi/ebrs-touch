@@ -134,10 +134,11 @@
 						<th >Sex</th>
 						<% if @person_prev_values['gender'].present? %>
 							<td style="text-decoration: line-through">
-								<%= @person.gender=='M' ? 'Male' : 'Female' %>
+								<%= @person_prev_values['gender'] == 'M' ? 'Male' : @person_prev_values['gender'] == 'F' ? 'Female' : '' %>
+								
 							</td>
 							<td>
-								<%= @person_prev_values['gender'] == 'M' ? 'Male' : @person_prev_values['gender'] == 'F' ? 'Female' : '' %>
+								<%= @person.gender== 'M' ? 'Male' : 'Female' %>
 							</td>
 						<%else%>
 							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>

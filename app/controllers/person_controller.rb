@@ -1684,13 +1684,59 @@ class PersonController < ApplicationController
     end
     if fields.include? "Sex"
        person = Person.find(params[:id])
-        person.update_attributes(gender: params[:person][:gender])
+       gender = params[:person][:gender]  == "Female" ? 'F' : 'M'
+       person.update_attributes(gender: gender)
     end
     if fields.include? "Place of birth"
+        person_birth_details = PersonBirthDetail.where(person_id: params[:id]).last
+        place_of_birth = params[:person][:place_of_birth]
+        place_of_birth_id = Location.locate_id_by_tag(params[:person][:place_of_birth], 'Place of Birth')
+        
+        case place_of_birth
+        when "Home"
+          district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+          ta_id = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
+          village_id = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
+          location_id = [village_id, ta_id, district_id].compact.first
+
+          person_birth_details.place_of_birth = place_of_birth_id
+          person_birth_details.district_of_birth = district_id
+          person_birth_details.birth_location_id = location_id
+          person_birth_details.other_birth_location = nil
+          person_birth_details.save
+        when "Hospital"
+           map =  {'Mzuzu City' => 'Mzimba',
+                'Lilongwe City' => 'Lilongwe',
+                'Zomba City' => 'Zomba',
+                'Blantyre City' => 'Blantyre'}
+
+          params[:person][:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+
+          district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+          location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', district_id)
+
+          location_id = [location_id, district_id].compact.first
+
+          person_birth_details.place_of_birth = place_of_birth_id
+          person_birth_details.district_of_birth = district_id
+          person_birth_details.birth_location_id = location_id
+          person_birth_details.other_birth_location = nil
+          person_birth_details.save
+        when "Other"
+          district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+          location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
+          other_place_of_birth = params[:other_birth_place_details]
+
+          person_birth_details.place_of_birth = place_of_birth_id
+          person_birth_details.district_of_birth = district_id
+          person_birth_details.birth_location_id = location_id
+          person_birth_details.other_birth_location = other_place_of_birth
+          person_birth_details.save
+        end
     end
     if fields.include? "Name of mother"
         person = Person.find(params[:id])
-        person_mother_name = person.mother.person_names.first
+        person_mother_name = person.mother.person_names.last
         person_mother_name.update_attributes(voided: true, void_reason: 'Amendment edited')
         person_mother_name = PersonName.create(person_id: person.mother.id,
             first_name: params[:person][:mother][:first_name],
@@ -1702,12 +1748,12 @@ class PersonController < ApplicationController
     end
     if fields.include? "Name of father"
         person = Person.find(params[:id])
-        person_father_name = person.father.person_names.first
+        person_father_name = person.father.person_names.last
 
         if person_father_name.present?
           person_father_name.update_attributes(voided: true, void_reason: 'Amendment edited')
         end
-        person_father_name = PersonName.create(person_id: person.mother.id,
+        person_father_name = PersonName.create(person_id: person.father.id,
               first_name: params[:person][:father][:first_name],
               last_name: params[:person][:father][:last_name])
 
