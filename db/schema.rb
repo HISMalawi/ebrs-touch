@@ -515,7 +515,6 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   ##########################################################################################################################
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
-  add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
