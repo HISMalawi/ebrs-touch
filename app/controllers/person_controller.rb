@@ -957,7 +957,7 @@ class PersonController < ApplicationController
       person["birthdate"]= params[:person][:birthdate].to_date.strftime('%Y-%m-%d')
       person["birthdate_estimated"] = params[:person][:birthdate_estimated]
 
-      if is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+      if is_twin_or_triplet(params[:person][:type_of_birth].to_s) && params[:person][:prev_child_id].present?
          prev_child = Person.find(params[:person][:prev_child_id].to_i)
          if params[:relationship] == "opharned" || params[:relationship] == "adopted"
            mother = prev_child.adoptive_mother
