@@ -112,7 +112,7 @@
 							<td><%= @name.first_name %> <%= @name.last_name %></td>
 						<%else%>
 							<td><%= @name.first_name %> <%= @name.last_name %></td>
-							<td></td>
+							<td><%= @name.first_name %> <%= @name.last_name %></td>
 						<%end%>
 
 					</tr>
@@ -126,7 +126,7 @@
 							<td><%= @person_prev_values['birthdate']? @person_prev_values['birthdate'].to_date.strftime('%d/%b/%Y') : "" %></td>
 						<%else%>
 							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
-							<td></td>
+							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
 						<%end%>
 						
 					</tr>
@@ -142,15 +142,20 @@
 							</td>
 						<%else%>
 							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
-							<td></td>
+							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
 						<%end%>
 
 					</tr>
 					<tr onmousedown="amendField('Place of birth')">
 						<th >Place of birth</th>
-						<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
-						<td></td>
-					</tr>
+						<% if @person_prev_values['birth_location_id'].present? %>
+							<td style="text-decoration: line-through" ><%= Location.find(@person_prev_values['birth_location_id']).name rescue @person_prev_values['other_place_of_birth']%></td>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+						<%else%>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+						<%end%>
+						</tr>
 					<tr onmousedown="amendField('Name of mother')">
 						<th >Name of mother</th>
 						<% if @person_prev_values["mother_name"].present?%>

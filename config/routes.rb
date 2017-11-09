@@ -142,6 +142,7 @@ Rails.application.routes.draw do
 
   get 'person/lost_and_damaged_cases'
   get 'person/ammendment_cases'
+  get 'person/rejected_ammendment_cases'
   get 'person/ammend_case'
   get '/person/amend_edit/:id'=> 'person#amend_edit'
   get '/person/amend_field'
