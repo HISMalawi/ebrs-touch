@@ -117,6 +117,18 @@ class PersonController < ApplicationController
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
+    if @mother_person.present?
+        mother_birth_date = @mother_person.birthdate.present? && @mother_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil
+    else
+        mother_birth_date = nil
+    end
+
+    if @father_person.present?
+        father_birth_date = @father_person.birthdate.present? && @father_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @father_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil
+    else
+        father_birth_date = nil
+    end
+
     @record = {
         "Details of Child" => [
             {
@@ -171,7 +183,7 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "mandatory"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{ @mother_person.birthdate.present? && @mother_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Date of birth" => "#{mother_birth_date}",
                 "Nationality" => "#{@mother_person.citizenship rescue nil}",
                 "ID Number" => "#{@mother_person.id_number rescue nil}"
             },
@@ -206,7 +218,7 @@ class PersonController < ApplicationController
                 "Surname" => "#{@father_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{@father_person.birthdate.present? && @father_person.birthdate.strftime('%Y-%m-%d') =='1900-01-01'? 'N/A' : @father_person.birthdate.strftime('%d/%b/%Y')}",
+                "Date of birth" => "#{father_birth_date}",
                 "Nationality" => "#{@father_person.citizenship rescue nil}",
                 "ID Number" => "#{@father_person.id_number rescue nil}"
             },
