@@ -171,7 +171,7 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "mandatory"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{@mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Date of birth" => "#{ @mother_person.birthdate.present? && @mother_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
                 "Nationality" => "#{@mother_person.citizenship rescue nil}",
                 "ID Number" => "#{@mother_person.id_number rescue nil}"
             },
@@ -206,7 +206,7 @@ class PersonController < ApplicationController
                 "Surname" => "#{@father_name.last_name rescue nil}"
             },
             {
-                "Date of birth" => "#{@father_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Date of birth" => "#{@father_person.birthdate.present? && @father_person.birthdate.strftime('%Y-%m-%d') =='1900-01-01'? 'N/A' : @father_person.birthdate.strftime('%d/%b/%Y')}",
                 "Nationality" => "#{@father_person.citizenship rescue nil}",
                 "ID Number" => "#{@father_person.id_number rescue nil}"
             },
@@ -1752,7 +1752,11 @@ class PersonController < ApplicationController
     end
     if fields.include? "Name of father"
         person = Person.find(params[:id])
-        person_father_name = person.father.person_names.last
+        if person.father.present?
+          person_father_name = person.father.person_names.last
+        else
+
+        end
 
         if person_father_name.present?
           person_father_name.update_attributes(voided: true, void_reason: 'Amendment edited')
