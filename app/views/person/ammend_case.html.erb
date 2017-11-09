@@ -109,21 +109,30 @@
 							<td style="text-decoration: line-through">
 									<%= @person_prev_values["person_name"] %>	
 							</td>
-							<td><%= @name.first_name %> <%= @name.last_name %></td>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
 						<%else%>
-							<td><%= @name.first_name %> <%= @name.last_name %></td>
-							<td><%= @name.first_name %> <%= @name.last_name %></td>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
 						<%end%>
 
 					</tr>
 					<tr onmousedown="amendField('Date of birth')">
 						<th >Date of birth</th>
 						<% if @person_prev_values['birthdate'].present? %>
-							<td style="text-decoration: line-through">
+							<td style="text-decoration: line-through"><%= @person_prev_values['birthdate']? @person_prev_values['birthdate'].to_date.strftime('%d/%b/%Y') : "" %></td>
+							<td >
 								<%= @person.birthdate.to_date.strftime('%d/%b/%Y') %>
 								
 							</td>
-							<td><%= @person_prev_values['birthdate']? @person_prev_values['birthdate'].to_date.strftime('%d/%b/%Y') : "" %></td>
 						<%else%>
 							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
 							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
@@ -162,10 +171,10 @@
 							<td style="text-decoration: line-through">
 									<%= @person_prev_values["mother_name"] %>	
 							</td>
-							<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
 						<%else%>
-							<td><%= @mother_name.first_name %> <%= @mother_name.last_name %></td>
-							<td></td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
 						<%end%>
 					</tr>
 					<tr onmousedown="amendField('Name of father')">
@@ -218,7 +227,7 @@
 	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
 	function amendField(field){
 		if(can_not_amend.indexOf(field) < 0){
-				window.location = "/person/amend_edit/<%=params[:id]%>?fields[]="+field
+				window.location = "/person/amend_edit/<%=params[:id]%>?fields[]="+field+"&next_path=<%= params[:next_path]%>"
 		}else{
 				showMsg("Can not amend "+field)
 		}

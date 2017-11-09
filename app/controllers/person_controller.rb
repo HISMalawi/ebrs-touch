@@ -1129,7 +1129,7 @@ class PersonController < ApplicationController
   def get_names
     entry = params["search"].soundex
     if params["last_name"]
-      data = PersonName.find_by_sql(" SELECT last_name FROM person_name WHERE first_name LIKE '#{params[:search]}%' ORDER BY last_name LIMIT 10").map(&:first_name)
+      data = PersonName.find_by_sql(" SELECT last_name FROM person_name WHERE last_name LIKE '#{params[:search]}%' ORDER BY last_name LIMIT 10").map(&:last_name)
       if data.present?
         render text: data.join("\n") and return
       else
@@ -1622,6 +1622,7 @@ class PersonController < ApplicationController
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
 
     @name = @person.person_names.last
+
     @person_prev_values = {}
     name_fields = ['first_name','last_name','middle_name',"gender","birthdate"]
     name_fields.each do |field|
@@ -1633,7 +1634,7 @@ class PersonController < ApplicationController
 
     if @person_prev_values['first_name'].present? || @person_prev_values['last_name'].present?
         name = "#{@person_prev_values['first_name'].present? ? @person_prev_values['first_name'] : @name.first_name} "+
-               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')}" +
+               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')} " +
                "#{@person_prev_values['last_name'].present? ? @person_prev_values['last_name'] : @name.last_name}"
         @person_prev_values["person_name"] = name
     end
@@ -1671,11 +1672,11 @@ class PersonController < ApplicationController
 
     if @father_prev_values['first_name'].present? || @father_prev_values['last_name'].present?
         father_name = "#{@father_prev_values['first_name'].present? ? @father_prev_values['first_name'] : @father_name.first_name} "+
-               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')}" +
+               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')} " +
                "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
         @person_prev_values["father_name"] = father_name
     end 
-
+    @targeturl = params[:next_path]
     @section = 'Ammend Case'
     render :layout => "facility"
   end
@@ -1703,7 +1704,7 @@ class PersonController < ApplicationController
       person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
       person_name = PersonName.create(person_id: params[:id],
             first_name: params[:person][:first_name],
-            last_name: params[:person][:last_name])
+            last_name: params[:person][:last_name],middle_name: params[:person][:middle_name])
     end
     if fields.include? "Date of birth"
         person = Person.find(params[:id])
@@ -1767,11 +1768,13 @@ class PersonController < ApplicationController
         person_mother_name.update_attributes(voided: true, void_reason: 'Amendment edited')
         person_mother_name = PersonName.create(person_id: person.mother.id,
             first_name: params[:person][:mother][:first_name],
-            last_name: params[:person][:mother][:last_name])
+            last_name: params[:person][:mother][:last_name],
+            middle_name: params[:person][:mother][:middle_name])
 
         PersonNameCode.create(person_name_id: person_mother_name.person_name_id,
             first_name_code: params[:person][:mother][:first_name].soundex,
-            last_name_code: params[:person][:mother][:last_name].soundex )
+            last_name_code: params[:person][:mother][:last_name].soundex,
+            middle_name_code: params[:person][:mother][:middle_name].soundex)
     end
     if fields.include? "Name of father"
         person = Person.find(params[:id])
@@ -1798,18 +1801,20 @@ class PersonController < ApplicationController
 
         person_father_name = PersonName.create(person_id: @father_person.id,
               first_name: params[:person][:father][:first_name],
-              last_name: params[:person][:father][:last_name])
+              last_name: params[:person][:father][:last_name],
+              middle_name: params[:person][:father][:middle_name])
 
         PersonNameCode.create(person_name_id: person_father_name.person_name_id,
               first_name_code: params[:person][:father][:first_name].soundex,
-              last_name_code: params[:person][:father][:last_name].soundex)
+              last_name_code: params[:person][:father][:last_name].soundex,
+              middle_name_code: params[:person][:father][:middle_name].soundex)
 
         PersonRelationship.create(
                 person_a: person.id, person_b: @father_person.person_id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
         )
     end
-    redirect_to "/person/ammend_case?id=#{params[:id]}" 
+    redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=#{params[:next_path]}" 
   end
 
   def amendiment_comment
