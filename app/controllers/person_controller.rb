@@ -63,7 +63,7 @@ class PersonController < ApplicationController
         redirect_to "/potential/duplicate/#{params[:id]}?next_path=/view_duplicates&index=0" and return
     end
 
-    if ["DC-AMEND"].include? @status
+    if ["DC-AMEND", "DC-AMEND-REJECTED"].include? @status
       redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=/view_printed_cases" and return
     end
 
