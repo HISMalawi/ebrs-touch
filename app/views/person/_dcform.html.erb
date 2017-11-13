@@ -1023,7 +1023,7 @@
                name="person[informant][last_name]"
                type="text"
                word_min_length = 2
-               condition = "__$('informant_id').value.trim().length == 0"
+               condition = "__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0"
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"

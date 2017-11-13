@@ -868,7 +868,7 @@
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
         <select id="person_informant_relationship_to_person"
-                condition = "__$('informant_id').value.trim().length == 0 && (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
+                condition = "(__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0) && (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
                 name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Grandmother/Grandfather</option>
