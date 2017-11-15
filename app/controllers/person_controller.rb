@@ -342,7 +342,7 @@ class PersonController < ApplicationController
             duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
             
             duplicates.each do |dup|
-                next if DuplicateRecord.where(person_id: person['person_id']).present?
+                next if DuplicateRecord.where(person_id: person['id']).present?
                 @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
             end
 

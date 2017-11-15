@@ -24,6 +24,7 @@ module EbrsAttribute
     district_id = nil
     location_id = nil
     person_id = hash['person_id']
+    person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
     person_id = User.where(user_id: hash['user_id']).first.person_id rescue nil if person_id.blank?
 
