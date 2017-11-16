@@ -45,7 +45,7 @@ class SimpleElasticSearch
 
  end
 
- def self.format_coded_content(person)
+  def self.format_coded_content(person)
      
      search_content = ""
       if person["middle_name"].present?
@@ -87,6 +87,7 @@ class SimpleElasticSearch
       return search_content.squish
 
   end
+
   def self.escape_single_quotes(string)
     if string.present?
         string = string.gsub("'", "'\\\\''")
@@ -99,7 +100,7 @@ class SimpleElasticSearch
     
      registration_district = person["district"]
 
-     coded_content = "#{person["first_name"].soundex} #{person["last_name"].soundex} #{self.format_coded_content(person)}"
+     coded_content = "#{person["first_name"].soundex rescue ''} #{person["last_name"].soundex rescue ''} #{self.format_coded_content(person)}"
 
      elastic_search_index = "curl -XPUT 'http://#{SETTING['host']}:#{SETTING['port']}/#{SETTING['index']}/#{SETTING['type']}/#{person["id"]}'  -d '
               {
@@ -156,7 +157,7 @@ class SimpleElasticSearch
 
   def self.query_duplicate(person,precision)
       content =  self.format_content(person)
-      query_string = "#{person["first_name"]} #{person["last_name"]} #{content}"
+      query_string = "#{person["first_name"] rescue ''} #{person["last_name"] rescue ''} #{content}"
 
       potential_duplicates = []
       hits = self.query("content",query_string,precision,10,0)["data"]
@@ -170,7 +171,7 @@ class SimpleElasticSearch
 
   def self.query_duplicate_coded(person,precision)
       content =  self.format_coded_content(person)
-      query_string = "#{person["first_name"].soundex} #{person["last_name"].soundex} #{content}"
+      query_string = "#{person["first_name"].soundex rescue ''} #{person["last_name"].soundex rescue ''} #{content}"
 
       potential_duplicates = []
       hits = self.query("coded_content",query_string,precision,10,0)["data"]

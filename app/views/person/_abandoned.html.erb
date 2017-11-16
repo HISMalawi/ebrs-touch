@@ -39,7 +39,7 @@
 
     <% end %>
     <input type="hidden" name="person[place_of_birth]" id="person_place_of_birth" value="Other">
-    <input type="hidden" name="person[birth_district]" id="person_birth_district">
+    <input type="hidden" name="person[birth_district]" id="person_birth_district" value="<%=Location.find(Location.current).name%>">
     <input id="person_original_surname" type="hidden"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
@@ -1727,7 +1727,7 @@
 
 
     function setChildName() {
-       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+       /*__$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");*/
        }
 
     init();
