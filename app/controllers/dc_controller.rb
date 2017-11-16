@@ -177,7 +177,7 @@ def incomplete_case_comment
     allocate_record.created_at = Time.now
     allocate_record.save
 
-    if old_state == "HQ-REJECTED"
+    if ["HQ-REJECTED","DC-VERIFY DUPLICATE"].include?(old_state)
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-RE-APPROVED")
     else
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
