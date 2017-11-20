@@ -105,9 +105,8 @@
       </div>
 
     </fieldset>
-
-    <fieldset>
-      <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
+ <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
       <div class="field">
         <label for="person_place_of_birth">Place of birth</label><br>
@@ -118,17 +117,16 @@
           <option <%= ((@person[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
-        
-      
+
+
       <div class="field">
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-               name="person[bd][holder]"
+               name="person[birth_district]"
                type="text"
-               condition="beforeLiveDate()"
                value="<%= @person[:bd] rescue nil %>"
-               ajaxURL = "/search_by_district"  
+               ajaxURL = "/search_by_district"
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
                class="input_cell"
                 />
@@ -138,42 +136,38 @@
       <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
-        <input type="text" name="hospital_of_birth" id="person_hospital_of_birth"
-               class ="input_cell"
-               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
-               tt_onUnload = "setDistrict('district');",
-               ajaxURL = "/search_by_hospital" >
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
+                          class ="input_cell"
+                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+                          tt_onUnload = "setDistrict('district'); "
+                          ajaxURL = "/search_by_hospital" >
       </div>
 
       <div class="field">
         <label for="person_birth_ta">T/A</label>
         <br>
-        <input type="text" name="birth_ta" id="person_birth_ta"
-               class = "input_cell"
-               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
-               ajaxURL = "/search_by_district"
-               tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
-               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
+        <input type="text" name="person[birth_ta]" id="person_birth_ta"
+                          class = "input_cell"
+                          condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+                          ajaxURL = "/search_by_district"
+                          tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
+                          tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
       </div>
       <div class="field">
         <label for="person_birth_village">Village</label>
         <br>
-        <input type="text" name="birth_village" class = "input_cell"
-               id="person_birth_village"
-               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
-               ajaxURL = "/search_by_village">
+        <input type="text" name="person[birth_village]" class = "input_cell"
+        id="person_birth_village"
+        condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+        ajaxURL = "/search_by_village">
       </div>
       <div class="field">
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
-        <input type="text" name="other_birth_place_details"
-               class ="input_cell"
-               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'"
-               id="person_other_birth_place_details">
+        <input type="text" name="other_birth_place_details" class ="input_cell" condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place_details">
       </div>
 
     </fieldset>
-
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
@@ -715,7 +709,8 @@
         <select id="same_address_with_mother"
                 name="same_address_with_mother"
                 class="input_cell"
-                tt_onUnload="nationality();">
+                tt_onUnload="nationality();"
+                condition="__$('parents_details_available').value.trim() == 'Both'">
           <option></option>
           <option value="Yes" >Yes</option>
           <option value="No" >No</option>
@@ -916,10 +911,11 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
-        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
+        <select id="person_informant_relationship_to_person"
+                condition = "(__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0) && (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
+                name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Grandmother/Grandfather</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>

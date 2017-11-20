@@ -9,13 +9,15 @@ class ApplicationController < ActionController::Base
   before_filter :check_last_sync_time
   before_filter :check_couch_loading
 
+
   def check_last_sync_time
-    last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time
+    last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time rescue nil
     job_interval = 60
     now = Time.now
-
-    if (now - last_run_time).to_f > 2*job_interval
-      SyncCheck.perform_in(2)
+    if last_run_time.present? && (now - last_run_time).to_f > 7*job_interval
+      Thread.new{
+        RestClient.get("#{SETTINGS['ebrs_services_link']}/api/start_sync")
+      }
     end
   end
 
@@ -25,7 +27,7 @@ class ApplicationController < ActionController::Base
     now = Time.now
     if last_run_time.present? && (now - last_run_time).to_f > 2*job_interval
       Thread.new{
-        load "#{Rails.root}/bin/couch-mysql.rb"
+        RestClient.get("#{SETTINGS['ebrs_services_link']}/api/start_data_loading")
       }
     end
   end

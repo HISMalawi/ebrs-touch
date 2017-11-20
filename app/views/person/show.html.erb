@@ -298,7 +298,7 @@
 
       function approveReprint(){
 
-         var action = "window.location = '/person/approve_reprint_request?id=<%=params[:id]%>&reason="+"<%=@status%>".replace("DC-","")+"&next_path=<%=params[:next_path]%>'";
+         var action = "window.location = '/person/approve_reprint_request?id=<%=params[:id]%>&reason="+"<%=@status%>".replace("DC-","").replace("-REJECTED","")+"&next_path=<%=params[:next_path]%>'";
          
           showMsgForAction("Send request to HQ", action, "200px", "Amendment action", null);
       }
@@ -377,55 +377,55 @@
 
       }
 
-  function viewComment(hide){
+      function viewComment(hide){
 
-      var msg = "";
+          var msg = "";
 
-      var parent = document.createElement("div");
+          var parent = document.createElement("div");
 
-      var div = document.createElement("div");
-      div.style.height = "300px";
-      div.style.width = "700px";
+          var div = document.createElement("div");
+          div.style.height = "300px";
+          div.style.width = "700px";
 
-      jQuery('.extra-btn').remove();
+          jQuery('.extra-btn').remove();
 
-      var table = document.createElement("table");
-      table.style.width = "100%";
+          var table = document.createElement("table");
+          table.style.width = "100%";
 
-      div.appendChild(table);
+          div.appendChild(table);
 
-      var tbody = document.createElement("tbody");
+          var tbody = document.createElement("tbody");
 
-      table.appendChild(tbody);
+          table.appendChild(tbody);
 
-      jQuery.ajax({
-          type: "GET",
-          url: "/comments/<%= @person.id %>",
-          data: "",
-          success: function(result){
-              hideSpinner();
-              $("#comment").empty();
-              if (result.trim() == "<ul></ul>")
-              {
-                  if(!hide) {
-                      $("#comment").append("<ul><li>No comment(s) as of now </li></ul>");
-                  }else{
-                      $("#button").hide();
-                      $("#title").html('Select reason for ammendment');
+          jQuery.ajax({
+              type: "GET",
+              url: "/comments/<%= @person.id %>",
+              data: "",
+              success: function(result){
+                  hideSpinner();
+                  $("#comment").empty();
+                  if (result.trim() == "<ul></ul>")
+                  {
+                      if(!hide) {
+                          $("#comment").append("<ul><li>No comment(s) as of now </li></ul>");
+                      }else{
+                          $("#button").hide();
+                          $("#title").html('Select reason for ammendment');
+                      }
+                  }else {
+                      $("#comment").append(result);
                   }
-              }else {
-                  $("#comment").append(result);
+
               }
 
-          }
+          });
+          parent.appendChild(div);
+          msg = parent.innerHTML;
 
-      });
-      parent.appendChild(div);
-      msg = parent.innerHTML;
-
-      hideSpinner();
-      $("#comment_popoup").css("visibility","visible");
-  }
+          hideSpinner();
+          $("#comment_popoup").css("visibility","visible");
+      }
 
       function dismissComment(){
           $("#comment_popoup").css("visibility","hidden");
@@ -440,7 +440,8 @@
                 window.location = next_path;
              },
              error: function(){
-                 alert("Something went wrong! server may be down");
+                 //alert("Something went wrong! server may be down");
+                 console.log("Something went wrong! server may be down")
              }
 
          });

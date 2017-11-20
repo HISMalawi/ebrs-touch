@@ -10,4 +10,4 @@ sync_host: 0.0.0.0:5984
 sync_database: 
 sync_username: 
 sync_password: 
-
+ebrs_services_link: http://0.0.0.0:10001

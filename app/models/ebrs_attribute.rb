@@ -24,6 +24,7 @@ module EbrsAttribute
     district_id = nil
     location_id = nil
     person_id = hash['person_id']
+    person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
     person_id = User.where(user_id: hash['user_id']).first.person_id rescue nil if person_id.blank?
 
@@ -131,7 +132,7 @@ module EbrsAttribute
 
   def create_audit_trail
 
-    if !["audit_trails","person_name_code","core_person"].include? self.class.table_name
+    if !["audit_trails","person_name_code","core_person","person_record_status"].include? self.class.table_name
       if self.prev.present?
         fields = self.attributes.keys
         prev = self.prev

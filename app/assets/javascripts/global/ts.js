@@ -6067,9 +6067,15 @@ function submitAfterSummary() {
                                         "person_mother_last_name",
                                         "person_mother_first_name",
                                         "person_mother_middle_name",
+                                        "person_foster_mother_last_name",
+                                        "person_foster_mother_first_name",
+                                        "person_foster_mother_middle_name",
                                         "person_father_first_name",
                                         "person_father_last_name",
                                         "person_father_middle_name",
+                                        "person_foster_father_last_name",
+                                        "person_foster_father_first_name",
+                                        "person_foster_father_middle_name",
                                         "person_type_of_birth",
                                         "person_relationship"]
 
@@ -6077,7 +6083,7 @@ function submitAfterSummary() {
 
     for(var i = 0 ; i < duplicate_search.length ; i++){
         if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
-             data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+             data[duplicate_search[i].replace("person_","").replace("person_foster_","")] = __$(duplicate_search[i]).value
          } else {
 
          }
@@ -6090,6 +6096,7 @@ function submitAfterSummary() {
 
         
         if(response.response && response.response.length != 0 && canSearchPotential(response)){
+            
             
             duplicatesPopup(response);
 

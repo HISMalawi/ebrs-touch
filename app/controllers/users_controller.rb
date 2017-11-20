@@ -90,6 +90,12 @@ class UsersController < ApplicationController
   def create
 
       @targeturl = "/user"
+
+      similar_users = User.where(username: params[:user]['username'])
+      if similar_users.count > 0
+        raise "User with Username = #{params[:user]['username']} Already Exists, Please Try Another Username".to_s
+      end
+
       core_person = CorePerson.create(person_type_id: PersonType.where(:name => 'User').last.id)
       person_name = PersonName.create(person_id: core_person.person_id,
                                   first_name: params[:user][:first_name],

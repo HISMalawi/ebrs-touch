@@ -33,7 +33,7 @@ module Lib
       return nil
     end
 
-    if self.is_twin_or_triplet(params[:person][:type_of_birth])
+    if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
        
@@ -123,7 +123,7 @@ module Lib
       return nil
     end
 
-    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+    if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
       if father_type =="Adoptive-Father"
@@ -220,7 +220,7 @@ module Lib
     informant[:citizenship] = 'Malawian' if informant[:citizenship].blank?
     informant[:residential_country] = 'Malawi' if informant[:residential_country].blank?
 
-    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+    if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       informant_person = Person.find(params[:person][:prev_child_id]).informant
     elsif params[:informant_same_as_mother] == 'Yes'
 
@@ -306,7 +306,7 @@ module Lib
   end
 
   def self.new_birth_details(person, params)
-    if self.is_twin_or_triplet(params[:person][:type_of_birth].to_s)
+    if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       return self.birth_details_multiple(person,params)
     end
     person_id = person.id; place_of_birth_id = nil; location_id = nil; other_place_of_birth = nil
@@ -466,4 +466,5 @@ module Lib
       return false
     end
   end
+
 end

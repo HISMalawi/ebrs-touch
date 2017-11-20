@@ -50,7 +50,7 @@
       
       <input id="person_original_surname" type="hidden"/>
       <div class="field">
-        <label for="person_last_name">Surname</label>
+        <%= f.label :last_name %>
         <br>
         <%= (f.text_field :last_name,
         :class => "input_cell",
@@ -389,7 +389,7 @@
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                condition="__$('mother_id').value.trim().length == 0"
+                condition="__$('mother_id') && __$('mother_id').value.trim().length == 0"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
                 optional="true"
@@ -1419,10 +1419,11 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
-        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
+        <select id="person_informant_relationship_to_person"
+                condition = "(__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0)&& (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
+                name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Grandmother/Grandfather</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
@@ -1518,6 +1519,7 @@
           <select id="person_copy_mother_name"
                   name="copy_mother_name"
                   class="input_cell"
+                  condition="false"
                   tt_onUnload="if(__$('textForperson_copy_mother_name').value.trim() == 'Yes'){copyMothersName();}">
               <option></option>
               <option value="Yes">Yes</option>
@@ -1536,7 +1538,7 @@
 
     function setpersonName() {
 
-       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+      /* __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");*/
     }
 
     function reportingDate(){
@@ -2509,7 +2511,7 @@
 
 
     function setChildName() {
-       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+       /*__$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");*/
        }
 
 
