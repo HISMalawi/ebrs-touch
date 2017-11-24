@@ -174,10 +174,22 @@ module PersonService
 
     person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
+    old_ben_identifier_join = " "
+    old_ben_type_id = PersonIdentifierType.where(name: "Old Birth Entry Number").first.id
+
     filters.keys.each do |k|
       case k
         when 'Birth Entry Number'
-          entry_num_query = " AND pbd.district_id_number = '#{filters[k]['person[birth_entry_number]']}' "
+
+          legacy = PersonIdentifier.where(value: filters[k]['person[birth_entry_number]'], person_identifier_type_id: old_ben_type_id)
+
+          raise legacy.length.to_s
+          legacy_available = legacy.length > 0
+          if legacy_available
+            old_ben_identifier_join = " INNER JOIN person_identifiers pid2 ON pid2.person_id = cp.person_id AND pid2.value = '#{filters[k]['person[birth_entry_number]']}' "
+          else
+            entry_num_query = " AND pbd.district_id_number = '#{filters[k]['person[birth_entry_number]']}' "
+          end
         when 'Facility Serial Number'
           fac_serial_query =  " AND pbd.facility_serial_number = '#{filters[k]['person[facility_serial_number]']}' "
         when 'Child Name'
@@ -228,7 +240,8 @@ module PersonService
     main = main.joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
             INNER JOIN person_name n ON person.person_id = n.person_id
             INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id
-            INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
+            INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
+            #{old_ben_identifier_join} ")
 
     main = main.where(" COALESCE(prs.voided, 0) = 0
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
