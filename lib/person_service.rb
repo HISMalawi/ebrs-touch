@@ -182,8 +182,6 @@ module PersonService
         when 'Birth Entry Number'
 
           legacy = PersonIdentifier.where(value: filters[k]['person[birth_entry_number]'], person_identifier_type_id: old_ben_type_id)
-
-          raise legacy.length.to_s
           legacy_available = legacy.length > 0
           if legacy_available
             old_ben_identifier_join = " INNER JOIN person_identifiers pid2 ON pid2.person_id = cp.person_id AND pid2.value = '#{filters[k]['person[birth_entry_number]']}' "
