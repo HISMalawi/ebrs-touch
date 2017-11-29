@@ -2034,12 +2034,12 @@ class PersonController < ApplicationController
     #create mother_address
     PersonAddress.create(
         :person_id          => core_person.id,
-        :current_district   => nris_person[:MotherDistrictId],
+        :current_district   => "",
         :current_ta         => "",
-        :current_village    => nris_person[:MotherVillageId],
-        :home_district   => "",
+        :current_village    => "",
+        :home_district   => nris_person[:MotherDistrictId],
         :home_ta            => "",
-        :home_village       => "",
+        :home_village       => nris_person[:MotherVillageId],
         :citizenship        => Location.where(country: nris_person[:MotherNationality]).last.id,
         
     )
@@ -2083,12 +2083,12 @@ class PersonController < ApplicationController
   #create father_address
   PersonAddress.create(
       :person_id          => core_person.id,
-      :current_district   => nris_person[:FatherDistrictId],
+      :current_district   => ""
       :current_ta         => "",
-      :current_village    => nris_person[:FatherVillageId],
-      :home_district  => "",
+      :current_village    => ""
+      :home_district  => nris_person[:FatherDistrictId],
       :home_ta => "",
-      :home_village => "",
+      :home_village => nris_person[:FatherVillageId],
       :citizenship => Location.where(country: nris_person[:FatherNationality]).last.id,
       
   )
