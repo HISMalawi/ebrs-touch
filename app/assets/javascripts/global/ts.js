@@ -5836,6 +5836,7 @@ function toTitleCase(str)
 
 function duplicatesPopup(data,checkbox){
        var people = data.response
+       console.log(data.exact);
        if (__$("msg.shield")) {
             document.body.removeChild(__$("msg.shield"));
         }
