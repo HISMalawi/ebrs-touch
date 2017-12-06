@@ -497,8 +497,10 @@
       }
 
       function duplicate(operation){
-          window.location = '/add_duplicate_comment/<%= params[:id]%>?decision=POTENTIAL DUPLICATE'+
-                            '&next_path=/view_cases&operation='+operation;
+          //window.location = '/add_duplicate_comment/<%= params[:id]%>?decision=POTENTIAL DUPLICATE'+
+          //                  '&next_path=/view_cases&operation='+operation;
+          window.location = '/resolve_duplicate?id=<%= params[:id]%>&decision=POTENTIAL DUPLICATE&'+
+                            'reason=System Captured record as duplicate'
       }
 
       function showSpinner(){}
