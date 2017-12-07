@@ -269,16 +269,18 @@ class PersonController < ApplicationController
 
     @summaryHash = {
 
-      "Child Name" => @person.name,
-      "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
-      "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-      "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
-      "Child's Mother " => (@mother_person.name rescue nil),
-      "Child's Father" =>  (@father_person.name rescue nil),
-      "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
-      "Court order attached" => (@birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No'),
-      "Parents signed?" => ((@birth_details.parents_signed rescue -1).to_s == '1' ? 'Yes' : 'No'),
-      "Delayed Registration" => @delayed
+        "Child Name" => @person.name,
+        "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
+        "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
+        "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+        "Child's Mother " => (@mother_person.name rescue nil),
+        "Mother Nationality " => (@mother_person.citizenship rescue "N/A"),
+        "Child's Father" =>  (@father_person.name rescue nil),
+        "Father Nationality" =>  (@father_person.citizenship rescue "N/A"),
+        "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
+        "Court order attached" => (@birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No'),
+        "Parents signed?" => ((@birth_details.parents_signed rescue -1).to_s == '1' ? 'Yes' : 'No'),
+        "Delayed Registration" => @delayed
     }
 
     if  (BirthRegistrationType.find(@person_details.birth_registration_type_id).name.upcase rescue nil) == 'ADOPTED'
