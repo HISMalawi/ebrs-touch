@@ -1110,7 +1110,7 @@ class PersonController < ApplicationController
   end
 
   def duplicate_search(person, params)
-      dupliates = SimpleElasticSearch.query_duplicate_coded(person,100)
+      dupliates = SimpleElasticSearch.query_duplicate_coded(person,99)
       exact = false
       if dupliates.blank?
         if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
@@ -1133,14 +1133,14 @@ class PersonController < ApplicationController
     if params["last_name"]
       data = PersonName.find_by_sql(" SELECT last_name FROM person_name WHERE last_name LIKE '#{params[:search]}%' ORDER BY last_name LIMIT 10").map(&:last_name)
       if data.present?
-        render text: data.join("\n") and return
+        render text: data.reject{|n| n == '@@@@@'}.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
       data = PersonName.find_by_sql(" SELECT first_name FROM person_name WHERE first_name LIKE '#{params[:search]}%' ORDER BY first_name LIMIT 10").map(&:first_name)
       if data.present?
-        render text: data.join("\n") and return
+        render text: data.reject{|n| n == '@@@@@'}.join("\n") and return
       else
         render text: "" and return
       end
