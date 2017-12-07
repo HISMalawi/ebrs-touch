@@ -343,7 +343,7 @@ class PersonController < ApplicationController
             @results = []
             @exact = false
             duplicates = []
-            duplicates = SimpleElasticSearch.query_duplicate_coded(person,99) 
+            duplicates = SimpleElasticSearch.query_duplicate_coded(person,99.4) 
 
             if duplicates.blank?
               duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
@@ -1124,7 +1124,7 @@ class PersonController < ApplicationController
   end
 
   def duplicate_search(person, params)
-      dupliates = SimpleElasticSearch.query_duplicate_coded(person,99)
+      dupliates = SimpleElasticSearch.query_duplicate_coded(person,99.4)
       exact = false
       if dupliates.blank?
         if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
