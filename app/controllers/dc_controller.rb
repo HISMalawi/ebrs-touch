@@ -88,7 +88,7 @@ def resolve_duplicate
      potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
         if params[:decision] == "POTENTIAL DUPLICATE"
-           PersonRecordStatus.new_record_state(params[:id], 'DC-POTENTIAL DUPLICATE', params[:reason])
+           PersonRecordStatus.new_record_state(params[:id], params[:nextstatus], params[:reason])
            redirect_to params[:next_path]
         elsif params[:decision] == "NOT DUPLICATE"
           potential_records.resolved = 1

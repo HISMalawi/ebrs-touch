@@ -264,6 +264,7 @@
 </table>
 </div>
   <script>
+    var status ="<%=@status%>";
 
     <% (@actions || []).each do |action|
       next if (SETTINGS['enable_role_privileges'] == false)
@@ -483,13 +484,14 @@
       function duplicateComments(){
           viewComment();
           var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
-          __$("title").innerHTML = "Record is potential duplicate with <%=@results.count%> record(s)";
-          var table = "<table align='center' id='printers'>"+
+          __$("title").innerHTML = "Record is "+ (status=="DC-DUPLICATE"? 'exact': 'potential') +" duplicate with <%=@results.count%> record(s)";
+          var table = "<table align='center' id='printers' style='width:98%;margin:auto'>"+
                       "</tr><% @results.each do |result| %><tr>"+
                       "<td><%= PersonBirthDetail.find_by_person_id(result['_id'].to_i).district_id_number rescue ''%></td>"+
                       "<td style='text-align: left; padding-left:50px;''><%=result['_source']['content'] %></td>"+
                       "</tr><% end %></table>"
           jQuery(table).insertAfter(__$("title"));
+          __$("comment").style.height ="150px"
           okBtn = __$("button")
           okBtn.onclick = function(){ duplicate('System')}
 
@@ -497,13 +499,13 @@
       }
 
       function duplicate(operation){
-          window.location = '/add_duplicate_comment/<%= params[:id]%>?decision=POTENTIAL DUPLICATE'+
-                            '&next_path=/view_cases&operation='+operation;
+          window.location = '/resolve_duplicate?id=<%= params[:id]%>&decision=POTENTIAL DUPLICATE&'+
+                            'nextstatus=<%=@status%>&reason=System Captured record as duplicate&next_path=/view_cases'
       }
 
       function showSpinner(){}
   </script>
-  <% if @status == "DC-POTENTIAL DUPLICATE" %>
+  <% if @status == "DC-POTENTIAL DUPLICATE" || @status == "DC-DUPLICATE" %>
     <script type="text/javascript">
           duplicateComments();
     </script>

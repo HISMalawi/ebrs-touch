@@ -7,7 +7,7 @@ class AuditTrail < ActiveRecord::Base
     class << self
 	    attr_accessor :ip_address_accessor
 	    attr_accessor :mac_address_accessor
-	  end
+	end
     def set_location
     	self.location_id =  SETTINGS['location_id']
     	self.ip_address = 	(AuditTrail.ip_address_accessor rescue (request.remote_ip rescue `ip route show`[/default.*/][/\d+\.\d+\.\d+\.\d+/]))
