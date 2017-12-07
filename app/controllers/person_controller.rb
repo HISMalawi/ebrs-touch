@@ -59,7 +59,7 @@ class PersonController < ApplicationController
 
     @status = PersonRecordStatus.status(params[:id])
 
-    if ["DC-POTENTIAL DUPLICATE","FC-POTENTIAL DUPLICATE","FC-EXACT DUPLICATE"].include? @status
+    if ["DC-POTENTIAL DUPLICATE","FC-POTENTIAL DUPLICATE","FC-EXACT DUPLICATE","DC-DUPLICATE"].include? @status
         redirect_to "/potential/duplicate/#{params[:id]}?next_path=/view_duplicates&index=0" and return
     end
 
@@ -339,8 +339,17 @@ class PersonController < ApplicationController
           if @status == "DC-ACTIVE"
 
             @results = []
-            duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
-            
+            @exact = false
+            duplicates = []
+            duplicates = SimpleElasticSearch.query_duplicate_coded(person,99) 
+
+            if duplicates.blank?
+              duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
+            else
+              @exact = true
+            end
+
+
             duplicates.each do |dup|
                 next if DuplicateRecord.where(person_id: person['id']).present?
                 @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
@@ -355,7 +364,12 @@ class PersonController < ApplicationController
                      end
                end
                #PersonRecordStatus.new_record_state(@person.person_id, "HQ-POTENTIAL DUPLICATE-TBA", "System mark record as potential duplicate")
-               @status = "DC-POTENTIAL DUPLICATE" #PersonRecordStatus.status(@person.id)
+               if @exact
+                 @status = "DC-DUPLICATE"
+               else
+                 @status = "DC-POTENTIAL DUPLICATE"
+               end
+               #PersonRecordStatus.status(@person.id)
 
             end      
           end
