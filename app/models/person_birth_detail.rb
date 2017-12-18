@@ -59,15 +59,6 @@ class PersonBirthDetail < ActiveRecord::Base
       person = Person.where(person_id: self.person_id).last
       mother_person = person.mother_all
       father_person = person.father_all
-
-      if self.district_id_number.blank?
-        return complete
-      end
-
-      if name.first_name.blank?
-        return complete
-      end
-
       if name.last_name.blank?
         return complete
       end
