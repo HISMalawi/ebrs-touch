@@ -51,4 +51,58 @@ class PersonBirthDetail < ActiveRecord::Base
     def birth_place
       Location.find(self.place_of_birth)
     end
+
+    def record_complete?()
+
+      complete = false
+      name = PersonName.where(person_id: self.person_id).last
+      person = Person.where(person_id: self.person_id).last
+      mother_person = person.mother
+      father_person = person.father
+
+      if self.district_id_number.blank?
+        return complete
+      end
+
+      if name.first_name.blank?
+        return complete
+      end
+
+      if name.last_name.blank?
+        return complete
+      end
+
+      if person.birthdate.blank?
+        return complete
+      end
+
+      if person.gender.blank?
+        return complete
+      end
+
+      if (mother_person.person_names.last.first_name.blank? rescue true)
+        return complete
+      end
+
+      if (mother_person.person_names.last.last_name.blank? rescue true)
+        return complete
+      end
+
+      if (mother_person.birthdate.blank? rescue true)
+        return complete
+      end
+
+      if self.parents_married_to_each_other.to_s == '1'
+
+        if (father_person.person_names.last.first_name.blank? rescue true)
+          return complete
+        end
+
+        if (father_person.person_names.last.last_name.blank? rescue true)
+          return complete
+        end
+      end
+
+      return true
+    end
 end
