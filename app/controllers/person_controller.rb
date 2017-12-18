@@ -168,7 +168,7 @@ class PersonController < ApplicationController
             {
                 "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
                 "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => "----"
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
@@ -1438,7 +1438,7 @@ class PersonController < ApplicationController
             {
                 ["Court Order Attached?","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_court_order_attached"] => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
                 ["Parents Signed?","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_parents_signed"] => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => "----"
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
