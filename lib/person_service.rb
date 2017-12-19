@@ -361,7 +361,7 @@ module PersonService
           :middle_name        => nris_person[:OtherNames],
           :last_name          => nris_person[:Surname]
       )
-      
+      #create person_birth_detail 
       PersonBirthDetail.create(
         person_id: core_person.id,
         birth_registration_type_id: "",
@@ -370,13 +370,19 @@ module PersonService
         district_of_birth:  nris_person[:PlaceOfBirthDistrictId],
         location_created_at: "" 
     )
-    
+    #create person identifier
       PersonIdentifier.create(
         person_id: father_person.person_id,
         person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
         value: nris_person[:BirthCertificateNumber].upcase
      )
      
+     PersonIdentifier.create(
+      person_id: core_person.id,
+      person_identifier_type_id: (PersonIdentifierType.find_by_name("NRIS ID").id),
+      value: nris_person[:NrisPk].upcase
+    )
+
         #create_mother
         #create mother_core_person
           core_person = CorePerson.create(
@@ -419,13 +425,7 @@ module PersonService
             )
         end
     
-        PersonIdentifier.create(
-          person_id: mother_person.person_id,
-          person_identifier_type_id: (PersonIdentifierType.find_by_name("NRIS ID").id),
-          value: nris_person[:NrisPk].upcase
-        )
-    
-        # create mothe_relationship
+        # create mother_relationship
         PersonRelationship.create(
             person_a: ebrs_person.id, person_b: core_person.id,
             person_relationship_type_id: PersonRelationType.where(name: 'Mother').last.id
