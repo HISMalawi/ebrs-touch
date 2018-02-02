@@ -7,14 +7,28 @@ class ApplicationController < ActionController::Base
   before_filter :check_if_logged_in, :except => ['login', 'searched_cases']
 
   before_filter :check_last_sync_time
+  before_filter :check_couch_loading
+
 
   def check_last_sync_time
-    last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time
+    last_run_time = File.mtime("#{Rails.root}/public/sync_sentinel").to_time rescue nil
     job_interval = 60
     now = Time.now
+    if last_run_time.present? && (now - last_run_time).to_f > 7*job_interval
+      Thread.new{
+        RestClient.get("#{SETTINGS['ebrs_services_link']}/api/start_sync")
+      }
+    end
+  end
 
-    if (now - last_run_time).to_f > 2*job_interval
-      SyncCheck.perform_in(2)
+  def check_couch_loading
+    last_run_time = File.mtime("#{Rails.root}/public/tap_sentinel").to_time rescue nil
+    job_interval = 60
+    now = Time.now
+    if last_run_time.present? && (now - last_run_time).to_f > 2*job_interval
+      Thread.new{
+        RestClient.get("#{SETTINGS['ebrs_services_link']}/api/start_data_loading")
+      }
     end
   end
 
@@ -57,10 +71,18 @@ class ApplicationController < ActionController::Base
   end
 
   def login!(user)
-    session[:user_id] = user.id 
+    session[:user_id] = user.id
+    AuditTrail.ip_address_accessor = request.remote_ip
+    AuditTrail.mac_address_accessor = ` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2]
+    AuditTrail.create(person_id: user.person_id,
+                       audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
+                       comment: "User login")
   end
 
   def logout!
+    AuditTrail.create(person_id: User.find(session[:user_id]).person_id,
+                       audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
+                       comment: "User logout") unless session[:user_id].blank?
     session[:user_id] = nil
   end
 

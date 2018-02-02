@@ -29,23 +29,22 @@
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+    <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
+    <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]">
+    <input id="person_relationship" name="person[relationship]" value="abandoned" type="hidden"/>
+
+    <% if flash[:error] == "Similar" %>
+
+        <input id="person_potentialduplicate" name="person[potentialduplicate]" value="potentialduplicate" type="hidden"/>
+
+    <% end %>
+    <input type="hidden" name="person[place_of_birth]" id="person_place_of_birth" value="Other">
+    <input type="hidden" name="person[birth_district]" id="person_birth_district" value="<%=Location.find(Location.current).name%>">
+    <input id="person_original_surname" type="hidden"/>
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Child</font></legend>
 
       <%= f.hidden_field :_rev rescue "" %>
-      <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
-      <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]">
-       <input id="person_relationship" name="person[relationship]" value="abandoned" type="hidden"/>
-
-      <% if flash[:error] == "Similar" %>
-
-      	<input id="person_potentialduplicate" name="person[potentialduplicate]" value="potentialduplicate" type="hidden"/>
-
-      <% end %>
-
-      <input id="person_original_surname" type="hidden"/>
-
-      <%= f.hidden_field :birth_district, :value => @current_district %>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -89,7 +88,7 @@
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_birthdate')",
-                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
+                          :tt_onUnload => "__$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
         <%= f.hidden_field :birth_district, :value => @current_district %>
@@ -137,8 +136,8 @@
       <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
 
       <div class="field">
-        <label for="person_place_of_birth">Place of birth</label><br>
-        <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" >
+        <label for="person_place_of_birth_holder">Place of birth</label><br>
+        <select id="person_place_of_birth_holder" name="person[place_of_birth_holder]" class="input_cell" tt_onUnLoad = "setPlaceOfBirth()" >
           <option></option>
           <option <%= ((@person[:place_of_birth] rescue nil) == "Home" ? "selected" : "") %> >Home</option>
           <option <%= ((@person[:place_of_birth] rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
@@ -153,7 +152,6 @@
         <input id="person_bd_holder"
         			 name="person[bd][holder]"
         			 type="text"
-        			 condition="beforeLiveDate()"
         			 value="<%= @person[:bd] rescue nil %>"
         			 ajaxURL = "/search_by_district"
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
@@ -167,17 +165,15 @@
         <br>
        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                     class ="input_cell"
-                    condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
-                    tt_onUnload = "setDistrict('district');",
+                    tt_onUnload = "setDistrict('district');"
                     ajaxURL = "/search_by_hospital" >
       </div>
 
       <div class="field">
         <label for="person_birth_ta">T/A</label>
         <br>
-        <input type="text" name="birth_ta" id="person_birth_ta"
+        <input type="text" name="person[birth_ta]" id="person_birth_ta"
                           class = "input_cell"
-                          condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
                           ajaxURL = "/search_by_district"
                           tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
                           tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
@@ -185,15 +181,14 @@
       <div class="field">
         <label for="person_birth_village">Village</label>
         <br>
-        <input type="text" name="birth_village" class = "input_cell"
+        <input type="text" name="person[birth_village]" class = "input_cell"
         id="person_birth_village"
-        condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
         ajaxURL = "/search_by_village">
       </div>
       <div class="field">
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
-        <input type="text" name="other_birth_place_details" class ="input_cell" condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place_details">
+        <input type="text" name="other_birth_place_details" class ="input_cell" id="person_other_birth_place_details">
       </div>
 
     </fieldset>
@@ -220,7 +215,7 @@
       <div class="field">
         <%= f.label :type_of_birth %>
         <br>
-        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" >
+        <select id="person_type_of_birth" name="person[type_of_birth]" class="input_cell" tt_onUnLoad="setTypeOfBirth()">
           <option></option>
           <option <%= ((@person[:type_of_birth] rescue nil) == "Single" ? "selected" : "") %> >Single</option>
 
@@ -237,7 +232,7 @@
       <div class="field">
         <label for="person_other_type_of_birth">Specify Other Type of Birth</label>
         <br>
-        <input type="text" name ="other_type_of_birth" id="person_other_type_of_birth" class ="input_cell" condition ="__$('person_type_of_birth').value.trim() == 'Other'" optional=true >
+        <input type="text" name ="other_type_of_birth" id="person_other_type_of_birth" class ="input_cell"  optional=true condition=false >
       </div>
 
     </fieldset>
@@ -553,7 +548,7 @@
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
        <input type="text" fieldtype="number" name="gestation_at_birth" id="person_gestation_at_birth"
-                class="input_cell" absolute_min="23" min="36" absolute_max="45" max="42" optional="true" >
+                class="input_cell" absolute_min="30" min="36" absolute_max="45" max="42" optional="true" >
       </div>
       <div class="field">
         <label for="person_number_of_prenatal_visits">Number of prenatal visits</label>
@@ -582,7 +577,7 @@
 
       </fieldset>
 
-      <fieldset>
+      <fieldset condition="__$('parents_details_available').value.trim() == 'Mother' || __$('parents_details_available').value.trim() == 'Both'">
       <legend><font size='5' style=''>Details of Mother continued..</font></legend>
       <div class="field">
         <label for="person_number_of_children_born_alive_inclusive">Number of children born to the mother, including this
@@ -942,14 +937,11 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
-        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
+        <select id="person_informant_relationship_to_person"
+                condition = "(__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0) && (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
+                name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Sister-in-marriage/Brother-in-marriage" ? "selected" : "") %> >Sister-in-marriage/Brother-in-marriage</option>
+          <option>Social Welfare</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
@@ -1010,7 +1002,7 @@
         <label for="person_informant_phone_number">Phone Number</label><br>
 
         <input id="person_informant_phone_number" name="person[informant][phone_number]" type="text" value="<%= @person[:informant][:phone_number] rescue nil %>"
-               class="input_cell" fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" />
+               class="input_cell" fieldtype="decimal" regex='^0(?=\d*$)(?:.{7}|.{9})|^N\/A$' regex_message="Please enter a valid phone number" optional=true />
 
       </div>
 
@@ -1026,14 +1018,14 @@
       </div>
 
       <div class="field">
-        <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
+        <label for="person_date_reported">Date of Reporting</label>
         <br>
         <input type="hidden" name="registration_type" id="registration_type">
-        <%= (f.text_field :acknowledgement_of_receipt_date,
+        <%= (f.text_field :date_reported,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onLoad => "dateInterval('person_acknowledgement_of_receipt_date');",
+                          :tt_onLoad => "dateInterval('person_date_reported');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
@@ -1050,15 +1042,19 @@
 <script>
     function reportingDate(){
 
-      commence = new Date(8 + '/' + 1 + '/' + 2015);
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
 
-      original = new Date(6 + '/' + 15 + '/' + 2015);
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
 
       if (original < commence){
         commence = original;
       }
-
-      return original.getDate() + "/" + months[original.getMonth()] + "/" + original.getFullYear();
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
 
     }
 
@@ -1731,7 +1727,7 @@
 
 
     function setChildName() {
-       __$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");
+       /*__$('person_copy_mother_name').setAttribute('condition', "__$('person_parents_married_to_each_other').value.trim() == 'No' && __$('person_court_order_attached').value.trim() == 'No' && __$('person_parents_signed').value.trim() == 'No' &&  __$('person_mother_last_name').value.trim().toLowerCase() != __$('person_last_name').value.trim().toLowerCase()");*/
        }
 
     init();
@@ -1805,12 +1801,12 @@
   function summaryFields(){
             var full_place_of_birth;
 
-            if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
+            if (__$('person_place_of_birth') != null && __$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
             {
               full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
 
             }
-            else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
+            else if (__$('person_place_of_birth') != null && __$('person_place_of_birth').value.trim().toLowerCase() == 'home')
             {
 
               full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
@@ -1838,7 +1834,7 @@
     {
         var person_dob = handleDate(__$('person_birthdate').value);
 
-        if (((Date.parse(__$('person_acknowledgement_of_receipt_date').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
+        if (((Date.parse(__$('person_date_reported').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
         {
             __$('registration_type').value = 'Yes'
         }
@@ -1850,7 +1846,7 @@
 
     function recalculateDateValidations(){
 
-        __$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());
+        __$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());
 
 
     }
@@ -1876,8 +1872,15 @@
     {
         if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
         {
+
             var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())
+
             var dob = handleDate(obj.value.toString().trim())
+
+            if ((marriageDate - dob) < 0) {
+                 showMsg("The date of marriage for " + parent + " is date of birth. Please enter a valid date.");
+                 __$("textForperson_date_of_marriage").focus()
+            }
 
             if (((marriageDate - dob) / (365 * 24 * 60 * 60 * 1000)) <= 10){
 
@@ -1925,6 +1928,48 @@
        __$('person_birth_district').value = "<%= Location.current_district.id %>" ;
 
      }
+    }
+
+    function setPlaceOfBirth(){
+        if (__$('person_place_of_birth_holder') != null) {
+
+            var value = __$('person_place_of_birth_holder').value
+
+            __$("person_place_of_birth").value = __$('person_place_of_birth_holder').value
+
+            var fields_to_enable = ['person_hospital_of_birth','person_birth_ta', 'person_birth_village']
+            for(var i = 0 ; i < fields_to_enable.length;i++){
+              __$(fields_to_enable[i]).setAttribute("condition",false)
+            }
+
+            if (value.trim().toLowerCase() =='hospital'){
+                __$("person_hospital_of_birth").setAttribute("condition",true)
+            }else if(value.trim().toLowerCase() == "home"){
+                 __$("person_birth_ta").setAttribute("condition",true)
+                 __$("person_birth_village").setAttribute("condition",true)
+            }else{
+                __$("other_birth_place_details").setAttribute("condition",true)
+            }
+
+        }else{
+            __$("person_place_of_birth").value = "Other"
+            var input = document.createElement("input");
+            input.type = "hidden"
+            input.name = "other_birth_place_details"
+            input.value = "Not known";
+
+            var form = document.getElementsByTagName("form")[0];
+            form.appendChild(input);
+        }
+    }
+
+    function setTypeOfBirth(){
+      var value =  __$("person_type_of_birth").value
+      if (value == "Other") {
+          __$("person_other_type_of_birth").setAttribute("condition",true);
+      }else{
+          __$("person_other_type_of_birth").setAttribute("condition",false);
+      }
     }
 
     function beforeLiveDate(){

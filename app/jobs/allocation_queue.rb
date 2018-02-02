@@ -6,7 +6,7 @@ class AllocationQueue
 
     FileUtils.touch("#{Rails.root}/public/sentinel")
 
-    ActiveRecord::Base.logger.level = 1
+    ActiveRecord::Base.logger.level = 3
     queue = []
     queue = IdentifierAllocationQueue.where(assigned: 0) if (SETTINGS['assign_ben'] != false)
 
@@ -24,6 +24,7 @@ class AllocationQueue
 
         if record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Entry Number").last.person_identifier_type_id
+
           if !ben.blank?
             record.update_attributes(assigned: 1)
             next
@@ -37,28 +38,27 @@ class AllocationQueue
 
           last = PersonBirthDetail.where("LEFT(district_id_number, #{district_code_len}) = '#{district_code}'
             AND RIGHT(district_id_number, #{year_len}) = #{Date.today.year}").select(" MAX(SUBSTR(district_id_number,
-              #{(district_code_len + 2)}, 7)) AS last_num")[0]['last_num'] rescue 0
+              #{(district_code_len + 2)}, 8)) AS last_num")[0]['last_num'] rescue 0
 
-          mid_number = (last.to_i + 1).to_s.rjust(7,'0')
+          mid_number = (last.to_i + 1).to_s.rjust(8,'0')
 
           person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
           record.update_attributes(assigned: 1)
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-ACTIVE')
+          person_birth_detail.update_attributes(date_registered: Date.today)
           PersonIdentifier.new_identifier(record.person_id, 'Birth Entry Number', person_birth_detail.district_id_number)
 
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Birth Registration Number").last.person_identifier_type_id
+
           if !brn.blank?
             record.update_attributes(assigned: 1)
             next
           end
 
-
           last = (PersonBirthDetail.select(" MAX(national_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
           brn = last + 1
           person_birth_detail.update_attributes(national_serial_number: brn)
           record.update_attributes(assigned: 1)
-          PersonRecordStatus.new_record_state(record.person_id, 'HQ-PRINT')
 
           PersonIdentifier.new_identifier(record.person_id, 'Birth Registration Number', person_birth_detail.national_serial_number)
 
@@ -84,6 +84,7 @@ class AllocationQueue
       AllocationQueue.perform_in(1.5)
     end
 
+    ActiveRecord::Base.logger.level = 3
     AllocationQueue.perform_in(1.5)
   end
 

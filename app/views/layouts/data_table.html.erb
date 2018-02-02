@@ -50,17 +50,25 @@
       }
 
       .btn-images {
-        height: 40px;
-        transform: translate(50%, -30%);
+        height: 40px !important;
+        margin: 10px;
+        margin-top: 13px !important;
+        margin-bottom: 15px !important;
+        transform: translate(50%, -40%);
         display: block;
-
+        cursor: pointer;
       }
 
       /* .......... buttons ends ......... */
   </style>
 
   <script>
-
+      var keyboard = "<%= User.current.preferred_keyboard %>"
+      if(keyboard == 'qwerty'){
+          currentKeysQWERTY = true
+      }else{
+          currentKeysQWERTY = false
+      }      
   </script>
 
   <%=javascript_include_tag "DataTables/jquery" %>

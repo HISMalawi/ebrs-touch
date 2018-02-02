@@ -6,7 +6,7 @@ h.destroy
 def start
   begin
       ActiveRecord::Base.transaction do
-        create_user
+        #create_user
       end
   rescue => e 
     puts "Error ::::  #{e.message}  ::  #{e.backtrace.inspect}"
@@ -46,6 +46,8 @@ def create_user
 
   User.current = User.first
   puts "Successfully created local System Administrator: your new username is: #{user.username}  and password: adminebrs"
+ 
+  CouchdbSequence.create!(seq: 0)
 end
 
 start

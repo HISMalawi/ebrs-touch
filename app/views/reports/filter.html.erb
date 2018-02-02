@@ -1,0 +1,177 @@
+<style>
+    #__content{
+        -moz-transform: scale(0.73);
+        -moz-transform-origin: 0 0;
+        width:99% !important;
+    }
+
+    #toolsCell1{
+        height: 450px !important;
+        min-width: 250px !important;
+        width: 500px !important;
+    }
+    #fixedkeyboard{
+        max-width: 800px !important;
+    }
+
+    #textForperson_birth_entry_number{
+        text-transform: uppercase;
+    }
+    #textForperson_facility_serial_number{
+        text-transform: uppercase;
+    }
+</style>
+<form>
+	<fieldset>
+		 <legend><font size='5' style='border: 2px;'>Report filters</font></legend>
+		 <div class="field">
+	       <label for="filters">Select Filter</label>
+	       <select id="filters" name="filter_name" class="input_cell">
+	         <option></option>
+	         <% @filters.each do |f|%>
+	             <option value="<%=f%>"><%=f%></option>
+	         <%end%>
+	       </select>
+		 </div>
+	</fieldset>
+	<fieldset>
+		 <legend><font size='5' style='border: 2px;'>Place of birth</font></legend>
+		 <div class="field">
+	       <label for="place_of_birth">Place of birth</label>
+	       <select id="place_of_birth" name="place_of_birth" class="input_cell" condition="__$('filters').value == 'Place of Birth'">
+	         <option></option>
+	         <option>Home</option>
+	         <option>Hospital</option>
+	         <option>Other</option>
+	       </select>
+		 </div>
+	</fieldset>
+	<fieldset>
+	   <legend><font size='5' style='border: 2px;'>Hospital of Birth</font></legend>
+		  <div class="field">
+		    <label for="hospital_of_birth">Hospital of Birth</label>
+		    <br>
+		    <input type="text" name="hospital_of_birth" id="hospital_of_birth" class="input_cell" condition="__$('place_of_birth').value == 'Hospital'" ajaxURL = "/search_by_hospital?district=<%=@district%>" optional=true>
+		  </div>
+	</fieldset>
+
+	<fieldset>
+		<legend><font size='5' style='border: 2px;'>District</font></legend>
+		  <div class="field">
+		    <label for="district_birth">District of birth</label>
+		    <br>
+		    <input type="text" name="district_birth" id="district_birth" class="input_cell" condition="__$('place_of_birth').value == 'Home'" ajaxURL = "/search_by_district"
+		     tt_onUnLoad="__$('ta_birth').setAttribute('ajaxURL','/search_by_ta?district='+__$('textFordistrict_birth').value)">
+		  </div>
+	</fieldset>
+	<fieldset>
+		<legend><font size='5' style='border: 2px;'>TA</font></legend>
+		  <div class="field">
+		    <label for="ta_birth">TA of birth</label>
+		    <br>
+		    <input type="text" name="ta_birth" id="ta_birth" class="input_cell" condition="__$('place_of_birth').value == 'Home'" ajaxURL = "/search_by_ta?district="
+		    >
+		  </div>
+	</fieldset>
+	<fieldset>
+		<legend><font size='5' style='border: 2px;'>Village</font></legend>
+		  <div class="field">
+		    <label for="village_birth">Village of birth</label>
+		    <br>
+		    <input type="text" name="village_birth" id="vilage_birth" class="input_cell" condition="false" ajaxURL = "/search_by_village?district=" >
+		  </div>
+	</fieldset>
+	<fieldset>
+		 <legend><font size='5' style='border: 2px;'>Record status</font></legend>
+		 <div class="field">
+	       <label for="states">Select record status</label>
+	       <select id="states" name="record_status" class="input_cell" condition="__$('filters').value == 'Record Status'">
+	         <option></option>
+	         <% @statuses.each do |s|%>
+	             <option value="<%=s%>"><%=s%></option>
+	         <%end%>
+	       </select>
+		 </div>
+	</fieldset>
+
+    <fieldset>
+	  <legend><font size='5' style='border: 2px;'>Start Date</font></legend>
+
+	  <div class="field">
+	    <label for="start_date">Start Date</label>
+	    <input id="start_date" name="start_date" type="text"
+	           condition="__$('filters').value == 'Date Registered Range' || __$('filters').value == 'Date Reported Range'"
+	           class="input_cell"
+	           fieldtype="date"
+	           />
+
+	  </div>
+	</fieldset>
+	<fieldset >
+		<legend><font size="5" style='border: 2px;'>End Date</font></legend>
+		<div>
+	    <label for="end_date">End Date</label>
+	    <input id="end_date" name="end_date" type="text"
+	           condition="__$('filters').value == 'Date Registered Range' || __$('filters').value == 'Date Reported Range'"
+	           class="input_cell"
+	           fieldtype="date"
+	    />
+
+	  </div>
+	</fieldset>
+	<fieldset condition="__$('filters').value == 'Age'">
+			<legend>Date operator</legend>
+			<div class="field">
+				<label for="operator">Age is </label>
+				<select id="operator" name="operator" condition="__$('filters').value == 'Age'">
+						<option></option>
+						<option>EQUAL </option>
+						<option>LESS THAN </option>
+						<option>LESS THAN OR EQUAL</option>
+						<option>GREATER THAN </option>
+						<option>GREATER OR EQUAL </option>
+						<option>BETWEEN</option>
+				</select>
+			</div>
+	</fieldset>
+	<fieldset>
+		<legend>Start Age</legend>
+			<div class="field">
+				<label for="start_age">Age 1</label>
+				<input 	type="number" 
+						fieldtype="number"
+						name="start_age"
+						absolute_min = 1
+						absoulte_max = 150
+						id="start_age"
+						condition ="__$('filters').value=='Age'" 
+						/>
+			</div>
+	</fieldset>
+	<fieldset>
+		  <legend>End age </legend>
+		  	<div class="field">
+				<label for="end_age">Age 2</label>
+				<input 	type="number" 
+						name="end_age"
+						absolute_min = 1
+						absoulte_max = 150
+						id="end_age" 
+						fieldtype="number"
+						condition ="__$('operator').value == 'BETWEEN'" 
+						/>
+			</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+	init();
+	var ajax_ta_interval;
+	function setAjaxTA(id,element){
+		if(element.id.indexOf('ta_birth') < 0 ){
+			clearInterval(ajax_ta_interval);
+			return;
+		}else{
+			__$("village_birth").setAttribute('ajaxURL','/search_by_village?district=' + __$('district_birth').value + '&ta=' + __$('textForta_birth').value);
+		}
+	}
+</script>

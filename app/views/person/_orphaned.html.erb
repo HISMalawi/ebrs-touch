@@ -86,11 +86,10 @@
         <%= (f.text_field :birthdate,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
-                          :absolute_min => Time.now.advance(:weeks => -6).strftime('%Y/%m/%d'),
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
                           :tt_onLoad =>"dateInterval('person_birthdate')",
-                          :tt_onUnload => "__$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
+                          :tt_onUnload => "__$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
         <%= f.hidden_field :birth_district, :value => @current_district %>
@@ -106,9 +105,8 @@
       </div>
 
     </fieldset>
-
-    <fieldset>
-      <legend><font size='5' style='border: 2px;'>Details of Child Continued..</font></legend>
+ <fieldset>
+      <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
       <div class="field">
         <label for="person_place_of_birth">Place of birth</label><br>
@@ -119,17 +117,16 @@
           <option <%= ((@person[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
         </select>
       </div>
-        
-      
+
+
       <div class="field">
         <label for="person_bd_holder">Birth District</label><br>
 
         <input id="person_bd_holder"
-               name="person[bd][holder]"
+               name="person[birth_district]"
                type="text"
-               condition="beforeLiveDate()"
                value="<%= @person[:bd] rescue nil %>"
-               ajaxURL = "/search_by_district"  
+               ajaxURL = "/search_by_district"
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
                class="input_cell"
                 />
@@ -139,42 +136,38 @@
       <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
-        <input type="text" name="hospital_of_birth" id="person_hospital_of_birth"
-               class ="input_cell"
-               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;",
-               tt_onUnload = "setDistrict('district');",
-               ajaxURL = "/search_by_hospital" >
+        <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
+                          class ="input_cell"
+                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+                          tt_onUnload = "setDistrict('district'); "
+                          ajaxURL = "/search_by_hospital" >
       </div>
 
       <div class="field">
         <label for="person_birth_ta">T/A</label>
         <br>
-        <input type="text" name="birth_ta" id="person_birth_ta"
-               class = "input_cell"
-               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
-               ajaxURL = "/search_by_district"
-               tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
-               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
+        <input type="text" name="person[birth_ta]" id="person_birth_ta"
+                          class = "input_cell"
+                          condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+                          ajaxURL = "/search_by_district"
+                          tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
+                          tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
       </div>
       <div class="field">
         <label for="person_birth_village">Village</label>
         <br>
-        <input type="text" name="birth_village" class = "input_cell"
-               id="person_birth_village"
-               condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
-               ajaxURL = "/search_by_village">
+        <input type="text" name="person[birth_village]" class = "input_cell"
+        id="person_birth_village"
+        condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+        ajaxURL = "/search_by_village">
       </div>
       <div class="field">
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
-        <input type="text" name="other_birth_place_details"
-               class ="input_cell"
-               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'"
-               id="person_other_birth_place_details">
+        <input type="text" name="other_birth_place_details" class ="input_cell" condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place_details">
       </div>
 
     </fieldset>
-
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
@@ -534,7 +527,7 @@
         <label for="person_gestation_at_birth">Gestation age at birth in weeks</label>
         <br>
         <input type="text" name="gestation_at_birth" class ="input_cell" fieldtype ="number" min =36
-                            absolute_min =23 max =42 absolute_max =45 optional="true" id="person_gestation_at_birth">
+                            absolute_min =29 max =42 absolute_max =45 optional="true" id="person_gestation_at_birth">
       </div>
       <div class="field">
         <label for ="number_of_prenatal_visits">Number of prenatal visits</label>
@@ -716,7 +709,8 @@
         <select id="same_address_with_mother"
                 name="same_address_with_mother"
                 class="input_cell"
-                tt_onUnload="nationality();">
+                tt_onUnload="nationality();"
+                condition="__$('parents_details_available').value.trim() == 'Both'">
           <option></option>
           <option value="Yes" >Yes</option>
           <option value="No" >No</option>
@@ -917,10 +911,11 @@
 
       <div class="field">
         <label for="person_informant_relationship_to_person">Relationship To person</label><br>
-        <select id="person_informant_relationship_to_person" name="person[informant][relationship_to_person]" class="input_cell">
+        <select id="person_informant_relationship_to_person"
+                condition = "(__$('informant_id') !=null &&__$('informant_id').value.trim().length == 0) && (__$('informant_same_as_father').value =='No' || __$('informant_same_as_mother').value =='No')"
+                name="person[informant][relationship_to_person]" class="input_cell">
           <option></option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother" ? "selected" : "") %> >Mother</option>
-          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Father</option>
+          <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Father" ? "selected" : "") %> >Grandmother/Grandfather</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Brother/Sister" ? "selected" : "") %> >Brother/Sister</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Aunt/Uncle" ? "selected" : "") %> >Aunt/Uncle</option>
           <option <%= ((@person[:person_informant_relationship_to_person] rescue nil) == "Mother-in-law/Father-in-law" ? "selected" : "") %> >Mother-in-law/Father-in-law</option>
@@ -999,14 +994,14 @@
       </div>
 
       <div class="field">
-        <label for="person_acknowledgement_of_receipt_date">Date of Reporting</label>
+        <label for="person_date_reported">Date of Reporting</label>
         <br>
         <input type="hidden" name="registration_type" id="registration_type">
-        <%= (f.text_field :acknowledgement_of_receipt_date,
+        <%= (f.text_field :date_reported,
                           :class => "input_cell",
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :fieldtype => "date",
-                          :tt_onLoad => "dateInterval('person_acknowledgement_of_receipt_date');",
+                          :tt_onLoad => "dateInterval('person_date_reported');",
                           :tt_onUnload => 'updateRegistrationType()',
                           :absolute_min => 'reportingDate()',
                           :absolute_max => Date.today.strftime('%Y/%m/%d')) rescue "" %>
@@ -1023,15 +1018,19 @@
 <script>
     function reportingDate(){
 
-      commence = new Date(8 + '/' + 1 + '/' + 2015);
+      commence = new Date(8 + '/' + 1 + '/' + 2015).format("YYYY-mm-dd");
 
-      original = new Date(6 + '/' + 15 + '/' + 2015);
+      original = new Date(6 + '/' + 15 + '/' + 2015).format("YYYY-mm-dd");
+
+      var date_of_birth = new Date(__$("person_birthdate").value).format("YYYY-mm-dd");
 
       if (original < commence){
         commence = original;
       }
-
-      return original.getDate() + "/" + months[original.getMonth()] + "/" + original.getFullYear();
+      if(original < date_of_birth){
+          original = date_of_birth
+      }
+      return new Date(original).format();
 
     }
 
@@ -1817,7 +1816,7 @@
     {
         var person_dob = handleDate(__$('person_birthdate').value);
 
-        if (((Date.parse(__$('person_acknowledgement_of_receipt_date').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
+        if (((Date.parse(__$('person_date_reported').value) - person_dob)/ (1000 * 60 * 60 * 24)) > 42)
         {
             __$('registration_type').value = 'Yes'
         }
@@ -1829,7 +1828,7 @@
 
     function recalculateDateValidations(){
 
-        __$('person_acknowledgement_of_receipt_date').setAttribute('absolute_min', __$('person_birthdate').value.trim());
+        __$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());
 
 
     }
@@ -1855,8 +1854,15 @@
     {
         if (__$('person_parents_married_to_each_other').value.toString().trim().toUpperCase() == "YES")
         {
+
             var marriageDate = handleDate(__$('person_date_of_marriage').value.toString().trim())
+
             var dob = handleDate(obj.value.toString().trim())
+
+            if ((marriageDate - dob) < 0) {
+                 showMsg("The date of marriage for " + parent + " is date of birth. Please enter a valid date.");
+                 __$("textForperson_date_of_marriage").focus()
+            }
 
             if (((marriageDate - dob) / (365 * 24 * 60 * 60 * 1000)) <= 10){
 
@@ -1864,7 +1870,6 @@
             }
         }
     }
-
     function handleDate(date){
 
         ele = date.split('/');

@@ -145,6 +145,9 @@
     }
 
     function addFilter(data){
+        if (__$(data['filter_name'])){
+            __$(data['filter_name']).parentNode.removeChild(__$(data['filter_name']))
+        }
         var badge = document.createElement('span');
         badge.id =  data['filter_name'];
         badge.className = 'data-badge';
@@ -230,7 +233,7 @@
             var data = JSON.parse(badges[i].getAttribute('data'));
             filters[data['filter_name']] = data;
         }
-        __$('data').value = JSON.stringify(filters);
-        __$('frm1').submit();
+        __$('search-frame').contentWindow.data = JSON.stringify(filters);
+        __$('search-frame').contentWindow.reloadDataTable();
     }
 </script>

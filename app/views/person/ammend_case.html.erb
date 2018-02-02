@@ -1,18 +1,298 @@
- <%= form_tag("/person/do_ammend", method: "get") do %>
- <input name="id" type="hidden" value="<%= params['person_id'] %>">
-<fieldset>
-	 <legend><font size='5' style='border: 2px;'>Enter Reason for Ammendment Request</font></legend>
-	 <div class="field">
-	 		<label for="reason">Enter Reason for Ammendment Request: </label>
-	 		<select id="reason" name="reason">
-                <option></option>
-                <option>Lost</option>
-                <option>Damaged</option>
-            </select>
-	 </div>
-</fieldset>
-<% end %>
+<style type="text/css">
+	#table{
+		width: 90%;
+		margin: auto;
+		margin-top: 2%;
+		border-collapse: collapse;
+		box
+	}
+	#table th {
+		padding: 1%;
+		border: 1px solid #bdbfc2;
+		width: 33.333%;
+	}
+	#table td {
+		padding: 1%;
+		border: 1px solid #bdbfc2;
+		text-align: center;
+		width: 33.333%
+	}
+	#table tr:nth-child(even) {
+		background: #eff0f2;
+	}
+
+	#table tr:hover {
+		color:#3465a4;
+	}
+	#comment_popoup{
+	    width: 45%;
+	    height: 50%;
+	    position: absolute;;
+	    left: 25%;
+	    top: 20%;
+	    background: #eeeeef;
+	    border-radius: 2%;
+	    color: black;
+	    box-shadow: 5px 5px 2px #888888;
+	    visibility: hidden;
+	 }
+	 #title{
+	      width: 98%;
+	      margin:auto;
+	      margin-top: 0.8%;
+	      background: #345d8c;
+	      font-size: 150%;
+	      font-weight: bold;
+	      color: #FFFFFF;
+	      text-align: center;
+	      padding-top: 2%;
+	      padding-bottom: 2%;
+	      border-top-right-radius: 7%;
+	      border-top-left-radius: 7%;
+	      border-bottom: 2px solid #d9d8d7;
+	}
+	#comment{
+	      width: 98%;
+	      height: 50%;
+	      overflow-y: scroll;
+	}
+	#comment ul{
+	      list-style-type: none;
+	}
+	#comment ul > li{
+	      display: block;
+	      background: #FFFFFF;
+	      width:92%;
+	      padding: 1.5%;
+	      margin: auto;
+	      margin-top: 0%;
+	      border-radius: 3%;
+	      padding-left: 2.5%;
+	      border: 1px solid #d9d8d7;
+	}
+	#button{
+	      width: 100%;
+	      text-align: center;
+	      padding: 5%;
+	}
+
+</style>
+  <div id="comment_popoup">
+    <div id="title">Record Comments</div>
+    <div id="comment">
+
+    </div>
+    <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
+  </div>
+<table id="table">
+			<thead>
+					<tr>
+						<th style="border:none"></th>
+						<th style="color: #093a1a;background: #bdbfc2;">Existing record</th>
+						<th style="color: #98530f;background: #bdbfc2;">Amended record</th>
+					</tr>
+			</thead>
+			<tbody>
+					<tr onmousedown="amendField('Death Entry Number')">
+						<th >Birth Entry Number</th>
+						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
+						<td><%= @birth_details.district_id_number rescue 'XXXXXXXXXX' %></td>
+					</tr>
+					<tr onmousedown="amendField('Registration Number')">
+						<th>Registration Number</th>
+						<td><%= @birth_details.national_serial_number rescue 'XXXXXXXXXX' %></td>
+						<td><%= @birth_details.national_serial_number rescue 'XXXXXXXXXX' %></td>
+					</tr>
+					<tr onmousedown="amendField('Name')">
+						<th>Name</th>
+						<% if @person_prev_values["person_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["person_name"] %>	
+							</td>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
+						<%else%>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
+							<td>
+								<%= @name.first_name %> <%= @name.middle_name rescue ''%> <%= @name.last_name %>
+								
+							</td>
+						<%end%>
+
+					</tr>
+					<tr onmousedown="amendField('Date of birth')">
+						<th >Date of birth</th>
+						<% if @person_prev_values['birthdate'].present? %>
+							<td style="text-decoration: line-through"><%= @person_prev_values['birthdate']? @person_prev_values['birthdate'].to_date.strftime('%d/%b/%Y') : "" %></td>
+							<td >
+								<%= @person.birthdate.to_date.strftime('%d/%b/%Y') %>
+								
+							</td>
+						<%else%>
+							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
+							<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>
+						<%end%>
+						
+					</tr>
+					<tr onmousedown="amendField('Sex')">
+						<th >Sex</th>
+						<% if @person_prev_values['gender'].present? %>
+							<td style="text-decoration: line-through">
+								<%= @person_prev_values['gender'] == 'M' ? 'Male' : @person_prev_values['gender'] == 'F' ? 'Female' : '' %>
+								
+							</td>
+							<td>
+								<%= @person.gender== 'M' ? 'Male' : 'Female' %>
+							</td>
+						<%else%>
+							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
+							<td><%= @person.gender=='M' ? 'Male' : 'Female' %></td>
+						<%end%>
+
+					</tr>
+					<tr onmousedown="amendField('Place of birth')">
+						<th >Place of birth</th>
+						<% if @person_prev_values['birth_location_id'].present? %>
+							<td style="text-decoration: line-through" ><%= Location.find(@person_prev_values['birth_location_id']).name rescue @person_prev_values['other_place_of_birth']%></td>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+						<%else%>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+							<td><%= Location.find(@birth_details.birth_location_id).name rescue @birth_details.other_place_of_birth%></td>
+						<%end%>
+						</tr>
+					<tr onmousedown="amendField('Name of mother')">
+						<th >Name of mother</th>
+						<% if @person_prev_values["mother_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["mother_name"] %>	
+							</td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
+						<%else%>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
+							<td><%= @mother_name.first_name %> <%= @mother_name.middle_name rescue '' %> <%= @mother_name.last_name %></td>
+						<%end%>
+					</tr>
+					<tr onmousedown="amendField('Name of father')">
+						<th >Name of father</th>
+						<% if @person_prev_values["father_name"].present?%>
+							<td style="text-decoration: line-through">
+									<%= @person_prev_values["father_name"] %>	
+							</td>
+							<td><%= @father_name.first_name rescue 'N/A'%> 
+								<%= @father_name.last_name  rescue ''%></td>
+						<%else%>
+							<td><%= @father_name.first_name rescue 'N/A' %> <%= @father_name.last_name rescue '' %></td>
+							<td></td>
+						<%end%>
+					</tr>
+					<tr onmousedown="amendField('Date of registration')">
+						<th>Date of registration</th>
+						<td></td>
+						<td></td>
+					</tr>
+
+			</tbody>
+</table>
+
+ <table style="position: absolute; right: 160px; bottom: 20px;">
+ 	<tr>
+ 		<td>
+ 			 <button id="btnViewComment"
+                 class="blue"
+                 style=""
+                 onclick="viewComment()">View Comments</button>
+ 		</td>
+ 		<td>
+	 		<% if @status == "DC-AMEND" %>
+				<button id="btnApprove-Reprint"
+		                class="green"
+		                style=""
+		                onclick="approveAmendment();">Send Request to HQ</button>
+			<%else%>
+				<button id="btnNext"
+				        class='blue'
+				        onclick="proceedReprint()">Proceed Request</button>
+			<%end%>
+		</td>
+ 	</tr>
+	
+</table>
+
 <script type="text/javascript">
-	init();
-    cancelDestination = '<%= request.referrer%>'
+	var can_not_amend = ['Date of registration','Death Entry Number','Registration Number']
+	function amendField(field){
+		if(can_not_amend.indexOf(field) < 0){
+				window.location = "/person/amend_edit/<%=params[:id]%>?fields[]="+field+"&next_path=<%= params[:next_path]%>"
+		}else{
+				showMsg("Can not amend "+field)
+		}
+
+	}
+	function proceedReprint(){
+		window.location ="/person/amendiment_comment?id=<%=params[:id]%>&next_path=<%=params[:next_path]%>"
+	}
+
+     function dismissComment(){
+          $("#comment_popoup").css("visibility","hidden");
+     }
+     function approveAmendment(){
+
+         var action = "window.location = '/person/approve_amendment_request?id=<%=params[:id]%>'";
+         
+          showMsgForAction("Send request to HQ", action, "200px", "Amendment action", null);
+      }
+	 function viewComment(hide){
+
+          var msg = "";
+
+          var parent = document.createElement("div");
+
+          var div = document.createElement("div");
+          div.style.height = "300px";
+          div.style.width = "700px";
+
+          jQuery('.extra-btn').remove();
+
+          var table = document.createElement("table");
+          table.style.width = "100%";
+
+          div.appendChild(table);
+
+          var tbody = document.createElement("tbody");
+
+          table.appendChild(tbody);
+
+          jQuery.ajax({
+              type: "GET",
+              url: "/comments/<%= @person.id %>",
+              data: "",
+              success: function(result){
+                  hideSpinner();
+                  $("#comment").empty();
+                  if (result.trim() == "<ul></ul>")
+                  {
+                      if(!hide) {
+                          $("#comment").append("<ul><li>No comment(s) as of now </li></ul>");
+                      }else{
+                          $("#button").hide();
+                          $("#title").html('Select reason for ammendment');
+                      }
+                  }else {
+                      $("#comment").append(result);
+                  }
+
+              }
+
+          });
+          parent.appendChild(div);
+          msg = parent.innerHTML;
+
+          hideSpinner();
+          $("#comment_popoup").css("visibility","visible");
+      }
 </script>

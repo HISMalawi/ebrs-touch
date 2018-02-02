@@ -13,6 +13,14 @@ Rails.application.routes.draw do
 
   get 'users/create'
 
+  get 'users/my_account'
+
+  get '/users/change_keyboard'
+
+  get "/users/update_keyboard"
+
+  get '/person/get_sync_status'
+
   get "/block_user/:id" => "users#block_user"
 
   get "/unblock_user/:id" => "users#unblock_user"
@@ -134,8 +142,16 @@ Rails.application.routes.draw do
 
   get 'person/lost_and_damaged_cases'
   get 'person/ammendment_cases'
+  get 'person/rejected_ammendment_cases'
   get 'person/ammend_case'
-  get 'person/do_ammend'
+  get '/person/amend_edit/:id'=> 'person#amend_edit'
+  get '/person/amend_field'
+  get '/person/amendiment_comment'
+  get '/person/do_amend'
+  get 'person/reprint_case'
+  get 'person/do_reprint'
+  get 'person/approve_reprint_request'
+  get "person/approve_amendment_request"
   get '/search' => 'dc#search'
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'
@@ -147,9 +163,18 @@ Rails.application.routes.draw do
   get "/comments/:id" => 'dc#comments'
 
   get 'reports/births_report'
+  get 'reports/report'
   get 'reports/report_date_range'
+  get 'reports/filter'
+  get 'reports/rfilter'
+  get "/user_audit_trail" =>"reports#user_audit_trail"
+  get "/get_user_audit_trail" => "reports#get_user_audit_trail"
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"
+
+  get '/person/paginated_data'
+  get '/person/paginated_search_data'
+  get '/person/search_by_nid'
 
   resources :person
 

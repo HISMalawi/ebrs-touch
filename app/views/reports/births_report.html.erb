@@ -1,50 +1,221 @@
 <style>
-    #table{
-        font-size: 1em;
-        color: darkslategray;
-    }
-    #table th{
-        border: 1px solid #d3d3d3;
-        background: #d3d3d3;
-        width: 33%;
-    }
-    #table td{
-       border: 1px solid #d3d3d3;
+
+        #search-table td{
+        border: 1px solid gray;
     }
 
-        .cat{
-            font-weight: bold;
-        }
+    #filter-frame, #rfilter-frame{
+        position: absolute;
+        top: 15%;
+        width: 60%;
+        height: 60%;
+        left: 20%;
+        border: 1px solid #000;
+        background: white;
+        z-index: 3000;
+    }
+    .btn-badge{
+        border-radius: 0px !important;
+        font-size: 16px;
+        min-width: 12%;
+        background-color: #089de3;
+        margin: 5px;
+        padding: 2px;
+        display: inline-block;
+        margin-top: 0px !important;
+        vertical-align: top;
+    }
+    .btn-badge caption{
+       color: white;
+    }
+    .btn-badge table{
+        width: 100%;
+        color: #000;
+    }
+    .btn-badge td{
+        padding: 2px;padding-left: 10px;padding-right: 10px;margin:0px;
+        border: 1px solid #d3d3d3 !important;
+    }
+    .cancel{
+        border-radius: 50%;
+        width: 40px !important;
+        color: red;
+        background: white;
+        border: 1px solid black;
+    }
+    .value{
+    }
+
 </style>
 <script type="text/javascript" src="/assets/showSubMenu.js"></script>
+<table id="search-table" style="width: 98.75%; font-size: 22px;margin: 10px;">
+  <caption style="text-align: left;">
+    <font size='5' style='border: 2px;'></font>
+  </caption>
 
-<div id="default" style="width: 95%; margin: auto; height: 400px; text-align: center; vertical-align: top;">
-<table id='table' style="width: 100%;" cellpadding="5" cellspacing="0">
-
-  <thead>
-        <tr>
-          <th>Category</th>
-          <th>Gender</th>
-          <th>Total</th>
-        </tr>
-  </thead>
-
-  <% @data.each do |cat, data|
-  %>
-      <tr>
-        <td>
-          <%= cat%>
+    <tr>
+        <td  valign='top' style="width: 70%;min-height: 20vh;
+                height: 20vh;">
+          <div class="" style="font-size: 20px;margin: auto; margin-top: 0px;width: 95%; text-align: center;border-bottom: 1px solid darkred;">
+            Report Filters
+          </div>
+          <div style="width: 95%; margin: auto;padding: 5px;" id="filter-names"></div>
         </td>
-        <td>
-            <table style="width: 100%;">
-                <% data.each do |k, sub_data|
-                %>
-                    <tr><td><%= k%></td></tr>
-                <% end
-                %>
-            </table>
-        </td>
-      </tr>
-  <% end %>
+      <td valign='top' style="width: 30%;">
+        <table style="width: 100%;">
+          <tr>
+            <td style="border: none;">
+              <div class="btn blue" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="showFilterWindow()">
+                Add Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div id='remove' class="btn gray" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="removeFilterWindow()">
+                Remove Filter
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td  style="border: none;">
+              <div class="btn green" style="width: 200px;font-size: 20px;margin: 5px;cursor: pointer;float: right"
+                   onmousedown="search()">
+                Apply
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
 </table>
+<div id='shieldd' style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;z-index: 2000; background: black; opacity: 0.3; display: none">
 </div>
+<iframe id="report_frame" src="/reports/report?date_reported_range[start_date]=<%=DateTime.now.strftime('%Y-%m-%d')%>&date_reported_range[end_date]=<%=DateTime.now.strftime('%Y-%m-%d')%>" style="width:100%; border:none;height:425px"></iframe>
+<script type="text/javascript">
+    function capitalize(string){
+        string = string.replace(/\_/g, ' ');
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function __$(id){
+        return document.getElementById(id);
+    }
+
+    function showFilterWindow(){
+        __$('shieldd').style.display = 'block';
+        var frm = document.createElement('iframe');
+        frm.id = 'filter-frame';
+        frm.src = '/reports/filter';
+        document.body.appendChild(frm);
+    }
+
+    function hideFilterWindow(){
+        __$('filter-frame').parentNode.removeChild(__$('filter-frame'));
+        __$('shieldd').style.display = 'none';
+    }
+
+    function hiderFilterWindow(){
+        __$('rfilter-frame').parentNode.removeChild(__$('rfilter-frame'));
+        __$('shieldd').style.display = 'none';
+    }
+
+    function addFilter(data){
+        var badge = document.createElement('span');
+        badge.id =  data['filter_name'];
+        badge.className = 'data-badge';
+        badge.setAttribute('data', JSON.stringify(data));
+        console.log(JSON.stringify(data));
+
+        var str = "<div class='btn-badge'><table  style='background: ghostwhite'> <caption>"+ data['filter_name'] + "</caption>";
+        for(var k in data){
+            var d =  data[k];
+            k = k.replace(/person\[/, '').replace(/\]|\[/g, ' ');
+            if(k != 'filter_name') {
+                str += "<tr><td >" + capitalize(k) + '</td> <td class="value">' + d + "</td></tr>";
+            }
+        }
+        str +=  "</table><div>";
+        badge.innerHTML = str;
+        __$('remove').className = 'btn red';
+        __$('filter-names').appendChild(badge);
+    }
+
+    function removeFilterWindow(){
+        if(__$('remove').className.match(/red/)) {
+            __$('shieldd').style.display = 'block';
+            var frm = document.createElement('iframe');
+            frm.id = 'rfilter-frame';
+            frm.src = '/reports/rfilter';
+            document.body.appendChild(frm);
+        }
+    }
+
+    function removeFilter(filter){
+        __$(filter).parentNode.removeChild(__$(filter));
+    }
+
+    setInterval(function(){
+
+        if(__$('filter-frame') && __$('filter-frame').contentDocument && __$('filter-frame').contentDocument.getElementById('btn0')) {
+            
+            var btn = __$('filter-frame').contentDocument.getElementById('btn0');
+            btn.onmousedown = function () {
+                hideFilterWindow();
+            }
+
+            __$('filter-frame').contentDocument.forms[0].submit = function(){
+
+                var data = {}
+                var sets = __$('filter-frame').contentWindow.navigablefieldsets;
+                for (var i = 0; i < sets.length; i++) {
+                    if (sets[i][0].value.length > 0) {
+                        data[sets[i][0].name] = sets[i][0].value;
+                    }
+                }
+
+                console.log(data);
+
+                if (Object.keys(data).length > 1) {
+                    addFilter(data);
+                }
+
+                hideFilterWindow();
+            };
+        }
+
+        if(__$('rfilter-frame') && __$('rfilter-frame').contentDocument && __$('rfilter-frame').contentDocument.getElementById('btn0')) {
+            var btn = __$('rfilter-frame').contentDocument.getElementById('btn0');
+            btn.onmousedown = function () {
+                hiderFilterWindow();
+            }
+
+            __$('rfilter-frame').contentDocument.forms[0].submit = function() {
+                var filter = __$('rfilter-frame').contentDocument.getElementById('filters').value;
+                removeFilter(filter);
+                hiderFilterWindow();
+            }
+        }
+      },200);
+
+      function search(){
+        var filters = {};
+        var url = "/reports/report?"
+
+        var badges = document.getElementsByClassName('data-badge');
+        for(var i = 0; i < badges.length; i++){
+            var data = JSON.parse(badges[i].getAttribute('data'));
+            var data_keys = Object.keys(data);
+            var current_filter = data["filter_name"].toLowerCase().split(" ").join("_")
+            for(var j = 0 ; j < data_keys.length ; j++){
+                    url = url+"&"+current_filter+"["+data_keys[j]+"]"+"="+data[data_keys[j]];
+            }
+        }
+        if(badges.length > 0){
+            console.log(":)")
+          __$("report_frame").src = url;
+        }
+    }
+</script>

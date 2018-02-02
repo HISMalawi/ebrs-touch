@@ -8,9 +8,9 @@
         text-align: center !important;
     }
     
-    .record .duplicate {
+    .record .existing {
      
-       background-color: #181818;
+       background-color: #316193;
        
     }
 
@@ -81,7 +81,7 @@
   <td rowspan="25" style="border: none;">
     &nbsp;
   </td>
-  <th colspan='2' style="width: 49%;">
+  <th colspan='2' style="width: 49%;" class="existing">
     Existing Record <i style="color: #999">(<span id="status"><%= @similar_records[params[:index].to_i][:status] %></span>)</i>
     <div style="float: right"><span id="childNumber"> <%= (params[:index].to_i + 1)%></span> / <%= @similar_records.count %></div>
   </th>

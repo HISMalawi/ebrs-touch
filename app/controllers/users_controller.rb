@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   #Displays All Users whose status = Active
   def view
 
-    @users = User.all.each
+    @users = User.where(location_id: SETTINGS['location_id'])
 
     @section = "View Users"
 
@@ -90,6 +90,12 @@ class UsersController < ApplicationController
   def create
 
       @targeturl = "/user"
+
+      similar_users = User.where(username: params[:user]['username'], location_id: SETTINGS['location_id'])
+      if similar_users.count > 0
+        raise "User with Username = #{params[:user]['username']} Already Exists, Please Try Another Username".to_s
+      end
+
       core_person = CorePerson.create(person_type_id: PersonType.where(:name => 'User').last.id)
       person_name = PersonName.create(person_id: core_person.person_id,
                                   first_name: params[:user][:first_name],
@@ -177,7 +183,7 @@ class UsersController < ApplicationController
 
     results = []
 
-    users = User.all
+    users = User.where(location_id: SETTINGS['location_id'])
       users.each do |user|
     	next if user.core_person.blank? || user.core_person.person_name.blank?
 
@@ -389,6 +395,8 @@ class UsersController < ApplicationController
 
   end
 
+
+
   def update_password
 
     user = User.current
@@ -407,6 +415,29 @@ class UsersController < ApplicationController
 
     render :text => result
 
+  end
+
+  def change_keyboard
+    #redirect_to "/" and return if !(User.current_user.activities_by_level("Facility").include?("Change own password"))
+
+    @section = "Change Password"
+
+    @targeturl = "/"
+
+    @user = User.current
+
+    render :layout => "touch"
+
+  end
+
+  def update_keyboard
+      user = User.current
+      if user.present?
+          user.update_attributes(:preferred_keyboard => params[:keyboard].downcase)
+          redirect_to "/users/my_account"
+      else
+          redirect_to "/users/my_account"
+      end
   end
 
   private

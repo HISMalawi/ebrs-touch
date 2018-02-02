@@ -15,7 +15,7 @@ var imgTick = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmH
 
 var imgUnTick = 'data:image/png;base64,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';
 
-var styles = "body {-moz-user-select: none; overflow: hidden; font-family: 'Nimbus Sans L', 'Arial Narrow', sans-serif; min-width: 1250px; min-height: 700px; } .button:active {border:1px solid #5ca6c4 !important;background-color: #82bbd1 !important; background-image: -webkit-gradient(linear, left top, left bottom, from(#82bbd1), to(#cd8912)) !important;background-image: -webkit-linear-gradient(top, #82bbd1, #cd8912) !important;background-image: -moz-linear-gradient(top, #efb144, #cd8912) !important;background-image: -ms-linear-gradient(top, #efb144, #cd8912) !important;background-image: -o-linear-gradient(top, #efb144, #cd8912) !important;background-image: linear-gradient(to bottom, #efb144, #cd8912) !important;filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#efb144, endColorstr=#cd8912) !important;} .input_cell {font-size: 1.2em;padding: 10px;border: 1px solid #3465a4;border-radius: 10px;width: 80%;}button {font-size: 1em;padding: 15px;min-width: 120px;cursor: pointer;min-height: 75px;border-radius: 10px !important;margin: 3px;}.button {font-size: 1em;padding: 15px;min-width: 100px;  cursor: pointer;  min-height: 60px;border-radius: 10px !important;margin: 3px;}.blue{border:1px solid #7eb9d0; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #a7cfdf; background-image: -webkit-gradient(linear, left top, left bottom, from(#a7cfdf), to(#23538a));background-image: -webkit-linear-gradient(top, #a7cfdf, #23538a);background-image: -moz-linear-gradient(top, #a7cfdf, #23538a);background-image: -ms-linear-gradient(top, #a7cfdf, #23538a);background-image: -o-linear-gradient(top, #a7cfdf, #23538a);background-image: linear-gradient(to bottom, #a7cfdf, #23538a);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#a7cfdf, endColorstr=#23538a);}.blue:hover{border:1px solid #5ca6c4;background-color: #82bbd1; background-image: -webkit-gradient(linear, left top, left bottom, from(#82bbd1), to(#193b61));background-image: -webkit-linear-gradient(top, #82bbd1, #193b61);background-image: -moz-linear-gradient(top, #82bbd1, #193b61);background-image: -ms-linear-gradient(top, #82bbd1, #193b61);background-image: -o-linear-gradient(top, #82bbd1, #193b61);background-image: linear-gradient(to bottom, #82bbd1, #193b61);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#82bbd1, endColorstr=#193b61);}.green{border:1px solid #34740e; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #4ba614; background-image: -webkit-gradient(linear, left top, left bottom, from(#4ba614), to(#008c00));background-image: -webkit-linear-gradient(top, #4ba614, #008c00);background-image: -moz-linear-gradient(top, #4ba614, #008c00);background-image: -ms-linear-gradient(top, #4ba614, #008c00);background-image: -o-linear-gradient(top, #4ba614, #008c00);background-image: linear-gradient(to bottom, #4ba614, #008c00);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#4ba614, endColorstr=#008c00);}.green:hover{border:1px solid #224b09;background-color: #36780f; background-image: -webkit-gradient(linear, left top, left bottom, from(#36780f), to(#005900));background-image: -webkit-linear-gradient(top, #36780f, #005900);background-image: -moz-linear-gradient(top, #36780f, #005900);background-image: -ms-linear-gradient(top, #36780f, #005900);background-image: -o-linear-gradient(top, #36780f, #005900);background-image: linear-gradient(to bottom, #36780f, #005900);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#36780f, endColorstr=#005900);}.red{border:1px solid #72021c; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #a90329; background-image: -webkit-gradient(linear, left top, left bottom, from(#a90329), to(#6d0019));background-image: -webkit-linear-gradient(top, #a90329, #6d0019);background-image: -moz-linear-gradient(top, #a90329, #6d0019);background-image: -ms-linear-gradient(top, #a90329, #6d0019);background-image: -o-linear-gradient(top, #a90329, #6d0019);background-image: linear-gradient(to bottom, #a90329, #6d0019);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#a90329, endColorstr=#6d0019);}.red:hover{border:1px solid #450111;background-color: #77021d; background-image: -webkit-gradient(linear, left top, left bottom, from(#77021d), to(#3a000d));background-image: -webkit-linear-gradient(top, #77021d, #3a000d);background-image: -moz-linear-gradient(top, #77021d, #3a000d);background-image: -ms-linear-gradient(top, #77021d, #3a000d);background-image: -o-linear-gradient(top, #77021d, #3a000d);background-image: linear-gradient(to bottom, #77021d, #3a000d);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#77021d, endColorstr=#3a000d);}.gray{border:1px solid #ccc; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #ccc; background-image: -webkit-gradient(linear, left top, left bottom, from(#ccc), to(#999));background-image: -webkit-linear-gradient(top, #ccc, #999);background-image: -moz-linear-gradient(top, #ccc, #999);background-image: -ms-linear-gradient(top, #ccc, #999);background-image: -o-linear-gradient(top, #ccc, #999);background-image: linear-gradient(to bottom, #ccc, #999);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ccc, endColorstr=#999);}.gray:hover{border:1px solid #ccc;background-color: #ddd; background-image: -webkit-gradient(linear, left top, left bottom, from(#333), to(#ccc));background-image: -webkit-linear-gradient(top, #333, #ccc);background-image: -moz-linear-gradient(top, #333, #ccc);background-image: -ms-linear-gradient(top, #333, #ccc);background-image: -o-linear-gradient(top, #333, #ccc);background-image: linear-gradient(to bottom, #333, #ccc);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#333, endColorstr=#ccc);}.orange{border:1px solid #ef8544; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #ef8544; background-image: -webkit-gradient(linear, left top, left bottom, from(#ef8544), to(#efb144));background-image: -webkit-linear-gradient(top, #ef8544, #efb144);background-image: -moz-linear-gradient(top, #ef8544, #efb144);background-image: -ms-linear-gradient(top, #ef8544, #efb144);background-image: -o-linear-gradient(top, #ef8544, #efb144);background-image: linear-gradient(to bottom, #ef8544, #efb144);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ef8544, endColorstr=#efb144);}.orange:hover{border:1px solid #ef8544;background-color: #ddd; background-image: -webkit-gradient(linear, left top, left bottom, from(#ff420e), to(#ef8544));background-image: -webkit-linear-gradient(top, #ff420e, #ef8544);background-image: -moz-linear-gradient(top, #ff420e, #ef8544);background-image: -ms-linear-gradient(top, #ff420e, #ef8544);background-image: -o-linear-gradient(top, #ff420e, #ef8544);background-image: linear-gradient(to bottom, #ff420e, #ef8544);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ff420e, endColorstr=#ef8544);}"
+var styles = "body {-moz-user-select: none; overflow: hidden; font-family: 'Nimbus Sans L', 'Arial Narrow', sans-serif; min-width: 800px; min-height: 700px; } .button:active {border:1px solid #5ca6c4 !important;background-color: #82bbd1 !important; background-image: -webkit-gradient(linear, left top, left bottom, from(#82bbd1), to(#cd8912)) !important;background-image: -webkit-linear-gradient(top, #82bbd1, #cd8912) !important;background-image: -moz-linear-gradient(top, #efb144, #cd8912) !important;background-image: -ms-linear-gradient(top, #efb144, #cd8912) !important;background-image: -o-linear-gradient(top, #efb144, #cd8912) !important;background-image: linear-gradient(to bottom, #efb144, #cd8912) !important;filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#efb144, endColorstr=#cd8912) !important;} .input_date_cell {font-size: 1.2em;padding: 10px;border: 1px solid #3465a4;border-radius: 10px;width: 80%;} .input_cell {font-size: 1.2em;padding: 10px;border: 1px solid #3465a4;border-radius: 10px;width: 80%;}button {font-size: 1em;padding: 15px;min-width: 120px;cursor: pointer;min-height: 75px;border-radius: 10px !important;margin: 3px;}.button {font-size: 1em;padding: 15px;min-width: 100px;  cursor: pointer;  min-height: 60px;border-radius: 10px !important;margin: 3px;}.blue{border:1px solid #7eb9d0; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #a7cfdf; background-image: -webkit-gradient(linear, left top, left bottom, from(#a7cfdf), to(#23538a));background-image: -webkit-linear-gradient(top, #a7cfdf, #23538a);background-image: -moz-linear-gradient(top, #a7cfdf, #23538a);background-image: -ms-linear-gradient(top, #a7cfdf, #23538a);background-image: -o-linear-gradient(top, #a7cfdf, #23538a);background-image: linear-gradient(to bottom, #a7cfdf, #23538a);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#a7cfdf, endColorstr=#23538a);}.blue:hover{border:1px solid #5ca6c4;background-color: #82bbd1; background-image: -webkit-gradient(linear, left top, left bottom, from(#82bbd1), to(#193b61));background-image: -webkit-linear-gradient(top, #82bbd1, #193b61);background-image: -moz-linear-gradient(top, #82bbd1, #193b61);background-image: -ms-linear-gradient(top, #82bbd1, #193b61);background-image: -o-linear-gradient(top, #82bbd1, #193b61);background-image: linear-gradient(to bottom, #82bbd1, #193b61);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#82bbd1, endColorstr=#193b61);}.green{border:1px solid #34740e; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #4ba614; background-image: -webkit-gradient(linear, left top, left bottom, from(#4ba614), to(#008c00));background-image: -webkit-linear-gradient(top, #4ba614, #008c00);background-image: -moz-linear-gradient(top, #4ba614, #008c00);background-image: -ms-linear-gradient(top, #4ba614, #008c00);background-image: -o-linear-gradient(top, #4ba614, #008c00);background-image: linear-gradient(to bottom, #4ba614, #008c00);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#4ba614, endColorstr=#008c00);}.green:hover{border:1px solid #224b09;background-color: #36780f; background-image: -webkit-gradient(linear, left top, left bottom, from(#36780f), to(#005900));background-image: -webkit-linear-gradient(top, #36780f, #005900);background-image: -moz-linear-gradient(top, #36780f, #005900);background-image: -ms-linear-gradient(top, #36780f, #005900);background-image: -o-linear-gradient(top, #36780f, #005900);background-image: linear-gradient(to bottom, #36780f, #005900);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#36780f, endColorstr=#005900);}.red{border:1px solid #72021c; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #a90329; background-image: -webkit-gradient(linear, left top, left bottom, from(#a90329), to(#6d0019));background-image: -webkit-linear-gradient(top, #a90329, #6d0019);background-image: -moz-linear-gradient(top, #a90329, #6d0019);background-image: -ms-linear-gradient(top, #a90329, #6d0019);background-image: -o-linear-gradient(top, #a90329, #6d0019);background-image: linear-gradient(to bottom, #a90329, #6d0019);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#a90329, endColorstr=#6d0019);}.red:hover{border:1px solid #450111;background-color: #77021d; background-image: -webkit-gradient(linear, left top, left bottom, from(#77021d), to(#3a000d));background-image: -webkit-linear-gradient(top, #77021d, #3a000d);background-image: -moz-linear-gradient(top, #77021d, #3a000d);background-image: -ms-linear-gradient(top, #77021d, #3a000d);background-image: -o-linear-gradient(top, #77021d, #3a000d);background-image: linear-gradient(to bottom, #77021d, #3a000d);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#77021d, endColorstr=#3a000d);}.gray{border:1px solid #ccc; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #ccc; background-image: -webkit-gradient(linear, left top, left bottom, from(#ccc), to(#999));background-image: -webkit-linear-gradient(top, #ccc, #999);background-image: -moz-linear-gradient(top, #ccc, #999);background-image: -ms-linear-gradient(top, #ccc, #999);background-image: -o-linear-gradient(top, #ccc, #999);background-image: linear-gradient(to bottom, #ccc, #999);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ccc, endColorstr=#999);}.gray:hover{border:1px solid #ccc;background-color: #ddd; background-image: -webkit-gradient(linear, left top, left bottom, from(#333), to(#ccc));background-image: -webkit-linear-gradient(top, #333, #ccc);background-image: -moz-linear-gradient(top, #333, #ccc);background-image: -ms-linear-gradient(top, #333, #ccc);background-image: -o-linear-gradient(top, #333, #ccc);background-image: linear-gradient(to bottom, #333, #ccc);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#333, endColorstr=#ccc);}.orange{border:1px solid #ef8544; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:28px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;background-color: #ef8544; background-image: -webkit-gradient(linear, left top, left bottom, from(#ef8544), to(#efb144));background-image: -webkit-linear-gradient(top, #ef8544, #efb144);background-image: -moz-linear-gradient(top, #ef8544, #efb144);background-image: -ms-linear-gradient(top, #ef8544, #efb144);background-image: -o-linear-gradient(top, #ef8544, #efb144);background-image: linear-gradient(to bottom, #ef8544, #efb144);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ef8544, endColorstr=#efb144);}.orange:hover{border:1px solid #ef8544;background-color: #ddd; background-image: -webkit-gradient(linear, left top, left bottom, from(#ff420e), to(#ef8544));background-image: -webkit-linear-gradient(top, #ff420e, #ef8544);background-image: -moz-linear-gradient(top, #ff420e, #ef8544);background-image: -ms-linear-gradient(top, #ff420e, #ef8544);background-image: -o-linear-gradient(top, #ff420e, #ef8544);background-image: linear-gradient(to bottom, #ff420e, #ef8544);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#ff420e, endColorstr=#ef8544);}"
 
 $(document).on('keydown',function(e)
 {
@@ -300,7 +300,7 @@ function showFixedKeyboard(ctrl, container, disabled, numbers, caps, symbols) {
     var div = document.createElement('div');
     div.id = 'fixedkeyboard';
     div.style.margin = 'auto';
-    div.style.width = "900px";
+    div.style.width = "600px";
     div.style.borderRadius = '10px';
     div.style.backgroundColor = 'rgba(255,255,255,0.8)';
 
@@ -391,18 +391,18 @@ function showFixedKeyboard(ctrl, container, disabled, numbers, caps, symbols) {
              button.setAttribute('class', (disabled[keys[i][j]] ? 'button gray' : 'button blue'));
             
             if(keys[i][j] == "&nbsp;"){
-             button.style.width = "386px";
+             button.style.width = "286px";
             }else if(keys[i][j] == "CAP") {
-             button.style.width = '152px';
+             button.style.width = '112px';
             }else{
-             button.style.width = '74px';
+             button.style.width = '54px';
             }
             
             button.style.height = '60px';
             button.style.minWidth = '40px';
             button.style.minHeight = '40px';
             button.style.margin = '2px';
-            button.style.fontSize = "30px";
+            button.style.fontSize = "22px";
 
             button.id = keys[i][j];
 
@@ -1569,7 +1569,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementYear(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1578,7 +1578,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementMonth(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1587,7 +1587,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementDate(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 }
                 ,
                 {
@@ -1605,7 +1605,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (!isNaN(date.getFullYear()) ? date.getFullYear() : (currentdate.length == 3 ? currentdate[2] : "?")),
                     "onmousedown": "overwriteNumber = true; if(__$('keyboard')){document.body.removeChild(__$('keyboard'));} else {showShield(\"checkDate('\" + this.getAttribute('target') + \"', false)\"); showKeyboard(__$('txtYearFor' + this.getAttribute('target')),{':':':','/':'/','.':'.','abc':'abc','sym':'sym'},true);} checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 },
                 {
@@ -1614,7 +1614,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (typeof(months[date.getMonth()]) != "undefined" ? months[date.getMonth()] : (currentdate.length == 3 ? currentdate[1] : "?")),
                     "onmousedown": "showShield(); addList(__$('txtMonthFor' + this.getAttribute('target')),{'Jan':'January','Feb':'February','Mar':'March','Apr':'April','May':'May','Jun':'June','Jul':'July','Aug':'August','Sep':'September','Oct':'October','Nov':'November','Dec':'December','?':'Unknown'},'single',__$('txtMonthFor' + this.getAttribute('target')),__$('txtMonthFor' + this.getAttribute('target')), 'checkDate(\"' + this.getAttribute('target') + '\")'); checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 },
                 {
@@ -1623,7 +1623,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (!isNaN(date.getDate()) ? date.getDate() : (currentdate.length == 3 ? currentdate[0] : "?")),
                     "onmousedown": "overwriteNumber = true; if(__$('keyboard')){document.body.removeChild(__$('keyboard'));} else {showShield(\"checkDate('\" + this.getAttribute('target') + \"', false)\"); showKeyboard(__$('txtDateFor' + this.getAttribute('target')),{':':':','/':'/','.':'.','abc':'abc','sym':'sym'},true);} checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 }
                 ,
@@ -1645,7 +1645,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementYear(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1654,7 +1654,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementMonth(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1663,7 +1663,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementDate(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 }
                 ,
                 {
@@ -1685,7 +1685,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementYear(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1694,7 +1694,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementMonth(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1703,7 +1703,7 @@ function addDate(parent, target, date) {
                     "value": "+",
                     "onmousedown": "incrementDate(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 }
 
 
@@ -1716,7 +1716,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (!isNaN(date.getFullYear()) ? date.getFullYear() : (currentdate.length == 3 ? currentdate[2] : "?")),
                     "onmousedown": "overwriteNumber = true; if(__$('keyboard')){document.body.removeChild(__$('keyboard'));} else {showShield(\"checkDate('\" + this.getAttribute('target') + \"', false)\"); showKeyboard(__$('txtYearFor' + this.getAttribute('target')),{':':':','/':'/','.':'.','abc':'abc','sym':'sym'},true);} checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 },
                 {
@@ -1725,7 +1725,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (typeof(months[date.getMonth()]) != "undefined" ? months[date.getMonth()] : (currentdate.length == 3 ? currentdate[1] : "?")),
                     "onmousedown": "showShield(); addList(__$('txtMonthFor' + this.getAttribute('target')),{'Jan':'January','Feb':'February','Mar':'March','Apr':'April','May':'May','Jun':'June','Jul':'July','Aug':'August','Sep':'September','Oct':'October','Nov':'November','Dec':'December','?':'Unknown'},'single',__$('txtMonthFor' + this.getAttribute('target')),__$('txtMonthFor' + this.getAttribute('target')), 'checkDate(\"' + this.getAttribute('target') + '\")'); checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 },
                 {
@@ -1734,7 +1734,7 @@ function addDate(parent, target, date) {
                     "target": target.id,
                     "value": (!isNaN(date.getDate()) ? date.getDate() : (currentdate.length == 3 ? currentdate[0] : "?")),
                     "onmousedown": "overwriteNumber = true; if(__$('keyboard')){document.body.removeChild(__$('keyboard'));} else {showShield(\"checkDate('\" + this.getAttribute('target') + \"', false)\"); showKeyboard(__$('txtDateFor' + this.getAttribute('target')),{':':':','/':'/','.':'.','abc':'abc','sym':'sym'},true);} checkDate(this.getAttribute('target'));",
-                    "class": "input_cell",
+                    "class": "input_date_cell",
                     "style": "font-size: 24px; text-align: center; width: 80%;"
                 }
 
@@ -1748,7 +1748,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementYear(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1757,7 +1757,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementMonth(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 },
                 {
                     "type": "button",
@@ -1766,7 +1766,7 @@ function addDate(parent, target, date) {
                     "value": "-",
                     "onmousedown": "decrementDate(this.getAttribute('target'))",
                     "class": "button blue",
-                    "style": "height: 60px; margin: auto; width: 100%;"
+                    "style": "height: 60px; margin: auto; width: 96%;"
                 }
 
 
@@ -3021,7 +3021,7 @@ function loadPage(section, back) {
     toolsCell1.style.display = "table-cell";
     // toolsCell1.style.border = "1px solid #ccc";
     toolsCell1.style.borderRadius = "10px";
-    toolsCell1.style.width = (window.innerWidth - 900) + "px";
+    toolsCell1.style.width = (window.innerWidth - 600) + "px";
     toolsCell1.style.height = (280) + "px";
     toolsCell1.style.overflow = "auto";
     toolsCell1.style.textAlign = "left";
@@ -3033,7 +3033,7 @@ function loadPage(section, back) {
     toolsCell2.style.display = "table-cell";
     // toolsCell2.style.border = "1px solid #ccc";
     toolsCell2.style.borderRadius = "10px";
-    toolsCell2.style.width = (900) + "px";
+    toolsCell2.style.width = (600) + "px";
     toolsCell2.style.height = (280) + "px";
     toolsCell2.id = "toolsCell2";
 
@@ -3994,6 +3994,15 @@ function gotoQuestion(pos, section) {
     section = parseInt(section);
 
     var fields = navigablefieldsets[section];
+
+
+    if (fields[pos]){
+        if (fields[pos].getAttribute("tt_BeforeUnload") != null) {
+
+            var val = eval(fields[pos].getAttribute("tt_BeforeUnload"));
+
+        }
+    }
 
     if (fields[pos]){
         if (fields[pos].getAttribute("tt_onUnload") != null) {
@@ -5827,6 +5836,7 @@ function toTitleCase(str)
 
 function duplicatesPopup(data,checkbox){
        var people = data.response
+       console.log(data.exact);
        if (__$("msg.shield")) {
             document.body.removeChild(__$("msg.shield"));
         }
@@ -5865,40 +5875,92 @@ function duplicatesPopup(data,checkbox){
 
         var table = document.createElement("table");
         table.style.marginTop = "0.5%";
-        table.style.border = "1px solid gray";
         table.style.height = "400px";
-        table.style.width = "98%";
+        table.style.width = "100%";
         table.style.margin ="auto";
         div.appendChild(table);
 
         var tr = document.createElement("tr");
         tr.style.height = "30px";
         table.appendChild(tr);
+
         var th =  document.createElement("th");
-        th.colSpan = "3";
+        th.colSpan = "5";
         th.style.padding = "0.8em";
         th.style.color = "#ffffff";
         th.style.fontSize = "1.2em";
         th.style.backgroundColor = "#526a83";
         th.innerHTML = "The record is "+(data.exact ? "exact" : "potential")+" duplicate to "+ (people && people.length ? people.length : "0")  +" record(s)";
         tr.appendChild(th);
+
+        var tr = document.createElement("tr");
+        tr.style.backgroundColor ="#e0dcdc"
+        table.appendChild(tr);
+
+        tr.style.height = "15px";
+
+        var th = document.createElement("th");
+        th.innerHTML = "#";
+        th.style.padding = "0.5em"
+        th.style.float ="left"
+        tr.appendChild(th)
+
+
+        var th = document.createElement("th");
+        th.innerHTML = "Name(Sex)";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Date of Birth";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Mother's name";
+        tr.appendChild(th);
+
+        var th = document.createElement("th");
+        th.innerHTML = "Father's name";
+        tr.appendChild(th);
+
+
         if(people){
             for(var i = 0; i < people.length ; i++){
               var tr = document.createElement("tr");
               table.appendChild(tr);
-              tr.style.height = "25px";
-              var td = document.createElement("td");
-              td.style.borderBottom = "1px dotted gray";
-              td.style.width = "5%";
-              td.style.padding = "0.5em";
-              td.innerHTML = (i + 1);
+              tr.style.height = "15px";
 
-              tr.appendChild(td);
               var td = document.createElement("td");
-              td.style.padding = "0.5em";
+              td.style.borderBottom = "1px solid gray";
+              td.style.width = "5%";
+              td.innerHTML = (i + 1);
+              td.style.padding = "0.5em"
+              tr.appendChild(td);
+
+
+              var td = document.createElement("td");
               td.style.textAlign = "center";
-              td.style.borderBottom = "1px dotted gray";
-              td.innerHTML =people[i]["_source"]["content"];
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = people[i]["_source"]["first_name"]+" "+ people[i]["_source"]["last_name"] + "("+people[i]["_source"]["gender"].split("")[0]+")";
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = new Date(people[i]["_source"]["birthdate"]).format();
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+              td.innerHTML = (people[i]["_source"]["mother_first_name"] ? people[i]["_source"]["mother_first_name"] : "") +
+                             " " +(people[i]["_source"]["mother_last_name"]? people[i]["_source"]["mother_last_name"] : "N/A");
+              tr.appendChild(td);
+
+              var td = document.createElement("td");
+              td.style.textAlign = "center";
+              td.style.borderBottom = "1px solid gray";
+               td.innerHTML = (people[i]["_source"]["father_first_name"] ? people[i]["_source"]["father_first_name"] : "") +
+                              " "+(people[i]["_source"]["father_last_name"]? people[i]["_source"]["father_last_name"] : "N/A");
               tr.appendChild(td);
             }
         }
@@ -5910,44 +5972,60 @@ function duplicatesPopup(data,checkbox){
         footdiv.style.height = "25%";
         footdiv.style.textAlign = "center";
         div.appendChild(footdiv);
+        if(facility_type  =="FC"){
+            var ok = document.createElement("button");
+            ok.innerHTML = "Cancel";
+            ok.className = "red";
+            ok.id = "popup.ok"
+            ok.style.height = "40px";
+            ok.style.width = "15%"
+            ok.onclick = function () {
+               ids = people.map(function(person){
+                    return person["_id"]
+               }).join("|");
+               __$("person_duplicate").value = ids;
 
-        var cancel = document.createElement("button");
-        cancel.innerHTML = "Cancel";
-        cancel.className = "red";
-        cancel.id = "popup.cancel"
-        cancel.style.height = "40px";
-        cancel.style.width = "15%"
-        cancel.style.marginRight ="10%";
-        cancel.onclick = function () {
-           document.body.removeChild(shield);
-        }
-        footdiv.appendChild(cancel);
-
-        var ok = document.createElement("button");
-        ok.innerHTML = "Proceed";
-        ok.className = "blue";
-        ok.id = "popup.ok"
-        ok.style.height = "40px";
-        ok.style.width = "15%"
-        ok.onclick = function () {
-           ids = people.map(function(person){
-                return person["_id"]
-           }).join("|");
-           __$("person_duplicate").value = ids;
-
-           __$("person_is_exact_duplicate").value = data.exact
-           if(data.exact && facility_type  =="FC"){
+               __$("person_is_exact_duplicate").value = data.exact
                window.location.href = "/"
-           }else{
+            }
+            footdiv.appendChild(ok);
+
+        }else{
+
+            var cancel = document.createElement("button");
+            cancel.innerHTML = "Cancel";
+            cancel.className = "red";
+            cancel.id = "popup.cancel"
+            cancel.style.height = "40px";
+            cancel.style.width = "15%"
+            cancel.style.marginRight ="10%";
+            cancel.onclick = function () {
                document.body.removeChild(shield);
-               document.forms[0].submit();            
-           }
+            }
+            footdiv.appendChild(cancel);
+
+            var ok = document.createElement("button");
+            ok.innerHTML = "Proceed";
+            ok.className = "blue";
+            ok.id = "popup.ok"
+            ok.style.height = "40px";
+            ok.style.width = "15%"
+            ok.onclick = function () {
+               ids = people.map(function(person){
+                    return person["_id"]
+               }).join("|");
+               __$("person_duplicate").value = ids;
+
+               __$("person_is_exact_duplicate").value = data.exact
+               if(data.exact && facility_type  =="FC"){
+                   window.location.href = "/"
+               }else{
+                   document.body.removeChild(shield);
+                   document.forms[0].submit();            
+               }
+            }
+            footdiv.appendChild(ok);
         }
-        footdiv.appendChild(ok);
-
-
-
-
 }
 
 function getUrlVars()
@@ -5962,7 +6040,13 @@ function getUrlVars()
     }
     return vars;
 }
-
+function canSearchPotential(data){
+    if(!data.exact && facility_type == "FC"){
+        return false;
+    }else{
+        return true;
+    }
+}
 function submitAfterSummary() {
     
     /*summaryHash = {
@@ -5984,9 +6068,15 @@ function submitAfterSummary() {
                                         "person_mother_last_name",
                                         "person_mother_first_name",
                                         "person_mother_middle_name",
+                                        "person_foster_mother_last_name",
+                                        "person_foster_mother_first_name",
+                                        "person_foster_mother_middle_name",
                                         "person_father_first_name",
                                         "person_father_last_name",
                                         "person_father_middle_name",
+                                        "person_foster_father_last_name",
+                                        "person_foster_father_first_name",
+                                        "person_foster_father_middle_name",
                                         "person_type_of_birth",
                                         "person_relationship"]
 
@@ -5994,7 +6084,7 @@ function submitAfterSummary() {
 
     for(var i = 0 ; i < duplicate_search.length ; i++){
         if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
-             data[duplicate_search[i].replace("person_","")] = __$(duplicate_search[i]).value
+             data[duplicate_search[i].replace("person_","").replace("person_foster_","")] = __$(duplicate_search[i]).value
          } else {
 
          }
@@ -6006,7 +6096,8 @@ function submitAfterSummary() {
     $.getJSON("/search_similar_record",data,function(response){
 
         
-        if(response.response && response.response.length != 0){
+        if(response.response && response.response.length != 0 && canSearchPotential(response)){
+            
             
             duplicatesPopup(response);
 

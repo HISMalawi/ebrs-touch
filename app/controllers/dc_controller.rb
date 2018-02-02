@@ -53,9 +53,9 @@ def view_duplicates
 
    #@actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
    @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def view_hq_duplicates
@@ -63,9 +63,9 @@ def view_hq_duplicates
     @states = ['DC-VERIFY DUPLICATE']
     @section = "Duplicates from HQ"
     @targeturl ="/manage_duplicates_menu"
-    @records = PersonService.query_for_display(@states)
+    @records = [] #PersonService.query_for_display(@states)
 
-    render :template => "dc/view_duplicates", :layout => "data_table"
+    render :template => "/person/records", :layout => "data_table"
 end
 
 def potential_duplicate
@@ -88,7 +88,7 @@ def resolve_duplicate
      potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
         if params[:decision] == "POTENTIAL DUPLICATE"
-           PersonRecordStatus.new_record_state(params[:id], 'DC-POTENTIAL DUPLICATE', params[:reason])
+           PersonRecordStatus.new_record_state(params[:id], params[:nextstatus], params[:reason])
            redirect_to params[:next_path]
         elsif params[:decision] == "NOT DUPLICATE"
           potential_records.resolved = 1
@@ -177,8 +177,13 @@ def incomplete_case_comment
     allocate_record.created_at = Time.now
     allocate_record.save
 
-    render :text => "/view_pending_cases" and return if old_state == "DC-PENDING"
-    render :text =>  "/view_complete_cases"
+    if ["HQ-REJECTED","DC-VERIFY DUPLICATE"].include?(old_state)
+      PersonRecordStatus.new_record_state(@child.person_id, "HQ-RE-APPROVED")
+    else
+      PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
+    end
+
+    render :text =>  session[:list_url]
   end
 
   ################################## Pending Cases actions ####################################################################
@@ -201,6 +206,7 @@ def incomplete_case_comment
   end
 
   def pending_case
+    
     PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
     #PersonRecordStatus.new_record_state(params[:id], 'DC-PENDING', params[:reason])
 
@@ -244,11 +250,7 @@ def incomplete_case_comment
 
   #################### Actions for special Cases ####################################################################################
   def special_cases
-    @states = []
-    #Filter only states that user has actions for
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    @states = ["DC-ACTIVE", 'DC-COMPLETE', 'DC-REJECTED']
 
     @abandoned = PersonRecordStatus.stats(['Abandoned'], false).reject{|k, v| !@states.include?(k)}.values.sum
     @orphaned = PersonRecordStatus.stats(['Orphaned'], false).reject{|k, v| !@states.include?(k)}.values.sum
@@ -264,11 +266,18 @@ def incomplete_case_comment
 
   def abandoned_cases
     @states = []
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
 
-    @records = PersonService.query_for_display(@states, types=['Abandoned'])
+    @birth_type = "Abandoned"
+    #Status.all.map(&:name).each{|name|
+     # @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
+    #}
+
+    #@records = PersonService.query_for_display(@states, types=['Abandoned'])
     @section = "Abandoned Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
@@ -276,19 +285,28 @@ def incomplete_case_comment
 
   def adopted_cases
     @states = []
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
 
-    @records = PersonService.query_for_display(@states, types=['Adopted'])
+    @birth_type = "Adopted"
     @section = "Adopted Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
   end
 
   def orphaned_cases
-    @states = Status.all.map(&:name)
-    @records = PersonService.query_for_display(@states, types=['Orphaned'])
+    @states = []
+    if User.current.user_role.role.role.upcase == "Logistics Officer".upcase
+      @states = ['DC-ACTIVE', 'DC-PENDING', 'DC-REJECTED']
+    elsif User.current.user_role.role.role.upcase == 'ADR'
+      @states = ['DC-COMPLETE']
+    end
+
+    @birth_type = "Orphaned"
+
     @section = "Orphaned Cases"
     @display_ben = true
     render :template => "/person/records", :layout => "data_table"
@@ -302,7 +320,7 @@ def incomplete_case_comment
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
                 "Place of Birth", 'Record Status'
                 ]
-    @statuses = Status.all.map(&:name)
+    @statuses = Status.all.map(&:name).sort
     users = User.find_by_sql(
         "SELECT u.username, u.person_id FROM users u
           INNER JOIN user_role ur ON ur.user_id = u.user_id
