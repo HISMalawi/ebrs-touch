@@ -1195,17 +1195,27 @@ class PersonController < ApplicationController
     end
   end
 
-  def get_district
+  def get_district 
+
+    cities = ["Blantyre City","Lilongwe City","Mzuzu City","Zomba City"]
+
     nationality_tag = LocationTag.where(name: 'District').first
     data = []
     Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?",
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
-      data << l.name
+          if params[:exclude].present?
+                next if l.name.include?(params[:exclude])
+                data << l.name
+          else
+                data << l.name
+          end 
     end
     
+
     if data.present?
       render text: data.compact.uniq.join("\n") and return
+      
     else
       render text: "" and return
     end

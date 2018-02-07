@@ -62,6 +62,32 @@
         text-transform: uppercase;
     }
 </style>
+<script type="text/javascript">
+  function getDistrict(place_of_birth){
+    
+    $.ajax({
+      url: "/person/get_district",
+      data: { place_of_birth: place_of_birth },
+      success: function(data) {
+        console.log(data);
+      },
+    error: function (xhr, ajaxOptions, thrownError) {
+        console.log(xhr.responseText);
+        
+      }
+    });
+  }
+
+  function setDistrictUrl(value){
+    if (value =="Hospital"){
+        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?exclude=City")
+        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?exclude=City");
+    }else{
+        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district")
+        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district");
+    }
+  }
+</script>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
 
@@ -153,8 +179,8 @@
 
       <div class="field">
         <label for="person_place_of_birth">Place of birth</label><br>
-        <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" >
-          <option></option>
+        <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" onchange="setDistrictUrl(__$('person_place_of_birth').value)" >
+          <option></option> 
           <option <%= ((@person[:place_of_birth] rescue nil) == "Home" ? "selected" : "") %> >Home</option>
           <option <%= ((@person[:place_of_birth] rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
           <option <%= ((@person[:place_of_birth] rescue nil) == "Other" ? "selected" : "") %> >Other</option>
@@ -168,10 +194,10 @@
         <input id="person_bd_holder"
         			 name="person[birth_district]"
         			 type="text"
-        			 condition="beforeLiveDate()"
+        			 condition="beforeLiveDate();"
         			 value="<%= @person[:bd] rescue nil %>"
         			 ajaxURL = "/search_by_district"
-               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district');"
+               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district'); console.log(__$('person_place_of_birth').value)"
         			 class="input_cell"
                 />
 
