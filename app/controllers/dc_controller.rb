@@ -88,7 +88,7 @@ def resolve_duplicate
      potential_records = PotentialDuplicate.where(:person_id => (params[:id].to_i)).last
      if potential_records.present?
         if params[:decision] == "POTENTIAL DUPLICATE"
-           PersonRecordStatus.new_record_state(params[:id], 'DC-POTENTIAL DUPLICATE', params[:reason])
+           PersonRecordStatus.new_record_state(params[:id], params[:nextstatus], params[:reason])
            redirect_to params[:next_path]
         elsif params[:decision] == "NOT DUPLICATE"
           potential_records.resolved = 1
@@ -250,11 +250,7 @@ def incomplete_case_comment
 
   #################### Actions for special Cases ####################################################################################
   def special_cases
-    @states = []
-    #Filter only states that user has actions for
-    Status.all.map(&:name).each{|name|
-      @states << name if ActionMatrix.read_actions(User.current.user_role.role.role, [name]).length > 0
-    }
+    @states = ["DC-ACTIVE", 'DC-COMPLETE', 'DC-REJECTED']
 
     @abandoned = PersonRecordStatus.stats(['Abandoned'], false).reject{|k, v| !@states.include?(k)}.values.sum
     @orphaned = PersonRecordStatus.stats(['Orphaned'], false).reject{|k, v| !@states.include?(k)}.values.sum

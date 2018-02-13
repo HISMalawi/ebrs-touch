@@ -510,6 +510,27 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at"
   end
 
+  create_table "notification_types", primary_key: "notification_type_id", force: :cascade do |t|
+    t.string   "name",        limit: 45,              null: false
+    t.string   "description", limit: 100
+    t.string   "role_id", limit: 100
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  create_table "notification", primary_key: "notification_id", force: :cascade do |t|
+    t.integer   "notification_type_id",                  null: false
+    t.bigint   "person_record_status_id", limit: 100,        null: false
+    t.integer  "seen",             limit: 1,   default: 0,     null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  change_column  :notification, :notification_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
+  add_foreign_key "notification", "notification_types", column: "notification_type_id", primary_key: "notification_type_id", name: "fk_notification_1"
+  add_foreign_key "notification", "person_record_statuses", column: "person_record_status_id", primary_key: "person_record_status_id", name: "fk_notification_2"
+
   add_foreign_key "barcode_identifiers", "person", primary_key: "person_id", name: "fk_barcode_identifiers_1"
   add_index "barcode_identifiers", ["value"], name: "value_UNIQUE", unique: true, using: :btree
   ##########################################################################################################################

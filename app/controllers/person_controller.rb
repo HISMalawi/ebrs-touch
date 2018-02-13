@@ -59,7 +59,7 @@ class PersonController < ApplicationController
 
     @status = PersonRecordStatus.status(params[:id])
 
-    if ["DC-POTENTIAL DUPLICATE","FC-POTENTIAL DUPLICATE","FC-EXACT DUPLICATE"].include? @status
+    if ["DC-POTENTIAL DUPLICATE","FC-POTENTIAL DUPLICATE","FC-EXACT DUPLICATE","DC-DUPLICATE"].include? @status
         redirect_to "/potential/duplicate/#{params[:id]}?next_path=/view_duplicates&index=0" and return
     end
 
@@ -168,7 +168,7 @@ class PersonController < ApplicationController
             {
                 "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
                 "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => "----"
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
@@ -269,16 +269,18 @@ class PersonController < ApplicationController
 
     @summaryHash = {
 
-      "Child Name" => @person.name,
-      "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
-      "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-      "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
-      "Child's Mother " => (@mother_person.name rescue nil),
-      "Child's Father" =>  (@father_person.name rescue nil),
-      "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
-      "Court order attached" => (@birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No'),
-      "Parents signed?" => ((@birth_details.parents_signed rescue -1).to_s == '1' ? 'Yes' : 'No'),
-      "Delayed Registration" => @delayed
+        "Child Name" => @person.name,
+        "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
+        "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
+        "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+        "Child's Mother " => (@mother_person.name rescue nil),
+        "Mother Nationality " => (@mother_person.citizenship rescue "N/A"),
+        "Child's Father" =>  (@father_person.name rescue nil),
+        "Father Nationality" =>  (@father_person.citizenship rescue "N/A"),
+        "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
+        "Court order attached" => (@birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No'),
+        "Parents signed?" => ((@birth_details.parents_signed rescue -1).to_s == '1' ? 'Yes' : 'No'),
+        "Delayed Registration" => @delayed
     }
 
     if  (BirthRegistrationType.find(@person_details.birth_registration_type_id).name.upcase rescue nil) == 'ADOPTED'
@@ -339,8 +341,17 @@ class PersonController < ApplicationController
           if @status == "DC-ACTIVE"
 
             @results = []
-            duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
-            
+            @exact = false
+            duplicates = []
+            duplicates = SimpleElasticSearch.query_duplicate_coded(person,99.4) 
+
+            if duplicates.blank?
+              duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
+            else
+              @exact = true
+            end
+
+
             duplicates.each do |dup|
                 next if DuplicateRecord.where(person_id: person['id']).present?
                 @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
@@ -355,7 +366,12 @@ class PersonController < ApplicationController
                      end
                end
                #PersonRecordStatus.new_record_state(@person.person_id, "HQ-POTENTIAL DUPLICATE-TBA", "System mark record as potential duplicate")
-               @status = "DC-POTENTIAL DUPLICATE" #PersonRecordStatus.status(@person.id)
+               if @exact
+                 @status = "DC-DUPLICATE"
+               else
+                 @status = "DC-POTENTIAL DUPLICATE"
+               end
+               #PersonRecordStatus.status(@person.id)
 
             end      
           end
@@ -1108,7 +1124,7 @@ class PersonController < ApplicationController
   end
 
   def duplicate_search(person, params)
-      dupliates = SimpleElasticSearch.query_duplicate_coded(person,100)
+      dupliates = SimpleElasticSearch.query_duplicate_coded(person,99.4)
       exact = false
       if dupliates.blank?
         if params[:type_of_birth] && is_twin_or_triplet(params[:type_of_birth])        
@@ -1131,14 +1147,14 @@ class PersonController < ApplicationController
     if params["last_name"]
       data = PersonName.find_by_sql(" SELECT last_name FROM person_name WHERE last_name LIKE '#{params[:search]}%' ORDER BY last_name LIMIT 10").map(&:last_name)
       if data.present?
-        render text: data.join("\n") and return
+        render text: data.reject{|n| n == '@@@@@'}.join("\n") and return
       else
         render text: "" and return
       end
     elsif params["first_name"]
       data = PersonName.find_by_sql(" SELECT first_name FROM person_name WHERE first_name LIKE '#{params[:search]}%' ORDER BY first_name LIMIT 10").map(&:first_name)
       if data.present?
-        render text: data.join("\n") and return
+        render text: data.reject{|n| n == '@@@@@'}.join("\n") and return
       else
         render text: "" and return
       end
@@ -1422,7 +1438,7 @@ class PersonController < ApplicationController
             {
                 ["Court Order Attached?","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_court_order_attached"] => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
                 ["Parents Signed?","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_parents_signed"] => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => "----"
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",

@@ -74,14 +74,13 @@ class ApplicationController < ActionController::Base
     session[:user_id] = user.id
     AuditTrail.ip_address_accessor = request.remote_ip
     AuditTrail.mac_address_accessor = ` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2]
-    AuditTrail.ip_address_accessor.inspect
-    AuditTrail.create(person_id: user.id,
+    AuditTrail.create(person_id: user.person_id,
                        audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
                        comment: "User login")
   end
 
   def logout!
-    AuditTrail.create(person_id: session[:user_id],
+    AuditTrail.create(person_id: User.find(session[:user_id]).person_id,
                        audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
                        comment: "User logout") unless session[:user_id].blank?
     session[:user_id] = nil

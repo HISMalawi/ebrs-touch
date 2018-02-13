@@ -91,7 +91,7 @@ class UsersController < ApplicationController
 
       @targeturl = "/user"
 
-      similar_users = User.where(username: params[:user]['username'])
+      similar_users = User.where(username: params[:user]['username'], location_id: SETTINGS['location_id'])
       if similar_users.count > 0
         raise "User with Username = #{params[:user]['username']} Already Exists, Please Try Another Username".to_s
       end
