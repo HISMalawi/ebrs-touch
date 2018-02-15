@@ -265,7 +265,7 @@ class PersonController < ApplicationController
         ]
     }
 
-
+    @trace_data = PersonRecordStatus.trace_data(@person.id)
 
     @summaryHash = {
 

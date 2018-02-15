@@ -393,7 +393,7 @@ module PersonService
         mother_person = Person.create(
             :person_id          => core_person.id,
             :gender             => 'F',
-            :birthdate          =>  nris_person[:MotherBirthdate]
+            :birthdate          =>  nris_person[:MotherBirthdate],
             :birthdate_estimated => nris_person[:MotherBirthdateEstimated]
         )
         #create mother_name
@@ -442,7 +442,7 @@ module PersonService
       father_person = Person.create(
           :person_id          => core_person.id,
           :gender             => 'M',
-          :birthdate          =>  nris_person[:FatherBirthdate]
+          :birthdate          =>  nris_person[:FatherBirthdate],
           :birthdate_estimated => nris_person[:FatherBirthdateEstimated]
       )
       #create father_name
@@ -455,9 +455,9 @@ module PersonService
       #create father_address
       PersonAddress.create(
           :person_id          => core_person.id,
-          :current_district   => ""
+          :current_district   => "",
           :current_ta         => "",
-          :current_village    => ""
+          :current_village    => "",
           :home_district  => nris_person[:FatherDistrictId],
           :home_ta => "",
           :home_village => nris_person[:FatherVillageId],
@@ -484,4 +484,5 @@ module PersonService
       end
       return ebrs_person.id
     end
+
 end

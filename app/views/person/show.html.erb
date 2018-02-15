@@ -107,6 +107,13 @@
       padding: 5%;
   }
 
+ #trace-tbl td{
+    border: 1px solid #d3d3d3;
+    padding: 5px !important;
+ }
+#trace-row td{
+    font-size: 0.8 !important;
+}
 
 </style>
   </head>
@@ -118,7 +125,11 @@
     </div>
     <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
   </div>
-
+  <div id="trace-btn"
+       class="btn btn-primary blue"
+       style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
+       onclick="ajaxTrace()"
+  > Trace</div>
 
   <table width="92%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
 
@@ -263,6 +274,39 @@
  </tr>
 </table>
 </div>
+
+  <shield id="shieldd"
+          onclick="$('#shieldd, #trace-div').hide(); "
+          style="position: absolute; display: none; top: 0px; left: 0px; width: 300vh; height: 300vh; background: black; opacity: 0.3;">
+  </shield>
+
+  <div id="trace-div" style="position: absolute; height: 60vh; overflow-y: auto; display: none; top: 18%; left: 10%;width: 65%;background: white;border: 2px solid gray;border-radius: 5px;">
+
+    <table id="trace-tbl" style="width: 100%;color: darkslategray;">
+        <caption style="background: ghostwhite;padding: 6px; font-size: 1.2em;">
+          Record Movements
+        </caption>
+      <tr >
+        <td style="width: 1%;background: lightsteelblue;font-weight: bold;">Site</td>
+        <td style="width: 14%;background: lightsteelblue;font-weight: bold;">Date</td>
+        <td style="width: 12%;background: lightsteelblue;font-weight: bold;">Time</td>
+        <td style="width: 20%;background: lightsteelblue;font-weight: bold;">User</td>
+        <td style="width: 30%;background: lightsteelblue;font-weight: bold;">Action Taken</td>
+        <td style="background: lightsteelblue;font-weight: bold;">Comments</td>
+      </tr>
+
+      <% (@trace_data || []).each do |data|%>
+          <tr class="trace-row">
+            <td><%= data['site']%></td>
+            <td><%= data['date']%></td>
+            <td><%= data['time']%></td>
+            <td><%= data['user'].html_safe%></td>
+            <td><%= data['action']%></td>
+            <td><%= data['comment']%></td>
+          </tr>
+      <% end %>
+    </table>
+  </div>
   <script>
     var status ="<%=@status%>";
 
@@ -504,6 +548,11 @@
       }
 
       function showSpinner(){}
+
+    function ajaxTrace(){
+        $("#shieldd, #trace-div").show();
+    }
+
   </script>
   <% if @status == "DC-POTENTIAL DUPLICATE" || @status == "DC-DUPLICATE" %>
     <script type="text/javascript">
