@@ -259,7 +259,8 @@ function checkSync(){
                 data = JSON.parse(data);
                 if (data['result'] == 'true'){
                     try {
-                        var td = document.getElementById(person_id).getElementsByClassName("btn-sync")[0];
+                        var td = document.getElementById(data['person_id']).getElementsByClassName("btn-sync")[0];
+                        console.log(td)
                         td.src = "/tick.png";
                     }catch(e){}
                 }

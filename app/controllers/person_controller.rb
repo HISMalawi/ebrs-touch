@@ -1991,8 +1991,25 @@ class PersonController < ApplicationController
   end
 
   def check_sync
+    sync = Syncs.where(person_id: params['person_id'])
+
+    if !sync.blank?
+      render :text => {'person_id' => params['person_id'],
+                       'result' => 'true'}.to_json and return
+    end
+
     url = SETTINGS['destination_app_link'] + "/sync_status?person_id=#{params['person_id']}"
-    result = RestClient.get(url)
+    result = RestClient.get(url) rescue 'false'
+
+    if result.to_s == 'true'
+      sync = Syncs.where(person_id: params['person_id'])
+      if sync.blank?
+        Syncs.create(
+            level: SETTINGS['application_mode'],
+            person_id: params['person_id']
+        )
+      end
+    end
 
     render :text => {'person_id' => params['person_id'],
                      'result' => result}.to_json
