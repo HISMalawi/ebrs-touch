@@ -67,7 +67,7 @@ class PersonRecordStatus < ActiveRecord::Base
           "date" => status.created_at.strftime("%d-%b-%Y"),
           "time" => status.created_at.strftime("%I:%M %p"),
           "site" => user.user_role.role.level,
-          "action" => "Status changed to:  #{status.status.name}",
+          "action" => "Status changed to:  '#{status.status.name.titleize.gsub(/^Hq/, "HQ").gsub(/^Dc/, 'DC').gsub(/^Fc/, 'FC')}'",
           "user"   => "#{user.first_name} #{user.last_name} <br /> <span style='font-size: 0.8em;'><i>(#{user.user_role.role.role})</i></span>",
           "comment" => status.comments
       }

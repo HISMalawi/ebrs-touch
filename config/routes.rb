@@ -37,6 +37,9 @@ Rails.application.routes.draw do
 
   get "/view_users" => "users#view"
 
+  get "/check_sync" => "person#check_sync"
+
+
   get 'users/my_account'
 
   post 'users/update_password'

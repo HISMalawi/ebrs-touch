@@ -1989,5 +1989,13 @@ class PersonController < ApplicationController
 
     render text: data.to_json
   end
+
+  def check_sync
+    url = SETTINGS['destination_app_link'] + "/sync_status?person_id=#{params['person_id']}"
+    result = RestClient.get(url)
+
+    render :text => {'person_id' => params['person_id'],
+                     'result' => result}.to_json
+  end
   
 end
