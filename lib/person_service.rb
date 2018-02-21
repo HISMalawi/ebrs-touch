@@ -339,4 +339,150 @@ module PersonService
 
   end
 
+
+  def self.create_nris_person(nris_person)
+    
+      # create core_person  
+        core_person = CorePerson.create(
+          :person_type_id     => PersonType.where(name: 'Client').last.id,
+      )
+      
+      ebrs_person = core_person
+      #create person
+      person = Person.create(
+          :person_id          => core_person.id,
+          :gender             => nris_person[:sex] == 1 ? 'M' : 'F',
+          :birthdate          => nris_person[:DateOfBirthString].to_date.to_s
+       )
+      #create person_name
+      PersonName.create(
+          :person_id          => core_person.id,
+          :first_name         => nris_person[:FirstName],
+          :middle_name        => nris_person[:OtherNames],
+          :last_name          => nris_person[:Surname]
+      )
+      #create person_birth_detail 
+      PersonBirthDetail.create(
+        person_id: core_person.id,
+        birth_registration_type_id: "",
+        place_of_birth:  "",
+        birth_location_id: nris_person[:PlaceOfBirthVillageId],
+        district_of_birth:  nris_person[:PlaceOfBirthDistrictId],
+        location_created_at: "" 
+    )
+    #create person identifier
+      PersonIdentifier.create(
+        person_id: father_person.person_id,
+        person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+        value: nris_person[:BirthCertificateNumber].upcase
+     )
+     
+     PersonIdentifier.create(
+      person_id: core_person.id,
+      person_identifier_type_id: (PersonIdentifierType.find_by_name("NRIS ID").id),
+      value: nris_person[:NrisPk].upcase
+    )
+
+        #create_mother
+        #create mother_core_person
+          core_person = CorePerson.create(
+            :person_type_id     => PersonType.where(name: 'Mother').last.id,
+        )
+        
+        #create mother_person
+        mother_person = Person.create(
+            :person_id          => core_person.id,
+            :gender             => 'F',
+            :birthdate          =>  nris_person[:MotherBirthdate],
+            :birthdate_estimated => nris_person[:MotherBirthdateEstimated]
+        )
+        #create mother_name
+        PersonName.create(
+            :person_id          => core_person.id,
+            :first_name         => nris_person[:MotherFirstName],
+            :middle_name        => nris_person[:MotherMaidenName],
+            :last_name          => nris_person[:MotherLastName]
+        )
+        #create mother_address
+        PersonAddress.create(
+            :person_id          => core_person.id,
+            :current_district   => "",
+            :current_ta         => "",
+            :current_village    => "",
+            :home_district   => nris_person[:MotherDistrictId],
+            :home_ta            => "",
+            :home_village       => nris_person[:MotherVillageId],
+            :citizenship        => Location.where(country: nris_person[:MotherNationality]).last.id,
+            
+        )
+        #create mother_identifier
+        if nris_person[:MotherPin].present?
+    
+          PersonIdentifier.create(
+                    person_id: mother_person.person_id,
+                    person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                    value: nris_person[:MotherPin].upcase
+            )
+        end
+    
+        # create mother_relationship
+        PersonRelationship.create(
+            person_a: ebrs_person.id, person_b: core_person.id,
+            person_relationship_type_id: PersonRelationType.where(name: 'Mother').last.id
+        )
+        
+      #create_father
+      #create father_core_person
+      if nris_person[:FatherFirstName].present? && nris_person[:FatherSurname].present?
+        core_person = CorePerson.create(
+          :person_type_id     => PersonType.where(name: 'Father').last.id,
+      )
+      
+      #create father_person
+      father_person = Person.create(
+          :person_id          => core_person.id,
+          :gender             => 'M',
+          :birthdate          =>  nris_person[:FatherBirthdate],
+          :birthdate_estimated => nris_person[:FatherBirthdateEstimated]
+      )
+      #create father_name
+      PersonName.create(
+          :person_id          => core_person.id,
+          :first_name         => nris_person[:FatherFirstName],
+          :middle_name        => nris_person[:FatherOtherNames],
+          :last_name          => nris_person[:FatherSurname]
+      )
+      #create father_address
+      PersonAddress.create(
+          :person_id          => core_person.id,
+          :current_district   => "",
+          :current_ta         => "",
+          :current_village    => "",
+          :home_district  => nris_person[:FatherDistrictId],
+          :home_ta => "",
+          :home_village => nris_person[:FatherVillageId],
+          :citizenship => Location.where(country: nris_person[:FatherNationality]).last.id,
+          
+      )
+      
+      #create father_identifier
+      if nris_person[:FatherPin].present?
+    
+        PersonIdentifier.create(
+                  person_id: father_person.person_id,
+                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                  value: nris_person[:FatherPin].upcase
+          )
+      end
+    
+       # create father_relationship
+       PersonRelationship.create(
+        person_a: ebrs_person.id, person_b: core_person.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
+      )
+    
+      end
+      return ebrs_person.id
+    end
+
 end

@@ -65,6 +65,9 @@
          display: none;
      }
 
+     .btn-sync{
+         height: 16px !important;width:16px !important;
+     }
 </style>
 <div class='data-table-container'>
 
@@ -144,6 +147,7 @@
 <script>
 
 var table ;
+var syncChecked = false;
 
 $(document).ready(function() {
     initTable();
@@ -153,8 +157,7 @@ $(document).ready(function() {
 
     var search =__$('example_filter').getElementsByTagName("input")[0];
     search.setAttribute("onclick","changeFocusToMe(this)");
-    searchData(search)
-
+    searchData(search);
 } );
 
 search_value = '';
@@ -226,6 +229,12 @@ function initTable(){
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
+                            json['data'][i][last_index] +=
+                                    '<td class="sync" person_id='+ person_id + ' id='+ person_id + '> ' +
+                                    '<div class="action-btn btn btn-success btn-xs">' +
+                                    '<%= image_tag "", class: 'btn-images btn-sync' %></div>' +
+                                    '</td>';
+
 
                             json['data'][i][last_index] += "</tr></table>"
                         }
@@ -233,6 +242,31 @@ function initTable(){
                     }
                 }}
     );
+
+
+    table.on("draw.dt", function(){
+        setTimeout("checkSync()", 250);
+    });
+
+}
+function checkSync(){
+    var nodes = document.getElementsByClassName("sync");
+   for (var i = 0; i < nodes.length; i ++){
+       var person_id = nodes[i].getAttribute("person_id");
+        jQuery.ajax({
+            url: "/check_sync?person_id=" + person_id,
+            success: function(data){
+                data = JSON.parse(data);
+                if (data['result'] == 'true'){
+                    try {
+                        var td = document.getElementById(data['person_id']).getElementsByClassName("btn-sync")[0];
+                        console.log(td)
+                        td.src = "/tick.png";
+                    }catch(e){}
+                }
+            }
+        })
+   }
 }
 
 function reloadDataTable(node){

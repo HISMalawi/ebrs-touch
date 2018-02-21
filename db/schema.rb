@@ -528,6 +528,16 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   change_column  :notification, :notification_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
+  create_table "syncs", primary_key: "sync_id", force: :cascade do |t|
+    t.string    "level"
+    t.bigint  "person_id"
+    t.string   "rev"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  change_column :syncs, :sync_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
   add_foreign_key "notification", "notification_types", column: "notification_type_id", primary_key: "notification_type_id", name: "fk_notification_1"
   add_foreign_key "notification", "person_record_statuses", column: "person_record_status_id", primary_key: "person_record_status_id", name: "fk_notification_2"
 
