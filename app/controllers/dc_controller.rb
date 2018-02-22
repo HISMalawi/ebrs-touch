@@ -318,7 +318,7 @@ def incomplete_case_comment
   def filter
     @filter = params[:filter]
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
-                "Place of Birth", 'Record Status'
+                "Place of Birth", 'Record Status',"Date Issued"
                 ]
     @statuses = Status.all.map(&:name).sort
     users = User.find_by_sql(
