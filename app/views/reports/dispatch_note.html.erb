@@ -32,7 +32,7 @@
 </style>
 <div id="default" style="width: 100%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:1%;">
 
-<h3>Dispatch Batches <div type='button' class='btn blue ' style="font-size: 1.1em; width: 170px !important;min-height: 30px;cursor: pointer;float: right;margin-right: 110px;"
+<h3>Dispatch Batches (<%= params[:start_date]%>  -  <%= params[:end_date]%>)<div type='button' class='btn blue ' style="font-size: 1.1em; width: 170px !important;min-height: 30px;cursor: pointer;float: right;margin-right: 110px;"
                           onclick="window.parent.location = '/view_dispatches?start_date=<%= params[:start_date]%>&end_date=<%= params[:end_date]%>'"> <span>Download All</span></div></h3>
 
 <table id="report" class="table table-bordered table-sm table-inverse" style="border: 1px solid lightgray; margin-left: 1.5%;width: 98.5%;font-size: 1.1em;">
