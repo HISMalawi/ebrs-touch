@@ -58,4 +58,25 @@
 
  <%end%>
 
+      <div class="button child_menu manage_cases "
+           onmousedown = "window.location = '/reports/report_date_range?target_action=/dispatch_note' "
+           tag=0 title="View Dispatches">
+        <table style="text-align: left;">
+          <tr>
+            <td rowspan="2">
+              <img src="<%= @icoFolder %>" height="60"/>  <br />
+              <span class="count"></span>
+            </td>
+            <td style="height: 30px;">
+              Dispatch Notes
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: 11px; font-style: italic;">
+              Dispatch batches from HQ
+            </td>
+          </tr>
+        </table>
+      </div>
+
 </div>

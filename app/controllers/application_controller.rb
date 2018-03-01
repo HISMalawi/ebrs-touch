@@ -4,10 +4,10 @@ class ApplicationController < ActionController::Base
   #protect_from_forgery with: :exception
   protect_from_forgery	#with: :null_session
 
-  before_filter :check_if_logged_in, :except => ['login', 'searched_cases']
+  before_filter :check_if_logged_in, :except => ['login', 'searched_cases', 'dispatch_list']
 
-  before_filter :check_last_sync_time
-  before_filter :check_couch_loading
+  before_filter :check_last_sync_time, :except => ['dispatch_list']
+  before_filter :check_couch_loading, :except => ['dispatch_list']
 
 
   def check_last_sync_time

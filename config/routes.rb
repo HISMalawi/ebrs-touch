@@ -39,6 +39,11 @@ Rails.application.routes.draw do
 
   get "/check_sync" => "person#check_sync"
 
+  get "/dispatch_note" => "reports#dispatch_note"
+
+  get "/view_dispatches" => "reports#view_dispatches"
+
+  get "/dispatch_list" => "reports#dispatch_list"
 
   get 'users/my_account'
 

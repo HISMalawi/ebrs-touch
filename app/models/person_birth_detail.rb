@@ -32,6 +32,23 @@ class PersonBirthDetail < ActiveRecord::Base
       LevelOfEducation.find(self.level_of_education_id).name
     end
 
+    def birthplace
+      place_of_birth = Location.find(self.place_of_birth).name
+      r = nil
+      if place_of_birth == "Hospital"
+        r = Location.find(self.birth_location_id).name
+      elsif place_of_birth == "Home"
+        l =  Location.find(self.birth_location_id) rescue ""
+        r = "#{r.village}, #{l.ta}, #{r.district}" rescue ""
+      else
+        d = Location.find(self.district_of_birth).name rescue nil
+        d = "" if d == "Other"
+        r = "#{d}, #{self.other_birth_location}"
+      end
+
+      r
+    end
+
     def brn
       n = self.national_serial_number
       return nil if n.blank?

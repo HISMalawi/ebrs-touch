@@ -269,4 +269,43 @@ class Report < ActiveRecord::Base
 
       return ActiveRecord::Base.connection.select_all(query).as_json
   end
+
+  def self.dispatch_note(start_date, end_date)
+    start_date = start_date.to_date
+    end_date = end_date.to_date
+    d_id = Status.where(name: "HQ-DISPATCHED").first.id
+
+    @data = []
+    PersonRecordStatus.find_by_sql("
+        SELECT count(*) c, s.creator, s.created_at, u.username, n.first_name, n.last_name, d.location_created_at FROM person_record_statuses s
+          INNER JOIN users u ON u.user_id = s.creator AND s.status_id = #{d_id}
+          INNER JOIN person_birth_details d ON d.person_id = s.person_id
+          INNER JOIN person_name n ON u.person_id = n.person_id
+          WHERE  DATE(s.created_at) BETWEEN '#{start_date.to_s}' AND '#{end_date.to_s}'
+          GROUP BY s.created_at, s.creator
+          ORDER BY s.created_at DESC
+      ").each do |s|
+      @data << {
+          'count'    => s.c,
+          'datetime' => s.created_at.strftime("%d/%b/%Y  %H:%M:%S"),
+          'creator'  => s.creator,
+          'user'     => s.username,
+          'district' => Location.find(s.location_created_at).district,
+          'user_names' => (s.first_name + " " + s.last_name)
+      }
+    end
+
+    @data
+  end
+
+  def self.dispatched_records(date, start_date, end_date)
+    ids = []
+    if !date.blank?
+      ids = PersonRecordStatus.where(" created_at = '#{date.to_datetime.to_s(:db)}' ").map(&:person_id)
+    else
+      ids = PersonRecordStatus.where(" created_at BETWEEN '#{start_date.to_datetime.to_s(:db)}' AND '#{end_date.to_datetime.to_s(:db)}' ").map(&:person_id)
+    end
+
+    ids
+  end
 end
