@@ -91,6 +91,8 @@ class ReportsController < ApplicationController
   end
 
   def dispatch_list
+    return [] if params[:person_ids].blank?
+    
     @people = Person.find_by_sql("SELECT n.*, p.gender, p.birthdate, d.national_serial_number, d.district_id_number, d.date_registered, d.location_created_at FROM person p
                                  INNER JOIN person_birth_details d ON d.person_id = p.person_id
                                  INNER JOIN person_name n ON n.person_id = p.person_id
