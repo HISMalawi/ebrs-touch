@@ -299,8 +299,8 @@ class Report < ActiveRecord::Base
   end
 
   def self.dispatched_records(date, start_date, end_date)
-    start_date = start_date.to_datetime.beginning_of_day
-    end_date = end_date.to_datetime.end_of_day
+    start_date = start_date.to_datetime.beginning_of_day rescue nil
+    end_date = end_date.to_datetime.end_of_day rescue nil 
 
     d_id = Status.where(name: "HQ-DISPATCHED").first.id
 
