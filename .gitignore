@@ -30,3 +30,4 @@ passenger*
 public/sync_sentinel
 public/sentinel
 public/errors/*
+public/*.pdf
