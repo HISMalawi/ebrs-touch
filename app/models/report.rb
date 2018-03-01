@@ -271,8 +271,8 @@ class Report < ActiveRecord::Base
   end
 
   def self.dispatch_note(start_date, end_date)
-    start_date = start_date.to_datetime
-    end_date = end_date.to_datetime
+    start_date = start_date.to_datetime.beginning_of_day
+    end_date = end_date.to_datetime.end_of_day
     d_id = Status.where(name: "HQ-DISPATCHED").first.id
 
     @data = []
