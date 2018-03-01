@@ -1,0 +1,40 @@
+<style type="text/css">
+    #table{
+        font-size: 1em;
+        color: darkslategray;
+    }
+    #table th{
+        border: 1px solid #d3d3d3;
+        background: #d3d3d3;
+        width: 2%;
+        color: #3465a4;
+    }
+    #table td{
+       border: 1px solid #d3d3d3;
+    }
+
+    .cat{
+      font-weight: bold;
+    }
+    .mintable{
+      width: 100%; 
+      border:none;
+      border-collapse: collapse;
+    }
+    .mintable td, .mintable th{
+        width: 33.33333% !important;
+        text-align: right;
+        padding-right: 10%;
+    }
+    .even td{
+
+    }
+</style>
+<div id="default" style="width: 100%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:1%;">
+
+<h3>Dispatches</h3>
+
+<iframe data="<%= @file%>" style="height: 70vh;width: 97%;margin: auto;">
+
+</iframe>
+</div>

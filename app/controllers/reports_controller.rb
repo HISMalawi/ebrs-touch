@@ -75,7 +75,7 @@ class ReportsController < ApplicationController
       @records = Report.dispatched_records(nil, params[:start_date], params[:end_date]).sort
     end
 
-    path = "#{Rails.root}/#{@records[0 .. 5].join(',')}.pdf"
+    path = "#{Rails.root}/public/#{@records[0 .. 5].join(',')}.pdf"
 
     cmd = "wkhtmltopdf 	--orientation landscape --page-size A4 http://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/dispatch_list?person_ids=#{@records.join(',')} #{path}\n"
 

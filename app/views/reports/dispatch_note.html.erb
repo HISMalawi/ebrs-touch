@@ -1,0 +1,70 @@
+<style type="text/css">
+    #table{
+        font-size: 1em;
+        color: darkslategray;
+    }
+    #table th{
+        border: 1px solid #d3d3d3;
+        background: #d3d3d3;
+        width: 2%;
+        color: #3465a4;
+    }
+    #table td{
+       border: 1px solid #d3d3d3;
+    }
+
+    .cat{
+      font-weight: bold;
+    }
+    .mintable{
+      width: 100%; 
+      border:none;
+      border-collapse: collapse;
+    }
+    .mintable td, .mintable th{
+        width: 33.33333% !important;
+        text-align: right;
+        padding-right: 10%;
+    }
+    .even td{
+
+    }
+</style>
+<div id="default" style="width: 100%; margin: auto; height: 400px; text-align: center; vertical-align: top; margin-top:1%;">
+
+<h3>Dispatch Batches <div type='button' class='btn blue ' style="font-size: 1.1em; width: 170px !important;min-height: 30px;cursor: pointer;float: right;margin-right: 110px;"
+                          onclick="window.parent.location = '/view_dispatches?start_date=<%= params[:start_date]%>&end_date=<%= params[:end_date]%>'"> <span>Download All</span></div></h3>
+
+<table id="report" class="table table-bordered table-sm table-inverse" style="border: 1px solid lightgray; margin-left: 1.5%;width: 98.5%;font-size: 1.1em;">
+
+  <thead>
+  <tr style="background: gray;">
+    <th style="border-right: 2px solid #f8f8ff;width: 4%;height: 45px;">&nbsp;#</th>
+    <th style="border-right: 1px solid #f8f8ff;width: 17%;">Dispatch Date</th>
+    <th style="border-right: 1px solid #f8f8ff;width: 17%;">Dispatcher</th>
+    <th style="border-right: 1px solid #f8f8ff;width: 16%;">Total Dispatched</th>
+    <th style="border-right: 1px solid #f8f8ff;width: 20%;">&nbsp;</th>
+
+
+  </tr>
+  </thead>
+  <tbody>
+  <% @records.each_with_index do |d, i|%>
+        <tr class=<%= cycle('even', 'odd')%>>
+            <td><%= @records.count - i%></td>
+            <td><%= d['datetime']%></td>
+            <td><%= d['user_names']%></td>
+            <td><%= d['count']%></td>
+            <td>
+              <div type='button' class='btn blue ' style="font-size: 1.1em; width: 170px !important;min-height: 30px;cursor: pointer;"
+		onclick="window.parent.location = '/view_dispatches?date=<%= d['datetime']%>'"> <span>Download PDF</span></div>
+            </td>
+        </tr>
+  <% end %>
+  </tbody>
+</table>
+</div>
+
+<script>
+    function showSpinner(){}
+</script>
