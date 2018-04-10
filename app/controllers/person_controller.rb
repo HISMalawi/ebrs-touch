@@ -2002,6 +2002,12 @@ class PersonController < ApplicationController
 
   def check_sync
     sync = Syncs.where(person_id: params['person_id'])
+			
+		details = PersonBirthDetail.where(person_id: params['person_id']).last
+		if details.district_id_number.blank?
+			render :text => {'person_id' => params['person_id'],
+                       'result' => 'false'}.to_json and return
+		end 		
 
     if !sync.blank?
       render :text => {'person_id' => params['person_id'],
