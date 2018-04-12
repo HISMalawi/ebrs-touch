@@ -78,11 +78,11 @@ class PersonController < ApplicationController
     @name = @person.person_names.last
     @address = @person.addresses.last
 
-    @mother_person = @person.mother
+    @mother_person = @person.mother_all
     @mother_address = @mother_person.addresses.last rescue nil
     @mother_name = @mother_person.person_names.last rescue nil
 
-    @father_person = @person.father
+    @father_person = @person.father_all
     @father_address = @father_person.addresses.last rescue nil
     @father_name = @father_person.person_names.last rescue nil
 
