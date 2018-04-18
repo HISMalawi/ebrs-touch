@@ -32,6 +32,11 @@ def manage_requests
   render :layout => "facility"
 end
 
+def add_adoptive_parents
+
+  render :layout => "touch"
+end
+
 def manage_duplicates_menu
   @stats = PersonRecordStatus.stats
   @icoFolder = folder
@@ -317,7 +322,7 @@ def incomplete_case_comment
 
   def filter
     @filter = params[:filter]
-    @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
+    @filters = ["Birth Entry Number", "Child Name", "Child Gender",
                 "Place of Birth", 'Record Status',"Date Issued"
                 ]
     @statuses = Status.all.map(&:name).sort

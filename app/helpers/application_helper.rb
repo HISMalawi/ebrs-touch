@@ -17,7 +17,15 @@ module ApplicationHelper
   end
 
   def district_name
-    return Location.find(SETTINGS['district_id']).name rescue nil    
+    return Location.find(SETTINGS['location_id']).district rescue nil
+  end
+
+  def district_code
+    if SETTINGS["application_mode"] == "DC"
+      return Location.find(SETTINGS['location_id']).code rescue nil
+    else
+      return ""
+    end
   end
 
   def admin?

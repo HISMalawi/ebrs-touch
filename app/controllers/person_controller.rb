@@ -557,6 +557,22 @@ class PersonController < ApplicationController
     render :layout => "touch"
   end
 
+  def create_adoptive_parents
+    raise params.inspect
+  end
+
+  def get_people_by_birth_entry_number
+
+    from_details = PersonBirthDetail.where(district_id_number: params['value']).pluck("person_id")
+    from_pidentifiers = PersonIdentifier.where(
+                        value: params['value'],
+                        person_identifier_type_id: PersonIdentifierType.where(
+                            name: "Old Birth Entry Number").last.id).pluck("person_id")
+
+    person_ids = (from_details + from_pidentifiers).uniq
+    render :text => person_ids.to_json
+  end
+
   def update
 
     if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])

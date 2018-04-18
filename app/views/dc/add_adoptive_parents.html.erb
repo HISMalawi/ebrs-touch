@@ -1,0 +1,89 @@
+<style>
+    #textForperson_birth_entry_number{
+        text-transform: uppercase;
+    }
+</style>
+
+<%= form_for :person, :url => {:controller => "person", :action => "create_adoptive_parents"} do |f| %>
+
+     <fieldset>
+       <div class="field">
+         <legend><font size='5' style='border: 2px;'>Birth Entry Number</font></legend>
+         <label for="person_birth_entry_number">Birth Entry Number</label>
+         <br>
+         <%= (f.text_field :birth_entry_number,
+                           :class => "input_cell",
+                           :textCase => 'upper',
+                           :optional => :true) %>
+       </div>
+    </fieldset>
+
+<% end %>
+<script type="text/javascript">
+
+	init();
+    $(document).ready(
+            function() {
+
+                __$("textForperson_birth_entry_number").value = "<%= district_code%>/";
+
+                setInterval(function(){
+                    __$("btn3").childNodes[0].innerHTML = "Search";
+
+                    __$("btn3").childNodes[0].onmousedown = function(){
+                        scanBarcode()
+                    }
+                }, 50);
+            }
+    )
+
+    function scanBarcode(){
+
+        if (__$("textForperson_birth_entry_number").value.trim().match(/\$$/)){
+            var value =  __$("textForperson_birth_entry_number").value.trim().replace(/\$$/, "");
+            __$("textForperson_birth_entry_number").value = value;
+
+        }
+
+        jQuery.ajax({
+
+            url: "/get_people_by_birth_entry_number?value=" + __$("textForperson_birth_entry_number").value.trim(),
+
+            success: function(result){
+
+                result = JSON.parse(result);
+
+                if (result.length == 0){
+
+                    __$("textForperson_birth_entry_number").value = "<%= district_code%>/";
+                    showMsg("Record(s) Not Found!");
+                }else{
+                    //Redirect to preview page fo selection
+                    loopPreview(result);
+                }
+            },
+
+            error: function(e){
+
+                alert("Something went wrong!")
+            }
+        })
+    }
+
+    var cur_pos = -1
+    function loopPreview(person_ids){
+        master_ids =  person_ids;
+
+        if (person_ids[(cur_pos + 1)]){
+            cur_pos = -1
+        }
+
+        cur_pos += 1;
+
+        __$("iframe").src = "/person/" + master_ids[cur_pos];
+
+    }
+
+    function showSpinner(){}
+
+</script>

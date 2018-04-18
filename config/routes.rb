@@ -91,6 +91,12 @@ Rails.application.routes.draw do
 
   get '/new_registration' => "dc#new_registration"
 
+  get '/add_adoptive_parents' => "dc#add_adoptive_parents"
+  get '/create_adoptive_parents' => "person#create_adoptive_parents"
+  post '/create_adoptive_parents' => "person#create_adoptive_parents"
+
+  get '/get_people_by_birth_entry_number' => "person#get_people_by_birth_entry_number"
+
   post "/person/:id" => "person#show", :defaults => { :next_path => "view_record"}
 
   get '/get_last_names' => 'person#get_names', :defaults => {last_name: 'last_name'}

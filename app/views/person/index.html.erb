@@ -32,6 +32,28 @@
 
 <% end %>
 
+<% if @folders.include?("Add Adoptive Parents") %>
+ 
+    <div class="button parent_menu" onclick="window.location = '/add_adoptive_parents' " tag=0>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Add Adoptive Parents
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+           Add adoptive parent(s) to already existing record
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
 <% if @folders.include?("Search Cases") %>
     <div class="button child_menu manage_cases" onclick="window.location = '/search' " tag=0 title="Search Cases">
       <table style="text-align: left;">
