@@ -125,11 +125,14 @@
     </div>
     <div id="button"><button class="blue" onclick="dismissComment()">Ok</button></div>
   </div>
-  <div id="trace-btn"
-       class="btn btn-primary blue"
-       style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
-       onclick="ajaxTrace()"
-  > Trace</div>
+
+  <% if params['preview'].blank? %>
+      <div id="trace-btn"
+           class="btn btn-primary blue"
+           style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
+           onclick="ajaxTrace()"
+      > Trace</div>
+  <% end %>
 
   <table width="92%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
 

@@ -378,7 +378,10 @@ class PersonController < ApplicationController
         else
              @results = []
         end
-        render :layout => "facility"
+
+        if params[:preview].blank?
+          render :layout => "facility"
+        end
     end
 
   end
@@ -439,8 +442,7 @@ class PersonController < ApplicationController
       elsif PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 5
          @type_of_birth = "Third Triplet"
       end
-        
-        
+
     end
      
      render :layout => "touch"
@@ -558,7 +560,7 @@ class PersonController < ApplicationController
   end
 
   def create_adoptive_parents
-    raise params.inspect
+
   end
 
   def get_people_by_birth_entry_number

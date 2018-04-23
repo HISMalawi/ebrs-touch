@@ -127,6 +127,8 @@ Rails.application.routes.draw do
   get "/complete_case_comment/:id" => "dc#complete_case_comment"
   get "/pending_case_comment/:id" => "dc#pending_case_comment"
   get "/reject_case_comment/:id" => "dc#reject_case_comment"
+  get "/new_adoptive_parent/:id" => "dc#new_adoptive_parent"
+
 
   get "/incomplete_case" => "dc#incomplete_case"
   get "/pending_case" => "dc#pending_case"

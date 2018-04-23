@@ -32,6 +32,21 @@ def manage_requests
   render :layout => "facility"
 end
 
+def new_adoptive_parent
+
+  @person = Person.find(params[:id])
+
+  @person_details = PersonBirthDetail.find_by_person_id(params[:id])
+
+
+  @person_name = PersonName.find_by_person_id(params[:id])
+
+  @person_mother_name = @person.mother.person_names.first rescue nil
+
+  @person_father_name = @person.father.person_names.first rescue nil
+
+end
+
 def add_adoptive_parents
 
   render :layout => "touch"

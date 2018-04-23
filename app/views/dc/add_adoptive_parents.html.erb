@@ -2,6 +2,19 @@
     #textForperson_birth_entry_number{
         text-transform: uppercase;
     }
+    #iframe{
+        position: absolute;
+        background: white;
+        z-index: 3000;
+        top: 5vh;
+        left: 9vh;
+        width: 85%;
+        height: 90vh;
+    }
+
+    #popup{
+        z-index: 3500 !important;
+    }
 </style>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create_adoptive_parents"} do |f| %>
@@ -18,6 +31,16 @@
        </div>
     </fieldset>
 
+    <div id="navigator" style="position: absolute;top: 40%;left: 40%;z-index: 3005">
+      <div id="navigateNext" class="btn blue" style="cursor: pointer; max-height: 30px !important;padding-top: 15px;padding-left: 15px;font-size: 1.25em;"> <span>Next->> </span> </div>
+      <div id="navigateSelect" class="btn green" style="cursor: pointer; max-height: 30px !important;padding-top: 15px;padding-left: 15px;font-size: 1.25em;"> <span>Select Record</span> </div>
+    </div>
+
+    <div
+    onmousedown="stopLoop()"
+    id="shield1" style="position: absolute;top: 0px;left:0px; width: 100%; height: 100vh; background: black; opacity: 0.5; z-index: 2500 !important;">
+        &nbsp;
+    </div>
 <% end %>
 <script type="text/javascript">
 
@@ -36,6 +59,16 @@
                 }, 50);
             }
     )
+
+    shield =  null;
+    navigator = null;
+    function stopLoop(){
+        __$('iframe').style.display = 'none';
+        master_ids = [];
+        cur_pos = -1;
+        __$('shield1').style.display = 'none';
+        __$('navigator').style.display = 'none';
+    }
 
     function scanBarcode(){
 
@@ -59,12 +92,11 @@
                     showMsg("Record(s) Not Found!");
                 }else{
                     //Redirect to preview page fo selection
+                    showMsg(result.length + " Record(s) Found!");
                     loopPreview(result);
                 }
             },
-
             error: function(e){
-
                 alert("Something went wrong!")
             }
         })
@@ -72,16 +104,48 @@
 
     var cur_pos = -1
     function loopPreview(person_ids){
+        if(__$('iframe')) {
+            __$("iframe").parentNode.removeChild(__$('iframe'));
+        }
+
+        var frame = document.createElement("iframe");
+        frame.id = "iframe";
+        document.body.appendChild(frame);
+
         master_ids =  person_ids;
 
-        if (person_ids[(cur_pos + 1)]){
+        if (person_ids.length >= cur_pos){
             cur_pos = -1
         }
 
         cur_pos += 1;
+        __$("iframe").src = "/person/" + master_ids[cur_pos] + "?preview=true";
 
-        __$("iframe").src = "/person/" + master_ids[cur_pos];
+        console.log("2")
+        if(person_ids.length >= 1) {
+            __$('navigateNext').onmousedown = function(){
+                loopPreview(person_ids);
+            };
+            __$('navigateNext').style.display = 'inline-block';
+        }else{
+            __$('navigateNext').style.display = 'none';
+        }
+        __$('navigateSelect').onmousedown = function(){
+            window.parent.location =  "/new_adoptive_parent/" + master_ids[cur_pos];
+        };
 
+        if(shield == null) {
+            shield = __$('shield1');
+        }
+
+        if(navigator == null){
+            navigator = __$('navigator');
+        }
+
+        document.body.appendChild(__$('navigator'));
+        __$('navigator').style.display = 'inline-block'
+        document.body.appendChild(__$('shield1'));
+        __$('shield1').style.display = 'inline-block';
     }
 
     function showSpinner(){}
