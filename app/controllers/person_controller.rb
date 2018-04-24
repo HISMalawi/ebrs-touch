@@ -1723,7 +1723,7 @@ class PersonController < ApplicationController
                "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
         @person_prev_values["father_name"] = father_name
     end 
-    @targeturl = params[:next_path]
+    @targeturl = session[:list_url] #params[:next_path]
     @section = 'Ammend Case'
     render :layout => "facility"
   end

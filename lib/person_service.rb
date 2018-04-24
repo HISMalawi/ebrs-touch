@@ -120,7 +120,7 @@ module PersonService
           WHERE prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
           GROUP BY prs.person_id
-          ORDER BY p.updated_at DESC
+          ORDER BY pdb.distict_id_number, p.updated_at
            "
     )
 
