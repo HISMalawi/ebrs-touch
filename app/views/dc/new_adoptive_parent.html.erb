@@ -1,0 +1,12 @@
+<script type="text/javascript">
+	  var site_type = "<%= @site_type %>";
+    var facility_type = "<%= SETTINGS['application_mode']%>"
+    String.prototype.capitalize = function(lower) {
+        return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    };
+    String.prototype.capitalizeAll = function(){
+    	return this.toUpperCase();
+    };
+</script>
+
+<%= render 'adoptive_parents_form' %>

@@ -38,18 +38,65 @@ def new_adoptive_parent
 
   @person_details = PersonBirthDetail.find_by_person_id(params[:id])
 
-
   @person_name = PersonName.find_by_person_id(params[:id])
 
   @person_mother_name = @person.mother.person_names.first rescue nil
 
   @person_father_name = @person.father.person_names.first rescue nil
 
+  @section = "New Adoptive Person"
+
+  render :layout => "touch"
 end
 
 def add_adoptive_parents
 
   render :layout => "touch"
+end
+
+def create_adoptive_parents
+
+  person = Person.find(params[:person_id])
+  if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+    adoptive_mother   = Lib.new_mother(person, params, 'Adoptive-Mother')
+  end
+
+  if params[:foster_parents] == "Both" || params[:foster_parents] =="Father"
+    adoptive_father   = Lib.new_father(person, params,'Adoptive-Father')
+  end
+
+  @birth_details = PersonBirthDetail.where(person_id: params[:person_id]).last
+  if params[:court_order_attached] == 'Yes'
+    @birth_details.court_order_attached = 1
+  elsif params[:court_order_attached] == 'No'
+    @birth_details.court_order_attached = 0
+  end
+
+  if params[:form_signed] == 'Yes'
+    @birth_details.form_signed = 1
+  elsif params[:form_signed] == 'No'
+    @birth_details.form_signed = 0
+  end
+
+  @birth_details.informant_designation = (params[:person][:informant][:designation].present? ? params[:person][:informant][:designation].to_s : nil)
+
+  if params[:informant_same_as_mother] == 'Yes'
+    params[:informant_id]                                 = adoptive_mother.person_id
+    @birth_details.informant_relationship_to_person       = "Adoptive-Mother"
+    @birth_details.other_informant_relationship_to_person = nil
+  end
+
+  if params[:informant_same_as_father] == 'Yes'
+    params[:informant_id]                                 = adoptive_father.person_id
+    @birth_details.informant_relationship_to_person       = "Adoptive-Father"
+    @birth_details.other_informant_relationship_to_person = nil
+  end
+
+  @birth_details.birth_registration_type_id = BirthRegistrationType.where(name: "Adopted").last.id
+  @birth_details.save
+
+  informant = Lib.new_informant(person, params)
+  redirect_to "/person/#{params[:person_id]}"
 end
 
 def manage_duplicates_menu

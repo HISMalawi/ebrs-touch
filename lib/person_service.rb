@@ -19,7 +19,7 @@ module PersonService
         if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
           mother   = Lib.new_mother(person, params, 'Mother')
         end
-        if params[:biological_parents] == "Both" || params[:biological_parents] =="Mother"
+        if params[:biological_parents] == "Both" || params[:biological_parents] =="Father"
           father   = Lib.new_father(person, params,'Father')
         end
         if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"

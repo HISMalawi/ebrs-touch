@@ -90,6 +90,7 @@ Rails.application.routes.draw do
   ########################### (create record form) routes
 
   get '/new_registration' => "dc#new_registration"
+  post '/create_adoptive_parents' => "dc#create_adoptive_parents"
 
   get '/add_adoptive_parents' => "dc#add_adoptive_parents"
   get '/create_adoptive_parents' => "person#create_adoptive_parents"

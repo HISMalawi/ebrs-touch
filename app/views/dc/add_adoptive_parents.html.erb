@@ -92,7 +92,12 @@
                     showMsg("Record(s) Not Found!");
                 }else{
                     //Redirect to preview page fo selection
-                    showMsg(result.length + " Record(s) Found!");
+                    if (result.length == 1) {
+                        showMsg(result.length + " Record Found!");
+                    }else{
+                        showMsg(result.length + " Record(s) Found!");
+                    }
+
                     loopPreview(result);
                 }
             },
@@ -122,7 +127,7 @@
         __$("iframe").src = "/person/" + master_ids[cur_pos] + "?preview=true";
 
         console.log("2")
-        if(person_ids.length >= 1) {
+        if(person_ids.length > 1) {
             __$('navigateNext').onmousedown = function(){
                 loopPreview(person_ids);
             };
