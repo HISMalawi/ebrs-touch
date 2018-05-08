@@ -67,17 +67,14 @@ class ReportsController < ApplicationController
   end
 
   def view_dispatches
-    date = params[:date]
+    path = "#{Rails.root}/public/#{Time.now.strftime("%Y%m%d%H%M%S")}.pdf"
 
-    if !date.blank?
-      @records = Report.dispatched_records(params[:date], nil, nil).sort
-    else
-      @records = Report.dispatched_records(nil, params[:start_date], params[:end_date]).sort
-    end
+    start_date = params[:start_date].to_datetime.strftime("%Y%m%d%H%M%S") rescue nil
+    end_date   = params[:end_date].to_datetime.strftime("%Y%m%d%H%M%S") rescue nil
+    date = params[:date].to_datetime.strftime("%Y%m%d%H%M%S") rescue nil
 
-    path = "#{Rails.root}/public/#{@records[0 .. 5].join(',')}.pdf"
-
-    cmd = "wkhtmltopdf 	--orientation landscape --page-size A4 http://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/dispatch_list?person_ids=#{@records.join(',')} #{path}\n"
+    url = URI.parse("http://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/dispatch_list?date=#{date}&start_date=#{start_date}&end_date=#{end_date}")
+    cmd = "wkhtmltopdf 	--orientation landscape --page-size A4 '#{url}'  #{path}\n"
 
     Kernel.system(cmd)
     @path = path
@@ -91,12 +88,19 @@ class ReportsController < ApplicationController
   end
 
   def dispatch_list
-    return [] if params[:person_ids].blank?
+    date = params[:date]
 
+    if !date.blank?
+      @records = Report.dispatched_records(params[:date], nil, nil).sort
+    else
+      @records = Report.dispatched_records(nil, params[:start_date], params[:end_date]).sort
+    end
+
+    person_ids = @records.join(', ')
     @people = Person.find_by_sql("SELECT n.*, p.gender, p.birthdate, d.national_serial_number, d.district_id_number, d.date_registered, d.location_created_at FROM person p
                                  INNER JOIN person_birth_details d ON d.person_id = p.person_id
                                  INNER JOIN person_name n ON n.person_id = p.person_id
-                        WHERE d.person_id IN (#{params[:person_ids]}) ")
+                        WHERE d.person_id IN (#{person_ids}) ")
     @districts = []
 
     @data = []
