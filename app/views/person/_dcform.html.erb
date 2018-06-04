@@ -156,6 +156,7 @@
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
+                          :tt_onLoad => "validateNID()",
                           :tt_BeforeUnLoad => "validateNID()",
 
         :tt_onLoad =>"dateInterval('person_birthdate')",
