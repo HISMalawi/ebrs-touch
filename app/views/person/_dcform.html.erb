@@ -156,7 +156,9 @@
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
-                          :tt_onLoad =>"dateInterval('person_birthdate')",
+                          :tt_BeforeUnLoad => "",
+
+        :tt_onLoad =>"dateInterval('person_birthdate')",
                           :tt_onUnload => "__$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
 
         <%= f.hidden_field :birthdate_estimated rescue "" %>
@@ -2265,5 +2267,13 @@ function removePopup(){
     __$('proceed').style.display = 'none';
     __$('notice').style.display = 'none';
 
+}
+
+function age(date){
+    var parts = date.split("/");
+    var dob   = new Date(parseInt(parts[2]), (parseInt(parts[1]) - 1), (parseInt(parts[0]) - 1));
+    console.log(dob);
+    var nowDate = new Date(<%= Date.today.year%>, <%= (Date.today.month - 1)%>, <%= (Date.today.day - 1)%>);
+    Math.floor((nowDate - dob)/31556952000);
 }
 </script>
