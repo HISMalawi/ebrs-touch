@@ -32,7 +32,7 @@
 
 <% end %>
 
-<% if @folders.include?("Add Adoptive Parents") %>
+<% if @folders.include?("Add Adoptive Parents") && SETTINGS['application_mode'] == "DC" %>
  
     <div class="button parent_menu" onclick="window.location = '/add_adoptive_parents' " tag=0>
       <table style="text-align: left;">
