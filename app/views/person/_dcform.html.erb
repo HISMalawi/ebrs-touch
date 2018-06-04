@@ -172,6 +172,19 @@
         </select>
       </div>
 
+      <div class="field">
+        <label for="person_id_number">ID Number</label><br>
+        <input id="id_number"
+               name="person[id_number]"
+               type="text"
+               tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_id');"
+               value="<%= @person[:id_number] rescue nil %>"
+               class="input_cell"
+               length = 8
+               optional="true" />
+      </div>
+
+
     </fieldset>
 
     <fieldset>
