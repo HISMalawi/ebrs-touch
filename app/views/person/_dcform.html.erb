@@ -2280,7 +2280,7 @@ function age(date){
 
 function validateNID(){
     if (age(__$("person_birthdate").value) >= 16){
-        __$("id_number").setAttribute("condition", "false");
+        __$("id_number").setAttribute("condition", "true");
     }
 }
 
