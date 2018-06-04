@@ -2270,10 +2270,9 @@ function removePopup(){
 }
 
 function age(date){
-    var parts = new Date(Date.parse(date));
-    var dob   = new Date(parseInt(parts[2]), (parseInt(parts[1]) - 1), (parseInt(parts[0]) + 1));
+    var dob = new Date(Date.parse(date));
 
-    var nowDate = new Date(<%= Date.today.year%>, <%= (Date.today.month - 1)%>, <%= (Date.today.day - 1)%>);
+    var nowDate = new Date(Date.parse("<%= Date.today.strftime("%d/%b/%Y")%>"));
     var age = Math.floor((nowDate - dob)/31556952000);
     console.log(age);
     return age;
