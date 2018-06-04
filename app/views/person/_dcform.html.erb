@@ -173,8 +173,9 @@
       </div>
 
       <div class="field">
-        <label for="person_id_number">ID Number</label><br>
+        <label for="id_number">ID Number</label><br>
         <input id="id_number"
+               condition="false"
                name="person[id_number]"
                type="text"
                tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_id');"
