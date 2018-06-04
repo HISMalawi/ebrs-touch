@@ -177,4 +177,11 @@ class Person < ActiveRecord::Base
       type_id = PersonAttributeType.where(name: type).last.id rescue nil
       PersonAttribute.where(person_id: self.person_id, person_attribute_type_id: type_id, voided: 0).last.value rescue nil
     end
+
+    def id_number
+      PersonIdentifier.where(
+          person_id: self.id,
+          person_identifier_type_id: PersonIdentifierType.where(name: "National ID Number").last.id
+      ).last.value
+    end
 end
