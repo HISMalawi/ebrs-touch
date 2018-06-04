@@ -156,7 +156,7 @@
                           :value => Date.today.strftime('%d/%b/%Y'),
                           :absolute_max => Date.today.strftime('%Y-%m-%d'),
                           :fieldtype => "date",
-                          :tt_BeforeUnLoad => "",
+                          :tt_BeforeUnLoad => "validateNID()",
 
         :tt_onLoad =>"dateInterval('person_birthdate')",
                           :tt_onUnload => "__$('person_date_reported').setAttribute('absolute_min', __$('person_birthdate').value.trim());") rescue "" %>
@@ -180,7 +180,7 @@
                condition="false"
                name="person[id_number]"
                type="text"
-               tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_id');"
+               tt_onLoad = "capitalizeAllCharacters('person_id');"
                value="<%= @person[:id_number] rescue nil %>"
                class="input_cell"
                length = 8
@@ -2277,4 +2277,11 @@ function age(date){
     console.log(age);
     return age;
 }
+
+function validateNID(){
+    if (age(__$("person_birthdate").value) >= 16){
+        __$("id_number").setAttribute("condition", "false");
+    }
+}
+
 </script>
