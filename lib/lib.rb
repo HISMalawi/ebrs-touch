@@ -20,6 +20,15 @@ module Lib
         :last_name          => params[:person][:last_name]
     )
 
+		if params[:person][:id_number].present?
+     
+      PersonIdentifier.create(
+                person_id: person.person_id,
+                person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                value: params[:person][:id_number].upcase
+        )
+    end
+
     person
   end
 

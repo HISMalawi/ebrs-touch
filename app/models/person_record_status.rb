@@ -13,7 +13,7 @@ class PersonRecordStatus < ActiveRecord::Base
     trail = self.where(:person_id => person_id, :voided => 0)
     trail.each do |state|
       state.update_attributes(
-          voided: 1,
+          voided: 1, 
           date_voided: Time.now,
           voided_by: user_id
       )
@@ -62,12 +62,18 @@ class PersonRecordStatus < ActiveRecord::Base
     result = []
     PersonRecordStatus.where(person_id: person_id).order("created_at DESC").each do |status|
       user = User.find(status.creator)
+			action = "Status changed to:  '#{status.status.name.titleize.gsub(/^Hq/, "HQ").gsub(/^Dc/, 'DC').gsub(/^Fc/, 'FC')}'"
+			if status.status.name.upcase == "DC-ACTIVE"
+				action  = "New Record Created"
+			elsif status.status.name.upcase == "HQ-ACTIVE"
+				action = "Record Approved By ADR"
+			end
 
       result << {
           "date" => status.created_at.strftime("%d-%b-%Y"),
           "time" => status.created_at.strftime("%I:%M %p"),
           "site" => user.user_role.role.level,
-          "action" => "Status changed to:  '#{status.status.name.titleize.gsub(/^Hq/, "HQ").gsub(/^Dc/, 'DC').gsub(/^Fc/, 'FC')}'",
+          "action" => action,
           "user"   => "#{user.first_name} #{user.last_name} <br /> <span style='font-size: 0.8em;'><i>(#{user.user_role.role.role})</i></span>",
           "comment" => status.comments
       }
