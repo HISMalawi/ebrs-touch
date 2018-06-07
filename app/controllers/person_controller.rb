@@ -133,7 +133,8 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}"
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                "ID Number" => "#{@person.id_number  rescue nil}"
             },
             {
                 ["First Name", "mandatory"] => "#{@name.first_name rescue nil}",
