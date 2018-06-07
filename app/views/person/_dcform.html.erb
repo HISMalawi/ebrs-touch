@@ -2283,11 +2283,11 @@ function age(date){
 function validateNID(){
     if (__$("person_birthdate").value && age(__$("person_birthdate").value) >= 16){
         __$("id_number").setAttribute("condition", "true");
-        __$("id_number").setAttribute("optional", false);
+        __$("id_number").setAttribute("optional", null);
     }else{
         __$("id_number").setAttribute("condition", "false");
         __$("id_number").value = "";
-        __$("id_number").setAttribute("condition", "false");
+        __$("id_number").setAttribute("optional", null);
     }
 
 		checkConditions();
