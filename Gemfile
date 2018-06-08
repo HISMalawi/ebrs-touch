@@ -26,7 +26,7 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem "whitesimilarity"
-
+gem "wkhtmltopdf-binary"
 gem 'mac-address'
 
 group :development, :test do
