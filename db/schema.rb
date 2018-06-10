@@ -285,10 +285,10 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.integer  "gestation_at_birth",                      limit: 4
     t.integer  "number_of_prenatal_visits",               limit: 4
     t.integer  "month_prenatal_care_started",             limit: 4
-    t.integer  "mode_of_delivery_id",                     limit: 4,               null: false
+    t.integer  "mode_of_delivery_id",                     limit: 4
     t.integer  "number_of_children_born_alive_inclusive", limit: 4,   default: 1, null: false
     t.integer  "number_of_children_born_still_alive",     limit: 4,   default: 1, null: false
-    t.integer  "level_of_education_id",                   limit: 4,               null: false
+    t.integer  "level_of_education_id",                   limit: 4
     t.string   "district_id_number",                      limit: 20
     t.integer  "national_serial_number",                  limit: 4
     t.integer  "court_order_attached",                    limit: 1,   default: 0, null: false
@@ -510,9 +510,13 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.datetime "created_at"
   end
 
+  change_column :barcode_identifiers, :barcode_identifier_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
+
   create_table "notification_types", primary_key: "notification_type_id", force: :cascade do |t|
-    t.string   "name",        limit: 45,              null: false
+    t.string   "name",        limit: 100,              null: false
+    t.string   "level",        limit: 45,              null: false
     t.string   "description", limit: 100
+    t.integer   "trigger_status_id"
     t.string   "role_id", limit: 100
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
@@ -521,6 +525,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
   create_table "notification", primary_key: "notification_id", force: :cascade do |t|
     t.integer   "notification_type_id",                  null: false
     t.bigint   "person_record_status_id", limit: 100,        null: false
+    t.bigint   "person_id", limit: 100
     t.integer  "seen",             limit: 1,   default: 0,     null: false
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
@@ -540,12 +545,15 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   add_foreign_key "notification", "notification_types", column: "notification_type_id", primary_key: "notification_type_id", name: "fk_notification_1"
   add_foreign_key "notification", "person_record_statuses", column: "person_record_status_id", primary_key: "person_record_status_id", name: "fk_notification_2"
+  add_foreign_key "notification_types", "statuses", column: "trigger_status_id", primary_key: "status_id", name: "fk_notification_types_1"
+  add_foreign_key "notification", "core_person", column: "person_id", primary_key: "person_id", name: "fk_notification_3"
 
   add_foreign_key "barcode_identifiers", "person", primary_key: "person_id", name: "fk_barcode_identifiers_1"
   add_index "barcode_identifiers", ["value"], name: "value_UNIQUE", unique: true, using: :btree
   ##########################################################################################################################
 
   add_index "users", ["person_id"], name: "fk_users_1_idx", using: :btree
+  #add_index "users", ["username"], name: "username_UNIQUE", unique: true, using: :btree
   add_index "users", ["voided_by"], name: "fk_users_2_idx", using: :btree
 
   add_foreign_key "audit_trails", "audit_trail_types", primary_key: "audit_trail_type_id", name: "fk_audit_trails_1"
