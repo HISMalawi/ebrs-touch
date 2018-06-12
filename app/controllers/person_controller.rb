@@ -578,7 +578,7 @@ class PersonController < ApplicationController
 
   def update
 
-    if ["child_first_name","child_last_name","child_middle_name"].include?(params[:field])
+    if ["child_first_name","child_surname","child_middle_name"].include?(params[:field])
       person_name = PersonName.find_by_person_id(params[:id])
       if params[:person][:first_name] != person_name.first_name  || params[:person][:last_name] != person_name.last_name || params[:person][:middle_name] != person_name.middle_name
         person_name.update_attributes(voided: true, void_reason: 'General edit')
@@ -738,7 +738,7 @@ class PersonController < ApplicationController
       end
     end
 
-    if ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number","mother_birth_date"].include?(params[:field])
+    if ["mother_last_name","mother_first_name", "mother_middle_name", "mother_maiden_name", "mother_id_number","mother_birth_date"].include?(params[:field])
           person_mother = Person.find(params[:id]).mother
           person_mother_name = PersonName.find_by_person_id(person_mother.id)
           if params[:person][:mother][:first_name] != person_mother_name.first_name  || params[:person][:mother][:last_name] != person_mother_name.last_name || params[:person][:mother][:middle_name] != person_mother_name.middle_name
@@ -815,7 +815,7 @@ class PersonController < ApplicationController
         end
     end
 
-    if ["father_last_name","father_first_name","father_middle_name", "father_id_number","mother_birth_date"].include?(params[:field])
+    if ["father_last_name","father_first_name","father_middle_name", "father_id_number","mother_birth_date", "person_surname"].include?(params[:field])
           person_father = Person.find(params[:id]).father
           person_father_name = PersonName.find_by_person_id(person_father.id)
           if params[:person][:father][:first_name] != person_father_name.first_name  || params[:person][:father][:last_name] != person_father_name.last_name || params[:person][:father][:middle_name] != person_father_name.middle_name

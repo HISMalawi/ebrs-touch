@@ -39,7 +39,7 @@
 
 <%= form_for :person, :url => {:controller => "person", :action => "update", params: {id: @person.id, field: @field}} do |f| %>
 
-<% if ["child_first_name","child_last_name","child_middle_name"].include? @field %>
+<% if ["child_first_name","child_surname","child_middle_name"].include? @field %>
 
     <fieldset>
 
@@ -277,7 +277,7 @@
     </fieldset>
 
     <!-- Mother -->
-  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_id_number","mother_birth_date"].include? @field  %>
+  <% elsif ["mother_last_name","mother_first_name", "mother_middle_name", "mother_maiden_name",  "mother_id_number","mother_birth_date"].include? @field  %>
 
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
@@ -626,9 +626,9 @@
 
     </fieldset>
 
-<% elsif ["father_last_name","father_first_name","father_middle_name", "father_id_number"].include? @field  %>
+<% elsif ["father_last_name","father_first_name","father_middle_name", "father_id_number", "person_surname"].include? @field  %>
     
-    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
+    <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
 
       <!-- Father -->
@@ -644,7 +644,7 @@
                class="input_cell"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+                />
       </div>
 
       <div class="field">
@@ -658,7 +658,7 @@
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" />
+                />
       </div>
 
       <div class="field">
@@ -670,8 +670,7 @@
                ajaxURL = "/get_first_names"
                class="input_cell"
                word_min_length = 2
-               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
+               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name'
                optional="true"/>
       </div>
 
@@ -696,10 +695,9 @@
                fieldtype="date"
                optional="true"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
-        <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden" condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'" optional='true'/>
+        <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden"  optional='true'/>
 
       </div>
 
@@ -707,7 +705,7 @@
 
 <% elsif ["father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
 
-    <fieldset condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
+    <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
 
       <div class="field">
@@ -717,7 +715,6 @@
                type="text"
                value="<%= @person[:father][:citizenship] rescue nil %>"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                ajaxURL="/search_by_nationality" />
       </div>
@@ -753,7 +750,7 @@
                type="text"
                value="<%= @person[:father][:current_district] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi'"
                ajaxURL="/search_by_district"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);" optional="true"/>
       </div>
@@ -765,7 +762,7 @@
                type="text"
                value="<%= @person[:father][:current_ta] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi' "
                ajaxURL="/search_by_ta"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_village').getAttribute('section'))][parseInt(__$('textForperson_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_current_district').value + '&ta=' + __$('textForperson_father_current_ta').value);"
                optional="true" />
@@ -778,7 +775,7 @@
                type="text"
                value="<%= @person[:father][:current_village] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() == 'Malawi' "
                ajaxURL="/search_by_village" optional="true" />
       </div>
 
@@ -794,7 +791,7 @@
         <input id="person_father_foreigner_current_district" name="person[father][foreigner_current_district]" type="text"
                value="<%= @person[:father][:foreigner_current_district] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
                optional="true"/>
       </div>
 
@@ -806,7 +803,7 @@
 	       type="text"
 	       value="<%= @person[:father][:foreigner_current_village] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
                optional="true"/>
       </div>
 
@@ -817,7 +814,7 @@
 	       type="text"
                value="<%= @person[:father][:foreigner_current_ta] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
                optional="true"/>
       </div>
 
@@ -834,7 +831,6 @@
         <br>
         <select id="father_home_address_same_as_physical"
         name="home_address_same_as_physical"
-        condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
         class="input_cell"
         tt_onUnload="if(__$('textForfather_home_address_same_as_physical').value.trim() == 'Yes'){loadFathersAddress();} else {unloadFathersAddress();}" />
         <option></option>
@@ -850,7 +846,6 @@
                type="text"
                value="<%= @person[:father][:home_district] rescue nil %>"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                ajaxURL="/search_by_district"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_home_ta').getAttribute('section'))][parseInt(__$('textForperson_father_home_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_home_district').value);" optional="true" />
       </div>
@@ -862,7 +857,6 @@
                type="text"
                value="<%= @person[:father][:home_ta] rescue nil %>"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                ajaxURL="/search_by_ta"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_home_village').getAttribute('section'))][parseInt(__$('textForperson_father_home_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_home_district').value + '&ta=' + __$('textForperson_father_home_ta').value);"
                optional="true"/>
