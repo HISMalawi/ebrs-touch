@@ -895,7 +895,7 @@
       <div class="field">
         <label for="informant_same_as_father">Father is informant?</label><br>
         <select id="informant_same_as_father" name="informant_same_as_father" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
-           condition="__$('person_father_last_name').value.trim().length > 0 && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes');">
+           ">
           <option></option>
           <option value="Yes" >Yes</option>
           <option value="No" >No</option>
@@ -909,6 +909,7 @@
                name="person[informant][last_name]"
                type="text"
                word_min_length = 2
+							 optional = "true"
                ajaxURL = "/get_last_names"
                tt_onLoad = "checkSpace('person_informant_last_name');validateNameLength('person_informant','person_informant_last_name',1)"
                value="<%= @person[:informant][:last_name] rescue nil %>"
@@ -921,6 +922,7 @@
                name="person[informant][first_name]"
                type="text"
                word_min_length = 2
+							 optional = "true"
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_first_name');validateNameLength('person_informant','person_informant_first_name',2)"
                value="<%= @person[:informant][:first_name] rescue nil %>"
@@ -933,6 +935,7 @@ f
                name="person[informant][middle_name]"
                type="text"
                word_min_length = 2
+							 optional = "true"
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_informant_middle_name');validateNameLength('person_informant','person_informant_middle_name',3)"
                value="<%= @person[:informant][:middle_name] rescue nil %>"
@@ -944,6 +947,7 @@ f
         <input id="person_informant_id_number"
                name="person[informant][id_number]"
                type="text"
+							 optional = "true"
                value="<%= @person[:informant][:id_number] rescue nil %>"
                class="input_cell"
                length = 8
