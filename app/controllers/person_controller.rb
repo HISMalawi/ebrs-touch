@@ -1402,6 +1402,18 @@ class PersonController < ApplicationController
     @father_address = @father_person.addresses.last rescue nil
     @father_name = @father_person.person_names.last rescue nil
 
+		if @mother_person.present?
+        mother_birth_date = @mother_person.birthdate.present? && @mother_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil
+    else
+        mother_birth_date = nil
+    end
+
+    if @father_person.present?
+        father_birth_date = @father_person.birthdate.present? && @father_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  						@father_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil
+    else
+        father_birth_date = nil
+    end
+
     @informant_person = @person.informant rescue nil
     @informant_address = @informant_person.addresses.last rescue nil
     @informant_name = @informant_person.person_names.last rescue nil
@@ -1433,7 +1445,7 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}"
+                "Birth" => "#{@birth_details.brn  rescue nil}"
             },  
             {
                 ["First Name","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_first_name"] => "#{@name.first_name rescue nil}",
@@ -1482,7 +1494,7 @@ class PersonController < ApplicationController
                 ["Maiden Surname", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_maiden_name"] => "#{@mother_name.last_name rescue nil}"
             },
             {
-                ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_birth_date"] => "#{@mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_birth_date"] => "#{mother_birth_date}",
                 ["Nationality", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_citizenship"] => "#{@mother_person.citizenship rescue nil}",
                 ["ID Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_id_number"] => "#{@mother_person.id_number rescue nil}"
             },
@@ -1517,7 +1529,7 @@ class PersonController < ApplicationController
                 ["Surname", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=person_surname" ] => "#{@father_name.last_name rescue nil}"
             },
             {
-                ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_birthdate"] => "#{@father_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_birthdate"] => "#{father_birth_date}",
                 ["Nationality", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_citizenship"] => "#{@father_person.citizenship rescue nil}",
                 ["ID Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_id_number"] => "#{@father_person.id_number rescue nil}"
             },

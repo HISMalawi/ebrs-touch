@@ -670,7 +670,7 @@
                ajaxURL = "/get_first_names"
                class="input_cell"
                word_min_length = 2
-               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name'
+               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name'"
                optional="true"/>
       </div>
 
@@ -694,7 +694,6 @@
                class="input_cell"
                fieldtype="date"
                optional="true"
-               tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
         <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden"  optional='true'/>
@@ -927,7 +926,7 @@
                value="<%= @person[:informant][:first_name] rescue nil %>"
                class="input_cell"/>
       </div>
-
+f
       <div class="field">
         <label for="person_informant_middle_name">Other Name</label><br>
         <input id="person_informant_middle_name"
