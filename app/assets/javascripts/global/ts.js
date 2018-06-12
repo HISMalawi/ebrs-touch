@@ -2245,7 +2245,7 @@ function checkDate(id, byAge) {
 
 /*
  parent:   control to attach to
- boxType:  type of textbox [text|password|barcode|number]
+ boxType:  type of textbox [text|passedrd|barcode|number]
  [target]:   control to update onchange (OPTIONAL)
  [callback]: callback function to call when barcode scanned (OPTIONAL)
  */

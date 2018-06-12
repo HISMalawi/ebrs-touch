@@ -181,11 +181,12 @@
                condition="false"
                name="person[id_number]"
                type="text"
-               tt_onLoad = "capitalizeAllCharacters('person_id');"
+							 regex = "^[A-Z0-9]{6}$"
+               tt_onLoad = "capitalizeAllCharacters('person_id'); makeCompulsory('id_number')"
+							 tt_BeforeUnLoad = ""
                value="<%= @person[:id_number] rescue nil %>"
-               class="input_cell"
+               class="input_cell"				
                length = 8
-               optional = false
          />
       </div>
 
@@ -2291,6 +2292,24 @@ function validateNID(){
     }
 
 		checkConditions();
+}
+
+function makeCompulsory(id){
+	btnNext.onmousedown = function(){
+		if (__$(id).value.trim().length > 0){
+
+			if (__$(id).value.trim().length == 8){
+						var section =  parseInt(__$("textFor" + id).getAttribute("section"));
+						var pos = parseInt(__$("textFor" + id).getAttribute("pos"));
+						loadPage(section + 1);
+			}else{
+					showMsg("National ID must be 8 charaters");
+			}
+			
+		}else{ 
+			showMsg("Please input National ID, Age is atleast 16");
+		}
+	}
 }
 
 </script>
