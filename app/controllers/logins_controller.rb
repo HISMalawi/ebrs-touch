@@ -55,12 +55,12 @@ class LoginsController < ApplicationController
     logout!
     unless SETTINGS['app_gate_url'].blank?
       
-      redirect_to SETTINGS['app_gate_url'].to_s
+      redirect_to SETTINGS['app_gate_url'].to_s and return
     else
-      flash[:notice] = 'You have been logged out. Good Bye!'
-      redirect_to "/", referrer_param => referrer_path
+      #iflash[:notice] = 'You have been logged out. Good Bye!'
+      redirect_to "/", referrer_param => referrer_path and return
     end
-    redirect_to "/login"
+    redirect_to "/login" and return
   end
 
   def set_context
