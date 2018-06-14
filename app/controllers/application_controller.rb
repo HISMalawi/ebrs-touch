@@ -173,7 +173,17 @@ class ApplicationController < ActionController::Base
     return person
     
   end
-  
+
+  def print_and_redirect(print_url, redirect_url, message = "Printing, please wait...", show_next_button = false, patient_id = nil)
+    @print_url = print_url
+    @redirect_url = redirect_url
+    @message = message
+    @show_next_button = show_next_button
+    @patient_id = patient_id
+    render :template => 'person/print', :layout => nil
+  end
+
+
   private
 
   def check_if_logged_in

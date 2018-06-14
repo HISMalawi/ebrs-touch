@@ -476,19 +476,19 @@ class PersonController < ApplicationController
   
 
     if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
-      
-      redirect_to "/person/new?id=#{@person.id}"
+
+      if application_mode == 'Facility'
+        print_registration(@person.id, "/person/new?id=#{@person.id}") and return
+      else
+        redirect_to "/person/new?id=#{@person.id}" and return
+      end
 
     else
 
        if application_mode == 'Facility'
-
-          redirect_to '/view_cases'
-
+         print_registration(@person.id, '/view_cases') and return
         else
-
-          redirect_to '/view_cases'
-
+          redirect_to '/view_cases' and return
         end
     end
 
@@ -2049,5 +2049,43 @@ class PersonController < ApplicationController
     render :text => {'person_id' => params['person_id'],
                      'result' => result}.to_json
   end
-  
+
+  def print_registration(person_id, redirect)
+
+    print_and_redirect("/person_id_label?person_id=#{person_id}", redirect)
+  end
+
+  def person_id_label
+    person = Person.find(params[:person_id])
+    print_string = person_label(person)
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:person_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def person_label(person)
+
+    sex =  person.gender.match(/F/i) ? "(F)" : "(M)"
+    name = PersonName.where(person_id: person.id).last
+    details = PersonBirthDetail.where(person_id: person.id).first
+    place_of_birth = Location.find(SETTINGS['location_id']).name
+    birth_district = Location.find(details.district_of_birth).name
+    mother_name = PersonService.mother(person.person_id)
+    informant_name = PersonService.informant(person.person_id)
+
+    label = ZebraPrinter::StandardLabel.new
+    label.font_size = 2
+    label.font_horizontal_multiplier = 1
+    label.font_vertical_multiplier = 1
+    label.left_margin = 50
+    label.draw_barcode(50,180,0,1,5,15,120,false,"#{details.facility_serial_number}")
+    label.draw_multi_text("ID Number: #{details.facility_serial_number}")
+    label.draw_multi_text("Child: #{name.first_name + ' ' + name.last_name} #{sex}")
+    label.draw_multi_text("DOB: #{person.birthdate.to_date.strftime("%d/%b/%Y")}")
+    label.draw_multi_text("Birth Place: #{place_of_birth} / #{birth_district}")
+    label.draw_multi_text("Mother: #{mother_name.first_name + ' ' + mother_name.last_name}")
+    label.draw_multi_text("Child Informant: #{informant_name.first_name + ' ' + informant_name.last_name}")
+    label.draw_multi_text("Date of Reporting: #{(details.acknowledgement_of_receipt_date.strftime('%d/%B/%Y') rescue nil)}")
+    label.print(1)
+  end
+
+
 end

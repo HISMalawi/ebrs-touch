@@ -105,6 +105,22 @@ module PersonService
     result
   end
 
+  def self.informant(person_id)
+    birth_details = PersonBirthDetail.where(person_id: person_id).first
+
+    relationship_name = "Informant"
+    result = nil
+    relationship_type = PersonRelationType.find_by_name(relationship_name)
+
+    relationship = PersonRelationship.where(:person_a => person_id, :person_relationship_type_id => relationship_type.id).last
+
+    unless relationship.blank?
+      result = PersonName.where(:person_id => relationship.person_b).last
+    end
+
+    result
+  end
+
   def self.query_for_display(states, types=['Normal', 'Abandoned', 'Adopted', 'Orphaned'])
 
     state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]

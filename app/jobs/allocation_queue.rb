@@ -2,6 +2,24 @@ class AllocationQueue
   include SuckerPunch::Job
   workers 1
 
+  def calculate_check_digit(serial_number)
+
+    number = serial_number.to_s
+    number = number.split(//).collect { |digit| digit.to_i }
+    parity = number.length % 2
+
+    sum = 0
+    number.each_with_index do |digit,index|
+      digit = digit * 2 if index%2!=parity
+      digit = digit - 9 if digit > 9
+      sum = sum + digit
+    end
+
+    check_digit = (9 * sum) % 10
+
+    return check_digit
+  end
+
   def perform()
 
     FileUtils.touch("#{Rails.root}/public/sentinel")
@@ -64,19 +82,39 @@ class AllocationQueue
 
         elsif record.person_identifier_type_id == PersonIdentifierType.where(
             :name => "Facility number").last.person_identifier_type_id
+
           if !fsn.blank?
             record.update_attributes(assigned: 1)
             next
           end
 
-          if SETTINGS['location_id'] && SETTINGS['location_id'] == 'FC'
-            last = (PersonBirthDetail.where(location_created_at: SETTINGS['location_id']).select(" MAX(facility_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
-            num = last + 1
+          if SETTINGS['location_id'] && SETTINGS['application_mode'] == 'FC'
+            code = Location.find(SETTINGS['location_id']).code.squish
+            left = "P5#{code}"
+            from = left.length + 1
+            length = 6
 
-            person_birth_detail.update_attributes(facility_serial_number: num)
+            SuckerPunch.logger.info "111------------ "
+
+            last = (PersonBirthDetail.where(location_created_at: SETTINGS['location_id']).select(" MAX(SUBSTRING(facility_serial_number, #{from}, #{length})) AS last_num")[0]['last_num'] rescue 0).to_i
+            num = last + 1
+            num =  "%06d" % num
+            SuckerPunch.logger.info "#{num} ----- ====="
+
+            checkdigit = calculate_check_digit(num)
+            serial_number =  "#{left}#{num}#{checkdigit}"
+            SuckerPunch.logger.info "#{serial_number} ----- ====="
+
+            person_birth_detail.update_attributes(facility_serial_number: serial_number)
             record.update_attributes(assigned: 1)
 
-            PersonIdentifier.new_identifier(record.person_id, 'Facility Number', person_birth_detail.facility_serial_number)
+            SuckerPunch.logger.info "Assigned ----- ====="
+
+            p = PersonIdentifier.new
+            p.person_id = record.person_id
+            p.value = serial_number
+            p.person_identifier_type_id = PersonIdentifierType.where(name: "Facility Number").last.id
+            p.save
           end
         end
       end

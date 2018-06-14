@@ -7,5 +7,6 @@ require "bantu_soundex"
 require "csv"
 require "simple_elastic_search"
 require "levenshtein"
+require "zebra_printer"
 
 

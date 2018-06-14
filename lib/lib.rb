@@ -461,6 +461,22 @@ module Lib
     else
        status = PersonRecordStatus.new_record_state(person.id, 'DC-ACTIVE')
     end
+
+    if SETTINGS["application_mode"] == "FC"
+      allocation = IdentifierAllocationQueue.new
+      allocation.person_id = person.id
+      allocation.assigned = 0
+      allocation.creator = User.current.id
+      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Facility Number").last.person_identifier_type_id
+      allocation.created_at = Time.now
+      allocation.save
+
+      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
+      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
+        AllocationQueue.perform_in(1)
+      end
+    end
+
     return status
   end
   

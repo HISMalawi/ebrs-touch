@@ -229,6 +229,16 @@ function initTable(){
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
+                            <% if SETTINGS["application_mode"] == "FC"%>
+                                json['data'][i][last_index] += '<td class="action-button"> ' +
+                                '<div onclick="javascript:location=\'/person_id_label?person_id=' + person_id + '?next_path=<%= request.path%> \'"     ' +
+                                'url=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
+                                '    class="action-btn btn btn-success btn-xs">' +
+                                '<%= image_tag "printer2.png", class: 'btn-images' %></div>' +
+                                '</td>';
+
+                            <% end %>
+
                             json['data'][i][last_index] +=
                                     '<td class="sync" person_id='+ person_id + ' id='+ person_id + '> ' +
                                     '<div class="action-btn btn btn-success btn-xs">' +
@@ -249,6 +259,11 @@ function initTable(){
     });
 
 }
+
+function showSpinner(){
+
+}
+
 function checkSync(){
     var nodes = document.getElementsByClassName("sync");
    for (var i = 0; i < nodes.length; i ++){

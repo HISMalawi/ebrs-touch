@@ -173,6 +173,10 @@ Rails.application.routes.draw do
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'
 
+  get "/person_label" => 'person#person_label'
+  get "/person_id_label" => 'person#person_id_label'
+  get "/print_registration" => 'person#print_registration'
+
 
   get '/filter' => 'dc#filter'
   get '/rfilter' => 'dc#rfilter'
