@@ -36,7 +36,6 @@
       return this.toUpperCase();
     };
 </script>
-
 <%= form_for :person, :url => {:controller => "person", :action => "update", params: {id: @person.id, field: @field}} do |f| %>
 
 <% if ["child_first_name","child_surname","child_middle_name"].include? @field %>
@@ -288,7 +287,7 @@
         <input id="person_mother_last_name"
         			 name="person[mother][last_name]"
         			 type="text"
-        			 value="<%= @person[:mother][:last_name] rescue nil %>"
+        			  value = "<%= @person.mother.last_name %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
                word_min_length = 2
@@ -302,11 +301,11 @@
         <input id="person_mother_first_name" 
             name="person[mother][first_name]"
           type="text"
-        value="<%= @person[:mother][:first_name] rescue nil %>"
-        ajaxURL = "/get_first_names"
-        class="input_cell"
-        word_min_length = 2
-        tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
+          ajaxURL = "/get_first_names"
+          class="input_cell"
+          value = "<%= @person.mother.first_name %>"
+          word_min_length = 2
+          tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
          />
       </div>
 
@@ -315,7 +314,7 @@
         <input id="person_mother_middle_name"
                name="person[mother][middle_name]"
                type="text"
-               value="<%= @person[:mother][:middle_name] rescue nil %>"
+               value = "<%= @person.mother.middle_name %>"
                class="input_cell"
                ajaxURL = "/get_first_names"
                word_min_length = 2
@@ -638,7 +637,7 @@
         <input id="person_father_last_name"
                name="person[father][last_name]"
                type="text"
-               value="<%= @person[:father][:last_name] rescue nil %>"
+               value = "<%= @person.father.last_name %>"
                tt_onUnload = "appendValue('person_father_last_name')"
                ajaxURL = "/get_last_names"
                class="input_cell"
@@ -653,7 +652,7 @@
                name="person[father][first_name]"
                type="text"
                word_min_length = 2
-               value="<%= @person[:father][:first_name] rescue nil %>"
+               value = "<%= @person.father.first_name %>"
                tt_onUnload = "appendValue('person_father_first_name')"
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
@@ -666,7 +665,7 @@
         <input id="person_father_middle_name"
                name="person[father][middle_name]"
                type="text"
-               value="<%= @person[:father][:middle_name] rescue nil %>"
+               value = "<%= @person.father.middle_name %>"
                ajaxURL = "/get_first_names"
                class="input_cell"
                word_min_length = 2
