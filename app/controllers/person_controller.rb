@@ -1681,7 +1681,7 @@ class PersonController < ApplicationController
     @name = @person.person_names.last
 
     @person_prev_values = {}
-    name_fields = ['first_name','last_name','middle_name',"gender","birthdate","birth_location_id"]
+    name_fields = ['first_name','last_name','middle_name',"gender","birthdate","birth_location_id","citizenship"]
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
         if trail.present?
@@ -1701,7 +1701,9 @@ class PersonController < ApplicationController
     @address = @person.addresses.last
 
     @mother_person = @person.mother
+    @mother_address = @mother_person.addresses.last
     @mother_name = @mother_person.person_names.last rescue nil
+    @mother_nationality = Location.find(@mother_address.citizenship).country
     @mother_prev_values = {}
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: @mother_person.id, field: field).order('created_at').last
@@ -1719,7 +1721,8 @@ class PersonController < ApplicationController
 
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
-
+    @father_address = @father_person.addresses.last
+    @father_nationality = Location.find(@father_address.citizenship).country
     @father_prev_values = {}
     name_fields.each do |field|
         break if @father_person.blank?
@@ -1736,7 +1739,8 @@ class PersonController < ApplicationController
                "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
         @person_prev_values["father_name"] = father_name
     end 
-    @targeturl = session[:list_url] #params[:next_path]
+    
+    @targeturl = session[:list_url] 
     @section = 'Ammend Case'
     render :layout => "facility"
   end
@@ -1873,6 +1877,24 @@ class PersonController < ApplicationController
                 person_a: person.id, person_b: @father_person.person_id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
         )
+    end
+
+    if fields.include? "Nationality of Mother"
+        person = Person.find(params[:id])
+        @mother_person = person.mother
+        location = Location.where(country: params[:person][:mother][:citizenship]).first
+        @mother_address = @mother_person.addresses.last
+        @mother_address.citizenship = location.id
+        @mother_address.save
+    end
+
+    if fields.include? "Nationality of Father"
+        person = Person.find(params[:id])
+        @father_person = person.father
+        location = Location.where(country: params[:person][:father][:citizenship]).first
+        @father_address = @father_person.addresses.last
+        @father_address.citizenship = location.id
+        @father_address.save
     end
     redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=#{params[:next_path]}" 
   end

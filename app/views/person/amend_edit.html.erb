@@ -221,6 +221,36 @@
 
     </fieldset>
     <%end%>
+    <%if params[:fields].include? "Nationality of Mother" %>
+     <fieldset>
+        <legend><font size='5' style='border: 2px;'>Details of Mother</font></legend>
+
+        <div class="field">
+          <label for="person_mother_citizenship">Nationality of Mother</label><br>
+          <input id="person_mother_citizenship"
+                 name="person[mother][citizenship]"
+                 type="text"
+                 value=""
+                 class="input_cell"
+                 ajaxURL="/search_by_nationality" />
+        </div>
+      </fieldset>
+    <%end%>
+    <%if params[:fields].include? "Nationality of Father" %>
+     <fieldset>
+        <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
+
+        <div class="field">
+          <label for="person_father_citizenship">Nationality of Father</label><br>
+          <input id="person_father_citizenship"
+                 name="person[father][citizenship]"
+                 type="text"
+                 value=""
+                 class="input_cell"
+                 ajaxURL="/search_by_nationality" />
+        </div>
+      </fieldset>
+    <%end%>
 </form>
 <script type="text/javascript">
 	init();
