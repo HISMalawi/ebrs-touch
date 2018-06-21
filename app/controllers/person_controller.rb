@@ -980,6 +980,22 @@ class PersonController < ApplicationController
         redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
 
+    if ["national_id"].include?(params[:field])
+        existing = PersonIdentifier.where("person_id = #{params[:id]} AND
+                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0").last
+        if existing.present?
+                existing.voided = 1
+        end
+
+        PersonIdentifier.create(
+                person_id: params[:id],
+                person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                value: params[:person][:national_id].upcase
+        )
+
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
   end   
 
   def person_for_elastic_search(core_person,params)
@@ -1445,7 +1461,8 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth" => "#{@birth_details.brn  rescue nil}"
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue 'XXXXXXXX')
             },  
             {
                 ["First Name","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_first_name"] => "#{@name.first_name rescue nil}",

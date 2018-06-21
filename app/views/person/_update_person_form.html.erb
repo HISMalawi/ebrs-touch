@@ -1059,6 +1059,17 @@ f
     <div class="actions">
       <%#= f.submit :id => "btnAction", :class => "buttons blue", :style => "position: absolute; right: 160px; bottom: 20px;" %>
     </div>
+<%elsif ["national_id"].include? @field%>
+  <fieldset>
+    <legend><font size='5' style='border: 2px;'>Person Details...</font></legend>
+      <div class="field">
+        <label for="person_national_id">National ID</label><br>
+        <input id="person_national_id" name="person[national_id]" type="text" value=""
+               length = "8"
+               class="input_cell" />
+      </div>
+
+  </fieldset>
 <% end %>
 <% end %>
 
