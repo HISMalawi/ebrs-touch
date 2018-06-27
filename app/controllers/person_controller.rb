@@ -614,6 +614,8 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
+
+        birth_details.place_of_birth = Location.where(name: "Home").first.id
         birth_details.save
 
       elsif params[:person][:place_of_birth] == 'Hospital'
@@ -631,6 +633,7 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
+        birth_details.place_of_birth = Location.where(name: "Hospital").first.id
         birth_details.save
 
       else #Other
@@ -639,7 +642,8 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
-        birth_details.other_birth_location = other_birth_location
+        birth_details.other_birth_location = other_place_of_birth 
+        birth_details.place_of_birth = Location.where(name: "Other").first.id
         birth_details.save
       end
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return

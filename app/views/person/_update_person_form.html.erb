@@ -118,8 +118,8 @@
       <legend><font size='5' style='border: 2px;'>Details of person Continued..</font></legend>
 
       <div class="field">
-        <label for="place_of_birth">Place of birth</label><br>
-        <select id="place_of_birth" name="person[place_of_birth]" class="input_cell" >
+        <label for="person_place_of_birth">Place of birth</label><br>
+        <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" >
           <option></option>
           <option <%= ((@person.place_of_birth rescue nil) == "Home" ? "selected" : "") %> >Home</option>
           <option <%= ((@person.place_of_birth rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
@@ -133,9 +133,9 @@
         <input id="person_birth_district"
                name="person[birth_district]"
         			 type="text"
-        			 condition="<%= @person.place_of_birth != 'Hospital' %>"
         			 ajaxURL = "/search_by_district"
         			 class="input_cell"
+               tt_onUnLoad = "__$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_birth_district').value)"
                 />
       </div>
       
@@ -146,7 +146,7 @@
                id="person_hospital_of_birth"
                name="person[hospital_of_birth]"
                class ="input_cell"
-               condition ="<%= @person.place_of_birth == 'Hospital' %>"
+               condition ="__$('person_place_of_birth').value == 'Hospital'"
                ajaxURL = "/search_by_hospital" >
       </div>
 
@@ -157,7 +157,7 @@
                name="person[birth_ta]" 
                id="person_birth_ta"
                class = "input_cell"
-               condition="<%= @person.place_of_birth == 'Home' %>"
+               condition ="__$('person_place_of_birth').value == 'Home'"
                ajaxURL = "/search_by_district"
                tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
@@ -167,7 +167,7 @@
         <br>
         <input type="text" name="person[birth_village]" class = "input_cell"
         id="person_birth_village"
-        condition="<%= @person.place_of_birth == 'Home' %>"
+        condition ="__$('person_place_of_birth').value == 'Home'"
         ajaxURL = "/search_by_village">
       </div>
       <div class="field">
@@ -176,7 +176,7 @@
         <input type="text" 
                name="person[other_birth_place_details]" 
                class ="input_cell" 
-               condition="<%= @person.place_of_birth == 'Other' %>"
+               condition ="__$('person_place_of_birth').value == 'Other'"
                id="person_other_birth_place_details">
       </div>
 
@@ -713,7 +713,6 @@
                type="text"
                value="<%= @person[:father][:citizenship] rescue nil %>"
                class="input_cell"
-               tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                ajaxURL="/search_by_nationality" />
       </div>
 
@@ -726,20 +725,6 @@
          />
       </div>
       
-      <div class="field">
-        <label for="same_address_with_mother">Same as mother's?</label><br>
-        <br>
-        <select id="same_address_with_mother"
-                name="same_address_with_mother"
-                class="input_cell"
-                tt_onUnload="nationality();">
-          <option></option>
-          <option value="Yes" >Yes</option>
-          <option value="No" >No</option>
-
-        </select>
-
-      </div>
 
       <div class="field">
         <label for="person_father_current_district">District</label><br>
@@ -780,7 +765,7 @@
     </fieldset>
 
 
-    <fieldset condition="__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
+    <fieldset condition="__$('person_father_residential_country').value.trim() != 'Malawi'">
 
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical residential address</font></legend>
 
