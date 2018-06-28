@@ -34,6 +34,8 @@ class PersonController < ApplicationController
   end
 
   def loc(id, tag=nil)
+    location = Location.find(id)
+    return location.name if location.present?
     tag_id = LocationTag.where(name: tag).last.id rescue nil
     result = nil
     if tag_id.blank?
@@ -866,7 +868,7 @@ class PersonController < ApplicationController
           person_address.current_district  = Location.find_by_name(params[:person][:father][:current_district]).id
         end
         if params[:person][:father][:current_ta].present?
-          person_address.current_ta = Location.find_by_name(params[:person][:father][:current_district]).id
+          person_address.current_ta = Location.find_by_name(params[:person][:father][:current_ta]).id
         end
         if params[:person][:father][:current_village].present?
           person_address.current_village = Location.find_by_name(params[:person][:father][:current_village]).id
@@ -879,7 +881,6 @@ class PersonController < ApplicationController
     if ["father_address_home_district","father_address_home_ta","father_address_home_village"].include?(params[:field])
         person_father = Person.find(params[:id]).father
         person_address = PersonAddress.find_by_person_id(person_father.id)
-
         if params[:person][:father][:home_district].present?
           person_address.home_district  = Location.find_by_name(params[:person][:father][:home_district]).id
         end
@@ -1420,6 +1421,7 @@ class PersonController < ApplicationController
 
     @father_person = @person.father
     @father_address = @father_person.addresses.last rescue nil
+
     @father_name = @father_person.person_names.last rescue nil
 
 		if @mother_person.present?

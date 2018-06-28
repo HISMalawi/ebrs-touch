@@ -762,13 +762,6 @@
                ajaxURL="/search_by_village" optional="true" />
       </div>
 
-    </fieldset>
-
-
-    <fieldset condition="__$('person_father_residential_country').value.trim() != 'Malawi'">
-
-      <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical residential address</font></legend>
-
       <div class="field">
         <label for="person_father_foreigner_current_district">District/State</label><br>
         <input id="person_father_foreigner_current_district" name="person[father][foreigner_current_district]" type="text"
@@ -806,21 +799,8 @@
 
 <% elsif ["father_address_home_district","father_address_home_ta","father_address_home_village"].include? @field  %>
     
-    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'">
+    <fieldset >
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Home Address</font></legend>
-
-      <div class="field">
-        <label for="father_home_address_same_as_physical">Home address same as the physical address?</label>
-        <br>
-        <select id="father_home_address_same_as_physical"
-        name="home_address_same_as_physical"
-        class="input_cell"
-        tt_onUnload="if(__$('textForfather_home_address_same_as_physical').value.trim() == 'Yes'){loadFathersAddress();} else {unloadFathersAddress();}" />
-        <option></option>
-        <option value="Yes" >Yes</option>
-        <option value="No" >No</option>
-      </select>
-    </div>
 
       <div class="field">
         <label for="person_father_home_district">District</label><br>
@@ -852,7 +832,6 @@
                type="text"
                value="<%= @person[:father][:home_village] rescue nil %>"
                class="input_cell"
-               condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'"
                ajaxURL="/search_by_village" optional="true" />
       </div>
 
