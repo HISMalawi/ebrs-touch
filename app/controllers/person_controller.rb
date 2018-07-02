@@ -793,7 +793,7 @@ class PersonController < ApplicationController
           person_address.current_district  = Location.find_by_name(params[:person][:mother][:current_district]).id
         end
         if params[:person][:mother][:current_ta].present?
-          person_address.current_ta = Location.find_by_name(params[:person][:mother][:current_district]).id
+          person_address.current_ta = Location.find_by_name(params[:person][:mother][:current_ta]).id
         end
         if params[:person][:mother][:current_village].present?
           person_address.current_village = Location.find_by_name(params[:person][:mother][:current_village]).id
