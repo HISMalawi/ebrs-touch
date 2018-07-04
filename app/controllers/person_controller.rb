@@ -822,7 +822,14 @@ class PersonController < ApplicationController
     end
 
     if ["father_last_name","father_first_name","father_middle_name", "father_id_number","mother_birth_date", "person_surname"].include?(params[:field])
-          person_father = Person.find(params[:id]).father
+          person = Person.find(params[:id])
+          person_father = person.father
+
+          if person_father.blank?
+              father   = Lib.new_father(person, params, 'Father')
+              redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+          end
+
           person_father_name = PersonName.find_by_person_id(person_father.id)
           if params[:person][:father][:first_name] != person_father_name.first_name  || params[:person][:father][:last_name] != person_father_name.last_name || params[:person][:father][:middle_name] != person_father_name.middle_name
             person_father_name.update_attributes(voided: true, void_reason: 'General edit')

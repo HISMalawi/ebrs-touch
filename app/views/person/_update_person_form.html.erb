@@ -626,83 +626,256 @@
     </fieldset>
 
 <% elsif ["father_last_name","father_first_name","father_middle_name", "father_id_number", "person_surname"].include? @field  %>
-    
-    <fieldset>
+    <% if @person.father.present? %>
+        <fieldset>
+          <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
+
+          <!-- Father -->
+
+          <div class="field">
+            <label for="person_father_last_name">Surname</label><br>
+            <input id="person_father_last_name"
+                   name="person[father][last_name]"
+                   type="text"
+                   value = "<%= @person.father.last_name rescue '' %>"
+                   tt_onUnload = "appendValue('person_father_last_name')"
+                   ajaxURL = "/get_last_names"
+                   class="input_cell"
+                   word_min_length = 2
+                   tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
+                    />
+          </div>
+
+          <div class="field">
+            <label for="person_father_first_name">First Name</label><br>
+            <input id="person_father_first_name"
+                   name="person[father][first_name]"
+                   type="text"
+                   word_min_length = 2
+                   value = "<%= @person.father.first_name rescue '' %>"
+                   tt_onUnload = "appendValue('person_father_first_name')"
+                   ajaxURL = "/get_first_names"
+                   tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
+                   class="input_cell"
+                    />
+          </div>
+
+          <div class="field">
+            <label for="person_father_middle_name">Other Name</label><br>
+            <input id="person_father_middle_name"
+                   name="person[father][middle_name]"
+                   type="text"
+                   value = "<%= @person.father.middle_name rescue '' %>"
+                   ajaxURL = "/get_first_names"
+                   class="input_cell"
+                   word_min_length = 2
+                   tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name'"
+                   optional="true"/>
+          </div>
+
+          <div class="field">
+            <label for="person_father_id_number">ID Number</label><br>
+            <input id="person_father_id_number"
+                   name="person[father][id_number]"
+                   type="text"
+                   value="<%= @person[:father][:id_number] rescue nil %>"
+                   length = 8
+                   class="input_cell"
+                   tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
+                   optional="true"/>
+          </div>
+
+        </fieldset>
+      <%else%>
+      <fieldset>
+          <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
+
+          <!-- Father -->
+
+          <div class="field">
+            <label for="person_father_last_name">Surname</label><br>
+            <input id="person_father_last_name"
+                   name="person[father][last_name]"
+                   type="text"
+                   value = "<%= @person.father.last_name rescue '' %>"
+                   ajaxURL = "/get_last_names"
+                   class="input_cell"
+                   word_min_length = 2
+                   tt_onLoad = "checkSpace('person_father_last_name')"
+                    />
+          </div>
+
+          <div class="field">
+            <label for="person_father_first_name">First Name</label><br>
+            <input id="person_father_first_name"
+                   name="person[father][first_name]"
+                   type="text"
+                   word_min_length = 2
+                   value = "<%= @person.father.first_name rescue '' %>"
+                   ajaxURL = "/get_first_names"
+                   tt_onLoad = "checkSpace('person_father_first_name')"
+                   class="input_cell"
+                    />
+          </div>
+
+          <div class="field">
+            <label for="person_father_middle_name">Other Name</label><br>
+            <input id="person_father_middle_name"
+                   name="person[father][middle_name]"
+                   type="text"
+                   value = "<%= @person.father.middle_name rescue '' %>"
+                   ajaxURL = "/get_first_names"
+                   class="input_cell"
+                   word_min_length = 2
+                   tt_onLoad = "checkSpace('person_father_middle_name')"
+                   optional="true"/>
+          </div>
+
+        </fieldset>
+
+        <fieldset>
+          <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
+          <div class="field">
+              <label for="person_father_birthdate">Date of Birth</label><br>
+
+              <input id="person_father_birthdate" name="person[father][birthdate]" type="text"
+                     value="<%= @person[:father][:birthdate] rescue nil %>"
+                     class="input_cell"
+                     fieldtype="date"
+                     optional="true"
+                    />
+
+              <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden"  optional='true'/>
+
+          </div>
+
+          <div class="field">
+            <label for="person_father_citizenship">Nationality</label><br>
+            <input id="person_father_citizenship"
+                   name="person[father][citizenship]"
+                   type="text"
+                   value="<%= @person[:father][:citizenship] rescue nil %>"
+                   class="input_cell"
+                   ajaxURL="/search_by_nationality" />
+          </div>
+
+          <div class="field">
+            <label for="person_father_id_number">ID Number</label><br>
+            <input id="person_father_id_number"
+                   name="person[father][id_number]"
+                   type="text"
+                   value="<%= @person[:father][:id_number] rescue nil %>"
+                   length = 8
+                   class="input_cell"
+                   tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
+                   optional="true"/>
+          </div>
+
+        </fieldset>
+        <fieldset>
+            <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
+
+            <div class="field">
+              <label for="person_father_residential_country">Country of Residence</label><br>
+              <input id="person_father_residential_country" name="person[father][residential_country]" type="text"
+                     value="<%= @person[:father][:residential_country] rescue nil %>"
+                     class="input_cell" ajaxURL="/search_by_country"
+               />
+            </div>
+            
+
+            <div class="field">
+              <label for="person_father_current_district">District</label><br>
+              <input id="person_father_current_district"
+                     name="person[father][current_district]"
+                     type="text"
+                     value="<%= @person[:father][:current_district] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() == 'Malawi'"
+                     ajaxURL="/search_by_district"
+                     tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);" optional="true"/>
+            </div>
+
+            <div class="field">
+              <label for="person_father_current_ta">T/A or Area of Residence</label><br>
+              <input id="person_father_current_ta"
+                     name="person[father][current_ta]"
+                     type="text"
+                     value="<%= @person[:father][:current_ta] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() == 'Malawi' "
+                     ajaxURL="/search_by_ta"
+                     tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_village').getAttribute('section'))][parseInt(__$('textForperson_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_current_district').value + '&ta=' + __$('textForperson_father_current_ta').value);"
+                     optional="true" />
+            </div>
+
+            <div class="field">
+              <label for="person_father_current_village">Village/Town</label><br>
+              <input id="person_father_current_village"
+                     name="person[father][current_village]"
+                     type="text"
+                     value="<%= @person[:father][:current_village] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() == 'Malawi' "
+                     ajaxURL="/search_by_village" optional="true" />
+            </div>
+
+            <div class="field">
+              <label for="person_father_foreigner_current_district">District/State</label><br>
+              <input id="person_father_foreigner_current_district" name="person[father][foreigner_current_district]" type="text"
+                     value="<%= @person[:father][:foreigner_current_district] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
+                     optional="true"/>
+            </div>
+
+
+            <div class="field">
+              <label for="person_father_foreigner_current_village">Village/Town</label><br>
+              <input id="person_father_foreigner_current_village"
+                     name="person[father][foreigner_current_village]"
+               type="text"
+               value="<%= @person[:father][:foreigner_current_village] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
+                     optional="true"/>
+            </div>
+
+            <div class="field">
+              <label for="person_father_foreigner_current_ta">Address</label><br>
+              <input id="person_father_foreigner_current_ta"
+               name="person[father][foreigner_current_ta]"
+               type="text"
+                     value="<%= @person[:father][:foreigner_current_ta] rescue nil %>"
+                     class="input_cell"
+                     condition="__$('person_father_residential_country').value.trim() != 'Malawi' "
+                     optional="true"/>
+            </div>
+
+
+          </fieldset>
+      <%end%>
+<% elsif ["father_birthdate"].include? @field %>
+  <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Father</font></legend>
-
-      <!-- Father -->
-
       <div class="field">
-        <label for="person_father_last_name">Surname</label><br>
-        <input id="person_father_last_name"
-               name="person[father][last_name]"
-               type="text"
-               value = "<%= @person.father.last_name %>"
-               tt_onUnload = "appendValue('person_father_last_name')"
-               ajaxURL = "/get_last_names"
-               class="input_cell"
-               word_min_length = 2
-               tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-                />
-      </div>
+          <label for="person_father_birthdate">Date of Birth</label><br>
 
-      <div class="field">
-        <label for="person_father_first_name">First Name</label><br>
-        <input id="person_father_first_name"
-               name="person[father][first_name]"
-               type="text"
-               word_min_length = 2
-               value = "<%= @person.father.first_name %>"
-               tt_onUnload = "appendValue('person_father_first_name')"
-               ajaxURL = "/get_first_names"
-               tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
-               class="input_cell"
-                />
-      </div>
+          <input id="person_father_birthdate" name="person[father][birthdate]" type="text"
+                 value="<%= @person[:father][:birthdate] rescue nil %>"
+                 class="input_cell"
+                 fieldtype="date"
+                 optional="true"
+                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
-      <div class="field">
-        <label for="person_father_middle_name">Other Name</label><br>
-        <input id="person_father_middle_name"
-               name="person[father][middle_name]"
-               type="text"
-               value = "<%= @person.father.middle_name %>"
-               ajaxURL = "/get_first_names"
-               class="input_cell"
-               word_min_length = 2
-               tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name'"
-               optional="true"/>
-      </div>
-
-      <div class="field">
-        <label for="person_father_id_number">ID Number</label><br>
-        <input id="person_father_id_number"
-               name="person[father][id_number]"
-               type="text"
-               value="<%= @person[:father][:id_number] rescue nil %>"
-               length = 8
-               class="input_cell"
-               tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
-               optional="true"/>
-      </div>
-
-      <div class="field">
-        <label for="person_father_birthdate">Date of Birth</label><br>
-
-        <input id="person_father_birthdate" name="person[father][birthdate]" type="text"
-               value="<%= @person[:father][:birthdate] rescue nil %>"
-               class="input_cell"
-               fieldtype="date"
-               optional="true"
-               tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
-
-        <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden"  optional='true'/>
+          <input id="person_father_birthdate_estimated" name="person[father][birthdate_estimated]" type="hidden"  optional='true'/>
 
       </div>
 
     </fieldset>
+<% elsif ["father_citizenship","father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
 
-<% elsif ["father_address_current_district","father_address_current_ta","father_address_current_village"].include? @field  %>
-
+    
     <fieldset>
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
 
