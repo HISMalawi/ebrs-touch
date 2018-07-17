@@ -34,6 +34,8 @@ class PersonController < ApplicationController
   end
 
   def loc(id, tag=nil)
+    location = Location.find(id)
+    return location.name if location.present?
     tag_id = LocationTag.where(name: tag).last.id rescue nil
     result = nil
     if tag_id.blank?
@@ -614,6 +616,8 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
+
+        birth_details.place_of_birth = Location.where(name: "Home").first.id
         birth_details.save
 
       elsif params[:person][:place_of_birth] == 'Hospital'
@@ -631,6 +635,7 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
+        birth_details.place_of_birth = Location.where(name: "Hospital").first.id
         birth_details.save
 
       else #Other
@@ -639,7 +644,8 @@ class PersonController < ApplicationController
 
         birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         birth_details.birth_location_id = location_id
-        birth_details.other_birth_location = other_birth_location
+        birth_details.other_birth_location = other_place_of_birth 
+        birth_details.place_of_birth = Location.where(name: "Other").first.id
         birth_details.save
       end
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
@@ -787,7 +793,7 @@ class PersonController < ApplicationController
           person_address.current_district  = Location.find_by_name(params[:person][:mother][:current_district]).id
         end
         if params[:person][:mother][:current_ta].present?
-          person_address.current_ta = Location.find_by_name(params[:person][:mother][:current_district]).id
+          person_address.current_ta = Location.find_by_name(params[:person][:mother][:current_ta]).id
         end
         if params[:person][:mother][:current_village].present?
           person_address.current_village = Location.find_by_name(params[:person][:mother][:current_village]).id
@@ -816,7 +822,14 @@ class PersonController < ApplicationController
     end
 
     if ["father_last_name","father_first_name","father_middle_name", "father_id_number","mother_birth_date", "person_surname"].include?(params[:field])
-          person_father = Person.find(params[:id]).father
+          person = Person.find(params[:id])
+          person_father = person.father
+
+          if person_father.blank?
+              father   = Lib.new_father(person, params, 'Father')
+              redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+          end
+
           person_father_name = PersonName.find_by_person_id(person_father.id)
           if params[:person][:father][:first_name] != person_father_name.first_name  || params[:person][:father][:last_name] != person_father_name.last_name || params[:person][:father][:middle_name] != person_father_name.middle_name
             person_father_name.update_attributes(voided: true, void_reason: 'General edit')
@@ -862,7 +875,7 @@ class PersonController < ApplicationController
           person_address.current_district  = Location.find_by_name(params[:person][:father][:current_district]).id
         end
         if params[:person][:father][:current_ta].present?
-          person_address.current_ta = Location.find_by_name(params[:person][:father][:current_district]).id
+          person_address.current_ta = Location.find_by_name(params[:person][:father][:current_ta]).id
         end
         if params[:person][:father][:current_village].present?
           person_address.current_village = Location.find_by_name(params[:person][:father][:current_village]).id
@@ -875,7 +888,6 @@ class PersonController < ApplicationController
     if ["father_address_home_district","father_address_home_ta","father_address_home_village"].include?(params[:field])
         person_father = Person.find(params[:id]).father
         person_address = PersonAddress.find_by_person_id(person_father.id)
-
         if params[:person][:father][:home_district].present?
           person_address.home_district  = Location.find_by_name(params[:person][:father][:home_district]).id
         end
@@ -977,6 +989,22 @@ class PersonController < ApplicationController
           birth_details.acknowledgement_of_receipt_date = params[:person][:acknowledgement_of_receipt_date].to_date.to_s
           birth_details.save
         end
+        redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
+    end
+
+    if ["national_id"].include?(params[:field])
+        existing = PersonIdentifier.where("person_id = #{params[:id]} AND
+                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0").last
+        if existing.present?
+                existing.voided = 1
+        end
+
+        PersonIdentifier.create(
+                person_id: params[:id],
+                person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+                value: params[:person][:national_id].upcase
+        )
+
         redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
     end
 
@@ -1400,6 +1428,7 @@ class PersonController < ApplicationController
 
     @father_person = @person.father
     @father_address = @father_person.addresses.last rescue nil
+
     @father_name = @father_person.person_names.last rescue nil
 
 		if @mother_person.present?
@@ -1445,7 +1474,8 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth" => "#{@birth_details.brn  rescue nil}"
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue 'XXXXXXXX')
             },  
             {
                 ["First Name","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_first_name"] => "#{@name.first_name rescue nil}",
@@ -1681,7 +1711,7 @@ class PersonController < ApplicationController
     @name = @person.person_names.last
 
     @person_prev_values = {}
-    name_fields = ['first_name','last_name','middle_name',"gender","birthdate","birth_location_id"]
+    name_fields = ['first_name','last_name','middle_name',"gender","birthdate","birth_location_id","citizenship"]
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
         if trail.present?
@@ -1701,7 +1731,9 @@ class PersonController < ApplicationController
     @address = @person.addresses.last
 
     @mother_person = @person.mother
+    @mother_address = @mother_person.addresses.last
     @mother_name = @mother_person.person_names.last rescue nil
+    @mother_nationality = Location.find(@mother_address.citizenship).country
     @mother_prev_values = {}
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: @mother_person.id, field: field).order('created_at').last
@@ -1719,7 +1751,8 @@ class PersonController < ApplicationController
 
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
-
+    @father_address = @father_person.addresses.last
+    @father_nationality = Location.find(@father_address.citizenship).country
     @father_prev_values = {}
     name_fields.each do |field|
         break if @father_person.blank?
@@ -1736,7 +1769,8 @@ class PersonController < ApplicationController
                "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
         @person_prev_values["father_name"] = father_name
     end 
-    @targeturl = session[:list_url] #params[:next_path]
+    
+    @targeturl = session[:list_url] 
     @section = 'Ammend Case'
     render :layout => "facility"
   end
@@ -1873,6 +1907,24 @@ class PersonController < ApplicationController
                 person_a: person.id, person_b: @father_person.person_id,
                 person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
         )
+    end
+
+    if fields.include? "Nationality of Mother"
+        person = Person.find(params[:id])
+        @mother_person = person.mother
+        location = Location.where(country: params[:person][:mother][:citizenship]).first
+        @mother_address = @mother_person.addresses.last
+        @mother_address.citizenship = location.id
+        @mother_address.save
+    end
+
+    if fields.include? "Nationality of Father"
+        person = Person.find(params[:id])
+        @father_person = person.father
+        location = Location.where(country: params[:person][:father][:citizenship]).first
+        @father_address = @father_person.addresses.last
+        @father_address.citizenship = location.id
+        @father_address.save
     end
     redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=#{params[:next_path]}" 
   end

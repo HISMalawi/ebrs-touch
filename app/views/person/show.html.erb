@@ -515,13 +515,16 @@
       }
 
       function approveComments(){
-          viewComment();
-          var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
+          submitSummary("")
+          //viewComment();
+          __$("no").style.display = "none";
+          var okBtn = __$('yes')
+          okBtn.removeAttribute("onmousedown")
           okBtn.className = "extra-btn green";
-          okBtn.innerHTML = "Approve";
-          okBtn.onclick = function(){ approve()}
+          okBtn.innerHTML = "OK";
+          okBtn.onmousedown = function(){ approve()}
 
-          __$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
+          //__$('button').getElementsByClassName('blue')[0].parentNode.appendChild(okBtn);
       }
 
       function reprint(){
