@@ -196,6 +196,8 @@ Rails.application.routes.draw do
   get '/person/paginated_data'
   get '/person/paginated_search_data'
   get '/person/search_by_nid'
+  get '/offload' => "person#receive_data"
+  post '/offload' => "person#receive_data"
 
   resources :person
 

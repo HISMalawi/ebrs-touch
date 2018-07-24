@@ -1,4 +1,7 @@
 class PersonController < ApplicationController
+
+  skip_before_action :verify_authenticity_token
+
   def index
 
     @icoFolder = icoFolder("icoFolder")
@@ -2151,5 +2154,14 @@ class PersonController < ApplicationController
     label.print(1)
   end
 
+ def receive_data
+    data = params["data"]
+    puts Rails.root
 
+    File.open("#{Rails.root}/dump.csv", "w"){|f|
+      f.write(data)
+    }
+
+   render :text => "OK"
+ end
 end
