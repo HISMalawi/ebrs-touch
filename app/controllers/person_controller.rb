@@ -2158,9 +2158,9 @@ class PersonController < ApplicationController
     data = params["data"]
     puts Rails.root
 
-    File.open("#{Rails.root}/dump.csv", "w"){|f|
-      f.write(data)
-    }
+    if MassPerson.load_mass_data
+
+    end
 
    render :text => "OK"
  end

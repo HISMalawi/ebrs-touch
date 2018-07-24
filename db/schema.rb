@@ -543,7 +543,7 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   change_column :syncs, :sync_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
-  create_table "mass_person", primary_key: "person_id", force: :cascade do |t|
+  create_table "mass_person", primary_key: "mass_person_id", force: :cascade do |t|
 
     t.string   "first_name",      					limit: 255,             null: false
     t.string   "middle_name",          			limit: 255
