@@ -4804,7 +4804,7 @@ function clickCanGo() {
 
         }
 
-        if (parent.getAttribute("ajaxURL") && parent.getAttribute("ajaxURL").match("/search")){
+        if ((__$("textFor" + parent.id).value.trim().length > 0) && parent.getAttribute("ajaxURL") && parent.getAttribute("ajaxURL").match("/search")){
             var lis = __$("ul1").getElementsByTagName("li");
             var aval = false;
             for(var i = 0; i < lis.length; i++){
