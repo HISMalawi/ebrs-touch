@@ -61,19 +61,25 @@ class MassPerson < ActiveRecord::Base
     return true
   end
 
-  def load_mass_data
+  def self.load_mass_data
 
+    columns = MassPerson.new.attributes.keys
+    columns[0] = 'mass_person_id'
     File.read("#{Rails.root}/dump.csv").split("\n").each{|line|
       data = line.split(",")
       next if data.first.strip == "person_id"
 
-      mass_person = MassPerson.new(data)
+      hash = {}
+      data.each_with_index do |v, i|
+          hash[columns[i]] = v
+      end
+
+      mass_person = MassPerson.new(hash)
       mass_person.save
     }
 
     next_file = (`ls #{Rails.root}/mass_data`.split("\n").collect{|f| f.to_i}.max + 1).to_s
     File.rename "#{Rails.root}/dump.csv", "#{Rails.root}/mass_data/#{next_file}"
-    File.delete("#{Rails.root}/dump.csv")
 
     return true
   end
