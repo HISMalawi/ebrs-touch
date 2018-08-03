@@ -417,9 +417,9 @@ module Lib
   def self.birth_details_multiple(person,params)
     
     prev_details = PersonBirthDetail.where(person_id: params[:person][:prev_child_id].to_s).first
-    
+    	
     prev_details_keys = prev_details.attributes.keys
-    exclude_these = ['person_id','person_birth_details_id',"birth_weight","type_of_birth","mode_of_delivery_id","document_id"]
+    exclude_these = ['person_id','person_birth_details_id',"birth_weight","type_of_birth","mode_of_delivery_id","document_id", 'facility_serial_number']
     prev_details_keys = prev_details_keys - exclude_these
 
     details = PersonBirthDetail.new
@@ -434,7 +434,25 @@ module Lib
     prev_details_keys.each do |field|
         details[field] = prev_details[field]
     end
+
+
+	  details["facility_serial_number"] = nil
     details.save!
+
+		if SETTINGS["application_mode"] == "FC"
+      allocation = IdentifierAllocationQueue.new
+      allocation.person_id = person.id
+      allocation.assigned = 0
+      allocation.creator = User.current.id
+      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Facility Number").last.person_identifier_type_id
+      allocation.created_at = Time.now
+      allocation.save
+
+      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
+      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
+        AllocationQueue.perform_in(1)
+      end
+    end
     
     return details
   end

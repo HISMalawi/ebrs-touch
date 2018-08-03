@@ -2117,9 +2117,23 @@ class PersonController < ApplicationController
                      'result' => result}.to_json
   end
 
-  def print_registration(person_id, redirect)
+	def check_serial_number
 
-    print_and_redirect("/person_id_label?person_id=#{person_id}", redirect)
+		render text: PersonService.get_identifier(params[:person_id], "Facility Number")
+		 
+	end
+
+  def print_registration(person_id, redirect)
+			
+			if redirect.split("").include?("?")
+				symbol = "&"
+			else
+				symbol = "?"
+			end
+
+			redirect_to "#{redirect}#{symbol}print_reg=true&person_id=#{person_id}" and return unless redirect.match("print_reg")
+			
+    	print_and_redirect("/person_id_label?person_id=#{person_id}", redirect)		
   end
 
   def person_id_label

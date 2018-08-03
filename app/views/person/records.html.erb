@@ -178,6 +178,8 @@ function searchData(element) {
 }
 
 var data = {};
+var printed = false; //Hook for twins to avoid reprints
+
 var url = "/person/paginated_data";
 <% if params[:action] == 'searched_cases'%>
 var url = "/person/paginated_search_data";
@@ -255,6 +257,13 @@ function initTable(){
 
 
     table.on("draw.dt", function(){
+
+        <% if !params[:person_id].blank? && SETTINGS['application_mode'] == "FC" && !params[:print_reg].blank? %>
+            if (printed == false) {
+                checkSerialNum();
+            }
+        <% end %>
+
         setTimeout("checkSync()", 250);
     });
 
@@ -312,6 +321,25 @@ setInterval(function(){
         <% end %>
     }, 200)
 
+
+function checkSerialNum(){
+		
+		jQuery.ajax({
+			url: "/check_serial_number?person_id=<%=params[:person_id]%>",
+			success: function(result){
+
+				if(result.match(/^P/)){
+                    printed = true;
+                    window.location = "/person_id_label?person_id=<%=params[:person_id]%>";
+				}else{
+					setTimeout(function(){
+						checkSerialNum();
+					}, 200)						
+				}
+			}
+		})		
+	}	
+
 </script>
 
 <% if params[:action] == 'searched_cases'%>
@@ -334,3 +362,4 @@ setInterval(function(){
 
     </style>
 <% end %>
+

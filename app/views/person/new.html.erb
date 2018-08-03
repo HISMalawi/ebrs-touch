@@ -44,3 +44,33 @@
  
 <% end %>
 <%  end %>
+
+<script>
+	
+	
+	function checkSerialNum(){
+		
+		jQuery.ajax({
+			url: "/check_serial_number?person_id=<%=params[:id]%>",
+			success: function(result){
+
+				if(result.match(/^P/)){
+                        hideSpinner();
+				 		window.location = "/person_id_label?person_id=<%=params[:id]%>";
+				}else{
+					setTimeout(function(){
+						checkSerialNum();
+					}, 200)						
+				}
+			},
+            error: function(e){
+                alert("Failed to Print Barcode");
+            }
+		})		
+	}	
+
+	<% if !params[:id].blank? && SETTINGS['application_mode'] == "FC" && !params[:print_reg].blank? %>	
+
+		checkSerialNum();
+	<% end %>
+</script>

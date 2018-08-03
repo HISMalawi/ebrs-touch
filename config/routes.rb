@@ -189,6 +189,7 @@ Rails.application.routes.draw do
   get 'reports/filter'
   get 'reports/rfilter'
   get "/user_audit_trail" =>"reports#user_audit_trail"
+	get "/check_serial_number" => "person#check_serial_number"
   get "/get_user_audit_trail" => "reports#get_user_audit_trail"
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"

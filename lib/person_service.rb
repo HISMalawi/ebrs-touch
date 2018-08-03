@@ -355,6 +355,18 @@ module PersonService
 
   end
 
+	def self.get_identifier(person_id, type)
+		type_id = PersonIdentifierType.where(name: type).first
+		return nil if type_id.blank? 
+
+		identifier = PersonIdentifier.where(
+			person_id: person_id, 
+			person_identifier_type_id: type_id		
+		).first
+
+		return nil if identifier.blank?
+		identifier.value
+	end 
 
   def self.create_nris_person(nris_person)
 
