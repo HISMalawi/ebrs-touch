@@ -1680,7 +1680,7 @@ class PersonController < ApplicationController
       "Child Name" => @person.name,
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-      "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+      "Place of Birth" => place_of_birth,
       "Child's Mother " => (@mother_person.name rescue nil),
       "Child's Father" =>  (@father_person.name rescue nil),
       "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
