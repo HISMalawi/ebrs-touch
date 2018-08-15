@@ -323,10 +323,16 @@ class PersonController < ApplicationController
           person["nationality"]=  @mother_person.citizenship rescue nil
           person["place_of_birth"] = @place_of_birth
 
-          if  birth_loc.district.present?
+          if  birth_loc.present? && birth_loc.district.present?
             person["district"] = birth_loc.district
           else
-            person["district"] = "Lilongwe"
+
+            if SETTINGS['application_mode'] == "DC"
+              person["district"] = Location.find(SETTINGS['location_id']).name 
+            else
+              person["district"] = Location.find(Location.find(SETTINGS['location_id']).parent_location).name rescue nil
+            end
+
           end      
 
           person["mother_first_name"]= @mother_name.first_name rescue ''
