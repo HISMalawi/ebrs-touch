@@ -111,6 +111,9 @@ Rails.application.routes.draw do
   ########################### (create record form) routes end
 
   get '/manage_cases' => "dc#manage_cases"
+  get '/print_certificates' => "dc#print_certificates"
+  get '/select_cases' => "dc#select_cases"
+
   get '/pending_cases' => "dc#manage_pending_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"

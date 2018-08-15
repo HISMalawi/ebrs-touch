@@ -241,9 +241,9 @@
         <br>
         <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                           class ="input_cell"
-                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' && __$('person_bd_holder').value.trim() != 'Other Country';"
                           tt_onUnload = "setDistrict('district'); "
-                          ajaxURL = "/search_by_hospital" >
+                          ajaxURL = "/search_by_hospital?include_other=true" >
       </div>
 
       <div class="field">
@@ -269,7 +269,7 @@
         <br>
         <input type="text" name="other_birth_place_details"
                class ="input_cell"
-               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other' || __$('person_bd_holder').value.trim() == 'Other Country' "
+               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'  || __$('person_hospital_of_birth').value.trim() == 'Other' || __$('person_bd_holder').value.trim() == 'Other Country' "
                id="person_other_birth_place_details">
       </div>
 
@@ -2079,7 +2079,6 @@
                 full_place_of_birth.pop();
                 full_place_of_birth.push("person_bc_holder");
             }
-console.log(full_place_of_birth)
 
             summaryHash = {
                             "person Name" : ["person_first_name","person_middle_name","person_last_name"],
@@ -2192,7 +2191,7 @@ console.log(full_place_of_birth)
       __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district %>" ;
 
          try{
-             __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
+             __$('person_hospital_of_birth').setAttribute('ajaxURL', ('/search_by_hospital?district=' + __$('person_bd_holder').value + "&include_other=true"))
          }catch(e){
 
          }

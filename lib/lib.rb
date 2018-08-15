@@ -348,8 +348,10 @@ module Lib
 
           district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
           location_id = Location.locate_id(person[:hospital_of_birth], 'Health Facility', district_id)
-
-          location_id = [location_id, district_id].compact.first
+          if location_id.blank? || person[:hospital_of_birth] == "Other"
+            location_id = Location.where(name: 'Other').last.id
+            other_place_of_birth = params[:other_birth_place_details]
+          end
 
         else #Other
           location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')

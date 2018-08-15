@@ -404,16 +404,6 @@ def incomplete_case_comment
       ]
     end
 
-=begin
-    @locations = []
-    locations = Location.find_by_sql("SELECT distinct(location_created_at) AS location_id FROM person_birth_details" ).map(&:location_id)
-    locations.each do |l|
-      @locations << [
-          Location.find(l).name,
-          l
-      ]
-    end
-=end
   end
 
   def rfilter
@@ -421,5 +411,56 @@ def incomplete_case_comment
     @filters = ["Birth Entry Number", "Facility Serial Number", "Child Name", "Child Gender",
                 "Place of Birth", 'Record Status', 'Location Created'
     ]
+  end
+
+  def print_certificates
+    @stats = PersonRecordStatus.stats
+    @icoFolder = folder
+    @section = "Print Certificates"
+    @targeturl = "/"
+    @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+    render :layout => "facility"
+  end
+
+  def select_cases
+
+    facility_tag_id = LocationTag.where(name: "Health Facility").first.id
+    #village_tag_id = LocationTag.where(name: "Village").first.id
+    printable_statuses = Status.where("name IN ('HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT')").map(&:status_id)
+
+    @facilities = ActiveRecord::Base.connection.select_all("
+      SELECT d.location_created_at, l.name, count(*) AS total FROM person_birth_details d
+        INNER JOIN person_record_statuses s ON s.person_id = d.person_id AND s.voided = 0 AND s.status_id IN (#{printable_statuses.join(", ")})
+        INNER JOIN location l ON l.location_id = d.location_created_at
+        INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{facility_tag_id}
+      GROUP BY location_created_at
+        "
+    )
+
+=begin
+    @villages = PersonBirthDetail.find_by_sql("
+      SELECT birth_location_id, l.name, count(*) total FROM person_birth_details d
+        INNER JOIN person_record_statuses s ON s.person_id = d.person_id AND s.voided = 0 AND s.status_id IN (#{printable_statuses.join(", ")})
+        INNER JOIN location l ON l.location_id = d.birth_location_id
+        INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{village_tag_id}
+
+    "
+    )
+
+    @tas_by_count = {}
+    @tas_villages = {}
+
+    @villages.each do |v|
+      village = Location.find(v)
+      ta = village.ta
+      @tas_by_count[ta]  = 0 if @tas_by_count[ta].blank?
+      @tas_by_count[ta] += 1
+
+      @tas_villages[ta]      = {} if @tas_villages[ta].blank?
+      @tas_villages[ta][village.name] = 0 if  @tas_villages[ta][village.name].blank?
+      @tas_villages[ta][village.name] += 1
+    end
+=end
   end
 end

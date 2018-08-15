@@ -100,21 +100,34 @@ class PersonController < ApplicationController
     @delayed =  days_gone > 42 ? "Yes" : "No"
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
+
     birth_loc = Location.find(@birth_details.birth_location_id)
-    district = Location.find(@birth_details.district_of_birth)
+    birth_loc = nil if birth_loc.name == "Other"
+    district_loc = Location.find(@birth_details.district_of_birth)
 
-    birth_location = birth_loc.name rescue nil
+    other_place = nil
+    district = nil
+    ta       = nil
+    village  = nil
+    hospital = nil
 
-    @place_of_birth = birth_loc.name rescue nil
-
-    if birth_location == 'Other' && @birth_details.other_birth_location.present?
-      @birth_details.other_birth_location
+    place = Location.find(@birth_details.place_of_birth).name
+    if place == "Home"
+      district = district_loc.name
+      village = birth_loc.village rescue nil
+      ta = birth_loc.ta rescue nil
+      if village.blank? #Foreign Birth
+        other_place = @birth_details.other_birth_location
+      end
+    elsif place == "Hospital"
+      district = district_loc.name
+      hospital = birth_loc.name rescue @birth_details.other_birth_location
+    else
+      district = district_loc.name
+      other_place = @birth_details.other_birth_location
     end
 
-    @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
-
     @status = PersonRecordStatus.status(@person.id)
-
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
@@ -152,14 +165,13 @@ class PersonController < ApplicationController
                 "Place of birth" => "#{loc(@birth_details.place_of_birth, 'Place of Birth')}"
             },
             {
-                "Name of Hospital" => "#{loc(@birth_details.birth_location_id, 'Health Facility')}",
-                "Other Details" => "#{@birth_details.other_birth_location}",
-                "Address" => "#{@child.birth_address rescue nil}"
+                "Name of Hospital" => hospital,
+                "Other Details" => other_place,
             },
             {
-                "District" => "#{district.name}",
-                "T/A" => "#{birth_loc.ta}",
-                "Village" => "#{birth_loc.village rescue nil}"
+                "District/Country" => district,
+                "T/A" => ta,
+                "Village" => village
             },
             {
                 "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
@@ -1341,6 +1353,7 @@ class PersonController < ApplicationController
   end
   
   if data.present?
+    data << "Other" if params[:include_other].to_s == "true"
     render text: data.compact.uniq.join("\n") and return
   else
     render text: "" and return
