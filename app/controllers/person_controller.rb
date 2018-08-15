@@ -455,7 +455,7 @@ class PersonController < ApplicationController
   end
 
   def create
-    
+
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -1231,10 +1231,17 @@ class PersonController < ApplicationController
 
   def get_country
     nationality_tag = LocationTag.where(name: 'Country').first
-    data = ['Malawi']
+    data = []
+
+    data = ['Malawi'] unless !params[:exclude].blank?  && params[:exclude].split("|").include?("Malawi")
+
     Location.where("LENGTH(name) > 0 AND country != 'Malawi' AND name LIKE (?) AND m.location_tag_id = ?", 
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
+
+      if params[:exclude].present?
+        next if params[:exclude].split("|").include?(l.name)
+      end
       data << l.name
     end
     
@@ -1254,16 +1261,14 @@ class PersonController < ApplicationController
     Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?",
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
-          if params[:exclude].present?
-                next if l.name.include?(params[:exclude])
-                data << l.name
-          else
-                data << l.name
-          end 
+      if params[:exclude].present?
+        next if params[:exclude].split("|").include?(l.name)
+      end
+      data << l.name
     end
-    
 
     if data.present?
+      data << "Other Country" if params[:include_other_country].to_s == "true"
       render text: data.compact.uniq.join("\n") and return
       
     else

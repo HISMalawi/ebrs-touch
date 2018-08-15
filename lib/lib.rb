@@ -331,27 +331,32 @@ module Lib
         place_of_birth_id = Location.locate_id_by_tag("Other", 'Place of Birth')
       end
 
-      if person[:place_of_birth] == 'Home'
-        district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
-        ta_id = Location.locate_id(person[:birth_ta], 'Traditional Authority', district_id)
-        village_id = Location.locate_id(person[:birth_village], 'Village', ta_id)
-        location_id = [village_id, ta_id, district_id].compact.first #Notice the order
+      if person[:birth_country].blank?
+        if person[:place_of_birth] == 'Home'
+          district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
+          ta_id = Location.locate_id(person[:birth_ta], 'Traditional Authority', district_id)
+          village_id = Location.locate_id(person[:birth_village], 'Village', ta_id)
+          location_id = [village_id, ta_id, district_id].compact.first #Notice the order
 
-      elsif person[:place_of_birth] == 'Hospital'
-        map =  {'Mzuzu City' => 'Mzimba',
-                'Lilongwe City' => 'Lilongwe',
-                'Zomba City' => 'Zomba',
-                'Blantyre City' => 'Blantyre'}
+        elsif person[:place_of_birth] == 'Hospital'
+          map =  {'Mzuzu City' => 'Mzimba',
+                  'Lilongwe City' => 'Lilongwe',
+                  'Zomba City' => 'Zomba',
+                  'Blantyre City' => 'Blantyre'}
 
-        person[:birth_district] = map[person[:birth_district]] if person[:birth_district].match(/City$/)
+          person[:birth_district] = map[person[:birth_district]] if person[:birth_district].match(/City$/)
 
-        district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
-        location_id = Location.locate_id(person[:hospital_of_birth], 'Health Facility', district_id)
+          district_id = Location.locate_id_by_tag(person[:birth_district], 'District')
+          location_id = Location.locate_id(person[:hospital_of_birth], 'Health Facility', district_id)
 
-        location_id = [location_id, district_id].compact.first
+          location_id = [location_id, district_id].compact.first
 
-      else #Other
-        location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
+        else #Other
+          location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
+          other_place_of_birth = params[:other_birth_place_details]
+        end
+      else
+        location_id = Location.where(name: 'Other').last.id
         other_place_of_birth = params[:other_birth_place_details]
       end
     end
@@ -378,9 +383,13 @@ module Lib
     if  SETTINGS["application_mode"] == "FC"
         birth_district_id = Location.find(Location.find(SETTINGS["location_id"]).parent_location).id
     else
+       if params[:person][:birth_country].blank?
         birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
+       else
+        birth_district_id = Location.locate_id_by_tag(person[:birth_country], 'Country')
+       end
     end
-    
+
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
