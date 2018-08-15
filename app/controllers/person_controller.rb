@@ -127,6 +127,7 @@ class PersonController < ApplicationController
       other_place = @birth_details.other_birth_location
     end
 
+    place_of_birth = "#{other_place}, #{village}, #{hospital}, #{ta}, #{district}".gsub(" ,", "").strip.gsub(/^,|^,\s+|,$|,\s+$/, "")
     @status = PersonRecordStatus.status(@person.id)
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
@@ -290,7 +291,7 @@ class PersonController < ApplicationController
         "Child Name" => @person.name,
         "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
         "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-        "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+        "Place of Birth" => place_of_birth,
         "Child's Mother " => (@mother_person.name rescue nil),
         "Mother Nationality " => (@mother_person.citizenship rescue "N/A"),
         "Child's Father" =>  (@father_person.name rescue nil),
@@ -328,7 +329,7 @@ class PersonController < ApplicationController
           else
 
             if SETTINGS['application_mode'] == "DC"
-              person["district"] = Location.find(SETTINGS['location_id']).name 
+              person["district"] = Location.find(SETTINGS['location_id']).name
             else
               person["district"] = Location.find(Location.find(SETTINGS['location_id']).parent_location).name rescue nil
             end
