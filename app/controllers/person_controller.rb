@@ -170,7 +170,7 @@ class PersonController < ApplicationController
                 "Other Details" => other_place,
             },
             {
-                "District/Country" => district,
+                "District/State" => district,
                 "T/A" => ta,
                 "Village" => village
             },
@@ -630,46 +630,71 @@ class PersonController < ApplicationController
     end
 
     if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
-      if params[:person][:place_of_birth] == 'Home'
-        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
-        ta_id = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
-        village_id = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
-        location_id = [village_id, ta_id, district_id].compact.first #Notice the order
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
+      map =  {'Mzuzu City' => 'Mzimba',
+              'Lilongwe City' => 'Lilongwe',
+              'Zomba City' => 'Zomba',
+              'Blantyre City' => 'Blantyre'}
 
-        birth_details.place_of_birth = Location.where(name: "Home").first.id
-        birth_details.save
+      d_name = params[:person][:birth_district]
+      d_name = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
 
-      elsif params[:person][:place_of_birth] == 'Hospital'
-        map =  {'Mzuzu City' => 'Mzimba',
-                'Lilongwe City' => 'Lilongwe',
-                'Zomba City' => 'Zomba',
-                'Blantyre City' => 'Blantyre'}
+      place_of_birth    = params[:person][:place_of_birth]
+      place_of_birth_id = Location.where(name: place_of_birth).first.id
 
-        person[:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+      other_birth_place = nil
+      birth_location_id = nil
+      district_id       = nil
+      foreign_birth     = false
 
-        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
-        location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', district_id)
+      district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
 
-        location_id = [location_id, district_id].compact.first
+      district_id_raw = Location.locate_id_by_tag(d_name, 'District')
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
-        birth_details.place_of_birth = Location.where(name: "Hospital").first.id
-        birth_details.save
+      if district_id_raw.blank?
+        foreign_birth = true
+        district_id_raw = Location.locate_id_by_tag(params[:person][:birth_country], 'Country')
+      end
+
+      if place_of_birth == 'Home'
+
+        if !foreign_birth
+          ta_id               = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
+          birth_location_id   = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
+        else
+          birth_location_id   = Location.where(name: "Other").first.id
+          other_birth_place   = params[:person][:other_birth_place_details]
+        end
+      elsif place_of_birth == 'Hospital'
+
+        params[:person][:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+
+        if  !foreign_birth
+          d_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+          birth_location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', d_id)
+
+          if birth_location_id.blank?
+            birth_location_id   = Location.where(name: "Other").first.id
+            other_birth_place   = params[:person][:other_birth_place_details]
+          end
+        else
+          birth_location_id   = Location.where(name: "Other").first.id
+          other_birth_place   = params[:person][:other_birth_place_details]
+        end
 
       else #Other
-        location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
-        other_place_of_birth = params[:person][:other_birth_place_details]
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
-        birth_details.other_birth_location = other_place_of_birth 
-        birth_details.place_of_birth = Location.where(name: "Other").first.id
-        birth_details.save
+        birth_location_id   = Location.where(name: "Other").first.id
+        other_birth_place   = params[:person][:other_birth_place_details]
       end
+
+      birth_details                       = PersonBirthDetail.where(person_id: params[:id]).last
+      birth_details.district_of_birth     = district_id_raw
+      birth_details.birth_location_id     = birth_location_id
+      birth_details.other_birth_location  = other_birth_place
+      birth_details.place_of_birth        = place_of_birth_id
+      birth_details.save
+
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
       #raise params.inspect
     end
@@ -1408,7 +1433,7 @@ class PersonController < ApplicationController
     @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = session[:list_url]
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -1433,11 +1458,7 @@ class PersonController < ApplicationController
 
   def edit
 
-    if params[:next_path].blank?
-      @targeturl = request.referrer
-    else
-      @targeturl = params[:next_path]
-    end
+    @targeturl = request.path
 
     @section = "Edit Record"
 
@@ -1480,15 +1501,34 @@ class PersonController < ApplicationController
     @delayed =  days_gone > 42 ? "Yes" : "No"
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
+
     birth_loc = Location.find(@birth_details.birth_location_id)
+    birth_loc = nil if birth_loc.name == "Other"
+    district_loc = Location.find(@birth_details.district_of_birth)
 
-    birth_location = birth_loc.name rescue nil
+    other_place = nil
+    district = nil
+    ta       = nil
+    village  = nil
+    hospital = nil
 
-    @place_of_birth = birth_loc.name rescue nil
-
-    if birth_location == 'Other' && @birth_details.other_birth_location.present?
-      @birth_details.other_birth_location
+    place = Location.find(@birth_details.place_of_birth).name
+    if place == "Home"
+      district = district_loc.name
+      village = birth_loc.village rescue nil
+      ta = birth_loc.ta rescue nil
+      if village.blank? #Foreign Birth
+        other_place = @birth_details.other_birth_location
+      end
+    elsif place == "Hospital"
+      district = district_loc.name
+      hospital = birth_loc.name rescue @birth_details.other_birth_location
+    else
+      district = district_loc.name
+      other_place = @birth_details.other_birth_location
     end
+
+    place_of_birth = "#{other_place}, #{village}, #{hospital}, #{ta}, #{district}".gsub(" ,", "").strip.gsub(/^,|^,\s+|,$|,\s+$/, "")
 
     @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
 
@@ -1503,7 +1543,7 @@ class PersonController < ApplicationController
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
                 "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
-                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue 'XXXXXXXX')
+                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue '')
             },  
             {
                 ["First Name","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_first_name"] => "#{@name.first_name rescue nil}",
@@ -1513,17 +1553,16 @@ class PersonController < ApplicationController
             {
                 ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_birthdate"] => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
                 ["Sex", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_gender"] => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
-                ["Place of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_place_of_birth"] => "#{loc(@birth_details.place_of_birth, 'Place of Birth')}"
+                ["Place of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_place_of_birth"] => place
             },
             {
-                ["Name of Hospital","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_hospital_of_birth"] => "#{loc(@birth_details.birth_location_id, 'Health Facility')}",
-                ["Other Details","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_details"] => "#{@birth_details.other_birth_location}",
-                ["Address","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_birth_address"] => "#{@child.birth_address rescue nil}"
+                ["Name of Hospital","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_hospital_of_birth"] =>  hospital,
+                ["Other Details","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_details"] => other_place,
             },
             {
-                ["District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_district"] => "#{birth_loc.district}",
-                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_ta"] => "#{birth_loc.ta}",
-                ["Village","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_village"] => "#{birth_loc.village rescue nil}"
+                ["District/State", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_district"] => district,
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_ta"] => ta,
+                ["Village","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_village"] => village
             },
             {
                 ["Birth weight (kg)","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_weight"] => "#{@birth_details.birth_weight rescue nil}",

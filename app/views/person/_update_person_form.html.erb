@@ -36,6 +36,7 @@
       return this.toUpperCase();
     };
 </script>
+
 <%= form_for :person, :url => {:controller => "person", :action => "update", params: {id: @person.id, field: @field}} do |f| %>
 
 <% if ["child_first_name","child_surname","child_middle_name"].include? @field %>
@@ -121,9 +122,9 @@
         <label for="person_place_of_birth">Place of birth</label><br>
         <select id="person_place_of_birth" name="person[place_of_birth]" class="input_cell" >
           <option></option>
-          <option <%= ((@person.place_of_birth rescue nil) == "Home" ? "selected" : "") %> >Home</option>
-          <option <%= ((@person.place_of_birth rescue nil) == "Hospital" ? "selected" : "") %> >Hospital</option>
-          <option <%= ((@person.place_of_birth rescue nil) == "Other" ? "selected" : "") %> >Other</option>
+          <option>Home</option>
+          <option>Hospital</option>
+          <option>Other</option>
         </select>
       </div>
 
@@ -133,12 +134,26 @@
         <input id="person_birth_district"
                name="person[birth_district]"
         			 type="text"
-        			 ajaxURL = "/search_by_district"
+        			 ajaxURL = "/search_by_district?include_other_country=true"
         			 class="input_cell"
-               tt_onUnLoad = "__$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_birth_district').value)"
+               tt_onUnLoad = "__$('person_hospital_of_birth').setAttribute('ajaxURL', ('/search_by_hospital?district=' + __$('person_birth_district').value + '&include_other=true'))"
                 />
       </div>
-      
+
+          <div class="field">
+            <label for="person_bc_holder">Country of Birth</label><br>
+
+            <input id="person_bc_holder"
+                   name="person[birth_country]"
+                   type="text"
+                   condition="__$('person_birth_district').value.trim() == 'Other Country' ;"
+                   value="<%= @person[:bc] rescue nil %>"
+                   ajaxURL="/search_by_country?exclude=Malawi"
+                   class="input_cell"
+            />
+
+          </div>
+
       <div class="field">
         <label for="person_hospital_of_birth">Name of Hospital</label>
         <br>
@@ -146,8 +161,8 @@
                id="person_hospital_of_birth"
                name="person[hospital_of_birth]"
                class ="input_cell"
-               condition ="__$('person_place_of_birth').value == 'Hospital'"
-               ajaxURL = "/search_by_hospital" >
+               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' && __$('person_birth_district').value.trim() != 'Other Country';"
+               ajaxURL = "/search_by_hospital?include_other=true" >
       </div>
 
       <div class="field">
@@ -157,7 +172,7 @@
                name="person[birth_ta]" 
                id="person_birth_ta"
                class = "input_cell"
-               condition ="__$('person_place_of_birth').value == 'Home'"
+               condition ="__$('person_place_of_birth').value == 'Home' && __$('person_birth_district').value.trim() != 'Other Country'"
                ajaxURL = "/search_by_district"
                tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
                tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
@@ -167,7 +182,7 @@
         <br>
         <input type="text" name="person[birth_village]" class = "input_cell"
         id="person_birth_village"
-        condition ="__$('person_place_of_birth').value == 'Home'"
+        condition ="__$('person_place_of_birth').value == 'Home' && __$('person_birth_district').value.trim() != 'Other Country' "
         ajaxURL = "/search_by_village">
       </div>
       <div class="field">
@@ -176,7 +191,7 @@
         <input type="text" 
                name="person[other_birth_place_details]" 
                class ="input_cell" 
-               condition ="__$('person_place_of_birth').value == 'Other'"
+               condition ="__$('person_place_of_birth').value == 'Other' || __$('person_hospital_of_birth').value.trim() == 'Other' || __$('person_birth_district').value.trim() == 'Other Country'"
                id="person_other_birth_place_details">
       </div>
 
@@ -1981,15 +1996,25 @@ f
             else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
             {
 
-              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
-            }
-            else {
+                  full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+                }
+                else {
 
-              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-            }
+                  full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+                }
 
 
             summaryHash = {};
+    }
+
+    function setDistrictUrl(value){
+        if (value =="Hospital"){
+            __$("person_birth_district").setAttribute("ajaxUrl", "/search_by_district?exclude=City&include_other_country=true")
+            __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?exclude=City&include_other_country=true");
+        }else{
+            __$("person_birth_district").setAttribute("ajaxUrl", "/search_by_district?include_other_country=true")
+            __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?include_other_country=true");
+        }
     }
 
     function updateRegistrationType()
@@ -2073,21 +2098,21 @@ f
 
     function setDistrict(place) {
 
-     if (place == 'district') {
+        if (place == 'district') {
 
-      __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district %>" ;
+            __$('person_birth_district').value =  __$('person_birth_district').value || "<%= Location.current_district %>" ;
 
-         try{
-             __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
-         }catch(e){
+            try{
+                __$('person_hospital_of_birth').setAttribute('ajaxURL', ('/search_by_hospital?district=' + __$('person_birth_district').value + "&include_other=true"))
+            }catch(e){
 
-         }
+            }
 
-     } else {
+        } else {
 
-       __$('person_birth_district').value = "<%= Location.current_district %>" ;
+            __$('person_birth_district').value = "<%= Location.current_district %>" ;
 
-     }
+        }
     }
 
     function beforeLiveDate(){
@@ -2104,6 +2129,16 @@ f
       }
 
 
+    }
+
+    function setDistrictUrl(value){
+        if (value =="Hospital"){
+            __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?exclude=City&include_other_country=true")
+            __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?exclude=City&include_other_country=true");
+        }else{
+            __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?include_other_country=true")
+            __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?include_other_country=true");
+        }
     }
     /*summaryHash = {};
 
