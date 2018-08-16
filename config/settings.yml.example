@@ -12,3 +12,4 @@ sync_username:
 sync_password: 
 ebrs_services_link: http://0.0.0.0:10001
 destination_app_link: http://0.0.0.0:9001
+printer_name: test1|tst2|UpperSoftware

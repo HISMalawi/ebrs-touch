@@ -1,0 +1,711 @@
+<%=javascript_include_tag "datatables/prototype" %>
+<%=javascript_include_tag "datatables/jquery.dataTables.min" %>
+<%=javascript_include_tag "datatables/dataTables.bootstrap" %>
+<%=javascript_include_tag "bootstrap/bootstrap.min" %>
+
+<%= stylesheet_link_tag "datatables/jquery.dataTables.min" %>
+
+
+<style>
+
+
+    #example{
+        background-color: #d3d3d3;
+    }
+    #example tr td{
+        border-left: 0.5px dotted lightgray;
+        padding: 7px;
+    }
+
+    .action-btn .fa{
+        min-width: 35px;
+        font-size: 18px;
+
+    }
+
+    .checkbox{
+        margin-left: 5px;
+
+    }
+
+    th{
+        background: lightsteelblue;
+        color: black;
+    }
+
+    .panel-heading{
+        margin-bottom: 20px;
+    }
+
+    .action-btn{
+        border: none !important;
+        margin-top: 0px;
+        min-width: 50px;
+        padding: 3px;
+        margin-left: 5px;
+
+    }
+
+    .fix-middle{
+        position: fixed;
+        z-index: 2000;
+        left: 55%;
+        top: 40%;
+    }
+
+    #roll-options{
+        width: 100%;
+    }
+
+    #roll-options td{
+        padding-right: 20px;
+    }
+
+    #verificationTable tr td{
+        text-align: left;
+        align: left;
+        border: 1px dotted #d3d3d3;
+        padding: 8px;
+        padding-left: 25px;
+    }
+
+    #verificationTable tr .labeel{
+        font-weight: bold;
+        width: 45%;
+    }
+
+</style>
+
+<% @type_stats = {} if @type_stats.blank?%>
+<div class="panel panel-default">
+  <div class="panel-heading" style="height: 50px;">
+    <table style="width: 100%;">
+      <tr>
+        <td>
+          <h3 style="padding-bottom: 15px;color:darkslategray; height: 40px;margin-top: 0px;"><%= @section%></h3>
+        </td>
+        <td colspan="8" style="width: 80%;" class="pull-right">
+          <button onclick="selectBadge('All')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Total
+            <span class="badge" style="background: #2e6da4"><%=@type_stats.values.sum || 0%></span></button>
+          <button onclick="selectBadge('Abandoned')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Abandoned
+            <span class="badge" style="background: #2e6da4"><%=@type_stats['Abandoned'] || 0%></span></button>
+          <button onclick="selectBadge('Orphaned')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Orphaned
+            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Orphaned'] || 0%></span></button>
+          <button onclick="selectBadge('Adopted')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Adopted
+            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Adopted'] || 0%></span></button>
+          <button onclick="selectBadge('Normal')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;width: 150px;" class="btn btn-default">Normal
+            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Normal'] || 0%></span></button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="fix-middle" style="height: 40px; margin-top: 0px;">
+    <%if (['HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT'] & params['statuses']).length > 0%>
+        <button id="print-all" onclick="printAll()"
+                class=" action-btn btn btn-sm btn-success"><i class="fa fa-print"></i>Print Selected</button>
+    <% end %>
+    <%if (['HQ-PRINTED'] & params['statuses']).length > 0%>
+        <button id="dispatch-all" onclick="__$('dispatch-count').innerHTML = selected.length; jQuery('#printerModal2').modal('show')"
+                class=" action-btn btn btn-sm btn-primary"><i class="fa fa-truck"></i>Dispatch Selected</button>
+    <% end %>
+  </div>
+<style>
+    #print-all, #dispatch-all{
+        display: none;
+    }
+
+</style>
+<table id="example" class="display table table-condensed table-striped" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th style="text-align: left;">BEN</th>
+      <th style="text-align: left;">National ID</th>
+      <th style="text-align: left;">Name</th>
+      <th style="text-align: center; width:90px;">Birthdate</th>
+      <th style="text-align: left;">Gender</th>
+      <th style="text-align: left;">Mother's Name</th>
+      <th style="text-align: left;">Father's Name</th>
+      <th style="text-align: center;">Status</th>
+      <th>&nbsp;
+            <div class="checkbox pull-right">
+              <label><input id='select-all' onchange="selectAll()" type="checkbox" value=""></label>
+            </div>
+      </th>
+  </tr>
+  </thead>
+    <%(@records || []).each do |record|
+       next
+    %>
+      <tr>
+        <td style="text-align: left;width: 15%"><%= record['ben'] %>&nbsp;</td>
+        <% if true%>
+            <td style="text-align: left;width: 15%"><%= record['brn'] %>&nbsp;</td>
+      <% end %>
+        <td style="text-align: left;width: 15%"><%= record['name']%></td>
+        <td style="text-align: center;width: 15%"><%= record['dob'] %></td>
+        <td style="text-align: center;width: 3%"><%= record['gender'] %></td>
+        <td style="text-align: center;width: 15%"><%= record['mother_name'] %></td>
+        <td style="text-align: center;width: 15%"><%= record['father_name'] %></td>
+        <td style="text-align: center;"><%= record['status'] %></td>
+        <td>
+          <table style="width: 100%; text-align: center; border-style: none;">
+            <tr>
+
+            </tr>
+          </table>
+        </td>
+      </tr>
+    <%end%>
+  <tbody>
+  </tbody>
+</table>
+
+</div>
+
+
+<div class="modal fade" id="verify_by_scanning" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+
+        <h3 style="padding-left:100px;">Scan Barcode to Verify Certificates</h3>
+
+        <br />
+        <input id="barcode" name="barcode" class="barcode" type="text"
+               style="margin-left: 100px; height: 50px;width: 350px;font-size: 20px; font-weight: bold; margin-bottom: 25px;" />
+        <div class="modal-footer">
+          <button id="scan_close" type="button" class="btn btn-sm btn-default pull-left" onclick="jQuery('#verify_by_scanning').modal('hide'); initTable();" > Close </button>
+          <button id="scan_search" type="button" class="btn btn-sm btn-primary pull-right" onclick="manualSearch()" > Search </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="modal fade" id="comments" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+
+          <h5>Are you sure you want to dispatch <span id="dispatch-count"></span> certificate(s)</h5>
+          <div class="modal-footer">
+            <button id="comment_close" type="button" class="btn btn-sm btn-default pull-left" onclick="jQuery('#comments').modal('hide')" > Cancel </button>
+            <button type="button" class="btn btn-sm btn-primary pull-right" onclick="dispatchAll();" > Dispatch </button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="modal fade" id="printerModal" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
+          Select Printer
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="printers">
+            <%
+               @available_printers = SETTINGS["printer_name"].split('|')
+               @available_printers.each do |printer| %>
+                <tr onmousedown="updateValue(this)" value="<%= printer %>">
+                  <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                  <td style="text-align: left; padding-left:50px;"><%= printer %></td>
+                </tr>
+            <% end %>
+          </table>
+        </span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="submitForm();">Okay</button>
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="printerModal2" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
+          Select Printer for Certificate(s) list
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="printers">
+            <%
+               @available_printers = SETTINGS["printer_name"].split('|')
+               @available_printers.each do |printer| %>
+                <tr onmousedown="updateValue(this)" value="<%= printer %>">
+                  <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                  <td style="text-align: left; padding-left:50px;"><%= printer %></td>
+                </tr>
+            <% end %>
+          </table>
+        </span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="dispatchAll();">Dispatch</button>
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="verification" tabindex="-1" role="dialog" aria-labelledby="verificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="verification-content">
+      <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="verificationModalLabel" style="text-align: left;">
+          Certificate Verification
+        </h4>
+        <div id="success" class="alert alert-success pull-right">
+          <strong>Success! Record Sent to Re-Print Queue!!</strong>
+        </div>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table style="width: 100%;">
+            <tr>
+                  <td style="width: 50%;">
+              <table style="width: 100%;" align="center" id="verificationTable">
+                    <tr>
+                      <td class="labeel">National ID</td>
+                      <td id="nid">&nbsp;</td>
+                    </tr>
+
+                    <tr>
+                      <td class="labeel">Registration Number</td>
+                      <td id="brn">&nbsp;</td>
+                    </tr>
+
+                    <tr>
+                      <td class="labeel">Birth Entry Number</td>
+                      <td id="ben">&nbsp;</td>
+                    </tr>
+
+                    <tr>
+                        <td class="labeel">Name</td>
+                        <td id="name">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td class="labeel">Sex</td>
+                      <td id="sex">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td class="labeel">Date Of Birth</td>
+                      <td id="dob">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td class="labeel">Place of Birth</td>
+                      <td id="place">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td class="labeel">Name of Mother</td>
+                      <td id="mother_name">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td class="labeel">Name of Father</td>
+                      <td id="father_name">&nbsp;</td>
+                    </tr>
+              </table>
+              </td>
+
+              <td style="width: 50%;">
+                <div class="field">
+                  <label for="verdict"><h4><b>Does certificate meet quality metrics?</b></h4></label><br>
+                  <select
+                  style="width: 320px;font-size: 20px;padding: 7px;font-weight: bold; font-color: darkslategray;margin-bottom: 25px;background: ghostwhite;"
+                  id="verdict" name="verdict" class="input_cell" onchange="enableReason()">
+                    <option></option>
+                    <option value="Yes" >Yes</option>
+                    <option value="No" >No</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="reason"><h4><b>Explanation for rejected certificate</b></h4></label><br>
+                  <select disabled="disabled"
+                    style="width: 320px; font-size: 20px;padding: 7px;font-color: darkslategray; background: ghostwhite;font-weight: bold;"
+                    id="reason" name="reason" class="input_cell" condition="__$('textForverdict').value.trim() == 'No' " >
+                    <option></option>
+                    <option value="blurred print out" >Blurred print out</option>
+                    <option value="distorted characters" >Distorted characters</option>
+                    <option value="wrinkles or creases" >Wrinkles or creases</option>
+                    <option value="skewed page" >Skewed page</option>
+                    <option value="unwanted ink dots" >Unwanted ink dots</option>
+                    <option value="other" >Other</option>
+                  </select>
+                </div>
+
+              </td>
+              </tr>
+              </table>
+        </span>
+        <div class="modal-footer">
+          <button type="button" id="ajax-verification-save" class="btn btn-primary" onclick="ajaxSaveVerification()">Save</button>
+          <button type="button" class="btn btn-default pull-left" onclick="window.location = window.location ">close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<table id="roll-options">
+  <tr>
+    <td id="p_h_1" style="width: 40%">
+
+    </td>
+
+    <td>
+      <select id="category" label="Category" onchange="reloadDataTable(this)"
+              style="color: #2f4f4f;border-radius: 3px;padding: 5px;font-weight: bold;margin: 5px;">
+        <option id="continuous" value = "continuous" >Continuous Registration</option>
+        <option id="mass_data" value = "mass_data" >Mass Data</option>
+        <option value="All">All Categories</option>
+      </select>
+    </td>
+
+    <td id="p_h_2">
+
+    </td>
+  </tr>
+</table>
+
+<select  style="display: none;color: #2f4f4f" id="birth_type" label="Birth Type" onchange="reloadDataTable(this)">
+  <option value="All">Select Category</option>
+  <option id="nid" >From NID</option>
+  <option id="normal">Normal</option>
+  <option id="abandoned">Abandoned</option>
+  <option id="adopted">Adopted</option>
+  <option id="orphaned">Orphaned</option>
+</select>
+
+
+<script>
+    selected = [];
+    var table;
+    var url = "<%= request.url%>";
+
+    <% if !@birth_type.blank? %>
+        jQuery("#birth_type").find("#" + '<%= @birth_type.downcase%>').prop('selected', true);
+        jQuery("#birth_type").prop('disabled', true);
+    <% end %>
+
+    <% if !session[:district].blank?%>
+        jQuery("#districts").find("#" + '<%= session[:district]%>').prop('selected', true);
+    <% end %>
+
+    <% if !session[:category].blank?%>
+        jQuery("#category").find("#" + '<%= session[:category]%>').prop('selected', true);
+    <% else %>
+        jQuery("#category").find("#continuous").prop('selected', true);
+    <% end %>
+
+    var type;
+    $i(document).ready(function() {
+
+        <% if params[:birth_type] != 'All Special Cases'%>
+            type = __$('birth_type').value;
+        <% else %>
+            type = "All Special Cases"
+        <% end %>
+
+        <% if User.current.user_role.role.role != "Quality Supervisor" %>
+            initTable();
+        <% end %>
+
+        var holder = __$('example_filter').parentNode;
+        holder.appendChild(__$('birth_type'));
+        holder.appendChild(__$('roll-options'));
+        __$("p_h_2").appendChild(__$('example_filter'))
+        __$("p_h_1").appendChild(__$('example_length'))
+
+        holder.style.width = "100%";
+
+    } );
+
+    function initTable(){
+
+        table =  $i('#example').DataTable(
+                {
+                    "processing": true,
+                    "serverSide": true,
+                    "ordering": false,
+                    "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+                        jQuery('td .action-btn', nRow).parent().parent().css('background', 'white');
+                    },
+                    "ajax": {
+                        "url": url,
+                        "data": function(d){
+                            d.type = type;
+                            d.category = __$('category').value;
+                        },
+                        dataFilter: function(data){
+                            var json = jQuery.parseJSON( data );
+                            for(var i = 0; i < json['data'].length; i ++){
+
+                                var last_index = json['data'][i].length - 1;
+                                var person_id = json['data'][i][last_index]
+
+                                var clas = "nonid";
+                                var popup = "";
+
+                                json['data'][i][last_index] =   '<td> ' +
+                                        '<button onclick="javascript:location=\'/show_person/' + person_id + popup + ' \'"     ' +
+
+                                        ' class="action-btn btn btn-success btn-xs ' + clas + '"><i class="fa fa-eye"></i></button></td>';
+
+                                json['data'][i][last_index] += '<td class="act-btn"><div class="checkbox">' +
+                                    '<label><input class=\'multi-check\' person_id = "' + person_id +  '" onchange="checkSelections();" type="checkbox" value=""></label> </div></td>';
+
+                            }
+                            return JSON.stringify( json );
+                        }
+                    }}
+        );
+    }
+
+    function reloadDataTable(node){
+        type = __$('birth_type').value;
+        table.ajax.reload();
+    }
+
+    function selectBadge(name){
+        type = name;
+        __$("birth_type").value = name;
+        table.ajax.reload();
+    }
+
+    function printAll() {
+        jQuery("#printerModal").modal("show");
+    }
+
+    function dispatchAll(){
+        if(printer_name.length == 0){
+            alert("Please select printer!");
+            return;
+        }
+        window.location = "/person/dispatch_certificates?person_ids=" +  selected.join(',') + "&printer_name=" + printer_name;
+    }
+
+    function checkSelections(){
+        var nodes = document.getElementsByClassName('multi-check');
+        selected = [];
+        for(var i = 0; i < nodes.length; i ++){
+            if(nodes[i].checked){
+                selected.push(nodes[i].getAttribute('person_id'));
+            }
+        }
+
+        if(selected.length > 0){
+            if (__$('print-all')){
+                jQuery('#print-all').show()
+            }
+            if (__$('dispatch-all')){
+                jQuery('#dispatch-all').show()
+            }
+        }else{
+            if (__$('print-all')){
+                jQuery('#print-all').hide()
+            }
+            if (__$('dispatch-all')){
+                jQuery('#dispatch-all').hide()
+            }
+        }
+    }
+
+    function selectAll(){
+        if(__$('select-all').checked){
+            jQuery(".multi-check").prop('checked', true);
+        }else{
+            jQuery(".multi-check").prop('checked', false);
+        }
+        checkSelections();
+    }
+
+    printer_name = ""
+
+    function updateValue(obj){
+        printer_name = obj.getAttribute('value');
+    }
+
+    function submitForm(){
+        if (printer_name.length == 0){
+            alert("Please select a printer");
+        }else {
+            window.location = "/print?person_ids=" + selected.join(',') + "&printer_name=" + printer_name;
+        }
+    }
+
+    function barcodeFocus(){
+        if (scanning == true) {
+            jQuery("#barcode").focus();
+        }
+
+        var barcode = __$("barcode").value;
+        if (barcode.match(/\$$/)){
+            var barcodeString = barcode.replace(/\$$/, "");
+            __$("barcode").value = "";
+            jQuery.ajax({
+                url: "/person/check_details?certificate_serial_number=" + barcodeString,
+                success: function(result){
+                    var person_id = JSON.parse(result);
+                    if (person_id == null){
+                        alert("Record Not Found Or Record Status Not 'HQ-PRINTED'!!")
+                    }else{
+                        popReasons(person_id);
+                    }
+                },
+                error: function(error){
+                    alert("Not Found")
+                }
+            })
+        }
+
+        setTimeout(function(){
+            barcodeFocus();
+        }, 250);
+    }
+
+    function manualSearch(){
+        jQuery("#barcode").focus();
+        var barcode = __$("barcode").value;
+        var barcodeString = barcode.replace(/\$$/g, "");
+        __$("barcode").value = "";
+        jQuery.ajax({
+            url: "/person/check_details?certificate_serial_number=" + barcodeString,
+            success: function(result){
+                var person_id = JSON.parse(result);
+                console.log(person_id)
+                if (person_id == null){
+                    alert("Record Not Found Or Record Status Not 'HQ-PRINTED' !! ")
+                }else{
+                    popReasons(person_id);
+                }
+            },
+            error: function(error){
+                alert("Not Found")
+            }
+        })
+
+        setTimeout(function(){
+            barcodeFocus();
+        }, 250);
+    }
+
+    function enableReason(){
+        __$("reason").value  = "";
+
+        if (__$("verdict").value.trim() == "Yes") {
+            __$("reason").setAttribute("disabled", "disabled")
+        }else{
+            __$("reason").removeAttribute("disabled")
+        }
+    }
+
+    var scanning = true;
+    var globalPersonId = null;
+
+    function popReasons(person_id){
+        jQuery('#success').hide();
+
+        scanning = false;
+        __$("verdict").value = "";
+        __$("reason").value  = "";
+
+        jQuery.ajax({
+            url: "/person/query_person_details?person_id=" + person_id,
+            success: function(data){
+                data = JSON.parse(data);
+                console.log(data);
+                for(var k in data){
+                    __$(k).innerHTML = data[k];
+                }
+
+                globalPersonId = person_id;
+                jQuery("#verification").modal("show");
+            },
+            error: function(error){
+                alert("Could Not Get Details of Person!!");
+            }
+        })
+    }
+
+    function ajaxSaveVerification(){
+
+            if (__$("verdict").value.trim() == ""){
+                alert("Select if Certificate Meet Quality Metrics!!");
+                return;
+            }
+
+            if (__$("verdict").value.trim() == "No" && __$("reason").value.trim() == ""){
+                alert("Select Reason For Rejected Certificate!!");
+                return;
+            }
+
+        jQuery.ajax({
+            url: "/person/certificate_verification",
+            method: "POST",
+            data: {
+                person_id: globalPersonId,
+                verdict: __$("verdict").value,
+                reason: __$("reason").value
+            },
+            success: function(result){
+                if (result == "OK" && __$("verdict").value.trim() == "No") {
+                    jQuery('#success').show();
+                    setTimeout(function(){
+                        jQuery("#verification").modal("hide");
+                    }, 1500);
+
+                }else{
+                    jQuery('#success').hide();
+                    jQuery("#verification").modal("hide");
+                }
+
+                console.log(result);
+            },
+            error: function(error){
+                console.log(error);
+            }
+        })
+    }
+
+    checkSelections();
+
+    jQuery("#example_filter").find("input")
+
+    <% if User.current.user_role.role.role == "Quality Supervisor" %>
+        jQuery("#verification-content").css({
+            position: "absolute",
+            top: "-20px",
+            left: "-250px",
+            width: (screen.width*0.70 + "px")
+        });
+
+        jQuery("#verify_by_scanning").modal("show");
+        barcodeFocus();
+    <% end %>
+  </script>
+
+<style>
+  .action-btn, .act-btn{
+    border: none !important;
+  }
+</style>

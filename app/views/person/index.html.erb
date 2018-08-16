@@ -96,6 +96,14 @@
 
 <% end %>
 
+<style>
+    .count{
+        color: black;
+        font-size: 13px;
+        font-weight: bold;
+    }
+</style>
+
 <% if @folders.include?("Print Certificates")%>
 
     <div class="button parent_menu" onclick="window.location = '/print_certificates'" tag=1>
@@ -103,6 +111,8 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>
+            <span class="count"><%= (@stats['HQ-CAN-PRINT'] + @stats["HQ-CAN-RE-PRINT"])%></span>
+
           </td>
           <td style="height: 30px;">
             Print Certificates

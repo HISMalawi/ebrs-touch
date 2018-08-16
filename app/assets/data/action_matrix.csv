@@ -65,12 +65,9 @@ View Synced Records,Y,Y,Y,Y,Y,Y,,,,
 Reports,Y,Y,Y,Y,Y,Y,,,,Y
 Manage Users,,,,,,,,,,Y
 Change Own Password,Y,Y,Y,Y,Y,Y,,,,Y
-Print Certificates,,,,,,,,,,
-Print By TA,,,,,Y,,,,,
-Print By Village,,,,,Y,,,,,
-Print By Facility,,,,,Y,,,,,
-Print By Search,,,,,Y,,,,,
+Print Certificates,,,,,Y,,,,,
 Manage Cases,Y,Y,Y,Y,Y,,,,,
+Search Cases,Y,Y,Y,Y,Y,,,,,
 Search Cases,Y,Y,Y,Y,Y,,,,,
 View Closed Cases,,,,,Y,,,,,
 Dispatched Certificates,,,,Y,Y,,,,,

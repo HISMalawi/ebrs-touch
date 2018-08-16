@@ -8,6 +8,7 @@ class PersonController < ApplicationController
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
+    @stats = PersonRecordStatus.stats
 
     render :layout => 'facility'
   end

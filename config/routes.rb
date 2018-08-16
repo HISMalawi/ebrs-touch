@@ -113,6 +113,7 @@ Rails.application.routes.draw do
   get '/manage_cases' => "dc#manage_cases"
   get '/print_certificates' => "dc#print_certificates"
   get '/select_cases' => "dc#select_cases"
+  get '/print_cases' => "dc#print_cases"
 
   get '/pending_cases' => "dc#manage_pending_cases"
   get '/manage_requests' => "dc#manage_requests"
