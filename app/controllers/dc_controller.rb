@@ -573,7 +573,7 @@ def print_certificates
         "data" => @records}.to_json and return
   end
 
-  render :template => "/dc/records", layout: "data_table"
+  render :template => "/dc/records", layout: "bootstrap_data_table"
  end
 
  def records

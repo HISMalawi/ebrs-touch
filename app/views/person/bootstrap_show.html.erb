@@ -1,0 +1,1087 @@
+<style>
+
+.record td {
+  font-size: 16px;
+  color: #000;
+  padding: 10px;
+  text-align: left;
+
+  <% if @status.match(/VOIDED/i) %>
+
+  text-decoration: line-through;
+
+  <% end %>
+
+}
+
+.record td strong {
+  font-size: 12px;
+  font-style: normal;
+  color: #333;
+  float: right;
+}
+#completeness_details tr{
+    border-top: 1px dotted lightgray
+}
+
+.labell{
+    text-align: left;
+    font-weight: bold !important;
+    padding: 0px;
+}
+.modal-header{
+    background: #006f95 none repeat scroll 0 0;
+    padding: 12px;
+}
+.comments-list .media{
+    border-bottom: 1px dotted #ccc;
+}
+#comments-list{
+    max-height: 300px;
+    overflow: auto;
+    width: 100%;
+}
+
+#trace-tbl td{
+    border: 1px solid #d3d3d3;
+    padding: 5px !important;
+}
+#trace-row td{
+    font-size: 1em !important;
+}
+#completeness_details td{
+    padding: 8px;
+    border: 1px dotted ghostwhite;
+}
+#completeness_details .labell{
+}
+#duplicates{
+   width: 98%;
+
+}
+
+#duplicates th , #duplicates td {
+   padding: 0.3em;
+   border: 1px solid gray;
+   text-align: center;
+   
+}
+#duplicates th{
+    background: #d9d8d7;
+}
+.red{
+    color:#c81414;
+    font-weight: bold;
+}
+</style>
+<script>
+  return_path = '<%= session[:list_url]%>'
+</script>
+<%=javascript_include_tag "bootstrap/bootstrap.min" %>
+
+<div id="trace-btn"
+     class="btn btn-primary blue"
+     style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
+     onclick="ajaxTrace()"
+> Trace</div>
+
+<shield id="shieldd"
+        onclick="jQuery('#shieldd, #trace-div').hide(); "
+        style="position: absolute; display: none; top: 0px; left: 0px; width: 300vh; height: 300vh; background: black; opacity: 0.3;">
+</shield>
+
+<div id="trace-div" style="position: absolute; height: 56vh; overflow-y: auto; display: none; top: 18%; left: 18%;width: 65%;background: white;border: 2px solid gray;border-radius: 5px;z-index: 3000">
+
+  <table id="trace-tbl" style="width: 100%;color: darkslategray;">
+    <caption style="background: ghostwhite;padding: 6px; font-size: 1.2em;">
+      Record Movements
+    </caption>
+    <tr >
+      <td style="width: 1%;background: lightsteelblue;font-weight: bold;">Site</td>
+      <td style="width: 14%;background: lightsteelblue;font-weight: bold;">Date</td>
+      <td style="width: 12%;background: lightsteelblue;font-weight: bold;">Time</td>
+      <td style="width: 20%;background: lightsteelblue;font-weight: bold;">User</td>
+      <td style="width: 30%;background: lightsteelblue;font-weight: bold;">Action Taken</td>
+      <td style="background: lightsteelblue;font-weight: bold;">Comments</td>
+    </tr>
+
+    <% (@trace_data || []).each do |data|%>
+        <tr class="trace-row">
+          <td><%= data['site']%></td>
+          <td><%= data['date']%></td>
+          <td><%= data['time']%></td>
+          <td><%= data['user'].html_safe%></td>
+          <td><%= data['action']%></td>
+          <td><%= data['comment']%></td>
+        </tr>
+    <% end %>
+  </table>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" style="height: 50px;">
+      <table style="width: 100%;">
+        <tr>
+          <td>
+            <h3 style="padding-bottom: 15px;color:darkslategray; height: 40px;margin-top: 0px;">Record Details</h3>
+          </td>
+          <td colspan="8" style="width: 70%;">
+            <div class="pull-left" style="height: 40px; margin-top: 0px;">
+
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="stats" style="width: 100%; overflow: auto; border-bottom: 1px solid #ccc;padding: 12px;border: 1px solid lightsteelblue;">
+
+      <table width="85%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
+
+
+        <% @record.each do |group, children| %>
+
+        <% r = 0 %>
+
+        <tr>
+          <td valign="top" style="font-size: 18px; text-align: left; padding: 10px;padding-top: 0px; background-color: lightsteelblue;
+          border-bottom: 1px solid #ccc;">
+          <%= group %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+
+
+          <table class="record" width="100%" cellpadding="10" cellspacing="0">
+
+            <% children.each do |child| %>
+
+            <% kids = child.keys %>
+
+            <tr>
+
+              <% (0..(kids.length - 1)).each do |i| %>
+
+              <td align="right" style="border-right: 1px solid #eee; <%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                <% unless kids[i].kind_of?(Array) %>
+                <strong style="color: #3465a4;;"><%= kids[i].html_safe %></strong>
+                <% else %>
+                    <% if  kids[i].second == "mandatory" %>
+                            <strong style="color: #3465a4;;"><%= kids[i].first %><span style='color: red;'> *</span></strong>
+                  <% elsif  kids[i].second == "sub" %>
+                            <strong style="color:#3465a4;;"><%= kids[i].first %><br /><span style='color: grey;font-size: smaller; font-style: italic;'>(<%= (child[kids[i]] == "Yes" ? "Registered after 42 days of birth" : "Registered within 42 days of birth") rescue nil %>)</span>
+                    <% end %>
+                <% end %>
+              </td>
+
+              <td style="<%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>" id='<%= kids[i].kind_of?(Array) ? "#{group.gsub(" ", "_").downcase}_#{kids[i].first.gsub(" ", "_").downcase}" : "#{group.gsub(" ", "_").downcase}_#{kids[i].gsub(" ", "_").downcase}" %>'>
+                <%= child[kids[i]] rescue nil %>
+              </td>
+
+              <% end %>
+
+              <% ((kids.length)..2).each do |i| %>
+
+              <td align="right" style="border-right: 1px solid #eee; <%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                <strong>&nbsp;</strong>
+              </td>
+              <td style="<%= (r < children.length - 1 ? "border-bottom: 1px solid #eee" : "") %>">
+                &nbsp;
+              </td>
+
+              <% end %>
+
+            </tr>
+
+            <% r += 1 %>
+
+            <% end %>
+
+          </table>
+
+        </td>
+      </tr>
+
+      <% end %>
+
+      <tr>
+        <td style="border-top: 1px solid #ccc;">
+          &nbsp;
+        </td>
+      </tr>
+
+    </table>
+
+      <% display = SETTINGS['enable_role_privileges'] == false ? '' : 'none'%>
+
+      <% if params[:viewport].blank?%>
+        <div style="margin-right: 100px;margin-left:100px;margin-top: 5px;">
+        <button class="btn btn-danger pull-left"
+                onclick="window.parent.location = return_path ">
+          Cancel
+        </button>
+      <button class="btn btn-primary pull-right" style="width: 80px; float: right; margin-right: 40px; margin-top: 5px; cursor: pointer;
+               "
+              onmousedown="window.location = '<%=session[:list_url]%>' ">
+        <b>Finish</b>
+      </button>
+
+        <% if "HQ-POTENTIAL DUPLICATE-TBA"== @status %>
+              <script type="text/javascript">
+                    jQuery(document).ready(function(){
+                        jQuery('#duplicateModal').modal('show')
+                    });
+              </script>
+        <%else%>
+        <button id="Check Completeness" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="jQuery('#completenessModal').modal('show')">
+          <span class="fa fa-check"></span>
+          Check Completeness
+        </button>
+        <button id="Confirm Completeness" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="jQuery('#completenessModal').modal('show')">
+          <span class="fa fa-check"></span>
+          Check Completeness
+        </button>
+
+        <button id="Approve for Printing" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="jQuery('#completenessModal').modal('show');">
+          <span class="fa fa-thumbs-o-up"></span>
+          Approve for Printing
+        </button>
+
+        <button id="Approve for Re-printing" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Reprint Reason', 'HQ-CAN-RE-PRINT')">
+          <span class="fa fa-thumbs-o-up"></span>
+          Approve for Re-Printing
+        </button>
+
+        <button id="Request Reprint" class="btn btn-danger  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter reason for Re-print Request', 'HQ-RE-PRINT')">
+          <span class="fa"></span>
+          Request Re-print
+        </button>
+
+        <button id="Dispatch" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="jQuery('#printerModal').modal('show')">
+          <span class="fa fa-truck"></span>
+          Dispatch
+        </button>
+        <button id="Print" class="btn btn-success pull-right" style="display:<%= display%>;"
+                onclick="window.location = '/print_preview?person_ids=<%= params[:person_id]%>&no_print=true' ">
+          <span class="fa fa-print"></span>
+          Print
+        </button>
+        <button id="Reject" class="btn btn-danger pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', 'HQ-CAN-REJECT')">
+          <span class="fa"></span>
+          Reject
+        </button>
+        <button id="Reject to DC" class="btn btn-danger pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', 'HQ-REJECTED')">
+          <span class="fa"></span>
+          Reject to DC
+        </button>
+        <button id="Void" class="btn btn-warning pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter void reason to proceed', 'HQ-VOIDED')">
+          <span class="fa fa-void"></span>
+          Void
+        </button>
+        <button id="DM Approve Amendment" class="btn btn-success  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', 'HQ-CAN-REPRINT-AMEND')">
+          <span class="fa"></span>
+          Approve for Re-print Amendment
+          </button>
+        <button id="Grant Request" class="btn btn-success  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', '<%=@status%>'.replace('-REJECTED','')+'-GRANTED')">
+          <span class="fa"></span>
+          Grant Request
+        </button>
+
+        <button id="Reject Request" class="btn btn-warning  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', '<%=@status%>-REJECTED-TBA')">
+          <span class="fa"></span>
+          Reject Request
+        </button>
+        
+        <button id="Reject Request to DC" class="btn btn-warning  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', '<%=@status%>'.replace('HQ','DC'))">
+          <span class="fa"></span>
+          Reject Request to DC
+        </button>
+
+        <button id="Approve Request" class="btn btn-success  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', 'HQ-CAN-PRINT')">
+          <span class="fa"></span>
+          Approve Request
+        </button>
+        <button id="Reject Request to DS" class="btn btn-warning  pull-right" style="display:<%= display%>;"
+                onclick="generalComment('Enter rejection reason to proceed', '<%=@status%>'.replace('GRANTED','REJECTED').replace('-TBA',''))">
+          <span class="fa"></span>
+            Reject Request to DS
+        </button>
+
+        <%end%>
+      </div>
+      <% else %>
+          <button class="btn btn-danger pull-left"
+                  onclick="window.location = '<%= request.referrer%>' ">
+            Back
+          </button>
+      <% end %>
+
+      <% if @comments.count > 0%>
+          <button id="View Comments" class="btn btn-primary pull-right" style="display:<%= display%>;"
+                  onclick= 'ajaxPullComments("view")' >
+            <span class="fa fa-comments"></span>
+            View Comments (<%= @comments.count%>)
+          </button>
+      <% end %>
+    </div>
+</div>
+
+<% if @results.present? %>
+<div style="margin-top:8%" class="modal fade" id="duplicateModal" tabindex="-1" role="dialog" aria-labelledby="duplicateModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:70%;margin:auto">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button"  style="display:none" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="duplicateModalLabel" style="text-align: left;">
+           Record is potential duplicate with <%= @results.count %> record(s)
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="duplicates">
+            <tr>
+               <th colspan="11" style="background:#ecccb4">Duplicate record (<i>New</i>)</th>
+            </tr>
+            <tr>
+              <th colspan="5"> Child's details</th>
+              <th colspan="2">Mother's details</th>
+              <th colspan="2">Father's details</th>
+              <th></th>
+            </tr>
+            <tr>
+               <td><%= @birth_details.district_id_number %></td>
+               <td ><%= @name.first_name %></td>
+               <td><%= @name.last_name %></td>
+               <td><%= @person.gender %> </td>
+               <td><%= @person.birthdate.to_date.strftime("%d/%b/%Y") %></td>
+               <td><%=@mother_name.first_name rescue 'N/A' %></td>
+               <td><%= @mother_name.last_name rescue 'N/A' %></td>
+               <td><%=@father_name.first_name rescue 'N/A' %></td>
+               <td><%=@father_name.last_name rescue 'N/A'%></td>
+               <td></td>
+            </tr>
+            <tr>
+               <th colspan="11" style="background: #c8e3ee">Existing record(s) (<i>Currently in HQ database</i>)</th>
+            </tr>
+            <tr>
+              <th colspan="5"> Child's details</th>
+              <th colspan="2">Mother's details</th>
+              <th colspan="2">Father's details</th>
+              <th></th>
+            </tr>
+            <tr>
+                <th>BEN</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>First Name</th>
+                <th>Surname</th>
+                <th>First Name</th>
+                <th>Surname</th>
+                <th>Similarity(%)</th>
+            </tr>
+            <% @results.each do |result| %>
+              <tr>
+                <td><%= PersonBirthDetail.find_by_person_id(result["_id"].to_i).district_id_number rescue ''%></td>
+
+                <td class="<%= @name.first_name.squish != result['_source']['first_name'].squish ? 'red' : ''  %>">
+                    <%= result["_source"]["first_name"]%> 
+                </td>
+                <td class="<%= @name.last_name.squish != result['_source']['last_name'].squish ? 'red' : ''  %>">
+                    <%= result["_source"]["last_name"]%> 
+                </td>
+                <td class="<%= @person.gender.squish != result['_source']['gender'].first.upcase ? 'red' : ''  %>">
+                  <%= result["_source"]["gender"].first.upcase %>
+                  
+                </td>
+                <td class="<%= @person.birthdate.to_date.strftime('%d/%b/%Y').squish != result['_source']['birthdate'].to_date.strftime('%d/%b/%Y') ? 'red' : ''  %>">
+                  <%= result["_source"]["birthdate"].to_date.strftime("%d/%b/%Y")%> 
+                </td>
+                <td class="<%= @mother_name.first_name.squish != result['_source']['mother_first_name'].squish ? 'red' : ''  %>">
+                    <%= result["_source"]["mother_first_name"]%> 
+                </td>
+                <td class="<%= @mother_name.last_name.squish != result['_source']['mother_last_name'].squish ? 'red' : ''  %>">
+                  <%= result["_source"]["mother_last_name"]%> 
+                </td>
+                <td  class="<%= (@father_name.first_name.to_s.squish rescue 'N/A') != result['_source']['father_first_name'].to_s.squish ? 'red' : ''  %>">
+                  <%= result["_source"]["father_first_name"] rescue 'N/A'%> 
+                </td>
+                <td class="<%= (@father_name.last_name.to_s.squish rescue 'N/A') != result['_source']['father_last_name'].to_s.squish ? 'red' : ''  %>">
+                  <%= result["_source"]["father_last_name"] rescue 'N/A'%> 
+                </td>
+                <td><%=result["similarity_score"].to_f.round(2) %></td>
+              </tr>
+            <% end %>
+          </table>
+        <form id="duplicate_form" action="/duplicate_processing/<%=@person.id %>">
+              <input type="hidden" name="operation" value="System">
+              <label class="hidden" style="margin:2%; float:left"><h4>Enter comment</h4></label>
+              <input class="form-control" type="textarea" name="comment" style="width: 98%;margin-top: 4px;margin-bottom: 4px;" required>
+              <input type="hidden" name="next_url" value="/person/view?statuses[]=HQ-ACTIVE&destination=Active Records" >
+        </form>
+        </span>
+        <div class="modal-footer">
+          <button type="button" class="btn" type="submit" onclick="jQuery('#duplicate_form').submit()">Ok</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+<%end%>
+
+<div class="modal fade" id="printerModal" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
+          Select Printer for Certificate(s) List
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="printers">
+            <% @available_printers.each do |printer| %>
+              <tr onmousedown="updateValue(this)" value="<%= printer %>">
+                <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                <td style="text-align: left; padding-left:50px;"><%= printer %></td>
+              </tr>
+            <% end %>
+          </table>
+        </span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="submitForm();">Dispatch</button>
+          <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="completenessModal" tabindex="-1" role="dialog" aria-labelledby="completenessModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
+          Check Completeness
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="completeness_details">
+            <tr>
+              <td class="labell" >Birth Entry Number</td>
+              <td style="text-align: left; padding-left:50px;"><%= @birth_details.district_id_number %></td> </tr>
+            <tr>
+              <td class="labell">Child Name</td>
+              <td style="text-align: left; padding-left:50px;"><%= "#{@name.first_name} #{@name.middle_name} #{@name.last_name}" %></td>
+            </tr>
+            <tr>
+              <td class="labell">Child Gender</td>
+              <td style="text-align: left; padding-left:50px;"><%= @person.gender == 'F' ? 'Female' : 'Male' %></td>
+            </tr>
+            <tr>
+              <td class="labell">Child Date of Birth</td>
+              <td style="text-align: left; padding-left:50px;"><%= @person.birthdate.strftime("%d/%b/%Y") %></td>
+            </tr>
+            <tr>
+              <td class="labell">Child Place of Birth</td>
+              <td style="text-align: left; padding-left:50px;"><%= @place_of_birth rescue nil%></td>
+            </tr>
+            <tr>
+              <td class="labell">Mother</td>
+              <td style="text-align: left; padding-left:50px;"><%= @mother_person.name rescue nil%></td>
+            </tr>
+            <tr>
+              <td class="labell">Nationality of Mother</td>
+              <td style="text-align: left; padding-left:50px;"><%= @mother_person.citizenship rescue nil%></td>
+            </tr>
+            <tr>
+              <td class="labell">Father</td>
+              <td style="text-align: left; padding-left:50px;"><%=@father_person.name rescue nil rescue nil %></td>
+            </tr>
+            <tr>
+              <td class="labell">Nationality of Father</td>
+              <td style="text-align: left; padding-left:50px;"><%=  @father_person.citizenship rescue nil %></td>
+            </tr>
+            <tr>
+              <td class="labell">Parents Married to each Other?</td>
+              <td style="text-align: left; padding-left:50px;"><%= @birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No' %></td>
+            </tr>
+            <tr>
+              <td class="labell">Court order attached</td>
+              <td style="text-align: left; padding-left:50px;"><%= @birth_details.court_order_attached.to_s == '1' ? 'Yes' : 'No' %></td>
+            </tr>
+            <tr>
+              <td class="labell">Parents signed?</td>
+              <td style="text-align: left; padding-left:50px;"><%=  @birth_details.parents_signed.to_s == '1' ? 'Yes' : 'No' %></td>
+            </tr>
+            <tr>
+              <td class="labell">Delayed Registration</td>
+              <td style="text-align: left; padding-left:50px;"><%= @delayed %></td>
+            </tr>
+          </table>
+        </span>
+
+        <% unless User.current.user_role.role.role == "Data Manager" && ["HQ-COMPLETE", "HQ-CONFLICT"].include?(@status) %>';
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" onclick="ajaxPullComments(null, 'HQ-COMPLETE')">Complete</button>
+              <button type="button" class="btn btn-danger" onclick="ajaxPullComments()" >Incomplete</button>
+            </div>
+        <% else %>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" onclick="ajaxify('HQ-CAN-PRINT')">Approve</button>
+              <button type="button" class="btn btn-danger" onclick="ajaxPullComments()" >Reject</button>
+            </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <div class="modal fade" id="comments" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 3000">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header btn-primary">
+        <h4 class="modal-title" id="comment-header">Record Comments</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col-lg-12">
+
+            <div class=" form-group">
+              <div class="container">
+                <div class="row" style="width: 550px;">
+
+                  <div id="comments-list">
+
+                  </div>
+
+                  <div style="width: 100%;margin-top: 20px;border-top: 1px solid #d3d3d3">
+                    <form id="comment-form" action="/ajax_save_comment">
+                      <textarea class="form-control" name="comment" placeholder="Add Comment" id="textarea" style="width: 98%;margin-top: 4px;margin-bottom: 4px;"></textarea>
+                      <label id='error' style="color: red;display: none;" class="pull-left">Comment cannot blank</label>
+                      <div id='submit_btn' onclick="saveComment();" class="btn btn-sm btn-primary pull-right">Submit</div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="comment_close" type="button" class="btn btn-sm btn-default pull-left" onclick="jQuery('#comments').modal('hide')" > Cancel </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="modal fade" id="nidcomparison" tabindex="-1" role="dialog" aria-labelledby="nidcomparisonlLabel" aria-hidden="true" style="z-index: 2700">
+  <div class="modal-dialog">
+    <div id="nidcomparison-content" class="modal-content" style="width: 850px;">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabels" style="text-align: left;">
+          EBRS - NRIS Data <span class="pull-right"><b>NATIONAL ID: <%= @person.id_number %></b></span>
+        </h4>
+      </div>
+      <div class="modal-body" style="width: 100%;">
+        <% if !@nid_data.blank? %>
+        <span style="text-align:center;width: 100%;">
+          <table align="center" id="completeness_details" style="width:100%;" class="nris-diff">
+            <tr class="nris-row">
+              <td class="labell" style="min-width: 200px;background: white;">&nbsp;</td>
+              <th style="text-align: left; padding-left:50px;background: darkslategrey;color: white;min-width: 200px;border: 1px solid white;">EBRS</th>
+              <th style="text-align: left; padding-left:50px;background: darkslategrey;color: white;min-width: 200px;border: 1px solid white;">NRIS</th>
+            <tr>
+            <tr class="nris-row">
+              <td class="labell">First Name</td>
+              <td style="text-align: left; padding-left:50px;"><%= @name.first_name %></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["FirstName"]["remote"] rescue nil) || @name.first_name)%></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Last Name</td>
+              <td style="text-align: left; padding-left:50px;"><%= @name.last_name %></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["Surname"]["remote"] rescue nil) || @name.last_name) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Sex</td>
+              <td style="text-align: left; padding-left:50px;"><%= @person.gender == 'F' ? 'Female' : 'Male' %></td>
+              <td style="text-align: left; padding-left:50px;"><%= (({1 => "Male", 2 => "Female"}[@nid_data["Sex"]["remote"]] rescue nil) || (@person.gender == 'F' ? 'Female' : 'Male')) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Date of Birth</td>
+              <td style="text-align: left; padding-left:50px;"><%= @person.birthdate.to_date.strftime("%d/%b/%Y") %></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["DateOfBirthString"]["remote"].to_date.strftime("%d/%b/%Y") rescue nil) || @person.birthdate.to_date.strftime("%d/%b/%Y")) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Place of Birth</td>
+              <td style="text-align: left; padding-left:50px;"><%= Location.find(@birth_details.district_of_birth).name rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["PlaceOfBirthDistrictName"]["remote"] rescue nil) || (Location.find(@birth_details.district_of_birth).name rescue nil)) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother First Name</td>
+              <td style="text-align: left; padding-left:50px;"><%= @mother_name.first_name rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["MotherFirstName"]["remote"] rescue nil) || @mother_name.first_name) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother Last Name</td>
+              <td style="text-align: left; padding-left:50px;"><%= @mother_name.last_name rescue nil %></td>
+              <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["MotherSurname"]["remote"] rescue nil) || @mother_name.last_name) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother Home District</td>
+              <td style="text-align: left; padding-left:50px;"><%= Location.find(@mother_address.home_district).name rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["MotherDistrictName"]["remote"] rescue nil) || (Location.find(@mother_address.home_district).name rescue nil)) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother Home TA</td>
+              <td style="text-align: left; padding-left:50px;"><%= Location.find(@mother_address.home_ta).name rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["MotherTaName"]["remote"] rescue nil) || (Location.find(@mother_address.home_ta).name rescue nil)) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother Home Village</td>
+              <td style="text-align: left; padding-left:50px;"><%= Location.find(@mother_address.home_village).name rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["MotherVillageName"]["remote"] rescue nil) || (Location.find(@mother_address.home_village).name rescue nil)) %></td>
+            </tr>
+            <tr class="nris-row">
+              <td class="labell">Mother Nationality</td>
+              <td style="text-align: left; padding-left:50px;"><%= @mother_person.citizenship rescue nil%></td>
+              <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["MotherNationality"]["remote"] rescue nil) || (@mother_person.citizenship rescue nil)) %></td>
+            </tr>
+
+            <% if !@father_name.blank? %>
+                <tr class="nris-row">
+                  <td class="labell">Father First Name</td>
+                  <td style="text-align: left; padding-left:50px;"><%= @father_name.first_name rescue nil%></td>
+                  <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["FatherFirstName"]["remote"] rescue nil) || @father_name.first_name) %></td>
+                </tr>
+                <tr class="nris-row">
+                  <td class="labell">Father Last Name</td>
+                  <td style="text-align: left; padding-left:50px;"><%= @father_name.last_name rescue nil %></td>
+                  <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["FatherSurname"]["remote"] rescue nil) || @father_name.last_name) %></td>
+                </tr>
+                <tr class="nris-row">
+                  <td class="labell">Father Home District</td>
+                  <td style="text-align: left; padding-left:50px;"><%= Location.find(@father_address.home_district).name rescue nil%></td>
+                  <td style="text-align: left; padding-left:50px;"><%=  ((@nid_data["FatherDistrictName"]["remote"] rescue nil) || (Location.find(@father_address.home_district).name rescue nil)) %></td>
+                </tr>
+                <tr class="nris-row">
+                  <td class="labell">Father Home TA</td>
+                  <td style="text-align: left; padding-left:50px;"><%= Location.find(@father_address.home_ta).name rescue nil%></td>
+                  <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["FatherTaName"]["remote"] rescue nil) || (Location.find(@father_address.home_ta).name rescue nil)) %></td>
+                </tr>
+                <tr class="nris-row">
+                  <td class="labell">Father Home Village</td>
+                  <td style="text-align: left; padding-left:50px;"><%= Location.find(@father_address.home_village).name rescue nil%></td>
+                  <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["FatherVillageName"]["remote"] rescue nil) || (Location.find(@father_name.home_village).name rescue nil)) %></td>
+                </tr>
+                <tr class="nris-row">
+                  <td class="labell">Father Nationality</td>
+                  <td style="text-align: left; padding-left:50px;"><%= @father_person.citizenship rescue nil%></td>
+                  <td style="text-align: left; padding-left:50px;"><%= ((@nid_data["FatherNationality"]["remote"] rescue nil) || (@father_person.citizenship rescue nil)) %></td>
+                </tr>
+            <% end %>
+
+          </table>
+        </span>
+        <% else %>
+        <div style="width: 100%;text-align: center;"> <br /> <br />
+          Could Not Validate National ID <span style="color: blue; font-weight: bold;"><i><%= (@person.id_number rescue nil)%></i></span>
+        <br /><br /> <br /><br /></div>
+        <% end %>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+
+          <% if @nid_data.blank? && !(@person.id_number rescue nil).blank? %>
+              <button type="button" class="btn btn-primary" onclick="revalidate()">Re-Validate</button>
+          <% end %>
+
+          <% if (User.current.user_role.role.role == "Data Manager" && !@nid_data.blank? ) %>
+              <% if ['HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT'].include?(@status) %>
+                  <button type="button" class="btn btn-success"
+                          onclick="window.location = '/print_preview?person_ids=<%= params[:person_id]%>&no_print=true' " >Print</button>
+              <% elsif @status == 'HQ-COMPLETE' %>
+                  <button type="button" class="btn btn-primary" onclick="ajaxify('HQ-CAN-PRINT');">Approve for Printing</button>
+              <% end %>
+          <% end %>
+
+          <% if User.current.user_role.role.role == "Data Manager"  %>
+            <button type="button" class="btn btn-danger" onclick="generalComment('Enter rejection reason to proceed', 'HQ-REJECTED')" >Reject </button>
+          <% else %>
+            <button type="button" class="btn btn-danger" onclick="generalComment('Enter rejection reason to proceed', 'HQ-REJECTED')" >Reject </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="clone_me" class="media" style="padding: 5px;display:none;border-top: 1px solid lightgrey;">
+  <div class="media-body" style="width: 550px;">
+    <h4 class="media-heading user_name"><a class="name"> <small class="role"> </small> </a> <small class="state pull-right " style="margin-right: 15px;font-style: italic; text-transform: lowercase"> HQ-OPEN</small></h4>
+    <span class="comment" style="width: 100%;"></span>
+  </div>
+</div>
+
+<div id="query-msg" style='display: none; position:  fixed; left: 43%; top: 14%; background: green !important; color: ghostwhite;padding: 5px;  font-size: 1.3em; !important; z-index: 3500;'>
+  </div>
+
+<script>
+    <% (@actions || []).each do |action|
+        next if (SETTINGS['enable_role_privileges'] == false)%>
+
+        if(__$('<%= action['button_name']%>')) {
+            __$('<%= action['button_name']%>').style.display = 'table-cell';
+        }
+    <% end %>
+
+    function highlightNRISDiff(){
+
+        var rows = document.getElementsByClassName("nris-row");
+        for(var i = 1; i < rows.length; i++) {
+            var tds = rows[i].getElementsByTagName("td");
+            if (tds[1].innerHTML.trim().toUpperCase() != tds[2].innerHTML.trim().toUpperCase()) {
+                tds[1].style.background = "#FFBAD2";
+                tds[2].style.background = "#FFBAD2";
+            }
+        }
+    }
+
+    function createShield(){
+       var shield = document.createElement("div");
+        shield.id = "ajaxshield";
+        shield.innerHTML = "&nbsp;";
+        jQuery(shield).css({
+            position: "absolute",
+            width: (5*screen.width + "px"),
+            height: (5*screen.height + "px"),
+            top: "0px",
+            left: "0px",
+            zIndex: "3000",
+            background: "black",
+            opacity: "0.5",
+            textAlign: "center",
+            align: "middle"
+        })
+
+        document.body.appendChild(shield);
+        <% if @person.id_number.blank? %>
+
+        __$("query-msg").style.display = "inline-block";
+        <% end %>
+    }
+    var brn_tries = 0
+    function assignmentOrder(person_id){
+         __$("query-msg").style.display = "inline-block";
+         __$("query-msg").innerHTML = "Assigning BRN   ....";
+        jQuery.ajax({
+            url: "/ajax_check_brn?person_id=<%= @person.id%>",
+            success: function(result){
+                console.log(result);
+                if(result == "OK"){
+                    queryNID();
+                }else{
+                    setTimeout(function(){assignmentOrder()}, 250);
+                }
+            },
+            error: function(error){
+                if (brn_tries < 3) {
+                    setTimeout(function(){assignmentOrder()}, 250);
+                    brn_tries += 1;
+                }else{
+                    alert("Something Went Wrong!");
+                }
+            }
+        })
+    }
+
+    function queryNID(){
+        __$("query-msg").style.display = "inline-block";
+        __$("query-msg").innerHTML = "Querying National ID from NRIS  .... "
+
+        jQuery.ajax({
+            url: "/ajax_request_national_id?person_id=<%= @person.id%>&national_id=<%= @person.id_number%>",
+            success: function(result){
+                console.log(result);
+                if(result == "OK"){
+                    window.parent.location = return_path;
+                }else{
+                    console.log("NID");
+                    setTimeout(function(){queryNID()}, 250);
+                }
+            },
+            error: function(error){
+                alert("Something Went Wrong!")
+            }
+        })
+    }
+
+    function removeShield(){
+        if (__$("ajaxshield")){
+            __$("ajaxshield").parentNode.removeChild(__$("ajaxshield"));
+        }
+
+        __$("query-msg").style.display = "none";
+    }
+
+    function ajaxify(status){
+        var role = '<%= User.current.user_role.role.role%>';
+        if (status == "HQ-COMPLETE") {
+            var status = ({
+                'Data Checking Clerk': 'HQ-COMPLETE',
+                'Administrator': 'HQ-COMPLETE',
+                'Data Supervisor': 'HQ-CONFLICT',
+                'Data Manager': 'HQ-CAN-PRINT'
+            })[role];
+        }
+
+        var url = "/ajax_status_change?person_id=<%= params[:person_id]%>&status="+status+"&comment=";
+
+        createShield();
+
+        jQuery.ajax({
+            url: url,
+            success: function(feedback){
+                if(status == "HQ-CAN-PRINT" || status == "HQ-CAN-RE-PRINT"){
+
+                    <% if @person.id_number.blank? %>
+                        assignmentOrder();
+                    <% else %>
+                        window.parent.location = return_path;
+                    <% end %>
+                }else{
+                    removeShield();
+                    window.parent.location = return_path;
+                }
+            },
+            error: function(error){
+                removeShield();
+                console.log("Something went wrong! server may be down")
+            }
+        })
+    }
+
+    function ajaxPullComments(mode, status){
+        var role = '<%= User.current.user_role.role.role%>';
+
+        if(role == "Data Checking Clerk" && status == "HQ-COMPLETE"){
+            ajaxify(status);
+            return;
+        }
+        if(role == "Data Supervisor" && status == "HQ-COMPLETE"){
+            <% if @status == "HQ-RE-APPROVED" %>
+                //status = "HQ-CONFLICT"
+            <% else %>
+                status = "HQ-CONFLICT"
+            <% end %>
+        }
+
+        jQuery("#comment-list").html("");
+
+        if (mode && mode == 'view'){
+            __$('textarea').value = ''
+            __$('textarea').style.display = 'none';
+            __$('submit_btn').style.display = 'none';
+            __$("comment-header").innerHTML = "Record comments"
+        }else{
+            __$('textarea').style.display = 'inline';
+            __$('submit_btn').style.display = 'inline';
+            __$("comment-header").innerHTML = "Add comment to proceed";
+        }
+
+        if(status && status.toLowerCase().match('complete')){
+            jQuery("#comments").attr('next_status', status)
+        }else{
+            jQuery("#comments").attr('next_status', '')
+        }
+
+        jQuery.ajax(
+                {
+                    url: "/get_comments?person_id=<%= params[:person_id]%>",
+                    success: function(results){
+                        results = JSON.parse(results);
+                        var parent = document.getElementById("comments-list");
+                        parent.innerHTML = "";
+                        __$('textarea').value = ''
+                        var clone = document.getElementById("clone_me");
+                        for(var i = 0; i < results.length; i++){
+                            var dup = clone.cloneNode(true);
+                            dup.id = i;
+                            dup.style.display = "block";
+                            //set values
+                            dup.getElementsByClassName("name")[0].innerHTML = results[i]['user']
+                                    + " <small class='user_role'>" + results[i]['user_role'] + " - " + results[i]['date_added'] + " </small>";
+                            dup.getElementsByClassName("state")[0].innerHTML = results[i]['status'];
+                            dup.getElementsByClassName("comment")[0].innerHTML = results[i]['comment'];
+
+                            parent.appendChild(dup);
+                        }
+
+                        jQuery("#comments").modal('show');
+                        console.log(status)
+
+                        parent.scrollTop = parent.scrollHeight;
+
+                    },
+                    error: function(e){
+                        alert("Something went wrong!");
+                    }
+                }
+        )
+    }
+
+    function generalComment(header, status){
+
+        ajaxPullComments();
+
+        __$('submit_btn').style.display = 'inline';
+        __$("comment-header").innerHTML = header;
+
+        if(status){
+            __$('submit_btn').onclick = function(){
+                    saveComment(status);
+                };
+        }
+    }
+
+    function reject(){
+
+    }
+
+    function saveComment(status){
+        if (__$("textarea").value.trim().length == 0){
+            jQuery('#error').show();
+            return
+        }
+
+        var role = '<%= User.current.user_role.role.role%>';
+
+        if (!status) {
+            status = jQuery("#comments").attr('next_status');
+        }
+
+        if (!status) {
+            status = ({
+                'Data Checking Clerk': 'HQ-INCOMPLETE',
+                'Administrator': 'HQ-INCOMPLETE-TBA',
+                'Data Supervisor': 'HQ-INCOMPLETE-TBA',
+                'Data Manager': 'HQ-CAN-REJECT'
+            })[role];
+        }
+
+        var url = "/ajax_status_change?person_id=<%= params[:person_id]%>&status="+status+"&comment="
+        jQuery.ajax(
+                {
+                    url: url,
+                    data: {
+                        'comment' : __$("textarea").value,
+                        "authenticity_token": "<%= form_authenticity_token %>"
+                    },
+                    success: function(result){
+                        if(result == 'ok'){
+                            window.location = return_path;
+                        }else if(result == "duplicate"){
+
+                        }else{
+                            alert("Something went wrong!")
+                        }
+                    },
+                    error: function(){
+                        alert("Something went wrong!")
+                    }
+                }
+        )
+    }
+
+    printer_name = "";
+
+    function updateValue(obj){
+        printer_name = obj.getAttribute('value');
+    }
+
+    function submitForm(){
+        if(printer_name.length == 0){
+            alert("Please select printer!");
+            return;
+        }
+        window.location = "/person/dispatch_certificates?person_ids=<%= params[:person_id]%>&printer_name=" + printer_name;
+    }
+
+    function ajaxTrace(){
+        jQuery("#shieldd, #trace-div").show();
+
+    }
+
+    function revalidate(){
+
+        var url = "/revalidate?person_id=<%= params[:person_id]%>";
+        jQuery.ajax(
+                {
+                    url: url,
+                    success: function(result){
+                        console.log(result);
+                        window.location = window.location + "&revalidation=true";
+                    },
+                    error: function(e){
+                        console.log(result);
+                        alert("Something went wrong!");
+                    }
+                }
+        )
+    }
+
+    <% if (params[:side_by_side] && params[:side_by_side].to_s == "true") || @show_popup == true %>
+        jQuery("#nidcomparison-content").css({
+            position: "absolute",
+            top: "-20px",
+            left: "-340px",
+            width: (screen.width*0.80 + "px")
+        });
+
+        jQuery("#nidcomparison").modal("show");
+        highlightNRISDiff();
+
+    <% end %>
+
+
+    <% unless @nris_up %>
+        var lockableFields = ["Check Completeness", "Confirm Completeness", "Approve for Printing", "Approve for Re-printing"];
+        for (var i = 0; i < lockableFields.length; i++){
+            __$(lockableFields[i]).setAttribute("disabled", "disabled")
+        }
+    <% end %>
+</script>
+
+<style>
+  .btn{
+    margin-left: 5px;
+      margin-right: 5px;
+  }
+</style>

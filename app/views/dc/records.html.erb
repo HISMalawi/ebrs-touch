@@ -101,18 +101,15 @@
   </div>
 
   <div class="fix-middle" style="height: 40px; margin-top: 0px;">
-    <%if (['HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT'] & params['statuses']).length > 0%>
         <button id="print-all" onclick="printAll()"
-                class=" action-btn btn btn-sm btn-success"><i class="fa fa-print"></i>Print Selected</button>
-    <% end %>
-    <%if (['HQ-PRINTED'] & params['statuses']).length > 0%>
-        <button id="dispatch-all" onclick="__$('dispatch-count').innerHTML = selected.length; jQuery('#printerModal2').modal('show')"
-                class=" action-btn btn btn-sm btn-primary"><i class="fa fa-truck"></i>Dispatch Selected</button>
-    <% end %>
+                class=" btn btn-primary"><i class="fa fa-print"></i>Print Selected</button>
+
   </div>
 <style>
     #print-all, #dispatch-all{
         display: none;
+        font-size: 1.1em;
+        width: 150px;
     }
 
 </style>
@@ -162,6 +159,12 @@
 </table>
 
 </div>
+
+<button class="red btn btn-danger pull-right" style="width: 80px; float: right; margin-right: 40px; margin-top: 10px; cursor: pointer;
+        padding: 6px; "
+        onmousedown="window.location = '/' ">
+  <b>Finish</b>
+</button>
 
 
 <div class="modal fade" id="verify_by_scanning" tabindex="-1" role="dialog" aria-hidden="true">
@@ -366,6 +369,8 @@
   </div>
 </div>
 
+
+
 <table id="roll-options">
   <tr>
     <td id="p_h_1" style="width: 40%">
@@ -464,10 +469,9 @@
                                 var person_id = json['data'][i][last_index]
 
                                 var clas = "nonid";
-                                var popup = "";
 
                                 json['data'][i][last_index] =   '<td> ' +
-                                        '<button onclick="javascript:location=\'/show_person/' + person_id + popup + ' \'"     ' +
+                                        '<button onclick="javascript:location=\'/person/' + person_id + '?bs_layout=true \'"     ' +
 
                                         ' class="action-btn btn btn-success btn-xs ' + clas + '"><i class="fa fa-eye"></i></button></td>';
 

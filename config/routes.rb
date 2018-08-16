@@ -115,6 +115,11 @@ Rails.application.routes.draw do
   get '/select_cases' => "dc#select_cases"
   get '/print_cases' => "dc#print_cases"
 
+  get '/print_preview' => 'person#print_preview'
+  post '/print_preview' => 'person#print_preview'
+  get '/birth_certificate' => 'person#birth_certificate'
+  get '/print' => 'person#print'
+
   get '/pending_cases' => "dc#manage_pending_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"

@@ -51,9 +51,14 @@ class PersonBirthDetail < ActiveRecord::Base
 
     def brn
       n = self.national_serial_number
+      if n.blank?
+        type_id = PersonIdentifierType.where(:name => "Old Birth Registration Number").first.id
+        return PersonIdentifier.where(person_id: self.person_id, :person_identifier_type_id => type_id, :voided => 0).last.value rescue nil
+      end
+
       return nil if n.blank?
       gender = Person.find(self.person_id).gender == 'M' ? '2' : '1'
-      n = n.to_s.rjust(12, '0')
+      n = n.to_s.rjust(10, '0')
       n.insert(n.length/2, gender)
     end
 

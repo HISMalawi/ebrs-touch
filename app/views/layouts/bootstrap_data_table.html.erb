@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="Dashboard">
+  <meta name="keyword" content="Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
+
+  <%= favicon_link_tag 'fav.ico' %>
+  <title>eBRS - HQ</title>
+
+  <%= stylesheet_link_tag "bootstrap/bootstrap" %>
+
+  <%= stylesheet_link_tag "extras/font-awesome.min" %>
+  <%= stylesheet_link_tag "alert" %>
+
+  <!-- Custom styles for this template -->
+  <%= stylesheet_link_tag "extras/style" %>
+  <%= stylesheet_link_tag "extras/style-responsive" %>
+  <script>
+      function __$(id){
+          return document.getElementById(id)
+      }
+  </script>
+</head>
+<%
+   @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+%>
+<body>
+<style type="text/css">
+
+    body {
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        overflow: hidden;
+        font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+        background: white;
+    }
+    header{
+
+    }
+    .panel{
+        width: 100% !important;
+        border: 1px solid #d3d3d3;
+        margin-top: 10px !important;
+        padding: 5px;
+        color: #333;
+    }
+
+</style>
+<script>
+
+    function alert(data){
+        try {
+            __$('alert-msg').innerHTML = data;
+            jQuery('#alert-modal').modal('show');
+        }catch(q) {} ;
+    }
+
+    function padZeros(number, positions) {
+        var zeros = parseInt(positions) - String(number).length;
+        var padded = "";
+
+        for (var i = 0; i < zeros; i++) {
+            padded += "0";
+        }
+
+        padded += String(number);
+
+        return padded;
+    }
+
+    Object.defineProperty(Date.prototype, "format", {
+        value: function (format) {
+            var date = this;
+            var result = "";
+
+            if (!format) {
+
+                format = ""
+
+            }
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                "October", "November", "December"];
+
+            if (format.match(/YYYY\-mm\-dd/)) {
+
+                result = date.getFullYear() + "-" + padZeros((parseInt(date.getMonth()) + 1), 2) + "-" + padZeros(date.getDate(), 2);
+
+            } else if (format.match(/mmm\/d\/YYYY/)) {
+
+                result = months[parseInt(date.getMonth())] + "/" + date.getDate() + "/" + date.getFullYear();
+
+            } else if (format.match(/d\smmmm,\sYYYY/)) {
+
+                result = date.getDate() + " " + monthNames[parseInt(date.getMonth())] + ", " + date.getFullYear();
+
+            } else {
+
+                result = date.getDate() + "/" + months[parseInt(date.getMonth())] + "/" + date.getFullYear();
+
+            }
+
+            return result;
+        }
+    });
+
+</script>
+
+<header class="header" style="color: black;display: none;">
+  <div style="display: table; width: 100%; height: 100%;">
+  <div style="display: table-row;width: 100%;">
+    <div style="display: table-cell; border-bottom: 1px solid #3465a4; height: 7vh; vertical-align: middle; color: #3465a4; font-size: 36px;">
+      <div id="legend" style="float: left; margin: 10px; margin-bottom: -15px;"></div>
+      <div style="float: right; margin-right: 5px;">
+        <table cellpadding="5">
+          <tr>
+            <td style="vertical-align: middle;">
+              <div style="border: 1px solid dimgray; color: dimgray; border-radius: 20px; padding: 2px; font-size: 0.4em;
+                      height: 20px; padding-left: 20px; padding-right: 20px;">
+                <% if (User.current.present? rescue false) && !request.path.match("/login") %>
+                    <%= User.current.username rescue nil %>@NRB DC - <%= Location.find(SETTINGS['location_id']).district %>
+                <% else %>
+                    NRB HQ - <%= Location.find(SETTINGS['location_id']).district %>
+                <% end %>
+              </div>
+            </td>
+            <td>
+              NRB eBRS
+            </td>
+            <td>
+              <img src="/assets/coa.png" height="50"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+<%=javascript_include_tag "datatables/jquery"%>
+<script>
+    function sleep (time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    var $j = jQuery.noConflict();
+</script>
+<%=javascript_include_tag "js/jquery"%>
+<script>
+    var $i = jQuery.noConflict();
+</script>
+<%=javascript_include_tag "bootstrap/bootstrap-inputmask.min"%>
+<%=javascript_include_tag "js/jquery-ui-1.9.2.custom.min"%>
+<%=javascript_include_tag "js/jquery.ui.touch-punch.min"%>
+<%=javascript_include_tag "js/jquery.dcjqaccordion.2.7"%>
+<%=javascript_include_tag "js/jquery.scrollTo.min"%>
+<%=javascript_include_tag "js/jquery.nicescroll"%>
+
+
+<%=javascript_include_tag "js/common-scripts"%>
+
+
+<script>
+    try {
+        $('select.styled').customSelect();
+    }catch(z){
+    }
+
+</script>
+
+  <div style="display: table-row;">
+    <div style="display: table-cell;">
+
+      <div id="display" style="width: 98vw; margin-left: 1vw;  border: 1px solid #f8f8ff;padding: 20px;font-size: 1.1em;">
+        <%= yield %>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+<div class="modal fade" class="alert-modal" id="alert-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-body" style="background: #d9534f;color: white;">
+        <div style="width: 100%;">
+          <label id='alert-msg' style="font-size: 18px;width: 100%; text-align: center;">&nbsp;</label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-default pull-right"
+                onclick="__$('alert-msg').innerHTML = '&nbsp;'; jQuery('#alert-modal').modal('hide')" >&nbsp;&nbsp; OK &nbsp;&nbsp; </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+</style>
+</html>

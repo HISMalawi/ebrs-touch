@@ -56,7 +56,9 @@ class PersonController < ApplicationController
 
 
   def show
-    
+
+    @available_printers = SETTINGS["printer_name"].split('|')
+
     if params[:next_path].blank?
       @targeturl = request.referrer
     else
@@ -153,7 +155,7 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn }",
                 "ID Number" => "#{@person.id_number  rescue nil}"
             },
             {
@@ -405,7 +407,9 @@ class PersonController < ApplicationController
              @results = []
         end
 
-        if params[:preview].blank?
+        if params[:bs_layout].to_s == "true"
+          render :layout => "bootstrap_data_table", :template => "person/bootstrap_show"
+        else params[:preview].blank?
           render :layout => "facility"
         end
     end
@@ -2245,4 +2249,111 @@ class PersonController < ApplicationController
 
    render :text => "OK"
  end
+
+
+
+  def print
+
+    print_errors = {}
+    print_error_log = Logger.new(Rails.root.join("log","print_error.log"))
+    paper_size = GlobalProperty.find_by_property("paper_size").value rescue 'A4'
+
+    if paper_size == "A4"
+      zoom = 0.83
+    elsif paper_size == "A5"
+      zoom = 0.89
+    end
+
+    person_ids = params[:person_ids].split(',')
+    person_ids.each do |person_id|
+      #begin
+      PersonRecordStatus.new_record_state(person_id, 'HQ-PRINTED', 'Printed Child Record')
+      print_url = "wkhtmltopdf --zoom #{zoom} --page-size #{paper_size} #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/birth_certificate?person_ids=#{person_id.strip} #{SETTINGS['certificates_path']}#{person_id.strip}.pdf\n"
+
+      print_error_log.debug print_url
+      puts print_url
+
+      t4 = Thread.new {
+        Kernel.system print_url
+        sleep(4)
+        Kernel.system "lp -d #{params[:printer_name]} #{SETTINGS['certificates_path'].strip}#{person_id.strip}.pdf\n"
+        PersonRecordStatus.new_record_state(person_id, 'HQ-PRINTED', 'Printed Child Record')
+
+        sleep(5)
+      }
+      sleep(1)
+
+      #rescue => e
+      #print_errors[person_id] = e.message + ":" + e.backtrace.inspect
+      ##end
+    end
+
+    if print_errors.present?
+      print_errors.each do |k,v|
+        print_error_log.debug "#{k} : #{v}"
+      end
+    end
+
+    if !session[:list_url].blank?
+      redirect_to session[:list_url]
+    else
+      redirect_to "/"
+    end
+  end
+
+  def print_preview
+    @section = "Print Preview"
+    @available_printers = SETTINGS["printer_name"].split('|')
+    render :layout => false
+  end
+
+  def birth_certificate
+
+    @data = []
+    signatory = User.find_by_username(GlobalProperty.find_by_property("signatory").value) rescue nil
+    signatory_attribute_type = PersonAttributeType.find_by_name("Signature") if signatory.present?
+    @signature = PersonAttribute.find_by_person_id_and_person_attribute_type_id(signatory.id,signatory_attribute_type.id).value rescue nil
+
+    person_ids = params[:person_ids].split(',')
+    nid_type = PersonIdentifierType.where(name: "Barcode Number").last
+
+    person_ids.each do |person_id|
+      data = {}
+      data['person'] = Person.find(person_id) rescue nil
+      data['birth']  = PersonBirthDetail.where(person_id: person_id).last
+
+      barcode = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png") rescue nil
+      if barcode.blank?
+
+        barcode_value = PersonIdentifier.where(person_id: person_id,
+                                               person_identifier_type_id: nid_type.id, voided: 0
+        ).last.value rescue nil
+
+        if barcode_value.blank?
+
+          bcd = BarcodeIdentifier.where(assigned: 0).first
+          bcd.person_id = person_id
+          bcd.assigned  = 1
+          bcd.save
+
+          p = PersonIdentifier.new
+          p.person_id = person_id
+          p.value = bcd.value
+          p.person_identifier_type_id = PersonIdentifierType.where(name: "Barcode Number").last.id
+          p.save
+
+          barcode_value = bcd.value
+        end
+
+        `bundle exec rails r bin/generate_barcode #{ barcode_value } #{ data['person'].id} #{SETTINGS['barcodes_path']} -e #{Rails.env}  `
+      end
+
+      data['barcode'] = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png")
+
+      @data << data
+    end
+
+    render :layout => false, :template => 'person/birth_certificate'
+  end
+
 end

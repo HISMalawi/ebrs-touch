@@ -181,7 +181,8 @@ class Person < ActiveRecord::Base
     def id_number
       PersonIdentifier.where(
           person_id: self.id,
+          voided: 0,
           person_identifier_type_id: PersonIdentifierType.where(name: "National ID Number").last.id
-      ).last.value
+      ).last.value.strip rescue nil
     end
 end
