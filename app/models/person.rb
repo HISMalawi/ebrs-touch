@@ -185,4 +185,12 @@ class Person < ActiveRecord::Base
           person_identifier_type_id: PersonIdentifierType.where(name: "National ID Number").last.id
       ).last.value.strip rescue nil
     end
+
+
+    def npid
+      PersonIdentifier.where(
+          person_id: self.id,
+          person_identifier_type_id: PersonIdentifierType.where(name: "Barcode Number").last.id
+      ).last.value.strip rescue nil
+    end
 end
