@@ -22,6 +22,16 @@ def manage_cases
   render :layout => "facility"
 end
 
+def printed_cases
+  @stats = PersonRecordStatus.stats
+  @icoFolder = folder
+  @section = "Printed Cases"
+  @targeturl = "/"
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+  render :layout => "facility"
+end
+
 def manage_requests
   @stats = PersonRecordStatus.stats
   @icoFolder = folder
@@ -433,7 +443,23 @@ def incomplete_case_comment
 
 def print_certificates
 
-  @type_stats = PersonRecordStatus.type_stats(params[:statuses], params[:had], params[:had_by])
+  @type_stats = PersonRecordStatus.type_stats(['HQ-CAN-PRINT', "HQ-CAN-RE-PRINT"], params[:had], params[:had_by])
+  facility_tag_id = LocationTag.where(name: "Health Facility").first.id
+  printable_statuses = Status.where("name IN ('HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT')").map(&:status_id)
+
+  @facilities = ActiveRecord::Base.connection.select_all("
+        SELECT d.location_created_at, l.name FROM person_birth_details d
+          INNER JOIN location l ON l.location_id = d.location_created_at
+          INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{facility_tag_id}
+        GROUP BY location_created_at
+          "
+  ).collect{|c| [c['location_created_at'], c['name']]}
+
+  cur_loc_id = SETTINGS['location_id']
+  cur_loc_name = Location.find(cur_loc_id).name
+
+  @facilities << [cur_loc_id, "#{cur_loc_name} (ADR)"]
+
   params[:statuses] = [] if params[:statuses].blank?
   session[:list_url] = request.referrer
   @states = params[:statuses]
@@ -488,6 +514,14 @@ def print_certificates
       loc_query = " AND pbd.location_created_at IN (#{locations.join(', ')}) "
     end
 
+    facility_filter = ""
+    if !params[:facility_id].blank? && params[:facility_id] != "All"
+      session[:facility_id] = params[:facility_id]
+      facility_filter = " AND pbd.location_created_at = #{params[:facility_id]} "
+    else
+      session[:facility_id] = ""
+    end
+
     state_ids = @states.collect{|s| Status.find_by_name(s).id} + [-1]
     types=['Normal', 'Abandoned', 'Adopted', 'Orphaned'] if params[:type] == 'All'
     types=['Abandoned', 'Adopted', 'Orphaned'] if params[:type] == 'All Special Cases'
@@ -519,7 +553,7 @@ def print_certificates
               #{had_query}
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
     .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
-              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query}
+              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query} #{facility_filter}
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
               person.birthdate, person.gender) REGEXP \"#{search_val}\"  #{search_category} ")
 

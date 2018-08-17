@@ -1705,8 +1705,20 @@ class PersonController < ApplicationController
   end  
 
   def view_printed_cases
-    @states = ["HQ-PRINTED"]
-    @section = "Printed Cases"
+
+    if params[:loc] == "hq"
+      @states = ["HQ-PRINTED"]
+      @section = "Cases Printed at HQ"
+    elsif params[:loc] == "dc"
+      @states = ["DC-PRINTED"]
+      @section = "Cases Printed at DC"
+    else
+      @states = ["HQ-PRINTED","DC-PRINTED"]
+      @section = "All Printed Cases"
+    end
+
+    @targeturl = "/printed_cases"
+
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
     #@records = PersonService.query_for_display(@states)
@@ -2256,7 +2268,7 @@ class PersonController < ApplicationController
 
     print_errors = {}
     print_error_log = Logger.new(Rails.root.join("log","print_error.log"))
-    paper_size = GlobalProperty.find_by_property("paper_size").value rescue 'A4'
+    paper_size = GlobalProperty.find_by_property("paper_size").value rescue 'A5'
 
     if paper_size == "A4"
       zoom = 0.83
@@ -2267,25 +2279,16 @@ class PersonController < ApplicationController
     person_ids = params[:person_ids].split(',')
     person_ids.each do |person_id|
       #begin
-      PersonRecordStatus.new_record_state(person_id, 'HQ-PRINTED', 'Printed Child Record')
       print_url = "wkhtmltopdf --zoom #{zoom} --page-size #{paper_size} #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/birth_certificate?person_ids=#{person_id.strip} #{SETTINGS['certificates_path']}#{person_id.strip}.pdf\n"
 
       print_error_log.debug print_url
       puts print_url
 
+      PersonRecordStatus.new_record_state(person_id, 'DC-PRINTED', 'Printed Child Record')
       t4 = Thread.new {
         Kernel.system print_url
-        sleep(4)
         Kernel.system "lp -d #{params[:printer_name]} #{SETTINGS['certificates_path'].strip}#{person_id.strip}.pdf\n"
-        PersonRecordStatus.new_record_state(person_id, 'HQ-PRINTED', 'Printed Child Record')
-
-        sleep(5)
       }
-      sleep(1)
-
-      #rescue => e
-      #print_errors[person_id] = e.message + ":" + e.backtrace.inspect
-      ##end
     end
 
     if print_errors.present?

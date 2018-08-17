@@ -386,6 +386,17 @@
       </select>
     </td>
 
+    <td>
+      <select id="facility" label="facility" onchange="reloadDataTable(this)"
+              style="color: #2f4f4f;border-radius: 3px;padding: 5px;font-weight: bold;margin: 5px;">
+
+        <option id="All2" value="All">Select Registration Facility</option>
+        <% (@facilities).each do |id, name|%>
+            <option id="<%= id%>" value = "<%= id%>"><%= name%></option>
+        <% end %>
+      </select>
+    </td>
+
     <td id="p_h_2">
 
     </td>
@@ -420,6 +431,12 @@
         jQuery("#category").find("#" + '<%= session[:category]%>').prop('selected', true);
     <% else %>
         jQuery("#category").find("#continuous").prop('selected', true);
+    <% end %>
+
+    <% if !session[:facility_id].blank? %>
+        jQuery("#facility").find("#" + '<%= session[:facility_id]%>').prop('selected', true);
+    <% else %>
+        jQuery("#facility").find("#All2").prop('selected', true);
     <% end %>
 
     var type;
@@ -460,6 +477,7 @@
                         "data": function(d){
                             d.type = type;
                             d.category = __$('category').value;
+                            d.facility_id = __$('facility').value;
                         },
                         dataFilter: function(data){
                             var json = jQuery.parseJSON( data );
