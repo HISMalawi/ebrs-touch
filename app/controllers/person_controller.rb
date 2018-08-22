@@ -346,7 +346,7 @@ class PersonController < ApplicationController
             @results = []
             @exact = false
             duplicates = []
-            duplicates = SimpleElasticSearch.query_duplicate_coded(person,99.4) 
+            #duplicates = SimpleElasticSearch.query_duplicate_coded(person,99.4) 
 
             if duplicates.blank?
               duplicates = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision']) 
@@ -360,6 +360,7 @@ class PersonController < ApplicationController
                 @results << dup if PotentialDuplicate.where(person_id: dup['_id']).blank? 
             end
 
+            @results = SimpleElasticSearch.query_duplicate_coded(person,SETTINGS['duplicate_precision'])
             
             if @results.present? && !@birth_details.birth_type.name.to_s.downcase.include?("twin")
                potential_duplicate = PotentialDuplicate.create(person_id: @person.person_id,created_at: (Time.now))

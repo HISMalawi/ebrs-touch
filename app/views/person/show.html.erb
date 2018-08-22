@@ -56,15 +56,15 @@
   }
 
   #comment_popoup{
-      width: 45%;
-      height: 50%;
+      width: 60%;
+      height: 60%;
       position: absolute;;
-      left: 25%;
-      top: 20%;
+      left: 20%;
+      top: 15%;
       background: #eeeeef;
-      border-radius: 2%;
+      border-radius: 0%;
       color: black;
-      box-shadow: 5px 5px 2px #888888;
+      box-shadow: 5px 3px 2px #888888;
       visibility: hidden;
   }
   #title{
@@ -72,14 +72,12 @@
       margin:auto;
       margin-top: 0.8%;
       background: #345d8c;
-      font-size: 150%;
+      font-size: 120%;
       font-weight: bold;
       color: #FFFFFF;
       text-align: center;
-      padding-top: 2%;
-      padding-bottom: 2%;
-      border-top-right-radius: 7%;
-      border-top-left-radius: 7%;
+      padding-top: 1%;
+      padding-bottom: 1%;
       border-bottom: 2px solid #d9d8d7;
   }
   #comment{
@@ -114,7 +112,27 @@
 #trace-row td{
     font-size: 0.8 !important;
 }
+#duplicates{
+   width: 98%;
+   border-collapse: collapse;
+}
 
+#duplicates th , #duplicates td {
+   padding: 0.3em;
+   border: 1px solid gray;
+   text-align: center;
+   
+}
+#duplicates th{
+    background: #d9d8d7;
+}
+#duplicates td {
+    background: #ffffff;
+}
+.redflag{
+    color:#c81414;
+    font-weight: bold;
+}
 </style>
   </head>
   <body>
@@ -535,13 +553,38 @@
           viewComment();
           var okBtn = __$('button').getElementsByClassName('blue')[0].cloneNode();
           __$("title").innerHTML = "Record is "+ (status=="DC-DUPLICATE"? 'exact': 'potential') +" duplicate with <%=@results.count%> record(s)";
-          var table = "<table align='center' id='printers' style='width:98%;margin:auto'>"+
+
+          var table = "<table align='center' id='duplicates' style='width:98%;margin:auto'>"+
+                      "<tr><th style='background:#ecccb4' colspan='9'>Duplicate Record - New </th></tr>"+
+                      "<tr><th colspan='4'>Child's details</th><th colspan='2'>Mother's details</th><th colspan='2'>Father's details</th><th rowspan='2'>Similarity</th></tr>"+
+                      "<tr><th>First Name</th><th>Surname</th><th>Sex</th><th>DOB</th>"+
+                      "<th>First Name</th><th>Last Name</th><th>First Name</th><th>Last Name</th></tr>"+
+                      "<td><%=@name.first_name %></td>"+
+                      "<td><%=@name.last_name %></td>"+
+                      "<td><%=@person.gender %></td>"+
+                      "<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>"+
+                      "<td><%= @mother_name.first_name %></td>"+
+                      "<td><%= @mother_name.last_name %></td>"+
+                      "<td><%= @father_name.first_name rescue 'N/A' %></td>"+
+                      "<td><%= @father_name.last_name rescue 'N/A' %></td>"+
+                      "<td></td>"+
+                      "<tr ><th style='background: #c8e3ee' colspan='9'>Existing record(s) - In database </th></tr>"+
+                      "<tr><th colspan='4'>Child's details</th><th colspan='2'>Mother's details</th><th colspan='2'>Father's details</th><th rowspan='2'>Similarity</th></tr>"+
+                      "<tr><th>First Name</th><th>Surname</th><th>Sex</th><th>DOB</th>"+
+                      "<th>First Name</th><th>Last Name</th><th>First Name</th><th>Last Name</th></tr>"+
                       "</tr><% @results.each do |result| %><tr>"+
-                      "<td><%= PersonBirthDetail.find_by_person_id(result['_id'].to_i).district_id_number rescue ''%></td>"+
-                      "<td style='text-align: left; padding-left:50px;''><%=result['_source']['content'] %></td>"+
+                      "<td><%=result['_source']['first_name'] %></td>"+
+                      "<td><%=result['_source']['last_name'] %></td>"+
+                      "<td><%=result['_source']['gender'] %></td>"+
+                      "<td><%=result['_source']['birthdate'].to_date.strftime('%d/%b/%Y') %></td>"+
+                      "<td><%=result['_source']['mother_first_name'] %></td>"+
+                      "<td><%=result['_source']['mother_last_name'] %></td>"+
+                      "<td><%=result['_source']['father_first_name'] rescue 'N/A' %></td>"+
+                      "<td><%=result['_source']['father_last_name'] rescue 'N/A' %></td>"+
+                      "<td><%=result['similarity_score'].to_f.round(2) %></td>"+
                       "</tr><% end %></table>"
           jQuery(table).insertAfter(__$("title"));
-          __$("comment").style.height ="150px"
+          __$("comment").style.display ="none"
           okBtn = __$("button")
           okBtn.onclick = function(){ duplicate('System')}
 
