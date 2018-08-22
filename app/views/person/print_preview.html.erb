@@ -1,0 +1,93 @@
+<style>
+    body{
+        background: darkslategray !important;
+    }
+    iframe{
+        width: 21.5cm;
+        min-height: 130vh;
+        margin-top: 20px;
+        overflow: auto;
+        background: white;
+        border: none;
+        margin-left: 22.5%;
+        -moz-transform: scale(1);
+    }
+
+</style>
+<%= stylesheet_link_tag "bootstrap/bootstrap" %>
+<%= stylesheet_link_tag "extras/font-awesome.min" %>
+
+<%= stylesheet_link_tag "extras/style" %>
+<%= stylesheet_link_tag "extras/style-responsive" %>
+<%=javascript_include_tag "datatables/jquery"%>
+
+<%=javascript_include_tag "bootstrap/bootstrap-inputmask.min"%>
+<%=javascript_include_tag "js/jquery-ui-1.9.2.custom.min"%>
+<%=javascript_include_tag "js/jquery.ui.touch-punch.min"%>
+<%=javascript_include_tag "js/jquery.dcjqaccordion.2.7"%>
+<%=javascript_include_tag "js/jquery.scrollTo.min"%>
+<%=javascript_include_tag "js/jquery.nicescroll"%>
+<%=javascript_include_tag "bootstrap/bootstrap.min" %>
+
+<iframe src="/birth_certificate?person_ids=<%=params[:person_ids]%>" >
+</iframe>
+
+
+<div style="width: 21.5cm; margin: auto;margin-top: 10px;padding-bottom: 15px; height: 70px;">
+
+
+  <button class="btn btn-success pull-right" style="margin-right: 10px;"
+          onclick="jQuery('#printerModal').modal('show')">
+    <span class="fa fa-print"></span>
+    Print
+  </button>
+
+  <button class="btn btn-danger pull-left" style="margin-right: 10px;"
+          onclick="window.parent.location = '<%= session[:list_url]%>' ">
+    Cancel
+  </button>
+</div>
+
+<div class="modal fade" id="printerModal" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
+          Select Printer
+        </h4>
+      </div>
+      <div class="modal-body">
+        <span style="text-align:center;">
+          <table align="center" id="printers">
+            <% @available_printers.each do |printer| %>
+                <tr onmousedown="updateValue(this)" value="<%= printer %>">
+                  <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                  <td style="text-align: left; padding-left:50px;"><%= printer %></td>
+                </tr>
+            <% end %>
+          </table>
+        </span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="submitForm();">Okay</button>
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+    printer_name = ""
+
+    function updateValue(obj){
+       printer_name = obj.getAttribute('value');
+    }
+
+    function submitForm(){
+        window.location = "/print?person_ids=<%= params[:person_ids]%>&printer_name=" + printer_name;
+    }
+</script>
+
+

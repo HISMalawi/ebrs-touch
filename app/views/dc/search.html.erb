@@ -233,7 +233,10 @@
             var data = JSON.parse(badges[i].getAttribute('data'));
             filters[data['filter_name']] = data;
         }
+
+         console.log(filters);
         __$('search-frame').contentWindow.data = JSON.stringify(filters);
         __$('search-frame').contentWindow.reloadDataTable();
     }
+
 </script>

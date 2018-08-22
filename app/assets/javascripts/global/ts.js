@@ -4804,6 +4804,22 @@ function clickCanGo() {
 
         }
 
+        if ((__$("textFor" + parent.id).value.trim().length > 0) && parent.getAttribute("ajaxURL") && parent.getAttribute("ajaxURL").match("/search")){
+            var lis = __$("ul1").getElementsByTagName("li");
+            var aval = false;
+            for(var i = 0; i < lis.length; i++){
+                if (lis[i].getAttribute("value") == __$("textFor" + parent.id).value.trim()){
+                    aval = true;
+                }
+            }
+
+            if (!aval){
+                showMsg("Please select value from list");
+                return false;
+            }
+
+        }
+
         if (parent.getAttribute("optional") == null) {
 
             if (__$("textFor" + parent.id)) {

@@ -56,7 +56,7 @@ f_type = PersonRelationType.find_by_name("Father")
   person["father_current_ta"] = Location.find(@father_address.current_ta).name rescue nil
   person["father_current_village"] = Location.find(@father_address.current_village).name rescue nil
 
-  SimpleElasticSearch.add(person)
+  SimpleElasticSearch.add(person) rescue next
 
   if i % 100 == 0
     puts "#{i} / #{total}"

@@ -4,6 +4,12 @@
 Rails.application.config.assets.version = '1.0'
 Rails.application.config.assets.precompile += %w( dashboard.js )
 Rails.application.config.assets.precompile += %w( DataTables/* )
+Rails.application.config.assets.precompile += %w( global/* )
+Rails.application.config.assets.precompile += %w( js/* )
+Rails.application.config.assets.precompile += %w( datatables/* )
+Rails.application.config.assets.precompile += %w( bootstrap/* )
+Rails.application.config.assets.precompile += %w( extras/* )
+Rails.application.config.assets.precompile += %w( alert.css )
 
 
 # Add additional assets to the asset load path

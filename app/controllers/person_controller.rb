@@ -1,10 +1,14 @@
 class PersonController < ApplicationController
+
+  skip_before_action :verify_authenticity_token
+
   def index
 
     @icoFolder = icoFolder("icoFolder")
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
     @targeturl = "/logout"
     @targettext = "Logout"
+    @stats = PersonRecordStatus.stats
 
     render :layout => 'facility'
   end
@@ -52,7 +56,9 @@ class PersonController < ApplicationController
 
 
   def show
-    
+
+    @available_printers = SETTINGS["printer_name"].split('|')
+
     if params[:next_path].blank?
       @targeturl = request.referrer
     else
@@ -97,21 +103,35 @@ class PersonController < ApplicationController
     @delayed =  days_gone > 42 ? "Yes" : "No"
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
+
     birth_loc = Location.find(@birth_details.birth_location_id)
-    district = Location.find(@birth_details.district_of_birth)
+    birth_loc = nil if birth_loc.name == "Other"
+    district_loc = Location.find(@birth_details.district_of_birth)
 
-    birth_location = birth_loc.name rescue nil
+    other_place = nil
+    district = nil
+    ta       = nil
+    village  = nil
+    hospital = nil
 
-    @place_of_birth = birth_loc.name rescue nil
-
-    if birth_location == 'Other' && @birth_details.other_birth_location.present?
-      @birth_details.other_birth_location
+    place = Location.find(@birth_details.place_of_birth).name
+    if place == "Home"
+      district = district_loc.name
+      village = birth_loc.village rescue nil
+      ta = birth_loc.ta rescue nil
+      if village.blank? #Foreign Birth
+        other_place = @birth_details.other_birth_location
+      end
+    elsif place == "Hospital"
+      district = district_loc.name
+      hospital = birth_loc.name rescue @birth_details.other_birth_location
+    else
+      district = district_loc.name
+      other_place = @birth_details.other_birth_location
     end
 
-    @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
-
+    place_of_birth = "#{other_place}, #{village}, #{hospital}, #{ta}, #{district}".gsub(" ,", "").strip.gsub(/^,|^,\s+|,$|,\s+$/, "")
     @status = PersonRecordStatus.status(@person.id)
-
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, [@status])
     @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
@@ -135,7 +155,7 @@ class PersonController < ApplicationController
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn }",
                 "ID Number" => "#{@person.id_number  rescue nil}"
             },
             {
@@ -149,14 +169,13 @@ class PersonController < ApplicationController
                 "Place of birth" => "#{loc(@birth_details.place_of_birth, 'Place of Birth')}"
             },
             {
-                "Name of Hospital" => "#{loc(@birth_details.birth_location_id, 'Health Facility')}",
-                "Other Details" => "#{@birth_details.other_birth_location}",
-                "Address" => "#{@child.birth_address rescue nil}"
+                "Name of Hospital" => hospital,
+                "Other Details" => other_place,
             },
             {
-                "District" => "#{district.name}",
-                "T/A" => "#{birth_loc.ta}",
-                "Village" => "#{birth_loc.village rescue nil}"
+                "District/State" => district,
+                "T/A" => ta,
+                "Village" => village
             },
             {
                 "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
@@ -275,7 +294,7 @@ class PersonController < ApplicationController
         "Child Name" => @person.name,
         "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
         "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-        "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+        "Place of Birth" => place_of_birth,
         "Child's Mother " => (@mother_person.name rescue nil),
         "Mother Nationality " => (@mother_person.citizenship rescue "N/A"),
         "Child's Father" =>  (@father_person.name rescue nil),
@@ -308,10 +327,16 @@ class PersonController < ApplicationController
           person["nationality"]=  @mother_person.citizenship rescue nil
           person["place_of_birth"] = @place_of_birth
 
-          if  birth_loc.district.present?
+          if  birth_loc.present? && birth_loc.district.present?
             person["district"] = birth_loc.district
           else
-            person["district"] = "Lilongwe"
+
+            if SETTINGS['application_mode'] == "DC"
+              person["district"] = Location.find(SETTINGS['location_id']).name
+            else
+              person["district"] = Location.find(Location.find(SETTINGS['location_id']).parent_location).name rescue nil
+            end
+
           end      
 
           person["mother_first_name"]= @mother_name.first_name rescue ''
@@ -383,7 +408,9 @@ class PersonController < ApplicationController
              @results = []
         end
 
-        if params[:preview].blank?
+        if params[:bs_layout].to_s == "true"
+          render :layout => "bootstrap_data_table", :template => "person/bootstrap_show"
+        else params[:preview].blank?
           render :layout => "facility"
         end
     end
@@ -453,7 +480,7 @@ class PersonController < ApplicationController
   end
 
   def create
-    
+
     type_of_birth = params[:person][:type_of_birth]
     
      if type_of_birth == 'Twin'
@@ -609,46 +636,71 @@ class PersonController < ApplicationController
     end
 
     if ["birth_details_hospital_of_birth","birth_details_place_of_birth","birth_details_other_details","birth_location_district","birth_location_ta","birth_location_village"].include?(params[:field])
-      if params[:person][:place_of_birth] == 'Home'
-        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
-        ta_id = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
-        village_id = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
-        location_id = [village_id, ta_id, district_id].compact.first #Notice the order
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
+      map =  {'Mzuzu City' => 'Mzimba',
+              'Lilongwe City' => 'Lilongwe',
+              'Zomba City' => 'Zomba',
+              'Blantyre City' => 'Blantyre'}
 
-        birth_details.place_of_birth = Location.where(name: "Home").first.id
-        birth_details.save
+      d_name = params[:person][:birth_district]
+      d_name = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
 
-      elsif params[:person][:place_of_birth] == 'Hospital'
-        map =  {'Mzuzu City' => 'Mzimba',
-                'Lilongwe City' => 'Lilongwe',
-                'Zomba City' => 'Zomba',
-                'Blantyre City' => 'Blantyre'}
+      place_of_birth    = params[:person][:place_of_birth]
+      place_of_birth_id = Location.where(name: place_of_birth).first.id
 
-        person[:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+      other_birth_place = nil
+      birth_location_id = nil
+      district_id       = nil
+      foreign_birth     = false
 
-        district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
-        location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', district_id)
+      district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
 
-        location_id = [location_id, district_id].compact.first
+      district_id_raw = Location.locate_id_by_tag(d_name, 'District')
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
-        birth_details.place_of_birth = Location.where(name: "Hospital").first.id
-        birth_details.save
+      if district_id_raw.blank?
+        foreign_birth = true
+        district_id_raw = Location.locate_id_by_tag(params[:person][:birth_country], 'Country')
+      end
+
+      if place_of_birth == 'Home'
+
+        if !foreign_birth
+          ta_id               = Location.locate_id(params[:person][:birth_ta], 'Traditional Authority', district_id)
+          birth_location_id   = Location.locate_id(params[:person][:birth_village], 'Village', ta_id)
+        else
+          birth_location_id   = Location.where(name: "Other").first.id
+          other_birth_place   = params[:person][:other_birth_place_details]
+        end
+      elsif place_of_birth == 'Hospital'
+
+        params[:person][:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+
+        if  !foreign_birth
+          d_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+          birth_location_id = Location.locate_id(params[:person][:hospital_of_birth], 'Health Facility', d_id)
+
+          if birth_location_id.blank?
+            birth_location_id   = Location.where(name: "Other").first.id
+            other_birth_place   = params[:person][:other_birth_place_details]
+          end
+        else
+          birth_location_id   = Location.where(name: "Other").first.id
+          other_birth_place   = params[:person][:other_birth_place_details]
+        end
 
       else #Other
-        location_id = Location.where(name: 'Other').last.id #Location.locate_id_by_tag(person[:birth_district], 'District')
-        other_place_of_birth = params[:person][:other_birth_place_details]
 
-        birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-        birth_details.birth_location_id = location_id
-        birth_details.other_birth_location = other_place_of_birth 
-        birth_details.place_of_birth = Location.where(name: "Other").first.id
-        birth_details.save
+        birth_location_id   = Location.where(name: "Other").first.id
+        other_birth_place   = params[:person][:other_birth_place_details]
       end
+
+      birth_details                       = PersonBirthDetail.where(person_id: params[:id]).last
+      birth_details.district_of_birth     = district_id_raw
+      birth_details.birth_location_id     = birth_location_id
+      birth_details.other_birth_location  = other_birth_place
+      birth_details.place_of_birth        = place_of_birth_id
+      birth_details.save
+
       redirect_to "/person/#{params[:id]}/edit?next_path=/view_cases" and return
       #raise params.inspect
     end
@@ -1229,10 +1281,17 @@ class PersonController < ApplicationController
 
   def get_country
     nationality_tag = LocationTag.where(name: 'Country').first
-    data = ['Malawi']
+    data = []
+
+    data = ['Malawi'] unless !params[:exclude].blank?  && params[:exclude].split("|").include?("Malawi")
+
     Location.where("LENGTH(name) > 0 AND country != 'Malawi' AND name LIKE (?) AND m.location_tag_id = ?", 
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
+
+      if params[:exclude].present?
+        next if params[:exclude].split("|").include?(l.name)
+      end
       data << l.name
     end
     
@@ -1252,16 +1311,14 @@ class PersonController < ApplicationController
     Location.where("LENGTH(name) > 0 AND name LIKE (?) AND m.location_tag_id = ?",
       "#{params[:search]}%", nationality_tag.id).joins("INNER JOIN location_tag_map m
       ON location.location_id = m.location_id").order('name ASC').map do |l|
-          if params[:exclude].present?
-                next if l.name.include?(params[:exclude])
-                data << l.name
-          else
-                data << l.name
-          end 
+      if params[:exclude].present?
+        next if params[:exclude].split("|").include?(l.name)
+      end
+      data << l.name
     end
-    
 
     if data.present?
+      data << "Other Country" if params[:include_other_country].to_s == "true"
       render text: data.compact.uniq.join("\n") and return
       
     else
@@ -1334,6 +1391,7 @@ class PersonController < ApplicationController
   end
   
   if data.present?
+    data << "Other" if params[:include_other].to_s == "true"
     render text: data.compact.uniq.join("\n") and return
   else
     render text: "" and return
@@ -1381,7 +1439,7 @@ class PersonController < ApplicationController
     @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-
+    @targeturl = session[:list_url]
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
@@ -1406,11 +1464,7 @@ class PersonController < ApplicationController
 
   def edit
 
-    if params[:next_path].blank?
-      @targeturl = request.referrer
-    else
-      @targeturl = params[:next_path]
-    end
+    @targeturl = request.path
 
     @section = "Edit Record"
 
@@ -1453,15 +1507,34 @@ class PersonController < ApplicationController
     @delayed =  days_gone > 42 ? "Yes" : "No"
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
+
     birth_loc = Location.find(@birth_details.birth_location_id)
+    birth_loc = nil if birth_loc.name == "Other"
+    district_loc = Location.find(@birth_details.district_of_birth)
 
-    birth_location = birth_loc.name rescue nil
+    other_place = nil
+    district = nil
+    ta       = nil
+    village  = nil
+    hospital = nil
 
-    @place_of_birth = birth_loc.name rescue nil
-
-    if birth_location == 'Other' && @birth_details.other_birth_location.present?
-      @birth_details.other_birth_location
+    place = Location.find(@birth_details.place_of_birth).name
+    if place == "Home"
+      district = district_loc.name
+      village = birth_loc.village rescue nil
+      ta = birth_loc.ta rescue nil
+      if village.blank? #Foreign Birth
+        other_place = @birth_details.other_birth_location
+      end
+    elsif place == "Hospital"
+      district = district_loc.name
+      hospital = birth_loc.name rescue @birth_details.other_birth_location
+    else
+      district = district_loc.name
+      other_place = @birth_details.other_birth_location
     end
+
+    place_of_birth = "#{other_place}, #{village}, #{hospital}, #{ta}, #{district}".gsub(" ,", "").strip.gsub(/^,|^,\s+|,$|,\s+$/, "")
 
     @place_of_birth = @birth_details.other_birth_location if @place_of_birth.blank?
 
@@ -1476,7 +1549,7 @@ class PersonController < ApplicationController
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
                 "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
-                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue 'XXXXXXXX')
+                ["National ID","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=national_id"] => (@person.id_number rescue '')
             },  
             {
                 ["First Name","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_first_name"] => "#{@name.first_name rescue nil}",
@@ -1486,17 +1559,16 @@ class PersonController < ApplicationController
             {
                 ["Date of birth", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_birthdate"] => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
                 ["Sex", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_gender"] => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
-                ["Place of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_place_of_birth"] => "#{loc(@birth_details.place_of_birth, 'Place of Birth')}"
+                ["Place of birth","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_place_of_birth"] => place
             },
             {
-                ["Name of Hospital","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_hospital_of_birth"] => "#{loc(@birth_details.birth_location_id, 'Health Facility')}",
-                ["Other Details","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_details"] => "#{@birth_details.other_birth_location}",
-                ["Address","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=child_birth_address"] => "#{@child.birth_address rescue nil}"
+                ["Name of Hospital","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_hospital_of_birth"] =>  hospital,
+                ["Other Details","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_other_details"] => other_place,
             },
             {
-                ["District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_district"] => "#{birth_loc.district}",
-                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_ta"] => "#{birth_loc.ta}",
-                ["Village","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_village"] => "#{birth_loc.village rescue nil}"
+                ["District/State", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_district"] => district,
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_ta"] => ta,
+                ["Village","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_location_village"] => village
             },
             {
                 ["Birth weight (kg)","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=birth_details_birth_weight"] => "#{@birth_details.birth_weight rescue nil}",
@@ -1614,7 +1686,7 @@ class PersonController < ApplicationController
       "Child Name" => @person.name,
       "Child Gender" => ({'M' => 'Male', 'F' => 'Female'}[@person.gender.strip.split('')[0]] rescue @person.gender),
       "Child Date of Birth" => @person.birthdate.to_date.strftime("%d/%b/%Y"),
-      "Place of Birth" => "#{Location.find(@birth_details.birth_location_id).name rescue nil}",
+      "Place of Birth" => place_of_birth,
       "Child's Mother " => (@mother_person.name rescue nil),
       "Child's Father" =>  (@father_person.name rescue nil),
       "Parents Married" => (@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No'),
@@ -1634,8 +1706,20 @@ class PersonController < ApplicationController
   end  
 
   def view_printed_cases
-    @states = ["HQ-PRINTED"]
-    @section = "Printed Cases"
+
+    if params[:loc] == "hq"
+      @states = ["HQ-PRINTED"]
+      @section = "Cases Printed at HQ"
+    elsif params[:loc] == "dc"
+      @states = ["DC-PRINTED"]
+      @section = "Cases Printed at DC"
+    else
+      @states = ["HQ-PRINTED","DC-PRINTED"]
+      @section = "All Printed Cases"
+    end
+
+    @targeturl = "/printed_cases"
+
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
     #@records = PersonService.query_for_display(@states)
@@ -1996,7 +2080,7 @@ class PersonController < ApplicationController
 
       person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
-      d = Person.order(" pbd.district_id_number, pbd.national_serial_number, n.first_name, n.last_name, cp.created_at ")
+      d = Person.order(" cp.created_at DESC ")
       .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
@@ -2004,7 +2088,7 @@ class PersonController < ApplicationController
       .where(" prs.status_id IN (#{state_ids.join(', ')})
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
-                person.birthdate, person.gender) REGEXP '#{search_val}' ")
+                person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
 
       total = d.select(" count(*) c ")[0]['c'] rescue 0
       page = (params[:start].to_i / params[:length].to_i) + 1
@@ -2115,9 +2199,23 @@ class PersonController < ApplicationController
                      'result' => result}.to_json
   end
 
-  def print_registration(person_id, redirect)
+	def check_serial_number
 
-    print_and_redirect("/person_id_label?person_id=#{person_id}", redirect)
+		render text: PersonService.get_identifier(params[:person_id], "Facility Number")
+		 
+	end
+
+  def print_registration(person_id, redirect)
+			
+			if redirect.split("").include?("?")
+				symbol = "&"
+			else
+				symbol = "?"
+			end
+
+			redirect_to "#{redirect}#{symbol}print_reg=true&person_id=#{person_id}" and return unless redirect.match("print_reg")
+			
+    	print_and_redirect("/person_id_label?person_id=#{person_id}", redirect)		
   end
 
   def person_id_label
@@ -2152,5 +2250,114 @@ class PersonController < ApplicationController
     label.print(1)
   end
 
+ def receive_data
+    data = params["data"]
+    File.open("#{Rails.root}/dump.csv", "w"){|f|
+      f.write(data)
+    }
+
+    if MassPerson.load_mass_data
+
+    end
+
+   render :text => "OK"
+ end
+
+
+
+  def print
+
+    print_errors = {}
+    print_error_log = Logger.new(Rails.root.join("log","print_error.log"))
+    paper_size = GlobalProperty.find_by_property("paper_size").value rescue 'A5'
+
+    if paper_size == "A4"
+      zoom = 0.83
+    elsif paper_size == "A5"
+      zoom = 0.89
+    end
+
+    person_ids = params[:person_ids].split(',')
+    person_ids.each do |person_id|
+      #begin
+      print_url = "wkhtmltopdf --zoom #{zoom} --page-size #{paper_size} #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/birth_certificate?person_ids=#{person_id.strip} #{SETTINGS['certificates_path']}#{person_id.strip}.pdf\n"
+
+      print_error_log.debug print_url
+      puts print_url
+
+      PersonRecordStatus.new_record_state(person_id, 'DC-PRINTED', 'Printed Child Record')
+      t4 = Thread.new {
+        Kernel.system print_url
+        Kernel.system "lp -d #{params[:printer_name]} #{SETTINGS['certificates_path'].strip}#{person_id.strip}.pdf\n"
+      }
+    end
+
+    if print_errors.present?
+      print_errors.each do |k,v|
+        print_error_log.debug "#{k} : #{v}"
+      end
+    end
+
+    if !session[:list_url].blank?
+      redirect_to session[:list_url]
+    else
+      redirect_to "/"
+    end
+  end
+
+  def print_preview
+    @section = "Print Preview"
+    @available_printers = SETTINGS["printer_name"].split('|')
+    render :layout => false
+  end
+
+  def birth_certificate
+
+    @data = []
+    signatory = User.find_by_username(GlobalProperty.find_by_property("signatory").value) rescue nil
+    signatory_attribute_type = PersonAttributeType.find_by_name("Signature") if signatory.present?
+    @signature = PersonAttribute.find_by_person_id_and_person_attribute_type_id(signatory.id,signatory_attribute_type.id).value rescue nil
+
+    person_ids = params[:person_ids].split(',')
+    nid_type = PersonIdentifierType.where(name: "Barcode Number").last
+
+    person_ids.each do |person_id|
+      data = {}
+      data['person'] = Person.find(person_id) rescue nil
+      data['birth']  = PersonBirthDetail.where(person_id: person_id).last
+
+      barcode = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png") rescue nil
+      if barcode.blank?
+
+        barcode_value = PersonIdentifier.where(person_id: person_id,
+                                               person_identifier_type_id: nid_type.id, voided: 0
+        ).last.value rescue nil
+
+        if barcode_value.blank?
+
+          bcd = BarcodeIdentifier.where(assigned: 0).first
+          bcd.person_id = person_id
+          bcd.assigned  = 1
+          bcd.save
+
+          p = PersonIdentifier.new
+          p.person_id = person_id
+          p.value = bcd.value
+          p.person_identifier_type_id = PersonIdentifierType.where(name: "Barcode Number").last.id
+          p.save
+
+          barcode_value = bcd.value
+        end
+
+        `bundle exec rails r bin/generate_barcode #{ barcode_value } #{ data['person'].id} #{SETTINGS['barcodes_path']} -e #{Rails.env}  `
+      end
+
+      data['barcode'] = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png")
+
+      @data << data
+    end
+
+    render :layout => false, :template => 'person/birth_certificate'
+  end
 
 end

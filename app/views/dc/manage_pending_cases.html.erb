@@ -14,7 +14,7 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"></span>
+            <span class="count"><%= (@stats['DC-PENDING'] + @stats['DC-INCOMPLETE'])%></span>
           </td>
           <td style="height: 30px;">
             Marked as pending
@@ -35,7 +35,7 @@
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"></span>
+            <span class="count"><%= @stats['DC-REJECTED']%></span>
           </td>
           <td style="height: 30px;">
             Rejected by ADR

@@ -111,7 +111,17 @@ Rails.application.routes.draw do
   ########################### (create record form) routes end
 
   get '/manage_cases' => "dc#manage_cases"
+  get '/print_certificates' => "dc#print_certificates"
+  get '/select_cases' => "dc#select_cases"
+  get '/print_cases' => "dc#print_cases"
+
+  get '/print_preview' => 'person#print_preview'
+  post '/print_preview' => 'person#print_preview'
+  get '/birth_certificate' => 'person#birth_certificate'
+  get '/print' => 'person#print'
+
   get '/pending_cases' => "dc#manage_pending_cases"
+  get '/printed_cases' => "dc#printed_cases"
   get '/manage_requests' => "dc#manage_requests"
   get '/manage_duplicates_menu' => "dc#manage_duplicates_menu"
   get '/view_duplicates' => "dc#view_duplicates"
@@ -189,6 +199,7 @@ Rails.application.routes.draw do
   get 'reports/filter'
   get 'reports/rfilter'
   get "/user_audit_trail" =>"reports#user_audit_trail"
+	get "/check_serial_number" => "person#check_serial_number"
   get "/get_user_audit_trail" => "reports#get_user_audit_trail"
   get '/update_person' => 'person#update_person'
   post '/update' => "person#update"
@@ -196,6 +207,8 @@ Rails.application.routes.draw do
   get '/person/paginated_data'
   get '/person/paginated_search_data'
   get '/person/search_by_nid'
+  get '/offload' => "person#receive_data"
+  post '/offload' => "person#receive_data"
 
   resources :person
 

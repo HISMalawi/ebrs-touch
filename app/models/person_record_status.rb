@@ -33,6 +33,40 @@ class PersonRecordStatus < ActiveRecord::Base
     self.where(:person_id => person_id, :voided => 0).last.status.name rescue ""
   end
 
+  def self.type_stats(states=nil, old_state=nil, old_state_creator=nil)
+      result = {}
+      return result if states.blank?
+      had_query = ''
+
+      if old_state.present?
+
+        prev_status_ids = Status.where(" name IN ('#{old_state.split("|").join("', '")}')").map(&:status_id)
+        had_query = "INNER JOIN person_record_statuses prev_s ON prev_s.person_id = s.person_id AND prev_s.status_id IN (#{prev_status_ids.join(', ')})"
+
+        if old_state_creator.present?
+          user_ids = UserRole.where(role_id: Role.where(role: old_state_creator).last.id).map(&:user_id)
+          user_ids = [-1] if user_ids.blank?
+
+          had_query += " AND prev_s.creator IN (#{user_ids.join(', ')})"
+        end
+      end
+
+      status_ids = states.collect{|s| Status.where(name: s).last.id} rescue Status.all.map(&:status_id)
+
+      data = self.find_by_sql("
+      SELECT t.name, COUNT(*) c FROM person_birth_details d
+        INNER JOIN person_record_statuses s ON d.person_id = s.person_id
+        INNER JOIN birth_registration_type t ON t.birth_registration_type_id = d.birth_registration_type_id
+          #{had_query}
+        WHERE s.voided = 0 AND s.status_id IN (#{status_ids.join(', ')}) GROUP BY d.birth_registration_type_id")
+
+
+      (data || []).each do |r|
+        result[r['name']] = r['c']
+      end
+      result
+  end
+
   def self.stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], approved=true)
     result = {}
     birth_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]

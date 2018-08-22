@@ -543,6 +543,66 @@ ActiveRecord::Schema.define(version: 20170912104756) do
 
   change_column :syncs, :sync_id, 'bigint(20) NOT NULL AUTO_INCREMENT'
 
+  create_table "mass_person", primary_key: "mass_person_id", force: :cascade do |t|
+
+    t.string   "first_name",      					limit: 255,             null: false
+    t.string   "middle_name",          			limit: 255
+    t.string   "last_name",                 limit: 255,               null: false
+
+    t.string   "gender",                    limit: 255
+    t.string   "date_of_birth",             limit: 255
+    t.string   "place_of_birth",         		limit: 255
+
+    t.string   "district_of_birth",    			limit: 255
+    t.string   "ta_of_birth",          			limit: 255
+    t.string   "village_of_birth", 					limit: 255
+    t.string   "parents_married",						limit: 255
+    t.string   "date_of_marriage",					limit: 255
+
+    t.string   "mother_first_name",					limit: 255
+    t.string   "mother_middle_name",				limit: 255
+    t.string   "mother_last_name",					limit: 255
+    t.string   "mother_nationality",				limit: 255
+    t.string   "mother_id_number",					limit: 255
+
+    t.string   "father_first_name",					limit: 255
+    t.string   "father_middle_name",				limit: 255
+    t.string   "father_last_name",					limit: 255
+    t.string   "father_nationality",				limit: 255
+    t.string   "father_id_number",					limit: 255
+
+    t.string   "informant_first_name",			limit: 255
+    t.string   "informant_middle_name",			limit: 255
+    t.string   "informant_last_name",				limit: 255
+    t.string   "informant_nationality",			limit: 255
+    t.string   "informant_id_number",				limit: 255
+    t.string   "informant_district",				limit: 255
+    t.string   "informant_ta",							limit: 255
+    t.string   "informant_village",					limit: 255
+
+    t.string   "informant_address_line1",		limit: 255
+    t.string   "informant_address_line2",		limit: 255
+    t.string   "informant_address_line3",		limit: 255
+    t.string   "informant_phone_number",		limit: 255
+
+    t.string   "informant_relationship",		limit: 255
+    t.string   "form_signed",								limit: 255
+    t.string   "date_reported",							limit: 255
+
+    t.string   "upload_status",							limit: 255
+    t.string   "upload_number",							limit: 255
+    t.datetime "upload_datetime"
+    t.string   "uploaded_by",								limit: 255
+
+    t.string   "location_created_at",       limit: 250,              null: false
+    t.string   "district_created_at",       limit: 250,              null: false
+    t.string   "ta_created_at",      				limit: 250,              null: false
+    t.string   "creator",       						limit: 250,              null: false
+
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
+
   add_foreign_key "notification", "notification_types", column: "notification_type_id", primary_key: "notification_type_id", name: "fk_notification_1"
   add_foreign_key "notification", "person_record_statuses", column: "person_record_status_id", primary_key: "person_record_status_id", name: "fk_notification_2"
   add_foreign_key "notification_types", "statuses", column: "trigger_status_id", primary_key: "status_id", name: "fk_notification_types_1"

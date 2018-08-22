@@ -42,6 +42,12 @@ group :development do
   gem 'spring'
 end
 
+gem 'barby'
+
+gem 'rmagick'
+
+gem 'rqrcode'
+
 gem 'couchrest_model'
 
 gem 'bcrypt', '3.1.7'

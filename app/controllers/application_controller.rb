@@ -4,10 +4,10 @@ class ApplicationController < ActionController::Base
   #protect_from_forgery with: :exception
   protect_from_forgery	#with: :null_session
 
-  before_filter :check_if_logged_in, :except => ['login', 'searched_cases', 'dispatch_list']
+  before_filter :check_if_logged_in, :except => ['login', 'searched_cases', 'dispatch_list', 'offload', 'receive_data', 'birth_certificate']
 
-  before_filter :check_last_sync_time, :except => ['dispatch_list']
-  before_filter :check_couch_loading, :except => ['dispatch_list']
+  before_filter :check_last_sync_time, :except => ['dispatch_list', 'offload', 'receive_data', 'birth_certificate']
+  before_filter :check_couch_loading, :except => ['dispatch_list', 'offload', 'receive_data', 'birth_certificate']
 
 
   def check_last_sync_time
@@ -76,13 +76,13 @@ class ApplicationController < ActionController::Base
     AuditTrail.mac_address_accessor = ` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2]
     AuditTrail.create(person_id: user.person_id,
                        audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
-                       comment: "User login")
+                       comment: "User login") rescue nil
   end
 
   def logout!
     AuditTrail.create(person_id: User.find(session[:user_id]).person_id,
                        audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
-                       comment: "User logout") unless session[:user_id].blank?
+                       comment: "User logout") rescue nil  unless session[:user_id].blank?
     session[:user_id] = nil
   end
 

@@ -181,7 +181,29 @@ class Person < ActiveRecord::Base
     def id_number
       PersonIdentifier.where(
           person_id: self.id,
+          voided: 0,
           person_identifier_type_id: PersonIdentifierType.where(name: "National ID Number").last.id
-      ).last.value
+      ).last.value.strip rescue nil
+    end
+
+
+    def npid
+      PersonIdentifier.where(
+          person_id: self.id,
+          person_identifier_type_id: PersonIdentifierType.where(name: "Barcode Number").last.id
+      ).last.value.strip rescue nil
+    end
+
+    def printable_name
+      name = self.person_names.last
+      if (name.first_name.length + (name.middle_name.length rescue 0) + name.last_name.length) >= 40
+        if name.middle_name.present? && name.middle_name.length > 0
+          "#{name.first_name} #{name.middle_name.first + '.'} #{name.last_name}".gsub(/\s+/, ' ')
+        else
+          "#{name.first_name} #{name.last_name}".gsub(/\s+/, ' ')
+        end
+      else
+        "#{name.first_name} #{name.middle_name} #{name.last_name}".gsub(/\s+/, ' ')
+      end
     end
 end

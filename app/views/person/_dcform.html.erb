@@ -80,11 +80,11 @@
 
   function setDistrictUrl(value){
     if (value =="Hospital"){
-        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?exclude=City")
-        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?exclude=City");
+        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?exclude=City&include_other_country=true")
+        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?exclude=City&include_other_country=true");
     }else{
-        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district")
-        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district");
+        __$("person_bd_holder").setAttribute("ajaxUrl", "/search_by_district?include_other_country=true")
+        __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?include_other_country=true");
     }
   }
 </script>
@@ -215,10 +215,24 @@
         			 type="text"
         			 condition="beforeLiveDate();"
         			 value="<%= @person[:bd] rescue nil %>"
-        			 ajaxURL = "/search_by_district"
-               tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district'); console.log(__$('person_place_of_birth').value)"
+        			 ajaxURL = "/search_by_district?include_other_country=true"
+                     tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_bd_holder').value);navigablefieldsets[parseInt(__$('textForperson_hospital_of_birth').getAttribute('section'))][parseInt(__$('textForperson_hospital_of_birth').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value);setDistrict('district'); console.log(__$('person_place_of_birth').value)"
         			 class="input_cell"
                 />
+
+      </div>
+
+      <div class="field">
+        <label for="person_bc_holder">Country of Birth</label><br>
+
+        <input id="person_bc_holder"
+               name="person[birth_country]"
+               type="text"
+               condition="__$('person_bd_holder').value.trim() == 'Other Country' ;"
+               value="<%= @person[:bc] rescue nil %>"
+               ajaxURL="/search_by_country?exclude=Malawi"
+               class="input_cell"
+        />
 
       </div>
 
@@ -227,9 +241,9 @@
         <br>
         <input type="text" name="person[hospital_of_birth]" id="person_hospital_of_birth"
                           class ="input_cell"
-                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' ;"
+                          condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital' && __$('person_bd_holder').value.trim() != 'Other Country';"
                           tt_onUnload = "setDistrict('district'); "
-                          ajaxURL = "/search_by_hospital" >
+                          ajaxURL = "/search_by_hospital?include_other=true" >
       </div>
 
       <div class="field">
@@ -237,7 +251,7 @@
         <br>
         <input type="text" name="person[birth_ta]" id="person_birth_ta"
                           class = "input_cell"
-                          condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+                          condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home' && __$('person_bd_holder').value.trim() != 'Other Country' "
                           ajaxURL = "/search_by_district"
                           tt_onload = "navigablefieldsets[parseInt(__$('textForperson_birth_ta').getAttribute('section'))][parseInt(__$('textForperson_birth_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('person_birth_district').value);"
                           tt_onUnload = "navigablefieldsets[parseInt(__$('textForperson_birth_village').getAttribute('section'))][parseInt(__$('textForperson_birth_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('person_birth_district').value + '&ta=' + __$('textForperson_birth_ta').value);">
@@ -247,13 +261,16 @@
         <br>
         <input type="text" name="person[birth_village]" class = "input_cell"
         id="person_birth_village"
-        condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home'"
+        condition = "__$('person_place_of_birth').value.trim().toLowerCase() == 'home' && __$('person_bd_holder').value.trim() != 'Other Country' "
         ajaxURL = "/search_by_village">
       </div>
       <div class="field">
         <label for="person_other_birth_place_details">Give Details</label>
         <br>
-        <input type="text" name="other_birth_place_details" class ="input_cell" condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'" id="person_other_birth_place_details">
+        <input type="text" name="other_birth_place_details"
+               class ="input_cell"
+               condition ="__$('person_place_of_birth').value.trim().toLowerCase() == 'other'  || __$('person_hospital_of_birth').value.trim() == 'Other' || __$('person_bd_holder').value.trim() == 'Other Country' "
+               id="person_other_birth_place_details">
       </div>
 
     </fieldset>
@@ -2058,6 +2075,10 @@
               full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
             }
 
+            if (__$("person_birth_district").value == "Other Country"){
+                full_place_of_birth.pop();
+                full_place_of_birth.push("person_bc_holder");
+            }
 
             summaryHash = {
                             "person Name" : ["person_first_name","person_middle_name","person_last_name"],
@@ -2170,7 +2191,7 @@
       __$('person_birth_district').value =  __$('person_bd_holder').value || "<%= Location.current_district %>" ;
 
          try{
-             __$('person_hospital_of_birth').setAttribute('ajaxURL', '/search_by_hospital?district=' + __$('person_bd_holder').value)
+             __$('person_hospital_of_birth').setAttribute('ajaxURL', ('/search_by_hospital?district=' + __$('person_bd_holder').value + "&include_other=true"))
          }catch(e){
 
          }

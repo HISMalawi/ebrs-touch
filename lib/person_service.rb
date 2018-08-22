@@ -208,13 +208,13 @@ module PersonService
           fac_serial_query =  " AND pbd.facility_serial_number = '#{filters[k]['person[facility_serial_number]']}' "
         when 'Child Name'
           if filters[k]["person[last_name]"].present?
-            name_query += " AND  n.last_name = '#{filters[k]["person[last_name]"]}'"
+            name_query += " AND  n.last_name = \"#{filters[k]["person[last_name]"]}\" "
           end
           if filters[k]["person[middle_name]"].present?
-            name_query += " AND n.middle_name = '#{filters[k]["person[middle_name]"]}'"
+            name_query += " AND n.middle_name = \"#{filters[k]["person[middle_name]"]}\" "
           end
           if filters[k]["person[first_name]"].present?
-            name_query += " AND n.first_name = '#{filters[k]["person[first_name]"]}'"
+            name_query += " AND n.first_name = \"#{filters[k]["person[first_name]"]}\" "
           end
         when 'Child Gender'
           gender_query = " AND person.gender = '#{filters[k]["person[gender]"].split('')[0]}' "
@@ -261,7 +261,7 @@ module PersonService
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
             #{entry_num_query} #{fac_serial_query} #{name_query} #{gender_query} #{place_of_birth_query} #{status_query}
            AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
-                person.birthdate, person.gender) REGEXP '#{search_val}' ")
+                person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
 
     total = main.select(" count(*) c ")[0]['c'] rescue 0
     page = (params[:start].to_i / params[:length].to_i) + 1
@@ -355,111 +355,198 @@ module PersonService
 
   end
 
+	def self.get_identifier(person_id, type)
+		type_id = PersonIdentifierType.where(name: type).first
+		return nil if type_id.blank? 
+
+		identifier = PersonIdentifier.where(
+			person_id: person_id, 
+			person_identifier_type_id: type_id		
+		).first
+
+		return nil if identifier.blank?
+		identifier.value
+	end 
 
   def self.create_nris_person(nris_person)
-    
-      # create core_person  
-        core_person = CorePerson.create(
-          :person_type_id     => PersonType.where(name: 'Client').last.id,
-      )
-      
-      ebrs_person = core_person
-      #create person
-      person = Person.create(
-          :person_id          => core_person.id,
-          :gender             => nris_person[:sex] == 1 ? 'M' : 'F',
-          :birthdate          => nris_person[:DateOfBirthString].to_date.to_s
-       )
-      #create person_name
-      PersonName.create(
-          :person_id          => core_person.id,
-          :first_name         => nris_person[:FirstName],
-          :middle_name        => nris_person[:OtherNames],
-          :last_name          => nris_person[:Surname]
-      )
-      #create person_birth_detail 
-      PersonBirthDetail.create(
-        person_id: core_person.id,
-        birth_registration_type_id: "",
-        place_of_birth:  "",
-        birth_location_id: nris_person[:PlaceOfBirthVillageId],
-        district_of_birth:  nris_person[:PlaceOfBirthDistrictId],
-        location_created_at: "" 
-    )
-    #create person identifier
-      PersonIdentifier.create(
-        person_id: father_person.person_id,
-        person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-        value: nris_person[:BirthCertificateNumber].upcase
-     )
-     
-     PersonIdentifier.create(
-      person_id: core_person.id,
-      person_identifier_type_id: (PersonIdentifierType.find_by_name("NRIS ID").id),
-      value: nris_person[:NrisPk].upcase
+
+=begin
+    {
+        "Surname"=> "Kenneth",
+        "OtherNames"=> "Moses",
+        "FirstName"=> "Masula",
+        "DateOfBirthString"=>"02/12/2017",
+        "Sex"=> 1,
+        "Nationality"=> "MWI",
+        "Nationality2"=> "",
+        "Status"=>0,
+        "MotherPin"=> '4BSBY839',
+        "MotherSurname"=> "Banda",
+        "MotherMaidenName"=> "Mwandala",
+        "MotherFirstName"=> "Zeliya",
+        "MotherOtherNames"=>"Julia",
+        "MotherNationality"=>"MWI",
+        "FatherPin"=> "4BSBY810",
+        "FatherSurname"=> "Kapundi",
+        "FatherFirstName"=> "Kangaonde",
+        "FatherOtherNames"=> "Masula",
+        "FatherVillageId"=>-1,
+        "FatherNationality"=>"MWI",
+        "EbrsPk"=> nil,
+        "NrisPk"=>nil,
+        "PlaceOfBirthDistrictId"=>-1,
+        "PlaceOfBirthDistrictName" => "Lilongwe",
+        "PlaceOfBirthTAName" => "Maluwa",
+        "PlaceOfBirthVillageName" => "Maluwa",
+        "PlaceOfBirthVillageId"=>-1,
+        "MotherDistrictId"=>-1,
+        "MotherDistrictName"=> "Lilongwe",
+        "MotherTAName"=> "Chadza",
+        "MotherVillageName"=> "Kaphantengo",
+        "MotherVillageId"=>-1,
+        "FatherDistrictId"=> -1,
+        "FatherDistrictName"=> "Lilongwe",
+        "FatherTAName" => "Chadza",
+        "FatherVillageName" => "Masula",
+        "EditUser"=> "Dataman1",
+        "EditMachine"=>"192.168.43.5",
+        "BirthCertificateNumber"=> "00000200001",
+        "DistrictOfRegistration" => "Lilongwe"
+    }
+=end
+    user_id = User.where(username: "admin279").last.id
+    codes = JSON.parse(File.read("#{Rails.root}/db/code2country.json"))
+
+    # create core_person
+    core_person = CorePerson.create(
+        :person_type_id     => PersonType.where(name: 'Client').last.id,
     )
 
-        #create_mother
-        #create mother_core_person
-          core_person = CorePerson.create(
-            :person_type_id     => PersonType.where(name: 'Mother').last.id,
-        )
-        
-        #create mother_person
-        mother_person = Person.create(
-            :person_id          => core_person.id,
-            :gender             => 'F',
-            :birthdate          =>  nris_person[:MotherBirthdate],
-            :birthdate_estimated => nris_person[:MotherBirthdateEstimated]
-        )
-        #create mother_name
-        PersonName.create(
-            :person_id          => core_person.id,
-            :first_name         => nris_person[:MotherFirstName],
-            :middle_name        => nris_person[:MotherMaidenName],
-            :last_name          => nris_person[:MotherLastName]
-        )
-        #create mother_address
-        PersonAddress.create(
-            :person_id          => core_person.id,
-            :current_district   => "",
-            :current_ta         => "",
-            :current_village    => "",
-            :home_district   => nris_person[:MotherDistrictId],
-            :home_ta            => "",
-            :home_village       => nris_person[:MotherVillageId],
-            :citizenship        => Location.where(country: nris_person[:MotherNationality]).last.id,
-            
-        )
-        #create mother_identifier
-        if nris_person[:MotherPin].present?
-    
-          PersonIdentifier.create(
-                    person_id: mother_person.person_id,
-                    person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                    value: nris_person[:MotherPin].upcase
-            )
-        end
-    
-        # create mother_relationship
-        PersonRelationship.create(
-            person_a: ebrs_person.id, person_b: core_person.id,
-            person_relationship_type_id: PersonRelationType.where(name: 'Mother').last.id
-        )
-        
-      #create_father
-      #create father_core_person
-      if nris_person[:FatherFirstName].present? && nris_person[:FatherSurname].present?
-        core_person = CorePerson.create(
+    ebrs_person = core_person
+    #create person
+
+    person = Person.create(
+        :person_id          => core_person.id,
+        :gender             => nris_person[:sex] == "Male" ? 'M' : 'F',
+        :birthdate          => nris_person[:DateOfBirthString].to_date.to_s
+    )
+
+    #create person_name
+    PersonName.create(
+        :person_id          => core_person.id,
+        :first_name         => nris_person[:FirstName],
+        :middle_name        => nris_person[:OtherNames],
+        :last_name          => nris_person[:Surname]
+    )
+
+    #create person_birth_detail
+    other_place = nil
+    nris_person["PlaceOfBirthDistrictName"] = "Nkhotakota" if nris_person["PlaceOfBirthDistrictName"].upcase == "NKHOTA-KOTA"
+    nris_person["DistrictOfRegistration"] = "Nkhotakota" if nris_person["DistrictOfRegistration"].upcase == "NKHOTA-KOTA"
+
+    district_id = Location.locate_id_by_tag(nris_person["PlaceOfBirthDistrictName"], "District")
+    ta_id = Location.locate_id(nris_person["PlaceOfBirthTAName"], "Traditional Authority", district_id)
+    village_id = Location.locate_id(nris_person["PlaceOfBirthVillageName"], "Village", ta_id)
+    reg_type = BirthRegistrationType.where(name: "Normal").last.id
+
+    if village_id.blank?
+      other_place = nris_person["PlaceOfBirthVillageName"]
+      village_id = Location.locate_id_by_tag("Other", "Place Of Birth")
+    end
+
+    details = PersonBirthDetail.create(
+        person_id: core_person.id,
+        birth_registration_type_id: reg_type,
+        place_of_birth:  Location.locate_id_by_tag("Other", "Place Of Birth"),
+        birth_location_id: village_id,
+        district_of_birth:  district_id,
+        other_birth_location: other_place,
+        type_of_birth: PersonTypeOfBirth.where(name: "Unknown").last.id,
+        mode_of_delivery_id: ModeOfDelivery.where(name: "Unknown").last.id,
+        location_created_at: Location.locate_id_by_tag(nris_person["DistrictOfRegistration"], "District"),
+        acknowledgement_of_receipt_date: nris_person["DateRegistered"].to_date.to_s,
+        date_reported: nris_person["DateRegistered"].to_date.to_s,
+        date_registered: nris_person["DateRegistered"].to_date.to_s,
+        level_of_education_id: LevelOfEducation.where(name: "Unknown").last.id,
+        flagged: 1,
+        creator: user_id
+    )
+
+    PersonIdentifier.create(
+        person_id: core_person.id,
+        person_identifier_type_id: (PersonIdentifierType.find_by_name("NRIS ID").id),
+        value: nris_person[:NrisPk]
+    )
+
+    #create_mother
+    #create mother_core_person
+    core_person = CorePerson.create(
+        :person_type_id     => PersonType.where(name: 'Mother').last.id,
+    )
+
+    #create mother_person
+    mother_person = Person.create(
+        :person_id          => core_person.id,
+        :gender             => 'F',
+        :birthdate          =>  "1900-01-01",
+        :birthdate_estimated => true
+    )
+    #create mother_name
+    PersonName.create(
+        :person_id          => core_person.id,
+        :first_name         => nris_person[:MotherFirstName],
+        :middle_name        => nris_person[:MotherMaidenName],
+        :last_name          => nris_person[:MotherSurname]
+    )
+    #create mother_address
+    m_district_id = Location.locate_id_by_tag(nris_person["MotherDistrictName"], "District")
+    m_ta_id = Location.locate_id(nris_person["MotherTAName"], "Traditional Authority", district_id)
+    m_village_id = Location.locate_id(nris_person["MotherVillageName"], "Village", ta_id)
+    m_citizenship = Location.locate_id_by_tag(codes[nris_person["MotherNationality"].upcase], "Country")
+
+    pam = PersonAddress.new(
+        :person_id          => core_person.id,
+        :home_district   => m_district_id,
+        :home_ta            => m_ta_id,
+        :home_village       => m_village_id,
+        :citizenship        => m_citizenship,
+        :residential_country => m_citizenship
+    )
+
+    pam.home_district_other = nris_person["MotherDistrictName"] if m_district_id.blank?
+    pam.home_ta_other = nris_person["MotherTaName"] if m_ta_id.blank?
+    pam.home_village_other = nris_person["MotherVillageName"] if m_village_id.blank?
+    pam.save
+
+    #create mother_identifier
+    if nris_person[:MotherPin].present?
+
+      PersonIdentifier.create(
+          person_id: mother_person.person_id,
+          person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+          value: nris_person[:MotherPin].upcase.strip
+      )
+    end
+
+    # create mother_relationship
+    PersonRelationship.create(
+        person_a: ebrs_person.id, person_b: core_person.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Mother').last.id
+    )
+
+    #create_father
+
+    if nris_person[:FatherFirstName].present? && nris_person[:FatherSurname].present?
+      core_person = CorePerson.create(
           :person_type_id     => PersonType.where(name: 'Father').last.id,
       )
-      
+
       #create father_person
       father_person = Person.create(
           :person_id          => core_person.id,
           :gender             => 'M',
-          :birthdate          =>  nris_person[:FatherBirthdate],
-          :birthdate_estimated => nris_person[:FatherBirthdateEstimated]
+          :birthdate          =>  "1900-01-01".to_date.to_s,
+          :birthdate_estimated => true
       )
       #create father_name
       PersonName.create(
@@ -468,37 +555,58 @@ module PersonService
           :middle_name        => nris_person[:FatherOtherNames],
           :last_name          => nris_person[:FatherSurname]
       )
+
       #create father_address
-      PersonAddress.create(
+      f_district_id = Location.locate_id_by_tag(nris_person["FatherDistrictName"], "District")
+      f_ta_id = Location.locate_id(nris_person["FatherTAName"], "Traditional Authority", district_id)
+      f_village_id = Location.locate_id(nris_person["FatherVillageName"], "Village", ta_id)
+      f_citizenship = Location.locate_id_by_tag(codes[nris_person["FatherNationality"].upcase], "Country")
+
+      paf = PersonAddress.new(
           :person_id          => core_person.id,
-          :current_district   => "",
-          :current_ta         => "",
-          :current_village    => "",
-          :home_district  => nris_person[:FatherDistrictId],
-          :home_ta => "",
-          :home_village => nris_person[:FatherVillageId],
-          :citizenship => Location.where(country: nris_person[:FatherNationality]).last.id,
-          
+          :home_district  => f_district_id,
+          :home_ta => f_ta_id,
+          :home_village => f_village_id,
+          :citizenship => f_citizenship,
+          :residential_country => f_citizenship
       )
-      
+
+      paf.home_district_other = nris_person["FatherDistrictName"] if f_district_id.blank?
+      paf.home_ta_other = nris_person["FatherTaName"]   if f_ta_id.blank?
+      paf.home_village_other = nris_person["FatherVillageName"] if f_village_id.blank?
+      paf.save
+
       #create father_identifier
       if nris_person[:FatherPin].present?
-    
+
         PersonIdentifier.create(
-                  person_id: father_person.person_id,
-                  person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
-                  value: nris_person[:FatherPin].upcase
-          )
+            person_id: father_person.person_id,
+            person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
+            value: nris_person[:FatherPin].upcase.strip
+        )
       end
-    
-       # create father_relationship
-       PersonRelationship.create(
-        person_a: ebrs_person.id, person_b: core_person.id,
-        person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
+
+      # create father_relationship
+      PersonRelationship.create(
+          person_a: ebrs_person.id,
+          person_b: core_person.id,
+          person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
       )
-    
-      end
-      return ebrs_person.id
+
+      PersonRecordStatus.new_record_state(ebrs_person.id, "HQ-CAN-PRINT", "From Mass Data Activity", user_id)
     end
+
+    PersonRelationship.create(
+        person_a: ebrs_person.id,
+        person_b: mother_person.id,
+        person_relationship_type_id: PersonRelationType.where(name: 'Informant').last.id
+    )
+
+    details.update_attribute("informant_relationship_to_person", "Mother")
+
+    PersonRecordStatus.new_record_state(ebrs_person.id, "HQ-ACTIVE", "New Record From Mass Data", user_id)
+
+    return ebrs_person.id
+  end
 
 end

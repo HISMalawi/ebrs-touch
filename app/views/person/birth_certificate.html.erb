@@ -1,0 +1,343 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>eBRS Death Certificate</title>
+  <style>
+ @media all {  
+ body {
+          margin: 0;
+          -moz-user-select: none;
+          font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+          margin-left: 10px;
+          margin-right: 10px;
+          color: #000;
+          font-size: 20px;
+         
+        
+      }
+    
+    #mainc {
+    height: 100% !important;
+    
+    }  
+      #barcode {
+        margin-right: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        margin-top: 30px;
+        float: right !important;
+        
+      }
+      
+      #childdata {
+       clear: both;
+       width: 21cm;
+       margin-top: 38cm;
+       padding-top: 6cm;
+       margin-left: auto;
+       margin-right: auto;
+       height: 20cm;  
+       }}
+   
+  </style>
+</head>
+<% @data.each do |data|
+ person = data['person']
+ birth = data['birth']
+
+%>
+<body style="color: #000;">
+<body style="color: #000;">
+    <% @long_cert = false %>
+    <% raw = File.read("#{SETTINGS['barcodes_path']}#{person.id}.png")
+
+       @data = Base64.encode64(raw)
+
+    %>
+    
+    <% raw_sig = File.read(Rails.root.join("public","uploads",@signature)) rescue nil %>
+    <% if raw_sig
+      @sig = Base64.encode64(raw_sig)
+     end %>
+             
+<div id="mainc">             
+  <div id="barcode">
+    <p style="text-align: center !important;font-size: 12px;"> <img src ="data:image/png;base64,<%= @data%>" />
+    <br/><%= person.npid %></p>
+  </div>
+
+  <div id="childdata">
+
+    <table style="width: 21cm; font-weight: normal;" cellpadding="8" width="100%">
+            <tr>
+            <td style="width: 130px;" align="right">
+              1.
+            </td>
+            <td align="left" style="width: 300px;">
+              Birth Entry Number
+            </td>
+            <td align="left">
+              <%= birth.ben rescue nil %>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 130px;" align="right">
+              2.
+            </td>
+            <td align="left" style="width: 300px;">
+              <%= (birth.national_id.present? ? "National ID" : "Registration Number") %>
+            </td>
+            <td align="left">
+	      <%= (birth.national_id.present? ? person.id_number : birth.brn) %>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 130px;" align="right">
+              3.
+            </td>
+            <td align="left" style="width: 300px;">
+              Name
+            </td>
+            <td align="left">
+             <%= person.printable_name %>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 130px;" align="right">
+              4.
+            </td>
+            <td align="left" style="width: 300px;">
+              Date of Birth
+            </td>
+            <td align="left">
+	      <%= person.birthdate.to_date.strftime("%d").to_i %><sup><%= person.birthdate.to_date.strftime("%d").to_i.ordinalize.gsub(/\d+/, "") rescue nil
+              %></sup> <%= person.birthdate.to_date.strftime("%B") rescue nil %>, <%= person.birthdate.to_date.strftime("%Y") rescue nil %>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 130px;" align="right">
+              5.
+            </td>
+            <td align="left" style="width: 300px;">
+              Sex
+            </td>
+            <td align="left">
+              <%= person.full_gender rescue nil %>
+            </td>
+          </tr>
+          <tr>
+              <td style="width: 130px;" align="right">
+                6.
+              </td>
+              <td align="left" style="width: 300px;">
+                Place of Birth
+              </td>
+              <td align="left">
+              <%
+                birth_place = birth.birth_place.name
+                if birth.district_of_birth.present?
+                  birth_district = Location.find(birth.district_of_birth).name rescue nil 
+                    if birth_district.present?
+                      place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
+                  
+		    if place_of_birth.downcase == 'other'
+                      place_of_birth = birth.other_birth_location
+                    end
+		     if !place_of_birth.blank?
+                       place_of_birth += ", " + birth_district 
+		     else
+		       place_of_birth = birth_district		
+		     end 
+                  else
+                     place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
+                  end
+                else
+                  place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
+                end
+              %>
+
+                <%= place_of_birth %>
+              </td>
+            </tr>
+            <tr>
+              <td style="width: 130px;" align="right">
+                7.
+              </td>
+              <td align="left" style="width: 300px;">
+                Name of Mother
+              </td>
+              <td align="left">
+                <%= person.mother.printable_name rescue nil%>
+              </td>
+            </tr>
+            <tr>
+              <td style="width: 130px;" align="right">
+                8.
+              </td>
+              <td align="left" style="width: 300px;">
+                Nationality of Mother
+              </td>
+              <td align="left">
+                <%= person.mother.citizenship rescue nil %>
+              </td>
+            </tr>
+           
+<!-- ........................................ -->
+ <% if birth.parents_married_to_each_other.to_s == '0' %>
+              <tr>
+							<% if birth.court_order_attached.to_s == '1' || birth.parents_signed.to_s == '1'  %>
+								 <% if (person.father.name.present? rescue false)%>
+									<td style="width: 130px;" align="right">
+									9.
+									</td>
+									<td align="left" style="width: 300px;">
+									Name of Father
+									</td>
+									<td align="left">
+										<%= person.father.printable_name %>
+									</td>
+									</tr>
+									
+									<tr>
+											<td style="width: 130px;" align="right">
+											10.
+											</td>
+											<td align="left" style="width: 300px;">
+											Nationality of Father
+											</td>
+											<td align="left">
+											 	<%= person.father.citizenship rescue nil %>
+											</td>
+			       			</tr>
+								 <% end %>
+			        <% end %>
+			       
+	    <% else %>
+	         <tr>
+	         <td style="width: 130px;" align="right">
+                                9.
+                            </td>
+                            <td align="left" style="width: 300px;">
+                                Name of Father
+                            </td>
+                            <td align="left">
+                                <% if (person.father.name.present? rescue false) %>
+                                    <%= person.father.printable_name  %>
+                                <% end %>
+	           </td>
+	         </tr>
+	         
+ 	         <tr>
+									<td style="width: 130px;" align="right">
+									10.
+									</td>
+									<td align="left" style="width: 300px;">
+									Nationality of Father
+									</td>
+									<td align="left">
+									 	<%= person.father.citizenship rescue nil %>
+									</td>
+								 
+			       </tr>
+	           
+	    <% end %> 
+<!-- ........................................ -->
+
+
+
+
+
+ <% if birth.parents_married_to_each_other.to_s == '0' %>
+		  <% if birth.court_order_attached.to_s == '1' || birth.parents_signed.to_s == '1'  %>
+		          <tr>
+							<% if (person.father.name.present? rescue false) %>
+							 <td style="width: 130px;" align="right">
+								      11.
+								   </td>
+
+							<% else %>
+								   <td style="width: 130px;" align="right">
+								      9.
+								   </td>
+						  <% end %>
+						  
+				<td align="left" style="width: 300px;">
+          Date of Registration
+        </td>
+        <td align="left">
+          <%= birth.date_registered.to_date.strftime("%d").to_i rescue nil %><sup><%= birth.date_registered.to_date.strftime("%d").to_i.ordinalize.gsub(/\d+/, "") rescue nil
+        %></sup> <%= birth.date_registered.to_date.strftime("%B") rescue nil %>, <%= birth.date_registered.to_date.strftime("%Y") rescue nil %>
+        </td>
+      </tr>
+						  
+						  
+      <% else %>
+              <td style="width: 130px;" align="right">
+                 9.
+              </td>
+              <td align="left" style="width: 300px;">
+          Date of Registration
+        </td>
+        <td align="left">
+          <%= birth.date_registered.to_date.strftime("%d").to_i rescue nil %><sup><%= birth.date_registered.to_date.strftime("%d").to_i.ordinalize.gsub(/\d+/, "") rescue nil
+        %></sup> <%= birth.date_registered.to_date.strftime("%B") rescue nil %>, <%= birth.date_registered.to_date.strftime("%Y") rescue nil %>
+        </td>
+      </tr>
+      
+      <tr>
+        <th colspan="3" style="font-size: 18px; font-weight: normal;">
+          &nbsp;
+        </th>
+      </tr>
+      <tr>
+        <th colspan="3" style="font-size: 18px; font-weight: normal;">
+          &nbsp;
+        </th>
+      </tr>
+              
+		  <% end %>
+    <% else %>
+          <td style="width: 130px;" align="right">
+              11.
+          </td>
+          <td align="left" style="width: 300px;">
+          Date of Registration
+        </td>
+        <td align="left">
+          <%= birth.date_registered.to_date.strftime("%d").to_i rescue nil %><sup><%= birth.date_registered.to_date.strftime("%d").to_i.ordinalize.gsub(/\d+/, "") rescue nil
+        %></sup> <%= birth.date_registered.to_date.strftime("%B") rescue nil %>, <%= birth.date_registered.to_date.strftime("%Y") rescue nil %>
+        </td>
+      </tr>
+    <% end %>
+      
+<tr>
+        <th colspan="3" style="font-size: 18px; font-weight: normal;">
+          I hereby certify the above to be a true and correct extract from the<br/>
+          Birth Register kept at NRB.
+        </th>
+      </tr>
+      <tr>
+        <td colspan="3" style="font-size: 18px; font-weight: normal; text-align: center;">
+          Dated this <%= Date.today.strftime("%d").to_i rescue nil %><sup><%= Date.today.strftime("%d").to_i.ordinalize.gsub(/\d+/, "") rescue nil
+        %></sup> <%= Date.today.strftime("%B") rescue nil %>, <%= Date.today.strftime("%Y") rescue nil %>
+        </td>
+      </tr>
+            <%end%>
+            
+            
+        </table>
+    </div>
+    <div id="signature">
+      <% raw = File.read(Rails.root.join("public","uploads",@signature)) rescue nil %>
+                 
+                 <% if raw
+                      sig = Base64.encode64(raw)
+                    end %>
+                    
+                 <% if sig.present? %>
+       <img src ="data:image/png;base64,<%= @sig %>" width="120" height="50" align="right" style="padding-right: 40px;margin-right: 40px;" />
+                 <% end %>
+   </div>	
+ </div>  
+</body>
+</html>
