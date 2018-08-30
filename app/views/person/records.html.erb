@@ -232,9 +232,9 @@ function initTable(){
                                     '<%= image_tag "edit.png", class: 'btn-images' %></div>' +
                                     '</td>';
 
-                            <% if SETTINGS["application_mode"] == "FC"%>
+                            <% if SETTINGS["application_mode"] == "FC" && !request.path.match("search")%>
                                 json['data'][i][last_index] += '<td class="action-button"> ' +
-                                '<div onclick="javascript:location=\'/person_id_label?person_id=' + person_id + '?next_path=<%= request.path%> \'"     ' +
+                                '<div onclick="javascript:location=\'/person_id_label?person_id=' + person_id + '&next_path=<%= request.path%> \'"     ' +
                                 'url=\'/person/' + person_id + '?next_path=<%= request.path%> \'"     ' +
                                 '    class="action-btn btn btn-success btn-xs">' +
                                 '<%= image_tag "printer2.png", class: 'btn-images' %></div>' +

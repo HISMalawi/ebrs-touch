@@ -2047,6 +2047,7 @@ class PersonController < ApplicationController
   end
 
   def searched_cases
+
     @states = Status.all.map(&:name)
     @section = "Search Cases"
     @display_ben = true
@@ -2056,7 +2057,6 @@ class PersonController < ApplicationController
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     filters = JSON.parse(params['data']) rescue {}
     @records = PersonService.search_results(filters)
-
     render :template => "person/records", :layout => "data_table"
   end
   #########################################################################

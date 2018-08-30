@@ -292,6 +292,14 @@
                 onclick="pending();">Mark Pending</button>
       </td>
 
+      <% if application_mode == "Facility" %>
+          <td id="Print Barcode">
+            <button id="printBarcode"
+                    class="green"
+                    style=""
+                    onclick="window.location = '/person_id_label?person_id=<%=params[:id]%>'; ">Print Barcode</button>
+          </td>
+      <% end %>
  </tr>
 </table>
 </div>

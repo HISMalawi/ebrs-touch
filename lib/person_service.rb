@@ -250,7 +250,7 @@ module PersonService
     search_val = params[:search][:value] rescue nil
     search_val = '_' if search_val.blank?
 
-    main =   Person.order(" person.updated_at DESC ")
+    main =   Person.order(" person.created_at DESC ")
     main = main.joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
             INNER JOIN person_name n ON person.person_id = n.person_id
             INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id
