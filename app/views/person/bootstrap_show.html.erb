@@ -221,11 +221,12 @@
                 onclick="window.parent.location = return_path ">
           Cancel
         </button>
-      <button class="btn btn-primary pull-right" style="width: 80px; float: right; margin-right: 40px; margin-top: 5px; cursor: pointer;
-               "
-              onmousedown="window.location = '<%=session[:list_url]%>' ">
-        <b>Finish</b>
-      </button>
+
+          <button class="btn btn-success pull-right"
+                  onclick="window.location = '/print_preview?person_ids=<%= params[:id]%>&no_print=true' ">
+            <span class="fa fa-print"></span>
+            Print
+          </button>
 
         <% if "HQ-POTENTIAL DUPLICATE-TBA"== @status %>
               <script type="text/javascript">

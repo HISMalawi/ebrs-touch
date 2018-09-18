@@ -2327,7 +2327,7 @@ class PersonController < ApplicationController
       data['birth']  = PersonBirthDetail.where(person_id: person_id).last
 
       barcode = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png") rescue nil
-      if barcode.blank?
+      if (barcode.blank? rescue nil)
 
         barcode_value = PersonIdentifier.where(person_id: person_id,
                                                person_identifier_type_id: nid_type.id, voided: 0
