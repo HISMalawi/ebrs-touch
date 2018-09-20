@@ -104,7 +104,7 @@
     }
 </style>
 
-<% if @folders.include?("Print Certificates")%>
+<% if SETTINGS["enable_decentralised_printing"].to_s == "true" && @folders.include?("Print Certificates")%>
 
     <div class="button parent_menu" onclick="window.location = '/print_certificates'" tag=1>
       <table style="text-align: left;">

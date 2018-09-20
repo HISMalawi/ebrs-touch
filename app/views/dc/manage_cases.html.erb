@@ -153,12 +153,14 @@
 
 <% if @folders.include?("View Printed Records") %>
 
+  <% if SETTINGS["enable_decentralised_printing"].to_s == "true"%>
     <div class="button child_menu manage_cases" onclick="window.location = '/printed_cases'" tag=0 title="View Printed Cases">
+
       <table style="text-align: left;">
         <tr>
           <td rowspan="2">
             <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"><%= @stats['HQ-PRINTED']%></span>
+            <span class="count"><%= (@stats['DC-PRINTED'] + @stats["HQ-PRINTED"])%></span>
           </td>
           <td style="height: 30px;">
             View Printed Records 
@@ -171,6 +173,29 @@
         </tr>
       </table>
     </div>
+  <% else %>
+
+        <div class="button child_menu manage_cases" onclick="window.location = '/view_printed_cases'" tag=0 title="View Printed Cases">
+
+          <table style="text-align: left;">
+            <tr>
+              <td rowspan="2">
+                <img src="<%= @icoFolder %>" height="60"/>  <br />
+                <span class="count"><%= @stats['HQ-PRINTED']%></span>
+              </td>
+              <td style="height: 30px;">
+                View Printed Records
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 11px; font-style: italic;">
+                Copy of Printed Certificates
+              </td>
+            </tr>
+          </table>
+        </div>
+
+  <% end %>
 
 <% end %>
 
