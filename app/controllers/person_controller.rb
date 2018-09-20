@@ -1718,7 +1718,11 @@ class PersonController < ApplicationController
       @section = "All Printed Cases"
     end
 
-    @targeturl = "/printed_cases"
+    if SETTINGS["enable_decentralised_printing"].to_s == "true"
+      @targeturl = "/printed_cases"
+    else
+      @targeturl = "/manage_cases"
+    end
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
