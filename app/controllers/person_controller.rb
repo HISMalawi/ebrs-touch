@@ -2276,6 +2276,7 @@ class PersonController < ApplicationController
       end
     end
 
+    render :text => "OK"
  end
 
 
