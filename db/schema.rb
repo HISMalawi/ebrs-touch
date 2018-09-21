@@ -589,6 +589,10 @@ ActiveRecord::Schema.define(version: 20170912104756) do
     t.string   "form_signed",								limit: 255
     t.string   "date_reported",							limit: 255
 
+    t.string   "village_headman_name",		  limit: 255
+    t.string   "village_senior_name",  		  limit: 255
+    t.string   "village_headman_signed",	  limit: 255
+
     t.string   "upload_status",							limit: 255
     t.string   "upload_number",							limit: 255
     t.datetime "upload_datetime"
