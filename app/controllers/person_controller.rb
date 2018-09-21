@@ -2255,18 +2255,28 @@ class PersonController < ApplicationController
   end
 
  def receive_data
+
+    User.current = User.where(username: "admin#{SETTINGS['location_id']}").first if User.current.blank?
     data = params["data"]
+
     File.open("#{Rails.root}/dump.csv", "w"){|f|
       f.write(data)
     }
 
-    if MassPerson.load_mass_data
+    ActiveRecord::Base.transaction do
+      if MassPerson.load_mass_data
 
+=begin
+        upload_number   = MassPerson.find_by_sql(" SELECT MAX(upload_number) n FROM mass_person ").last['n'].to_i + 1
+        MassPerson.where(upload_status: "NOT UPLOADED").each do |record|
+          record.map_to_ebrs_tables(upload_number)
+        end
+=end
+
+      end
     end
 
-   render :text => "OK"
  end
-
 
 
   def print

@@ -25,7 +25,7 @@ class MassPerson < ActiveRecord::Base
   def self.dump
 
     data = MassPerson.new.attributes.keys.join(",") + "\n"
-    upload_number   = MassPerson.find_by_sql(" SELECT MAX(upload_number) n FROM person ").last['n'].to_i + 1
+    upload_number   = MassPerson.find_by_sql(" SELECT MAX(upload_number) n FROM mass_person ").last['n'].to_i + 1
     upload_datetime = Time.now
     MassPerson.where(upload_status: "NOT UPLOADED").each do |person|
       data = data + person.attributes.values.join(",") + "\n"
@@ -61,10 +61,22 @@ class MassPerson < ActiveRecord::Base
     return true
   end
 
+  def map_to_ebrs_tables(upload_number)
+    self.upload_datetime = Time.now
+    self.upload_number = upload_number
+    self.upload_status = "UPLOADED"
+
+    ebrs_id = PersonService.create_mass_registration_person(self)
+    if ebrs_id.present?
+      self.save
+    end
+  end
+
   def self.load_mass_data
 
     columns = MassPerson.new.attributes.keys
     columns[0] = 'mass_person_id'
+
     File.read("#{Rails.root}/dump.csv").split("\n").each{|line|
       data = line.split(",")
       next if data.first.strip == "person_id"
@@ -75,6 +87,7 @@ class MassPerson < ActiveRecord::Base
       end
 
       mass_person = MassPerson.new(hash)
+      mass_person.mass_person_id = (MassPerson.count > 0 ? (MassPerson.last.mass_person_id + 1) : 1)
       mass_person.save
     }
 
