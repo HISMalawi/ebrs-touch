@@ -2084,6 +2084,10 @@ class PersonController < ApplicationController
 
       person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
+      faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+                                                LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+                                                WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+
       d = Person.order(" cp.created_at DESC ")
       .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
@@ -2091,6 +2095,7 @@ class PersonController < ApplicationController
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
       .where(" prs.status_id IN (#{state_ids.join(', ')})
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
+              AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
 
