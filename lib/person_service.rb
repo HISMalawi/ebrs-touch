@@ -193,6 +193,10 @@ module PersonService
     old_ben_identifier_join = " "
     old_ben_type_id = PersonIdentifierType.where(name: "Old Birth Entry Number").first.id
 
+    faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+                                                LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+                                                WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+
     filters.keys.each do |k|
       case k
         when 'Birth Entry Number'
@@ -259,6 +263,7 @@ module PersonService
 
     main = main.where(" COALESCE(prs.voided, 0) = 0
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
+            AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
             #{entry_num_query} #{fac_serial_query} #{name_query} #{gender_query} #{place_of_birth_query} #{status_query}
            AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP \"#{search_val}\" ")

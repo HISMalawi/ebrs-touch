@@ -53,12 +53,16 @@ class PersonRecordStatus < ActiveRecord::Base
 
       status_ids = states.collect{|s| Status.where(name: s).last.id} rescue Status.all.map(&:status_id)
 
+      faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+                                                LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+                                                WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+
       data = self.find_by_sql("
       SELECT t.name, COUNT(*) c FROM person_birth_details d
         INNER JOIN person_record_statuses s ON d.person_id = s.person_id
         INNER JOIN birth_registration_type t ON t.birth_registration_type_id = d.birth_registration_type_id
           #{had_query}
-        WHERE s.voided = 0 AND s.status_id IN (#{status_ids.join(', ')}) GROUP BY d.birth_registration_type_id")
+        WHERE s.voided = 0 AND s.person_record_status_id NOT IN (#{faulty_ids.join(', ')}) AND s.status_id IN (#{status_ids.join(', ')}) GROUP BY d.birth_registration_type_id")
 
 
       (data || []).each do |r|
@@ -71,12 +75,16 @@ class PersonRecordStatus < ActiveRecord::Base
     result = {}
     birth_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
 
+    faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+                                                LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+                                                WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+
     Status.all.each do |status|
       result[status.name] = self.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
         INNER JOIN person_birth_details p ON p.person_id = s.person_id
           AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
-        WHERE voided = 0 AND status_id = #{status.id}")[0]['c']
+        WHERE voided = 0 AND s.person_record_status_id NOT IN (#{faulty_ids.join(', ')}) AND status_id = #{status.id}")[0]['c']
     end
 
     unless approved == false
