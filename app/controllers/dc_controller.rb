@@ -612,6 +612,14 @@ def print_certificates
         "data" => @records}.to_json and return
   end
 
+  @online = false
+  require 'open3'
+  host, port = SETTINGS['sync_host'].split(":")
+  a, b, c = Open3.capture3("nc -vw 5 #{host} #{port}")
+  if b.scan(/succeeded/).length > 0
+    @online = true
+  end
+
   render :template => "/dc/records", layout: "bootstrap_data_table"
  end
 

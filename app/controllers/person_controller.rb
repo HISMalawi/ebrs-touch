@@ -1,4 +1,5 @@
 class PersonController < ApplicationController
+  require 'open3'
 
   skip_before_action :verify_authenticity_token
 
@@ -34,7 +35,6 @@ class PersonController < ApplicationController
       sync_progress = "Sync Status: #{task['progress']}%"
     end
 
-    require 'open3'
     host, port = SETTINGS['sync_host'].split(":")
     a, b, c = Open3.capture3("nc -vw 5 #{host} #{port}")
     if b.scan(/succeeded/).length > 0
@@ -418,6 +418,14 @@ class PersonController < ApplicationController
         end
 
         if params[:bs_layout].to_s == "true"
+
+          @online = false
+          host, port = SETTINGS['sync_host'].split(":")
+          a, b, c = Open3.capture3("nc -vw 5 #{host} #{port}")
+          if b.scan(/succeeded/).length > 0
+            @online = true
+          end
+
           render :layout => "bootstrap_data_table", :template => "person/bootstrap_show"
         else params[:preview].blank?
           render :layout => "facility"

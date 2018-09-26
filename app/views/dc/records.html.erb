@@ -711,19 +711,12 @@
 
     checkSelections();
 
-    jQuery("#example_filter").find("input")
-
-    <% if User.current.user_role.role.role == "Quality Supervisor" %>
-        jQuery("#verification-content").css({
-            position: "absolute",
-            top: "-20px",
-            left: "-250px",
-            width: (screen.width*0.70 + "px")
-        });
-
-        jQuery("#verify_by_scanning").modal("show");
-        barcodeFocus();
+    <% if @online %>
+        var interval = setInterval(function() {
+            jQuery("input:checkbox").attr("disabled", true);
+        }, 250);
     <% end %>
+
   </script>
 
 <style>

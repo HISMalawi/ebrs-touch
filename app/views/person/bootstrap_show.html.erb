@@ -222,7 +222,7 @@
           Cancel
         </button>
 
-          <button class="btn btn-success pull-right"
+          <button id="DC-Print" class="btn btn-success pull-right"
                   onclick="window.location = '/print_preview?person_ids=<%= params[:id]%>&no_print=true' ">
             <span class="fa fa-print"></span>
             Print
@@ -1072,11 +1072,8 @@
     <% end %>
 
 
-    <% unless @nris_up %>
-        var lockableFields = ["Check Completeness", "Confirm Completeness", "Approve for Printing", "Approve for Re-printing"];
-        for (var i = 0; i < lockableFields.length; i++){
-            __$(lockableFields[i]).setAttribute("disabled", "disabled")
-        }
+    <% if !@online %>
+            jQuery("#DC-Print").attr("disabled", true);
     <% end %>
 </script>
 
