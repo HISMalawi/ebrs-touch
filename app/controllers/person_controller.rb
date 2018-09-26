@@ -34,6 +34,15 @@ class PersonController < ApplicationController
       sync_progress = "Sync Status: #{task['progress']}%"
     end
 
+    require 'open3'
+    host, port = SETTINGS['sync_host'].split(":")
+    a, b, c = Open3.capture3("nc -vw 5 #{host} #{port}")
+    if b.scan(/succeeded/).length > 0
+      sync_progress += "<span style='color: white;'>Up</span>"
+    else
+      sync_progress += "<span style='color: white;'>UpDown</span>"
+    end
+
     render text: sync_progress
   end
 

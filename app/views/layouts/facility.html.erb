@@ -60,7 +60,11 @@
           <div id="sync_status" style="display: inline-block; float: left;height: 40px; width: 250px; color: green;font-size: 19px;
                   padding-top: 20px;padding-left: 20px;"></div>
           <tr>
+            <td><span id="remote-server" style="font-size: 23px;border: 2px solid gray; border-radius: 50%; color: white;
+                    padding: 5px;background: white; "><%= {"DC" => "HQ", "FC" => "DC"}[application_mode]%></span></td>
             <td style="vertical-align: middle;">
+
+
               <div style="border: 1px solid dimgray; color: dimgray; border-radius: 20px; padding: 2px; font-size: 0.4em;
                       height: 20px; padding-left: 20px; padding-right: 20px;">
                 <%= User.current.username rescue nil %>@<%= Location.current.name.titleize rescue "PLEASE SET LOCATION" %> | <span style="font-weight: bold !important;"><%= Date.today.strftime("%d/%b/%Y") %></span>
@@ -183,7 +187,14 @@ function displaySyncStatus(){
                         }else{
                             __$('sync_status').style.color = "green";
                         }
+
                         __$('sync_status').innerHTML = result;
+
+                        if(result.match("Up")){
+                            __$('remote-server').style.background = "green";
+                        }else{
+                            __$('remote-server').style.background = "red";
+                        }
 
                         setTimeout(function(){displaySyncStatus()}, 5000)
                     },
