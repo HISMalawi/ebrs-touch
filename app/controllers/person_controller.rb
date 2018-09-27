@@ -40,7 +40,7 @@ class PersonController < ApplicationController
     if b.scan(/succeeded/).length > 0
       sync_progress += "<span style='color: white;'>Up</span>"
     else
-      sync_progress += "<span style='color: white;'>UpDown</span>"
+      sync_progress += "<span style='color: white;'>Down</span>"
     end
 
     render text: sync_progress
