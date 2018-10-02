@@ -3,7 +3,6 @@ upload_number   = MassPerson.find_by_sql(" SELECT MAX(upload_number) n FROM mass
 
 
 User.current = User.where(username: "admin#{SETTINGS['location_id']}").last
-User.first.lock
 response = "N"
 
 ActiveRecord::Base.connection.execute <<EOF

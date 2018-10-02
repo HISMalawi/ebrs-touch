@@ -203,7 +203,7 @@ class PersonController < ApplicationController
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
-                "Record Status" => "#{@status}",
+                "Record Status" => "#{@status.sub("HQ-CAN-PRINT", "CAN-PRINT")}",
                 "Child/Person Type" => "#{@birth_details.reg_type.name}"
             }
         ],
@@ -2050,7 +2050,15 @@ class PersonController < ApplicationController
   end
 
   def do_reprint
-    PersonRecordStatus.new_record_state(params['id'], "DC-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
+
+    status = ""
+    if params['reason'].to_s.upcase == "LOST"
+     status = "DC-LOST"
+    else
+     status = "DC-DAMAGED"
+    end
+
+    PersonRecordStatus.new_record_state(params['id'], status, "Reprint request; #{params['reason']}");
 
     redirect_to session['list_url']
   end

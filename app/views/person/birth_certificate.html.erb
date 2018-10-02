@@ -36,7 +36,7 @@
        padding-top: 6cm;
        margin-left: auto;
        margin-right: auto;
-       height: 20cm;  
+       height: 18cm;
        }}
    
   </style>
@@ -328,16 +328,29 @@
         </table>
     </div>
     <div id="signature">
-      <% raw = File.read(Rails.root.join("public","uploads",@signature)) rescue nil %>
-                 
-                 <% if raw
-                      sig = Base64.encode64(raw)
-                    end %>
-                    
-                 <% if sig.present? %>
-       <img src ="data:image/png;base64,<%= @sig %>" width="120" height="50" align="right" style="padding-right: 40px;margin-right: 40px;" />
-                 <% end %>
-   </div>	
+      <table style="width: 100%;">
+        <tr>
+          <td>
+            <% raw = File.read(Rails.root.join("public","uploads",@signature)) rescue nil %>
+
+            <% if raw
+                 sig = Base64.encode64(raw)
+               end %>
+
+            <% if sig.present? %>
+                <img src ="data:image/png;base64,<%= @sig %>" width="120" height="50" align="right" style="padding-right: 40px;margin-right: 40px;" />
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 0px;padding-right: 95px;">
+            <div style="width: 100%;text-align: right;font-size: 16px;margin:0px;">
+              Chief Director
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
  </div>  
 </body>
 </html>

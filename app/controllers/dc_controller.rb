@@ -598,7 +598,7 @@ def print_certificates
                    p.gender,
                    mother_name,
                    father_name,
-                   Status.find(p.status_id).name,
+                   Status.find(p.status_id).name.sub("HQ-CAN-PRINT", "CAN-PRINT"),
                    p.person_id
       ]
 

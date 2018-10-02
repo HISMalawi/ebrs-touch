@@ -484,7 +484,7 @@
                             for(var i = 0; i < json['data'].length; i ++){
 
                                 var last_index = json['data'][i].length - 1;
-                                var person_id = json['data'][i][last_index]
+                                var person_id = json['data'][i][last_index];
 
                                 var clas = "nonid";
 
@@ -711,7 +711,7 @@
 
     checkSelections();
 
-    <% if @online %>
+    <% if !@online %>
         var interval = setInterval(function() {
             jQuery("input:checkbox").attr("disabled", true);
         }, 250);

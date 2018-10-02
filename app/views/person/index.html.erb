@@ -369,6 +369,29 @@
     </div>
 <% end %>
 
+<% if @folders.include?("Lost/damage cases") %>
+
+    <div class="button parent_menu" onclick="window.location = '/person/lost_and_damaged_cases'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+            <span class="count"><%= (@stats['DC-DAMAGED'] + @stats["DC-LOST"])%></span>
+
+          </td>
+          <td style="height: 30px;">
+            Re-Prints
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Print Certificates Approved at HQ
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
 <% if @folders.include?("Request Change") %>
 
     <div style="display:none" class="button child_menu manage_requests_child" onclick="window.location = '/request_change'" tag=0 title="Request change">
