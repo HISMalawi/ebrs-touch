@@ -2362,6 +2362,7 @@ class PersonController < ApplicationController
     signatory = User.find_by_username(GlobalProperty.find_by_property("signatory").value) rescue nil
     signatory_attribute_type = PersonAttributeType.find_by_name("Signature") if signatory.present?
     @signature = PersonAttribute.find_by_person_id_and_person_attribute_type_id(signatory.id,signatory_attribute_type.id).value rescue nil
+    @signature = "signature.png" if @signature.blank? 
 
     person_ids = params[:person_ids].split(',')
     nid_type = PersonIdentifierType.where(name: "Barcode Number").last
