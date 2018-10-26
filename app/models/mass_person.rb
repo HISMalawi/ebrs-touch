@@ -61,15 +61,57 @@ class MassPerson < ActiveRecord::Base
     return true
   end
 
-  def map_to_ebrs_tables(upload_number)
+  def self.format_person(hash, person_id=nil)
+
+    person = {}
+    person["id"] = person_id
+    person["first_name"]= hash["first_name"] rescue ''
+    person["last_name"] =  hash["last_name"] rescue ''
+    person["middle_name"] = hash["middle_name"] rescue ''
+    person["gender"] = hash["gender"]
+    person["birthdate"]= hash["date_of_birth"].to_date.to_s
+    person["birthdate_estimated"] = 0
+    person["nationality"]=  hash["nationality"]
+    person["place_of_birth"] = "Other"
+    person["district"] = hash["district_created_at"]
+
+    person["mother_first_name"]= hash["mother_first_name"]
+    person["mother_last_name"] =  hash["mother_last_name"]
+    person["mother_middle_name"] = hash["mother_middle_name"]
+
+    person["mother_home_district"] = nil
+    person["mother_home_ta"] = nil
+    person["mother_home_village"] = nil
+
+    person["mother_current_district"] = nil
+    person["mother_current_ta"] = nil
+    person["mother_current_village"] = nil
+
+    person["father_first_name"]= hash["father_first_name"]
+    person["father_last_name"] =  hash["father_last_name"]
+    person["father_middle_name"] = hash["father_middle_name"]
+
+    person["father_home_district"] = nil
+    person["father_home_ta"] = nil
+    person["father_home_village"] = nil
+
+    person["father_current_district"] = nil
+    person["father_current_ta"] = nil
+    person["father_current_village"] = nil
+    person
+  end
+
+  def map_to_ebrs_tables(upload_number, status)
     self.upload_datetime = Time.now
     self.upload_number = upload_number
     self.upload_status = "UPLOADED"
 
-    ebrs_id = PersonService.create_mass_registration_person(self)
+    ebrs_id = PersonService.create_mass_registration_person(self, status)
     if ebrs_id.present?
       self.save
     end
+
+    ebrs_id
   end
 
   def self.load_mass_data

@@ -372,7 +372,7 @@ class PersonController < ApplicationController
           person["father_current_district"] = Location.find(@father_person.addresses.last.current_district).name rescue nil
           person["father_current_ta"] = Location.find(@father_person.addresses.last.current_ta).name rescue nil
           person["father_current_village"] = Location.find(@father_person.addresses.last.current_village).name rescue nil
-        
+
           SimpleElasticSearch.add(person)
 
           if @status == "DC-ACTIVE"

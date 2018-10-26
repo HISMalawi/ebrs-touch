@@ -373,7 +373,7 @@ module PersonService
 		identifier.value
 	end
 
-  def self.create_mass_registration_person(mass_reg_person)
+  def self.create_mass_registration_person(mass_reg_person, status)
 
     PersonTypeOfBirth.create(
         name: "Unknown"
@@ -653,7 +653,7 @@ module PersonService
     )
 
 
-    PersonRecordStatus.new_record_state(ebrs_person.id, "HQ-CAN-PRINT", "NEW RECORD FROM MASS REGISTRATION");
+    PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM MASS REGISTRATION")
 
     allocation = IdentifierAllocationQueue.new
     allocation.person_id = ebrs_person.id
