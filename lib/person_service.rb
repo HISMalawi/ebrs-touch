@@ -136,7 +136,7 @@ module PersonService
           WHERE prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
             AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
           GROUP BY prs.person_id
-          ORDER BY pdb.distict_id_number, p.updated_at
+          ORDER BY pbd.district_id_number, p.updated_at
            "
     )
 
@@ -425,6 +425,7 @@ module PersonService
       village_id = Location.locate_id_by_tag("Other", "Place Of Birth")
     end
 
+
     details = PersonBirthDetail.create(
         person_id: core_person.id,
         birth_registration_type_id: reg_type,
@@ -443,7 +444,7 @@ module PersonService
         form_signed: (mass_reg_person[:form_signed] == "Yes" ? 1 : 0),
         flagged: 1,
         creator: user_id,
-        source_id: -1
+        source_id: (-1 * mass_reg_person['id'].to_i)
     )
 
     #create_mother
@@ -655,6 +656,7 @@ module PersonService
 
     PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM MASS REGISTRATION")
 
+=begin
     allocation = IdentifierAllocationQueue.new
     allocation.person_id = ebrs_person.id
     allocation.assigned = 0
@@ -662,7 +664,7 @@ module PersonService
     allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id
     allocation.created_at = Time.now
     allocation.save
-
+=end
     return ebrs_person.id
   end
 

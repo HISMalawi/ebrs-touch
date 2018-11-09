@@ -460,8 +460,8 @@ class PersonController < ApplicationController
         @current_district = Location.find(SETTINGS['location_id']).name rescue nil
     end
 
+    @role = User.current.user_role.role.role
     $prev_child_id = params[:id]
-
     
     if params[:id].blank?
       

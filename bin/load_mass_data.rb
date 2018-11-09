@@ -17,6 +17,23 @@ ActiveRecord::Base.connection.execute <<EOF
 ALTER TABLE person_birth_details MODIFY number_of_prenatal_visits INT NULL
 EOF
 
+
+last_2017_ben = ActiveRecord::Base.connection.execute <<EOF
+    SELECT MAX(district_id_number) ben FROM person_birth_details;
+EOF
+
+
+last_2017_ben2 = ActiveRecord::Base.connection.execute <<EOF
+    SELECT MAX(value) ben FROM person_identifiers WHERE value LIKE '%/%/%2017';
+EOF
+
+last_2017_ben =  [(last_2017_ben.first[0].split("/")[1].to_i rescue 0), (last_2017_ben2.first[0].split("/")[1].to_i rescue 0)].max
+
+$counter = last_2017_ben
+$district_code = Location.find(SETTINGS['location_id']).code
+puts $counter
+puts "Last BEN: #{$counter}"
+
 if MassPerson.where(" upload_status  = 'NOT UPLOADED' ").count > 0
   puts "Upload Number: #{upload_number}"
   puts "#{MassPerson.where(" upload_status  = 'NOT UPLOADED' ").count} Records to be Loaded"
@@ -28,6 +45,20 @@ else
   puts "No Records Found to Load"
 end
 
+def assign_next_ben(person_id)
+
+  $counter = $counter.to_i + 1
+  mid_number = $counter.to_s.rjust(8,'0')
+  ben = "#{$district_code}/#{mid_number}/2017"
+  ActiveRecord::Base.connection.execute <<EOF
+    UPDATE person_birth_details SET district_id_number = '#{ben}' WHERE person_id = #{person_id}
+EOF
+
+  PersonIdentifier.new_identifier(person_id, 'Birth Entry Number', ben)
+
+  ben
+end
+
 if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
   incomplete = [MassPerson.new.attributes.keys.join(",")]
@@ -36,6 +67,7 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
   MassPerson.where(upload_status: "NOT UPLOADED").each do |record|
 
     status = "HQ-CAN-PRINT"
+    outcome = "Success"
 
     #Filter for Complete Cases
     if ([record["last_name"], record["first_name"], record["gender"], record["date_of_birth"],
@@ -47,11 +79,14 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
          record["father_nationality"]] & ["", nil]).length > 0
 
       status = "DC-INCOMPLETE"
+      outcome = "Incomplete Record"
       incomplete << record.attributes.values.join(",")
     end
 
     formated = MassPerson.format_person(record)
-    if SimpleElasticSearch.query_duplicate_coded(formated, 100).length > 0
+    exact_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 100)
+
+    if exact_duplicates.length > 0
 
       exact_dup << record.attributes.values.join(",")
       record.upload_datetime = Time.now
@@ -59,36 +94,44 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
       record.upload_status = "UPLOADED"
       record.save!
 
+      RecordChecks.create(
+          person_id: (-1 * record.id),
+          outcome: "Exact Duplicate"
+      )
+
       next
     end
 
     potential_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 80)
     if potential_duplicates.length > 0
       status = "DC-POTENTIAL DUPLICATE"
+      outcome = "Potential Duplicate"
       potential_dup << record.attributes.values.join(",")
     end
 
     ActiveRecord::Base.transaction do
       person_id = record.map_to_ebrs_tables(upload_number, status)
 
-      potential_duplicates.each do |dup|
+      if potential_duplicates.present?
         potential_duplicate = PotentialDuplicate.create(person_id: person_id, created_at: (Time.now))
-        if potential_duplicates.present?
-          potential_duplicates.each do |result|
-            puts result["_id"]
-            potential_duplicate.create_duplicate(result["_id"]) #rescue nil
-          end
+        potential_duplicates.each do |result|
+          potential_duplicate.create_duplicate(result["_id"]) #rescue nil
         end
       end
+
+      if status == "HQ-CAN-PRINT"
+        assign_next_ben(person_id)
+      end
+
+      RecordChecks.create(
+          person_id: person_id,
+          outcome: outcome
+      )
 
       formated["id"] = person_id
       SimpleElasticSearch.add(formated)
     end
   end
-
-  File.open("IncompleteRecords.csv", "w"){|f| f.write(incomplete.join("\n"))}
-  File.open("ExactDuplicates.csv", "w"){|f| f.write(exact_dup.join("\n"))}
-  File.open("PotentialDuplicates.csv", "w"){|f| f.write(potential_dup.join("\n"))}
 
   puts "Done"
 else

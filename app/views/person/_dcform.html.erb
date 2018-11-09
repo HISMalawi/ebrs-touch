@@ -115,6 +115,20 @@
 
       <input id="person_original_surname" type="hidden"/>
 
+      <% if @role == "Data Supervisor" %>
+          <div class="field">
+            <label for="verification_number">Director Verification Number</label><br>
+            <input id="verification_number"
+                   name="person[verification_number]"
+                   type="text"
+                   fieldtype="number"
+                   tt_onload = "__$('N/A').style.display = 'none'; __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
+                   value="<%= @person[:verification_number] rescue nil %>"
+                   class="input_cell"
+            />
+          </div>
+      <% end %>
+
       <div class="field">
         <label for="person_last_name">Surname</label>
         <br>
@@ -175,20 +189,22 @@
         </select>
       </div>
 
-      <div class="field">
-        <label for="id_number">ID Number</label><br>
-        <input id="id_number"
-               condition="false"
-               name="person[id_number]"
-               type="text"
-							 regex = "^[A-Z0-9]{6}$"
-               tt_onLoad = "capitalizeAllCharacters('person_id'); makeCompulsory('id_number')"
-							 tt_BeforeUnLoad = ""
-               value="<%= @person[:id_number] rescue nil %>"
-               class="input_cell"				
-               length = 8
-         />
-      </div>
+      <% if @role != "Data Supervisor" %>
+          <div class="field">
+            <label for="id_number">ID Number</label><br>
+            <input id="id_number"
+                   condition="false"
+                   name="person[id_number]"
+                   type="text"
+                   regex = "^[A-Z0-9]{6}$"
+                   tt_onLoad = "capitalizeAllCharacters('person_id'); makeCompulsory('id_number')"
+                   tt_BeforeUnLoad = ""
+                   value="<%= @person[:id_number] rescue nil %>"
+                   class="input_cell"
+                   length = 8
+            />
+          </div>
+      <% end %>
 
 
     </fieldset>
@@ -2303,6 +2319,10 @@ function age(date){
 }
 
 function validateNID(){
+    <% if @role == "Data Supervisor" %>
+        return;
+    <% end %>
+
     if (__$("person_birthdate").value && age(__$("person_birthdate").value) >= 16){
         __$("id_number").setAttribute("condition", "true");
         __$("id_number").setAttribute("optional", null);
@@ -2332,5 +2352,21 @@ function makeCompulsory(id){
 		}
 	}
 }
+
+    function makeCompulsory2(id){
+        btnNext.onmousedown = function(){
+            if (__$(id).value.trim().length > 0){
+
+               var section =  parseInt(__$("textFor" + id).getAttribute("section"));
+               var pos = parseInt(__$("textFor" + id).getAttribute("pos")) + 1;
+
+                gotoQuestion(pos, section);
+                //loadPage(section + 1);
+
+            }else{
+                showMsg("Please enter a verification number");
+            }
+        }
+    }
 
 </script>

@@ -59,7 +59,7 @@ END CODES,,,,,,,,,,
 ,,,,,,,,,,
 Root Folder Privileges,,,,,,,,,,
 Folder/Role,TestRole,Nurse/Midwife,Data Clerk,Logistics Officer,ADR,Data Checking Clerk,Data Supervisor,Data Manager,Quality Supervisor,Administrator
-Register Child,Y,Y,Y,,,,,,,
+Register Child,Y,Y,Y,,,,Y,,,
 Add Adoptive Parents,Y,,Y,,,,,,,
 View Records,Y,Y,Y,,Y,Y,,,,
 View Synced Records,Y,Y,Y,Y,Y,Y,,,,
