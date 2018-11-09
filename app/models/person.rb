@@ -206,4 +206,12 @@ class Person < ActiveRecord::Base
         "#{name.first_name} #{name.middle_name} #{name.last_name}".gsub(/\s+/, ' ')
       end
     end
+
+    def verification_number
+      PersonIdentifier.where(
+          person_id: self.id,
+          voided: 0,
+          person_identifier_type_id: PersonIdentifierType.where(name: "Verification Number").last.id
+      ).last.value.strip rescue nil
+    end
 end

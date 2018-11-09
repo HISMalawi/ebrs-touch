@@ -29,6 +29,15 @@ module Lib
         )
     end
 
+   if params[:person][:verification_number].present?
+     type = PersonIdentifierType.find_by_name("Verification Number")
+     PersonIdentifier.create(
+         person_id: person.person_id,
+         person_identifier_type_id: type.id,
+         value: params[:person][:verification_number].upcase
+     )
+   end
+
     person
   end
 
@@ -470,6 +479,25 @@ module Lib
 
   def self.workflow_init(person,params)
     status = nil
+
+    if params[:person][:verification_number].present?
+      status = PersonRecordStatus.new_record_state(person.id, 'HQ-COMPLETE');
+      allocation = IdentifierAllocationQueue.new
+      allocation.person_id = person.id
+      allocation.assigned = 0
+      allocation.creator = User.current.id
+      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id
+      allocation.created_at = Time.now
+      allocation.save
+
+      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
+      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
+        AllocationQueue.perform_in(1)
+      end
+
+      return
+    end
+
     is_record_a_duplicate = params[:person][:duplicate] rescue nil
     if is_record_a_duplicate.present?
         if params[:person][:is_exact_duplicate].present? && eval(params[:person][:is_exact_duplicate].to_s)

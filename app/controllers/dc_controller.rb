@@ -3,6 +3,10 @@ class DcController < ApplicationController
 def new_registration
     @icoFolder = folder
 
+    if User.current.user_role.role.role == "Data Supervisor"
+      redirect_to "/person/new?utf8=✓&id=&relationship=Normal" and return
+    end
+
     @section = "Register Person"
 
     #reset_page_sessions()

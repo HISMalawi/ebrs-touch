@@ -58,7 +58,7 @@
         background: ghostwhite;
     }
 
-    #textForid_number, #textForperson_mother_id_number, #textForperson_father_id_number, #textForperson_informant_id_number{
+    #textForverification_number, #textForid_number, #textForperson_mother_id_number, #textForperson_father_id_number, #textForperson_informant_id_number{
         text-transform: uppercase;
     }
 </style>
@@ -121,8 +121,8 @@
             <input id="verification_number"
                    name="person[verification_number]"
                    type="text"
-                   fieldtype="number"
-                   tt_onload = "__$('N/A').style.display = 'none'; __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
+                   fieldtype="text"
+                   tt_onload = "__$('N/A').style.display = 'none'; __$('/').style.className = '' ; __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
                    value="<%= @person[:verification_number] rescue nil %>"
                    class="input_cell"
             />

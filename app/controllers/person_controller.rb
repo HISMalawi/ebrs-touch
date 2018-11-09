@@ -160,8 +160,14 @@ class PersonController < ApplicationController
         father_birth_date = nil
     end
 
+    verification_number = @person.verification_number
+    flag = ""
+    if !verification_number.blank?
+      flag = " <span style='color: green; font-weight: bold;'>  &nbsp;&nbsp;( Verification Number: #{verification_number}) </span>"
+    end
+
     @record = {
-        "Details of Child" => [
+        "Details of Child #{flag}".html_safe => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
                 "Birth Registration Number" => "#{@birth_details.brn }",
@@ -499,7 +505,6 @@ class PersonController < ApplicationController
   def create
 
     type_of_birth = params[:person][:type_of_birth]
-    
      if type_of_birth == 'Twin'
 
         type_of_birth = 'First Twin'
@@ -521,6 +526,9 @@ class PersonController < ApplicationController
 
     end
   
+    if User.current.user_role.role.role == "Data Supervisor"
+      redirect_to "/view_approved_cases" and return
+    end
 
     if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
 
