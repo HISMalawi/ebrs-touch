@@ -164,11 +164,19 @@
       <div class="field">
         <label for="person_birthdate">Date of Birth</label>
         <br>
-        
+
+        <%
+            max = Date.today.strftime('%Y-%m-%d')
+            default = Date.today.strftime('%d/%b/%Y')
+           if @role == "Data Supervisor"
+            max = (Date.today - 16.years).strftime('%Y-%m-%d')
+            default = ""
+           end
+        %>
         <%= (f.text_field :birthdate,
                           :class => "input_cell",
-                          :value => Date.today.strftime('%d/%b/%Y'),
-                          :absolute_max => Date.today.strftime('%Y-%m-%d'),
+                          :value => default,
+                          :absolute_max => "#{max}",
                           :fieldtype => "date",
                           :tt_onLoad => "validateNID()",
                           :tt_BeforeUnLoad => "validateNID()",
