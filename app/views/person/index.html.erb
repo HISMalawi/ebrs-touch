@@ -13,7 +13,11 @@
             <img src="<%= @icoFolder %>" height="60"/>
           </td>
           <td style="height: 30px;">
+            <% if @role == "Data Supervisor" %>
+            Register for 16 and above – Abroad
+            <% else %>
             Register Child
+            <% end %>
           </td>
         </tr>
         <tr>

@@ -10,6 +10,7 @@ class PersonController < ApplicationController
     @targeturl = "/logout"
     @targettext = "Logout"
     @stats = PersonRecordStatus.stats
+    @role = User.current.user_role.role.role
 
     render :layout => 'facility'
   end
