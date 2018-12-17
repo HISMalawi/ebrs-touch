@@ -58,7 +58,7 @@
         background: ghostwhite;
     }
 
-    #textForverification_number, #textForid_number, #textForperson_mother_id_number, #textForperson_father_id_number, #textForperson_informant_id_number{
+    #textForid_number, #textForperson_mother_id_number, #textForperson_father_id_number, #textForperson_informant_id_number{
         text-transform: uppercase;
     }
 </style>
@@ -87,6 +87,22 @@
         __$("textForperson_bd_holder").setAttribute("ajaxurl", "/search_by_district?include_other_country=true");
     }
   }
+
+function checkNumberFormat(){
+    var val = __$("verification_number").value;
+    if (val.trim() == ""){
+        showMsg("Please enter a valid value in the empty field");
+        return;
+    }
+
+    if(val.match(/^[0-9]{2}\/[0-9]{2}\-[0-9]{2}\-[0-9]{4}$/)){
+
+    }else{
+        showMsg("Incorrect number format!");
+    }
+}
+
+
 </script>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
@@ -117,13 +133,16 @@
 
       <% if @role == "Data Supervisor" %>
           <div class="field">
-            <label for="verification_number">Director Verification Number</label><br>
+            <label for="verification_number">Director Approval Number</label><br>
             <input id="verification_number"
                    name="person[verification_number]"
+                   regex = "^[0-9]{2}\/[0-9]{2}\-[0-9]{2}\-[0-9]{4}$"
+                   regex_message="Wrong Number format"
                    type="text"
+                   tt_beforeUnload="checkNumberFormat()"
                    fieldtype="text"
-                   tt_onload = "__$('N/A').style.display = 'none'; __$('/').style.className = '' ; __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
-                   value="<%= @person[:verification_number] rescue nil %>"
+                   tt_onload = "__$('N/A').style.display = 'none'; __$('/').style.className = '' ;
+                    __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
                    class="input_cell"
             />
           </div>
