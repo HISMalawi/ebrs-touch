@@ -29,6 +29,8 @@ Rails.application.routes.draw do
 
   get '/block'  => "users#block"
 
+  get '/get_person_details'  => "person#person_id_details"
+
   get '/unblock' => "users#unblock"
 
   get '/query_users' =>"users#query_users"
