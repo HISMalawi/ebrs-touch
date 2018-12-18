@@ -43,23 +43,44 @@ module Lib
 
   def self.new_mother(person, params,mother_type)
 
+    if mother_type =="Adoptive-Mother"
+      mother = params[:person][:foster_mother]
+    else
+      mother = params[:person][:mother]
+    end
+
     if !params[:mother_id].blank?
       PersonRelationship.create(
           person_a: person.id, person_b: params[:mother_id],
           person_relationship_type_id: PersonRelationType.where(name: mother_type).last.id
       )
+
+      address = PersonAddress.where(person_id: params[:mother_id]).first
+      return nil if address.blank?
+
+      cur_district_id   = Location.locate_id_by_tag(mother[:current_district], 'District')
+      cur_ta_id         = Location.locate_id(mother[:current_ta], 'Traditional Authority', cur_district_id)
+      cur_village_id    = Location.locate_id(mother[:current_village], 'Village', cur_ta_id)
+
+      address.current_district   = cur_district_id
+      address.current_ta         = cur_ta_id
+      address.current_village    = cur_village_id
+
+      address.current_district_other   = mother[:foreigner_current_district]
+      address.current_ta_other         = mother[:foreigner_current_ta]
+      address.current_village_other    = mother[:foreigner_current_village]
+      address.residential_country    = Location.locate_id_by_tag(mother[:residential_country], 'Country')
+      address.address_line_1         = (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline1] : nil)
+      address.address_line_2         = (params[:informant_same_as_mother].present? && params[:informant_same_as_mother] == "Yes" ? params[:person][:informant][:addressline2] : nil)
+      address.save
+
       return nil
     end
 
     if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       mother_person = Person.find(params[:person][:prev_child_id]).mother
     else
-       
-        if mother_type =="Adoptive-Mother"
-          mother = params[:person][:foster_mother]
-        else
-          mother = params[:person][:mother]
-        end
+
         if mother[:first_name].blank?
           return nil
         end

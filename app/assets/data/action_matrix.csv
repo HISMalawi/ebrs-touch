@@ -94,4 +94,6 @@ Special Cases,,,,,Y,,,,,
 Marked as pending,,,,Y,,,,,,
 Rejected by ADR,,,,Y,,,,,,
 Birth Report,,Y,Y,Y,Y,,,,,
+Above 16 (Abroad),,,,,Y,,Y,,,
+
 END ROOT FOLDER PRIVILEGES,,,,,,,,,,

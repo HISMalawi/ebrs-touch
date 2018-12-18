@@ -4922,6 +4922,7 @@ function clickCanGo() {
 
                         var date = new Date(validationControl.value.trim());
                         var absolute_date = new Date(parent.getAttribute("absolute_max"));
+                        var max_date = new Date(parent.getAttribute("max"));
 
                         if (validationControl.id == "textForchild_acknowledgement_of_receipt_date") {
 

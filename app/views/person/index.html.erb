@@ -100,6 +100,29 @@
 
 <% end %>
 
+
+<% if @folders.include?("Above 16 (Abroad)") && SETTINGS['application_mode'] == "DC" %>
+
+    <div class="button parent_menu" onclick="window.location = '/add_adoptive_parents' " tag=0>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Above 16 (Abroad)
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            View cases above 16 years living aboard
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
 <style>
     .count{
         color: black;
