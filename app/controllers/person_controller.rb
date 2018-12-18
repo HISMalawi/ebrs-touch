@@ -226,9 +226,9 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@mother_person.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{loc(@mother_address.current_district, 'District') rescue nil}",
-                "T/A" => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
-                "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+                "Physical Residential Address, District" => "#{(loc(@mother_address.current_district, 'District') rescue @mother_address.current_district_other) rescue nil}",
+                "T/A" => "#{(loc(@mother_address.current_ta, 'Traditional Authority') rescue @mother_address.current_ta_other) rescue nil}",
+                "Village/Town" => "#{(loc(@mother_address.current_village, 'Village') rescue @mother_address.current_village_other) rescue nil}"
             },
             {
                 "Home Address, District" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
@@ -261,9 +261,9 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@father_person.id_number rescue nil}"
             },
             {
-                "Physical Residential Address, District" => "#{loc(@father_address.current_district, 'District') rescue nil}",
-                "T/A" => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
-                "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+                "Physical Residential Address, District" => "#{(loc(@father_address.current_district, 'District') rescue @father_address.current_district_other) rescue nil}",
+                "T/A" => "#{(loc(@father_address.current_ta, 'Traditional Authority') rescue @father_address.current_ta_other) rescue nil}",
+                "Village/Town" => "#{(loc(@father_address.current_village, 'Village') rescue @father_address.current_village_other) rescue nil}"
             },
             {
                 "Home Address, District" => "#{loc(@father_address.home_district, 'District') rescue nil}",
@@ -282,9 +282,9 @@ class PersonController < ApplicationController
                 "ID Number" => "#{@informant_person.id_number rescue ""}"
             },
             {
-                "Physical Address, District" => "#{loc(@informant_address.current_district, 'District') rescue nil}",
-                "T/A" => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
-                "Village/Town" => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
+                "Physical Address, District" => "#{(loc(@informant_address.current_district, 'District') rescue @informant_address.current_district_other) rescue nil}",
+                "T/A" => "#{(loc(@informant_address.current_ta, 'Traditional Authority') rescue @informant_address.current_ta_other) rescue nil}",
+                "Village/Town" => "#{(loc(@informant_address.current_village, 'Village') rescue @informant_address.current_village_other) rescue nil}"
             },
             {
                 "Postal Address" => "#{@informant_address.address_line_1 rescue nil}",
@@ -2413,6 +2413,20 @@ class PersonController < ApplicationController
     end
 
     render :layout => false, :template => 'person/birth_certificate'
+  end
+
+  def person_id_details
+    name = PersonName.where(person_id: params[:person_id]).first
+    address = PersonAddress.where(person_id: params[:person_id]).first
+
+    data = {
+      first_name: name.first_name,
+      last_name:  name.last_name,
+      middle_name: name.middle_name,
+      citizenship: (Location.find(address.citizenship).country rescue nil)
+    }
+
+    render :text => data.to_json
   end
 
 end
