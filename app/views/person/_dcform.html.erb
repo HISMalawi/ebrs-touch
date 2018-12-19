@@ -88,18 +88,54 @@
     }
   }
 
+  var nextClickEvent = "";
 function checkNumberFormat(){
-    var val = __$("verification_number").value;
-    if (val.trim() == "") {
-        showMsg("Please enter a valid value in the empty field");
-    }else if(!val.match(/^\d+\/[0-9]{2}\-[0-9]{2}\-[0-9]{4}$/)){
-        showMsg("Incorrect number format!");
+
+    if (validationControl && validationControl.id == "textForverification_number"){
+        if (nextClickEvent == ""){
+            nextClickEvent = btnNext.onmousedown;
+            btnNext.onmousedown = null;
+        }
+
+        var msg = "";
+        var val = __$("verification_number").value;
+        if (val.trim() == "") {
+            msg = "Please enter a valid value in the empty field";
+        }else if(!val.match(/^\d+\/[0-9]{2}\-[0-9]{2}\-[0-9]{4}$/)){
+            msg = "Incorrect number format!";
+        }else if(val.match(/^\d+\/[0-9]{2}\-[0-9]{2}\-[0-9]{4}$/)){
+            jQuery.ajax({
+                url: ("/get_person_details?verification_number=" + __$("verification_number").value),
+                success: function(info) {
+
+                    var data = JSON.parse(info);
+
+                    if (data['verification_number_exists']){
+                        msg = "Director approval number " + val.trim() + " already exists!!"
+                    }
+                    hideSpinner();
+                },
+                async:false
+            });
+            hideSpinner()
+        }
+
+        if (msg == ""){
+            btnNext.onmousedown = nextClickEvent;
+        }else{
+            btnNext.onmousedown = function(){
+                showMsg(msg);
+            }
+        }
+
+        setTimeout(function(){checkNumberFormat()}, 500);
     }
 }
 
 </script>
 
 <%= form_for :person, :url => {:controller => "person", :action => "create"} do |f| %>
+
 
     <fieldset>
 
@@ -113,33 +149,39 @@ function checkNumberFormat(){
       <input id="person_mother_birthdate_estimated" name="person[mother][birthdate_estimated]" type="hidden"/>
 
       <input id="person_duplicate" name="person[duplicate]" type="hidden"/>
-      
+
       <input id="person_is_exact_duplicate" type="hidden" name="person[is_exact_duplicate]" >
 
       <input id="person_relationship" name="person[relationship]" value="normal" type="hidden"/>
 
       <% if flash[:error] == "Similar" %>
 
-      	<input id="person_potentialduplicate" name="person[potentialduplicate]" value="potentialduplicate" type="hidden"/>
+          <input id="person_potentialduplicate" name="person[potentialduplicate]" value="potentialduplicate" type="hidden"/>
 
       <% end %>
 
       <input id="person_original_surname" type="hidden"/>
+
 
       <% if @role == "Data Supervisor" %>
           <div class="field">
             <label for="verification_number">Director Approval Number</label><br>
             <input id="verification_number"
                    name="person[verification_number]"
-                   type="text"
-                   tt_beforeUnload="checkNumberFormat()"
+                   type="text" placeholder="e.g 2/01-12-2018"
+                   tt_onLoad="checkNumberFormat()"
                    fieldtype="text"
-                   tt_onload = "__$('N/A').style.display = 'none'; __$('/').style.className = '' ;
-                    __$('sym').style.display = 'none'; __$('abc').style.display = 'none'; "
                    class="input_cell"
             />
           </div>
       <% end %>
+
+    <script>
+        <% if @role == "Data Supervisor" %>
+            setTimeout(function(){
+                checkNumberFormat()}, 1000);
+        <% end %>
+    </script>
 
       <div class="field">
         <label for="person_last_name">Surname</label>
@@ -828,7 +870,7 @@ function checkNumberFormat(){
                class="input_cell"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-               condition="__$('father_id').value.trim().length == 0 &&
+               condition="__$('person_father_id_number').value.trim().length == 0 &&
                (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes') " />
       </div>
 
@@ -843,7 +885,7 @@ function checkNumberFormat(){
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
+               condition="__$('person_father_id_number').value.trim().length == 0 &&
                (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')" />
       </div>
 
@@ -857,7 +899,7 @@ function checkNumberFormat(){
                class="input_cell"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
-               condition="__$('father_id').value.trim().length == 0 &&
+               condition="__$('person_father_id_number').value.trim().length == 0 &&
                 (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes') "
                optional="true"/>
       </div>
@@ -876,7 +918,7 @@ function checkNumberFormat(){
                fieldtype="date"
                optional="true"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
-               condition="__$('father_id').value.trim().length == 0 &&
+               condition="__$('person_father_id_number').value.trim().length == 0 &&
                 (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
@@ -891,27 +933,25 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:citizenship] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('person_father_id_number').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                ajaxURL="/search_by_nationality" />
       </div>
+    </fieldset>
 
+    <fieldset condition="__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes' ">
+      <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
 
       <div class="field">
         <label for="person_father_residential_country">Country of Residence</label><br>
         <input id="person_father_residential_country"
                name="person[father][residential_country]"
                type="text"
-               condition="__$('father_id').value.trim().length == 0"
                value="<%= @person[:father][:residential_country] rescue nil %>"
-               class="input_cell" ajaxURL="/search_by_country"
-         />
+               class="input_cell"
+               ajaxURL="/search_by_country"
+        />
       </div>
-
-    </fieldset>
-
-    <fieldset condition="__$('father_id').value.trim().length == 0 && (__$('person_father_residential_country').value.trim() == 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))">
-      <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical Residential Address</font></legend>
 
       <div class="field">
         <label for="same_address_with_mother">Same as mother's?</label><br>
@@ -919,7 +959,7 @@ function checkNumberFormat(){
         <select id="same_address_with_mother"
                 name="same_address_with_mother"
                 class="input_cell"
-                condition="__$('father_id').value.trim().length == 0"
+                condition="__$('person_father_id_number').value.trim().length == 0"
                 tt_onUnload="nationality();">
           <option></option>
           <option value="Yes" >Yes</option>
@@ -936,8 +976,7 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:current_district] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-                    (__$('person_father_residential_country').value.trim() == 'Malawi' &&
+               condition="(__$('person_father_residential_country').value.trim() == 'Malawi' &&
                         (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))"
                ajaxURL="/search_by_district"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_ta').getAttribute('section'))][parseInt(__$('textForperson_father_current_ta').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_ta?district=' + __$('textForperson_father_current_district').value);" optional="true"/>
@@ -950,8 +989,7 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:current_ta] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-                    (__$('person_father_residential_country').value.trim() == 'Malawi' &&
+               condition="(__$('person_father_residential_country').value.trim() == 'Malawi' &&
                         (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))"
                ajaxURL="/search_by_ta"
                tt_onUnload="navigablefieldsets[parseInt(__$('textForperson_father_current_village').getAttribute('section'))][parseInt(__$('textForperson_father_current_village').getAttribute('pos'))].setAttribute('ajaxURL', '/search_by_village?district=' + __$('textForperson_father_current_district').value + '&ta=' + __$('textForperson_father_current_ta').value);"
@@ -965,17 +1003,15 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:current_village] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-                (__$('person_father_residential_country').value.trim() == 'Malawi' &&
+               condition="(__$('person_father_residential_country').value.trim() == 'Malawi' &&
                     (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))"
                ajaxURL="/search_by_village" optional="true" />
       </div>
 
     </fieldset>
 
-
-    <fieldset condition="__$('father_id').value.trim().length == 0 && (__$('person_father_residential_country').value.trim() != 'Malawi' &&
-    (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))">
+    <fieldset condition="__$('person_father_residential_country').value.trim() != 'Malawi' &&
+    ((__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))">
 
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Physical residential address</font></legend>
 
@@ -984,8 +1020,7 @@ function checkNumberFormat(){
         <input id="person_father_foreigner_current_district" name="person[father][foreigner_current_district]" type="text"
                value="<%= @person[:father][:foreigner_current_district] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-                (__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' ||
+               condition="(__$('person_father_residential_country').value.trim() != 'Malawi' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' ||
                 __$('details_of_father_known').value.trim() == 'Yes'))"
                optional="true"/>
       </div>
@@ -998,8 +1033,7 @@ function checkNumberFormat(){
 	       type="text"
 	       value="<%= @person[:father][:foreigner_current_village] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-               (__$('person_father_residential_country').value.trim() != 'Malawi' &&
+               condition="(__$('person_father_residential_country').value.trim() != 'Malawi' &&
                (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))"
                optional="true"/>
       </div>
@@ -1011,8 +1045,7 @@ function checkNumberFormat(){
 	       type="text"
                value="<%= @person[:father][:foreigner_current_ta] rescue nil %>"
                class="input_cell"
-               condition="__$('father_id').value.trim().length == 0 &&
-                (__$('person_father_residential_country').value.trim() != 'Malawi' &&
+               condition="(__$('person_father_residential_country').value.trim() != 'Malawi' &&
                 (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes'))"
                optional="true"/>
       </div>
@@ -1020,7 +1053,7 @@ function checkNumberFormat(){
 
     </fieldset>
 
-    <fieldset condition=" __$('father_id').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
+    <fieldset condition=" __$('person_father_id_number').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Home Address</font></legend>
 
       <div class="field">
@@ -1028,7 +1061,7 @@ function checkNumberFormat(){
         <br>
         <select id="father_home_address_same_as_physical"
         name="home_address_same_as_physical"
-        condition="__$('father_id').value.trim().length == 0 &&
+        condition="__$('person_father_id_number').value.trim().length == 0 &&
             (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
         class="input_cell"
         tt_onUnload="if(__$('textForfather_home_address_same_as_physical').value.trim() == 'Yes'){loadFathersAddress();} else {unloadFathersAddress();}" />
@@ -1096,16 +1129,19 @@ function checkNumberFormat(){
 
       </div>
 
-      <div class="field">
-        <label for="informant_same_as_father">Father is informant?</label><br>
-        <select id="informant_same_as_father" name="informant_same_as_father" class="input_cell" tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
-           condition="(__$('person_father_last_name').value.trim().length > 0 || __$('father_id').value.trim() > 0)
-            && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes');">
-          <option></option>
-          <option value="Yes" >Yes</option>
-          <option value="No" >No</option>
+        <div class="field">
+            <label for="informant_same_as_father">Father is informant?</label><br>
+            <select id="informant_same_as_father" name="informant_same_as_father"
+                    class="input_cell"
+                    tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
+                    condition="__$('informant_same_as_mother').value.trim() == 'No' && (__$('person_father_id_number').value.trim().length > 0 ||
+                                (__$('person_father_last_name').value.trim().length > 0 && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes')));">
+              <option></option>
+              <option value="Yes" >Yes</option>
+              <option value="No" >No</option>
 
-        </select>
+            </select>
+        </div>
 
         <div class="field">
           <label for="person_informant_id_number">ID Number</label><br>

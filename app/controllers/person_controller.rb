@@ -164,7 +164,7 @@ class PersonController < ApplicationController
     verification_number = @person.verification_number
     flag = ""
     if !verification_number.blank?
-      flag = " <span style='color: green; font-weight: bold;'>  &nbsp;&nbsp;( Verification Number: #{verification_number}) </span>"
+      flag = " <span style='color: green; font-weight: bold;'>  &nbsp;&nbsp;( Director Approval Number: #{verification_number}) </span>"
     end
 
     @record = {
@@ -2416,6 +2416,21 @@ class PersonController < ApplicationController
   end
 
   def person_id_details
+
+    if !params[:verification_number].blank?
+
+      pid_type_id = PersonIdentifierType.where(name: "Verification Number").first.id
+      pid = PersonIdentifier.where(value: params[:verification_number],
+                                   voided: 0,
+                                   person_identifier_type_id: pid_type_id).first
+
+      if pid.blank?
+        render :text => {}.to_json and return
+      else
+        render :text => {"verification_number_exists" => true}.to_json and return
+      end
+    end
+
     name = PersonName.where(person_id: params[:person_id]).first
     address = PersonAddress.where(person_id: params[:person_id]).first
 
@@ -2426,7 +2441,7 @@ class PersonController < ApplicationController
       citizenship: (Location.find(address.citizenship).country rescue nil)
     }
 
-    render :text => data.to_json
+    render :text => data.to_json and return
   end
 
 end

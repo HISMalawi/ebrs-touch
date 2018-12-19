@@ -153,23 +153,44 @@ module Lib
   end
 
   def self.new_father(person, params, father_type)
+    if father_type =="Adoptive-Father"
+      father = params[:person][:foster_father]
+    else
+      father = params[:person][:father]
+    end
 
     if !params[:father_id].blank?
       PersonRelationship.create(
           person_a: person.id, person_b: params[:father_id],
           person_relationship_type_id: PersonRelationType.where(name: father_type).last.id
       )
+
+      address = PersonAddress.where(person_id: params[:father_id]).first
+      return nil if address.blank?
+
+      cur_district_id   = Location.locate_id_by_tag(father[:current_district], 'District')
+      cur_ta_id         = Location.locate_id(father[:current_ta], 'Traditional Authority', cur_district_id)
+      cur_village_id    = Location.locate_id(father[:current_village], 'Village', cur_ta_id)
+
+      address.current_district   = cur_district_id
+      address.current_ta         = cur_ta_id
+      address.current_village    = cur_village_id
+
+      address.current_district_other   = father[:foreigner_current_district]
+      address.current_ta_other         = father[:foreigner_current_ta]
+      address.current_village_other    = father[:foreigner_current_village]
+      address.residential_country    = Location.locate_id_by_tag(father[:residential_country], 'Country')
+      address.address_line_1         = (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil)
+      address.address_line_2         = (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
+      address.save
+
       return nil
     end
 
     if self.is_twin_or_triplet(params[:person][:type_of_birth]) && params[:person][:prev_child_id].present?
       father_person = Person.find(params[:person][:prev_child_id]).father
     else
-      if father_type =="Adoptive-Father"
-        father = params[:person][:foster_father]
-      else
-        father = params[:person][:father]
-      end
+
       father[:citizenship] = 'Malawian' if father[:citizenship].blank?
       father[:residential_country] = 'Malawi' if father[:residential_country].blank?
 
