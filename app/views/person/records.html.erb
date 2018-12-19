@@ -77,13 +77,16 @@
       <% if (@display_ben rescue false) %>
         <th style="text-align: left;">BEN</th>
       <% end %>
-      <th style="text-align: left;min-width:15%;">Name</th>
+      <% if (@display_ver_num rescue false) %>
+          <th style="text-align: left;width: 10%;">Approval Number</th>
+      <% end %>
+      <th style="text-align: left;min-width:12%;">Name</th>
       <th style="text-align: left;min-width:10%;">Birthdate</th>
-      <th style="text-align: left;min-width:16%;">Mother's Details</th>
-      <th style="text-align: left; min-width:16%;">Father's Details</th>
-      <th style="text-align: center; min-width:16%;">Reporting Date</th>
+      <th style="text-align: left;min-width:12%;">Mother's Details</th>
+      <th style="text-align: left; min-width:12%;">Father's Details</th>
+      <th style="text-align: center; min-width:13%;">Reporting Date</th>
       <th style="text-align: center;min-width: 10%;">Status</th>
-      <th  style="text-align: left;min-width:14%;">&nbsp;</th>
+      <th  style="text-align: left;min-width:10%;">&nbsp;</th>
     </tr>
   </thead>
 
@@ -97,6 +100,9 @@
       <tr>
         <% if (@display_ben rescue false) %>
             <td class='t-data' style="text-align: left;"><%= record['ben'] %></td>
+        <% end %>
+        <% if (@display_ver_num rescue false) %>
+            <td class='t-data' style="text-align: left;"><%= record['vnum'] %></td>
         <% end %>
         <td class='t-data' style="text-align: left;"><%= record['name'] %></td>
         <td class='t-data' style="text-align: left;"><%= record['mother_name'] %></td>
@@ -206,9 +212,13 @@ function initTable(){
                     "url": url,
                     "data": function(d){
                         d.type = __$('birth_type').value;
-                        d.statuses = "<%= @states.join(',')%>",
-                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>",
-                        d.data = data
+                        d.statuses = "<%= @states.join(',')%>";
+                        d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>";
+                        d.vnum = "<%= (@display_ver_num rescue false) ? true : false %>";
+                        d.data = data;
+                        <% if request.path.to_s.match("above_16")%>
+                            d.by_ds_at_dro = true;
+                        <% end %>
                     },
                     dataFilter: function(data){
                         var json = jQuery.parseJSON( data );

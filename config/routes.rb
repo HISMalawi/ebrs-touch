@@ -132,7 +132,8 @@ Rails.application.routes.draw do
   get "/add_duplicate_comment/:id" => "dc#add_duplicate_comment"
   get "/resolve_duplicate" =>"dc#resolve_duplicate"
   get "/duplicates" => "dc#duplicates"
-  
+  get "/above_16_abroad" => "dc#above_16_abroad"
+
   get "/view_complete_cases" => "person#view_complete_cases"
   get "/view_incomplete_cases" => "person#view_incomplete_cases"
 

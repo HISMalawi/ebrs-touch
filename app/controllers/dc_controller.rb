@@ -36,6 +36,19 @@ def printed_cases
   render :layout => "facility"
 end
 
+def above_16_abroad
+  @stats = PersonRecordStatus.stats
+  @icoFolder = folder
+  @section = "Above 16 (Abroad)"
+  @targeturl = "/"
+  @states = Status.all.pluck :name
+  @display_ben = true
+  @display_ver_num = true
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+  render :template => "/person/records", :layout => "data_table"
+end
+
 def manage_requests
   @stats = PersonRecordStatus.stats
   @icoFolder = folder

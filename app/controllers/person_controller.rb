@@ -528,7 +528,7 @@ class PersonController < ApplicationController
     end
   
     if User.current.user_role.role.role == "Data Supervisor"
-      redirect_to "/view_approved_cases" and return
+      redirect_to "/above_16_abroad" and return
     end
 
     if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
@@ -2122,11 +2122,19 @@ class PersonController < ApplicationController
                                                 LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
                                                 WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
 
+      by_ds_at_filter = ""
+      pid_type_ver_id = PersonIdentifierType.where(name: "Verification Number").first.id
+      if params[:by_ds_at_dro].to_s == "true"
+        by_ds_at_filter = " INNER JOIN person_identifiers pidr ON pidr.person_id = prs.person_id
+          AND pidr.person_identifier_type_id = #{pid_type_ver_id} AND pidr.voided = 0 "
+      end
+
       d = Person.order(" cp.created_at DESC ")
       .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
-              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
+              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
+              #{by_ds_at_filter} ")
       .where(" prs.status_id IN (#{state_ids.join(', ')})
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
               AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
@@ -2153,6 +2161,7 @@ class PersonController < ApplicationController
         father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
         row = []
         row = [p.ben] if params[:assign_ben] == 'true'
+        row << PersonIdentifier.by_type(p.person_id, "Verification Number") if params[:vnum]         == 'true'
         row = row + [
             "#{name} (#{p.gender})",
             p.birthdate.strftime('%d/%b/%Y'),

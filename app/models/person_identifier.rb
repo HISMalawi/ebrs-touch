@@ -14,4 +14,10 @@ class PersonIdentifier < ActiveRecord::Base
           voided: 0
       )
     end
+
+    def self.by_type(person_id, type)
+      type_id = PersonIdentifierType.where(name: type).first.id
+      PersonIdentifier.where(person_identifier_type_id: type_id,
+                             voided: 0, person_id: person_id).first.value rescue nil
+    end
 end
