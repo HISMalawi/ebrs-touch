@@ -457,7 +457,7 @@ function checkNumberFormat(){
                name="person[mother][id_number]"
                type="text"
                tt_onLoad = "checkSpecialCharacters('person_mother_id_number');capitalizeAllCharacters('person_mother_id');"
-               tt_onUnLoad ="fetchByNID('textForperson_mother_id_number', 'F', 'mother_id')"
+               tt_BeforeUnload ="fetchByNID('textForperson_mother_id_number', 'F', 'mother_id')"
                value="<%= @person[:mother][:id_number] rescue nil %>"
                class="input_cell"
                length = 8
@@ -470,7 +470,7 @@ function checkNumberFormat(){
         <input id="person_mother_last_name"
         			 name="person[mother][last_name]"
         			 type="text"
-                     condition="__$('person_mother_id_number').value.trim().length == 0"
+                     condition="__$('mother_id').value.trim().length == 0"
         			 value="<%= @person[:mother][:last_name] rescue nil %>"
         			 ajaxURL = "/get_last_names"
         			 class="input_cell"
@@ -488,7 +488,7 @@ function checkNumberFormat(){
         value="<%= @person[:mother][:first_name] rescue nil %>"
         ajaxURL = "/get_first_names"
         class="input_cell"
-        condition="__$('person_mother_id_number').value.trim().length == 0"
+        condition="__$('mother_id').value.trim().length == 0"
         word_min_length = 2
         tt_onLoad = "checkSpace('person_mother_first_name');validateNameLength('person_mother','person_mother_first_name',2)"
         tt_onUnload = "appendValue('person_mother_first_name')" />
@@ -501,7 +501,7 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:mother][:middle_name] rescue nil %>"
                class="input_cell"
-               condition="__$('person_mother_id_number').value.trim().length == 0"
+               condition="__$('mother_id').value.trim().length == 0"
                ajaxURL = "/get_first_names"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_mother_middle_name');validateNameLength('person_mother','person_mother_middle_name',3)"
@@ -510,7 +510,7 @@ function checkNumberFormat(){
 
     </fieldset>
 
-    <fieldset condition="__$('person_mother_id_number').value.trim().length == 0" >
+    <fieldset condition="__$('mother_id').value.trim().length == 0" >
       <legend><font size='5' style='border: 2px;'>Details of Mother continued</font></legend>
 
       <div class="field">
@@ -521,7 +521,7 @@ function checkNumberFormat(){
                 value="<%= @person[:mother][:birthdate] rescue nil %>"
                 class="input_cell"
                 fieldtype="date"
-                condition="__$('person_mother_id_number').value.trim().length == 0"
+                condition="__$('mother_id').value.trim().length == 0"
                 tt_onUnload="checkWeddingDate( __$('person_mother_birthdate'),'Mother')"
                 tt_onLoad="validateDate(__$('person_birthdate'), __$('person_mother_birthdate'), 45, 14, 60, 8);dateInterval('person_mother_birthdate');"
                 optional="true"
@@ -531,7 +531,7 @@ function checkNumberFormat(){
       <div class="field">
         <label for="person_mother_citizenship">Nationality</label><br>
         <input id="person_mother_citizenship" name="person[mother][citizenship]"
-               condition="__$('person_mother_id_number').value.trim().length == 0"
+               condition="__$('mother_id').value.trim().length == 0"
                type="text" value="<%= @person[:mother][:citizenship] rescue nil %>"
                class="input_cell" ajaxURL="/search_by_nationality" />
       </div>
@@ -853,7 +853,7 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:id_number] rescue nil %>"
                length = 8
-               tt_onUnLoad ="fetchByNID('textForperson_father_id_number', 'M', 'father_id')"
+               tt_BeforeUnload ="fetchByNID('textForperson_father_id_number', 'M', 'father_id')"
                class="input_cell"
                tt_onLoad = "checkSpecialCharacters('person_father_id_number');capitalizeAllCharacters('person_father_id')"
                optional="true"/>
@@ -870,7 +870,7 @@ function checkNumberFormat(){
                class="input_cell"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_father_last_name');validateNameLength('person_father','person_father_last_name',1)"
-               condition="__$('person_father_id_number').value.trim().length == 0 &&
+               condition="__$('father_id').value.trim().length == 0 &&
                (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes') " />
       </div>
 
@@ -885,7 +885,7 @@ function checkNumberFormat(){
                ajaxURL = "/get_first_names"
                tt_onLoad = "checkSpace('person_father_first_name');validateNameLength('person_father','person_father_first_name',2)"
                class="input_cell"
-               condition="__$('person_father_id_number').value.trim().length == 0 &&
+               condition="__$('father_id').value.trim().length == 0 &&
                (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')" />
       </div>
 
@@ -899,7 +899,7 @@ function checkNumberFormat(){
                class="input_cell"
                word_min_length = 2
                tt_onLoad = "checkSpace('person_father_middle_name');validateNameLength('person_father','person_father_middle_name',3)"
-               condition="__$('person_father_id_number').value.trim().length == 0 &&
+               condition="__$('father_id').value.trim().length == 0 &&
                 (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes') "
                optional="true"/>
       </div>
@@ -918,7 +918,7 @@ function checkNumberFormat(){
                fieldtype="date"
                optional="true"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
-               condition="__$('person_father_id_number').value.trim().length == 0 &&
+               condition="__$('father_id').value.trim().length == 0 &&
                 (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
                tt_onLoad="validateDate(__$('person_birthdate'), __$('person_father_birthdate'), 100, 14, 115, 8);dateInterval('person_father_birthdate');" />
 
@@ -933,7 +933,7 @@ function checkNumberFormat(){
                type="text"
                value="<%= @person[:father][:citizenship] rescue nil %>"
                class="input_cell"
-               condition="__$('person_father_id_number').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
+               condition="__$('father_id').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
                tt_onUnload="checkWeddingDate( __$('person_father_birthdate'),'Father')"
                ajaxURL="/search_by_nationality" />
       </div>
@@ -959,7 +959,7 @@ function checkNumberFormat(){
         <select id="same_address_with_mother"
                 name="same_address_with_mother"
                 class="input_cell"
-                condition="__$('person_father_id_number').value.trim().length == 0"
+                condition="__$('father_id').value.trim().length == 0"
                 tt_onUnload="nationality();">
           <option></option>
           <option value="Yes" >Yes</option>
@@ -1053,7 +1053,7 @@ function checkNumberFormat(){
 
     </fieldset>
 
-    <fieldset condition=" __$('person_father_id_number').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
+    <fieldset condition=" __$('father_id').value.trim().length == 0 && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')">
       <legend><font size='5' style='border: 2px;'>Details of Father continued: Home Address</font></legend>
 
       <div class="field">
@@ -1061,7 +1061,7 @@ function checkNumberFormat(){
         <br>
         <select id="father_home_address_same_as_physical"
         name="home_address_same_as_physical"
-        condition="__$('person_father_id_number').value.trim().length == 0 &&
+        condition="__$('father_id').value.trim().length == 0 &&
             (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('details_of_father_known').value.trim() == 'Yes')"
         class="input_cell"
         tt_onUnload="if(__$('textForfather_home_address_same_as_physical').value.trim() == 'Yes'){loadFathersAddress();} else {unloadFathersAddress();}" />
@@ -1134,7 +1134,7 @@ function checkNumberFormat(){
             <select id="informant_same_as_father" name="informant_same_as_father"
                     class="input_cell"
                     tt_onUnload="if(__$('textForinformant_same_as_father').value.trim() == 'Yes'){loadFathersDetails();} else {unloadInformantsDetails();}"
-                    condition="__$('informant_same_as_mother').value.trim() == 'No' && (__$('person_father_id_number').value.trim().length > 0 ||
+                    condition="__$('informant_same_as_mother').value.trim() == 'No' && (__$('father_id').value.trim().length > 0 ||
                                 (__$('person_father_last_name').value.trim().length > 0 && __$('person_father_first_name').value.trim().length > 0 && __$('informant_same_as_mother').value.trim() == 'No' && (__$('person_parents_married_to_each_other').value.trim() == 'Yes' || __$('person_parents_signed').value.trim() == 'Yes' || __$('person_court_order_attached').value.trim() == 'Yes')));">
               <option></option>
               <option value="Yes" >Yes</option>
@@ -1151,7 +1151,7 @@ function checkNumberFormat(){
                  value="<%= @person[:informant][:id_number] rescue nil %>"
                  class="input_cell"
                  length = 8
-                 tt_onUnLoad ="fetchByNID('textForperson_informant_id_number', 'M', 'informant_id')"
+                 tt_BeforeUnload ="fetchByNID('textForperson_informant_id_number', '', 'informant_id')"
                  tt_onLoad = "checkSpecialCharacters('person_informant_id_number');capitalizeAllCharacters('person_informant_id')"
                  optional="true" />
         </div>
@@ -2157,7 +2157,7 @@ function checkNumberFormat(){
                 full_place_of_birth.push("person_bc_holder");
             }
 
-            if (__$("person_mother_id_number").value.trim().length == 8){
+            if (__$("mother_id").value.trim().length > 0){
                jQuery.ajax({
                     url: ("/get_person_details?person_id=" + __$("mother_id").value.trim()),
                     success: function(info) {
@@ -2171,7 +2171,7 @@ function checkNumberFormat(){
                 });
             }
 
-            if (__$("person_father_id_number").value.trim().length == 8){
+            if (__$("father_id").value.trim().length > 0){
                 jQuery.ajax({
                     url: ("/get_person_details?person_id=" + __$("father_id").value.trim()),
                     success: function(info) {
@@ -2362,7 +2362,8 @@ function fetchByNID(id, gender, input_id){
             __$('notice').style.display = 'block';
           }
 
-        }
+        },
+        async:false
     })
 
 }
@@ -2383,6 +2384,10 @@ function loadData(data, input_id){
         console.log(input_id, JSON.parse(this.getAttribute("data")));
         var dt = JSON.parse(this.getAttribute("data"));
         __$(input_id).value = dt['person_id'];
+
+        checkConditions();
+
+        $(__$("btn1").children[0]).mousedown(); //Click clear button, hack to move forward
 
        removePopup();
     }
