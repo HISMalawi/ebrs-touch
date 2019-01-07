@@ -168,18 +168,37 @@ module Lib
       address = PersonAddress.where(person_id: params[:father_id]).first
       return nil if address.blank?
 
-      cur_district_id   = Location.locate_id_by_tag(father[:current_district], 'District')
-      cur_ta_id         = Location.locate_id(father[:current_ta], 'Traditional Authority', cur_district_id)
-      cur_village_id    = Location.locate_id(father[:current_village], 'Village', cur_ta_id)
+      if params[:same_address_with_mother] == "Yes"
+        mother = params[:person][:mother]
 
-      address.current_district   = cur_district_id
-      address.current_ta         = cur_ta_id
-      address.current_village    = cur_village_id
+        cur_district_id   = Location.locate_id_by_tag(mother[:current_district], 'District')
+        cur_ta_id         = Location.locate_id(mother[:current_ta], 'Traditional Authority', cur_district_id)
+        cur_village_id    = Location.locate_id(mother[:current_village], 'Village', cur_ta_id)
 
-      address.current_district_other   = father[:foreigner_current_district]
-      address.current_ta_other         = father[:foreigner_current_ta]
-      address.current_village_other    = father[:foreigner_current_village]
-      address.residential_country    = Location.locate_id_by_tag(father[:residential_country], 'Country')
+        address.current_district   = cur_district_id
+        address.current_ta         = cur_ta_id
+        address.current_village    = cur_village_id
+
+        address.current_district_other   = mother[:foreigner_current_district]
+        address.current_ta_other         = mother[:foreigner_current_ta]
+        address.current_village_other    = mother[:foreigner_current_village]
+        address.residential_country    = Location.locate_id_by_tag(mother[:residential_country], 'Country')
+      else
+
+        cur_district_id   = Location.locate_id_by_tag(father[:current_district], 'District')
+        cur_ta_id         = Location.locate_id(father[:current_ta], 'Traditional Authority', cur_district_id)
+        cur_village_id    = Location.locate_id(father[:current_village], 'Village', cur_ta_id)
+
+        address.current_district   = cur_district_id
+        address.current_ta         = cur_ta_id
+        address.current_village    = cur_village_id
+
+        address.current_district_other   = father[:foreigner_current_district]
+        address.current_ta_other         = father[:foreigner_current_ta]
+        address.current_village_other    = father[:foreigner_current_village]
+        address.residential_country    = Location.locate_id_by_tag(father[:residential_country], 'Country')
+      end
+
       address.address_line_1         = (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline1] : nil)
       address.address_line_2         = (params[:informant_same_as_father].present? && params[:informant_same_as_father] == "Yes" ? params[:person][:informant][:addressline2] : nil)
       address.save
