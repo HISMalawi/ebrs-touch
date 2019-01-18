@@ -89,7 +89,7 @@ module EbrsAttribute
       before_create :generate_key
       #after_create :create_or_update_in_couch
       #after_create :create_audit_trail_after_create
-      after_save :create_or_update_in_couch#, :create_audit_trail
+      after_commit :create_or_update_in_couch#, :create_audit_trail
     end
   end
 
@@ -111,9 +111,25 @@ module EbrsAttribute
   end
 
   def next_primary_key
+    retries = 0
+    begin
+      p_key = max_id
+    rescue ActiveRecord::StatementInvalid => ex
+      if ex.message =~ /Deadlock found when trying to get lock/ #ex not e!!
+        retries += 1
+        raise ex if retries > 20  ## max 20 retries
+        sleep 2
+        max_id
+      else
+        raise ex
+      end
+    end
+  end
+
+  def max_id
     location_pad = SETTINGS['location_id'].to_s.rjust(5, '0').rjust(6, '1')
     max = (ActiveRecord::Base.connection.select_all("SELECT MAX(#{self.class.primary_key})
-      FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' FOR UPDATE ").last.values.last.to_i rescue 0)
+        FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' FOR UPDATE ").last.values.last.to_i)
     autoincpart = max.to_s.split('')[6 .. 1000].join('').to_i rescue 0
     auto_id = autoincpart + 1
     new_id = (location_pad + auto_id.to_s).to_i

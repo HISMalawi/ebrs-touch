@@ -8,7 +8,10 @@ class PersonRecordStatus < ActiveRecord::Base
 
   def self.new_record_state(person_id, state, change_reason='', user_id=nil)
     ActiveRecord::Base.transaction do
-    user_id = User.current.id if user_id.blank?
+    if user_id.blank?
+      user_id = User.current.id
+    end
+
     state_id = Status.where(:name => state).first.id
     trail = self.where(:person_id => person_id, :voided => 0)
     trail.each do |state|

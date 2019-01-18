@@ -123,4 +123,49 @@ class PersonBirthDetail < ActiveRecord::Base
       PersonIdentifier.find_by_person_id_and_person_identifier_type_id(self.person_id,
       PersonIdentifierType.find_by_name("National ID Number").id).value rescue ""
     end
+
+    def self.next_missing_brn
+      found    = ActiveRecord::Base.connection.select_all(" SELECT national_serial_number FROM person_birth_details WHERE national_serial_number IS NOT NULL").collect{|h| h.values.first.to_i}
+      return nil if found.blank?
+
+      missing = []
+      missing  = Array(found.min.to_i .. found.max.to_i) - found if found.length > 0
+
+      brn = nil
+      if missing.length > 0
+        brn    = missing.first
+      end
+
+      brn
+    end
+
+    def self.next_missing_ben(district_code, year)
+      a = PersonBirthDetail.where("district_id_number LIKE '#{district_code}/%/#{year}' ").map(&:district_id_number)
+      a = a.collect{|bn| bn.split("/")[1].to_i}.sort
+      return nil if a.blank?
+
+      missing = Array(a.first .. a.last) - a
+
+      mid_number = nil
+      if missing.length > 0
+        mid_number = missing.first.to_s.rjust(8,'0')
+      end
+      mid_number
+    end
+
+    def self.missing_bens(district_code, year)
+      a = PersonBirthDetail.where("district_id_number LIKE '#{district_code}/%/#{year}' ").map(&:district_id_number)
+      a = a.collect{|bn| bn.split("/")[1].to_i}.sort
+
+      return [] if a.blank?
+
+      Array(a.first .. a.last) - a
+    end
+
+    def self.missing_brns
+      found    = ActiveRecord::Base.connection.select_all(" SELECT national_serial_number FROM person_birth_details WHERE national_serial_number IS NOT NULL").collect{|h| h.values.first.to_i}
+      return [] if found.blank?
+
+      Array(found.min.to_i .. found.max.to_i) - found
+    end
 end

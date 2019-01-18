@@ -54,13 +54,20 @@ class AllocationQueue
           year = Date.today.year
           year_len = year.to_s.length
 
-          last = PersonBirthDetail.where("LEFT(district_id_number, #{district_code_len}) = '#{district_code}'
-            AND RIGHT(district_id_number, #{year_len}) = #{Date.today.year}").select(" MAX(SUBSTR(district_id_number,
-              #{(district_code_len + 2)}, 8)) AS last_num")[0]['last_num'] rescue 0
+          #Check for skipped BEN first
+          mid_number = PersonBirthDetail.next_missing_ben(district_code, year)
 
-          mid_number = (last.to_i + 1).to_s.rjust(8,'0')
+          if mid_number.blank?
+            last = PersonBirthDetail.where("LEFT(district_id_number, #{district_code_len}) = '#{district_code}'
+              AND RIGHT(district_id_number, #{year_len}) = #{Date.today.year}").select(" MAX(SUBSTR(district_id_number,
+                #{(district_code_len + 2)}, 8)) AS last_num")[0]['last_num'] rescue 0
 
-          person_birth_detail.update_attributes(district_id_number: "#{district_code}/#{mid_number}/#{year}")
+            mid_number = (last.to_i + 1).to_s.rjust(8,'0')
+          end
+
+          next_ben   = "#{district_code}/#{mid_number}/#{year}"
+          person_birth_detail.update_attributes(district_id_number: next_ben)
+
           record.update_attributes(assigned: 1)
           person_birth_detail.update_attributes(date_registered: Date.today)
           PersonIdentifier.new_identifier(record.person_id, 'Birth Entry Number', person_birth_detail.district_id_number)
@@ -73,8 +80,13 @@ class AllocationQueue
             next
           end
 
-          last = (PersonBirthDetail.select(" MAX(national_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
-          brn = last + 1
+          brn = PersonBirthDetail.next_missing_brn
+
+          if brn.blank?
+            last = (PersonBirthDetail.select(" MAX(national_serial_number) AS last_num")[0]['last_num'] rescue 0).to_i
+            brn = last + 1
+          end
+
           person_birth_detail.update_attributes(national_serial_number: brn)
           record.update_attributes(assigned: 1)
 
