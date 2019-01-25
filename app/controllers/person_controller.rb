@@ -2093,7 +2093,7 @@ class PersonController < ApplicationController
     @user = User.find(params[:user_id]) rescue nil
     User.current = @user if !@user.blank?
 
-    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states) rescue nil 
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states) rescue nil
     filters = JSON.parse(params['data']) rescue {}
     @records = PersonService.search_results(filters)
     render :template => "person/records", :layout => "data_table"
