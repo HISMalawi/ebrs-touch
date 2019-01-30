@@ -2414,10 +2414,8 @@ class PersonController < ApplicationController
           barcode_value = bcd.value
         end
 
-        `bundle exec rails r bin/generate_barcode #{ barcode_value } #{ data['person'].id} #{SETTINGS['barcodes_path']} -e #{Rails.env}  `
+        PersonBirthDetail.generate_barcode(barcode_value, person_id, SETTINGS['barcodes_path'])
       end
-
-      data['barcode'] = File.read("#{SETTINGS['barcodes_path']}#{person_id}.png")
 
       @data << data
     end

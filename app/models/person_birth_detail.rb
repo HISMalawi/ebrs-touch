@@ -1,3 +1,9 @@
+require 'rubygems'
+require 'barby'
+require 'barby/barcode/code_128'
+require 'barby/outputter/rmagick_outputter'
+require 'rqrcode'
+
 class PersonBirthDetail < ActiveRecord::Base
     self.table_name = :person_birth_details
     self.primary_key = :person_birth_details_id
@@ -167,5 +173,13 @@ class PersonBirthDetail < ActiveRecord::Base
       return [] if found.blank?
 
       Array(found.min.to_i .. found.max.to_i) - found
+    end
+
+    def self.generate_barcode(barcode, file_name, save_path)
+
+      barcode = Barby::Code128B.new(barcode)
+      file = File.open("#{save_path}/#{file_name}.png", "wb")
+      file.write barcode.to_png(:height => 50, :xdim => 2)
+      file.close
     end
 end
