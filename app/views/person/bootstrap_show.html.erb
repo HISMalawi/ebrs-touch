@@ -461,7 +461,7 @@
           <table align="center" id="printers">
             <% @available_printers.each do |printer| %>
               <tr onmousedown="updateValue(this)" value="<%= printer %>">
-                <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                <td><input type="radio" checked="false" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
                 <td style="text-align: left; padding-left:50px;"><%= printer %></td>
               </tr>
             <% end %>
@@ -1075,6 +1075,8 @@
     <% if !@online %>
             jQuery("#DC-Print").attr("disabled", true);
     <% end %>
+
+    jQuery("input").prop("checked", false);
 </script>
 
 <style>

@@ -59,10 +59,11 @@
       </div>
       <div class="modal-body">
         <span style="text-align:center;">
+          <div id="select-printer-warning" style="display: none; color: red;padding: 5px;"><blink>Please select a printer to proceed</blink></div>
           <table align="center" id="printers">
             <% @available_printers.each do |printer| %>
                 <tr onmousedown="updateValue(this)" value="<%= printer %>">
-                  <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
+                  <td><input type="radio" checked="false" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
                   <td style="text-align: left; padding-left:50px;"><%= printer %></td>
                 </tr>
             <% end %>
@@ -83,11 +84,19 @@
 
     function updateValue(obj){
        printer_name = obj.getAttribute('value');
+       $(obj).find("input").prop("checked", true);
+       $("#select-printer-warning").hide()
     }
 
     function submitForm(){
-        window.location = "/print?person_ids=<%= params[:person_ids]%>&printer_name=" + printer_name;
+        if (printer_name.length > 0) {
+            window.location = "/print?person_ids=<%= params[:person_ids]%>&printer_name=" + printer_name;
+        }else{
+           $("#select-printer-warning").show()
+        }
     }
+
+    $("input").prop("checked", false);
 </script>
 
 
