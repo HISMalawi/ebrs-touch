@@ -191,15 +191,7 @@ def resolve_duplicate
           potential_records.resolved_at = Time.now
           potential_records.save
 
-          allocate_record = IdentifierAllocationQueue.new
-          allocate_record.person_id = params[:id].to_i
-          allocate_record.assigned = 0
-          allocate_record.creator = User.current.id
-          allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
-          allocate_record.created_at = Time.now
-          if allocate_record.save
-            PersonRecordStatus.new_record_state(params[:id], 'HQ-ACTIVE', params[:reason])
-          end
+          PersonRecordStatus.new_record_state(params[:id], 'DC-COMPLETE', params[:reason])
           redirect_to params[:next_path]
         else
           potential_records.resolved = 1
