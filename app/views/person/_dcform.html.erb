@@ -2146,22 +2146,27 @@ function checkNumberFormat(){
 
             if (__$('person_place_of_birth').value.trim().toLowerCase() == 'hospital')
             {
-              full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"] ;
+                if (__$('person_bc_holder').value.trim() == 'Malawi') {
+                    full_place_of_birth = ["person_hospital_of_birth", "person_birth_district"];
+                }else{
+                    full_place_of_birth = ["person_other_birth_place_details", "person_bc_holder"];
+                }
 
             }
             else if (__$('person_place_of_birth').value.trim().toLowerCase() == 'home')
             {
-
-              full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"] ;
+                if (__$('person_bc_holder').value.trim() == 'Malawi') {
+                    full_place_of_birth = ["person_birth_ta", "person_birth_village", "person_birth_district"];
+                }else{
+                    full_place_of_birth = ["person_other_birth_place_details", "person_bc_holder"];
+                }
             }
             else {
-
-              full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
-            }
-
-            if (__$("person_birth_district").value == "Other Country"){
-                full_place_of_birth.pop();
-                full_place_of_birth.push("person_bc_holder");
+                if (__$('person_bc_holder').value.trim() == 'Malawi') {
+                    full_place_of_birth = ["person_other_birth_place_details", "person_birth_district"];
+                }else{
+                    full_place_of_birth = ["person_other_birth_place_details", "person_bc_holder"];
+                }
             }
 
             if (__$("mother_id").value.trim().length > 0){
