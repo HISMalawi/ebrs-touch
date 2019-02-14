@@ -457,7 +457,7 @@ module Lib
     if  SETTINGS["application_mode"] == "FC"
         birth_district_id = Location.find(Location.find(SETTINGS["location_id"]).parent_location).id
     else
-       if params[:person][:birth_country].blank?
+       if params[:person][:birth_country].blank? || params[:person][:birth_country] == 'Malawi'
         birth_district_id = Location.where("name = '#{params[:person][:birth_district]}' AND code IS NOT NULL").first.id
        else
         birth_district_id = Location.locate_id_by_tag(person[:birth_country], 'Country')
