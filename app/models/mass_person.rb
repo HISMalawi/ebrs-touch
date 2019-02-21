@@ -138,4 +138,24 @@ class MassPerson < ActiveRecord::Base
 
     return true
   end
+
+  def self.dump_all
+
+    File.open("#{Rails.root}/dump.csv", "w"){|f|
+      f.write("")
+    }
+
+    data = MassPerson.new.attributes.keys.join("|") + "\n"
+    records = MassPerson.order('created_at DESC')
+    records.each do |person|
+      person.creator = person.creator.gsub("|", "-")
+      data = data + person.attributes.values.join("|") + "\n"
+    end
+
+    File.open("#{Rails.root}/dump.csv", "w"){|f|
+      f.write(data)
+    }
+
+    return true
+  end
 end
