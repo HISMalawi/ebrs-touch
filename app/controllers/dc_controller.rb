@@ -642,4 +642,28 @@ def print_certificates
     render :layout => 'data_table'
  end
 
+  def check_print_rules
+    person_ids = params[:person_ids]
+
+    #Check for missing barcode and assign one from remote
+    barcode_number_id = PersonIdentifierType.where(name: "Barcode Number").first.id
+    missing_barcodes_person_ids = PersonBirthDetail.find_by_sql(
+        "SELECT pbd.person_id FROM person_birth_details pbd
+          LEFT JOIN person_identifiers pid ON pid.person_id = pbd.person_id AND pid.person_identifier_type_id = #{barcode_number_id}
+          WHERE pid.person_id IS NULL AND pbd.person_id IN (#{person_ids})
+        ").map(&:person_id).uniq
+
+    if missing_barcodes_person_ids.length > 0
+      #query for assignment of missing barcode
+      hq_link = SETTINGS["destination_app_link"] + "/check_print_rules?person_ids=#{missing_barcodes_person_ids.join(',')}"
+      ids = JSON.parse(RestClient.get(hq_link))
+
+      ids.each do |hash|
+        PersonIdentifier.create(hash)
+      end
+    end
+
+    render :text => "OK"
+  end
+
 end

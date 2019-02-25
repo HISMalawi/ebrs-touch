@@ -213,6 +213,8 @@ Rails.application.routes.draw do
   get '/offload' => "person#receive_data"
   post '/offload' => "person#receive_data"
 
+  get 'check_print_rules' => 'dc#check_print_rules'
+
   resources :person
 
   resources :users

@@ -515,7 +515,17 @@
     }
 
     function printAll() {
-        jQuery("#printerModal").modal("show");
+        //Check for barcode availability before printing
+        jQuery.ajax({
+            url: "/check_print_rules?person_ids=" + selected.join(','),
+            success: function(res){
+                if(res == "OK"){
+                    jQuery("#printerModal").modal("show");
+                }else{
+                    alert("Missing printing requirements for some records");
+                }
+            }
+        })
     }
 
     function dispatchAll(){
