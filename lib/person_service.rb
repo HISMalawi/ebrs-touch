@@ -668,4 +668,73 @@ module PersonService
     return ebrs_person.id
   end
 
+  def self.exact_duplicates(params)
+
+    mother_type = ""
+    mother      = {}
+
+    if params[:foster_parents] == "Both" || params[:foster_parents] =="Mother"
+      mother_type  = 'Adoptive-Mother'
+    end
+
+    if mother_type =="Adoptive-Mother"
+      mother = params[:person][:foster_mother]
+    else
+      mother = params[:person][:mother]
+    end
+
+    mother_relationship_ids = PersonRelationType.where(" name IN ('Mother', 'Adoptive-Mother') ").collect{|r| r.id}
+
+    #Query by name
+    person_ids = PersonName.find_by_sql(" SELECT pn.person_id FROM person_name pn
+      INNER JOIN person_birth_details pbd On pbd.person_id = pn.person_id AND pn.voided = 0
+      AND pn.first_name = '#{params[:person][:first_name]}' AND pn.last_name = '#{params[:person][:last_name]}'
+    ").map(&:person_id)
+
+    #Query by gender and birthdate
+    gender = {'Female' => 'F', 'Male' => 'M'}[params[:person][:gender]]
+    person_ids = Person.find_by_sql(" SELECT person_id FROM person
+                  WHERE person_id IN (#{person_ids.join(',')}) AND gender ='#{gender}'
+                  AND birthdate = '#{params[:person][:birthdate].to_date.to_s}' ").collect{|p| p.person_id}
+
+    return [] if person_ids.blank?
+
+    person_ids = PersonName.find_by_sql(
+        "SELECT pr.person_a FROM person_name pn INNER JOIN person_relationship pr ON pr.person_b = pn.person_id
+          AND pn.voided = 0 AND pr.person_relationship_type_id IN (#{mother_relationship_ids.join(',')})
+          AND pn.first_name = '#{mother[:first_name]}' AND pn.last_name = '#{mother[:last_name]}' AND pr.person_a IN (#{person_ids.join(',')})"
+    ).collect{|p| p.person_a}
+
+    return [] if person_ids.blank?
+
+    if !mother['home_district'].blank?
+      person_ids = PersonAddress.find_by_sql(
+          "SELECT pr.person_a FROM person_addresses pa
+            INNER JOIN person_relationship pr ON pr.person_b = pa.person_id
+            INNER JOIN location l ON l.location_id = pa.home_district
+              AND pr.person_relationship_type_id IN (#{mother_relationship_ids.join(',')})
+              AND l.name = '#{mother['home_district']}'
+              AND pa.home_district AND pr.person_a IN (#{person_ids.join(',')})"
+      ).collect{|p| p.person_a}
+    end
+
+    return [] if person_ids.blank?
+
+    #Query by place of birth
+    map =  {'Mzuzu City' => 'Mzimba',
+            'Lilongwe City' => 'Lilongwe',
+            'Zomba City' => 'Zomba',
+            'Blantyre City' => 'Blantyre'}
+
+    params[:person][:birth_district] = map[params[:person][:birth_district]] if params[:person][:birth_district].match(/City$/)
+    district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
+
+    person_ids = PersonBirthDetail.find_by_sql("
+      SELECT person_id FROM person_birth_details pbd
+        WHERE district_of_birth = #{district_id} AND person_id IN (#{person_ids.join(',')})
+    ").collect{|p| p.person_id}
+
+    return person_ids
+  end
+
 end

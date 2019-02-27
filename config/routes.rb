@@ -212,7 +212,7 @@ Rails.application.routes.draw do
   get '/person/search_by_nid'
   get '/offload' => "person#receive_data"
   post '/offload' => "person#receive_data"
-
+  get '/record_exists' => "person#record_exists"
   get 'check_print_rules' => 'dc#check_print_rules'
 
   resources :person

@@ -517,10 +517,14 @@ class PersonController < ApplicationController
          params[:person][:type_of_birth] = 'First Triplet'                                         
      end
 
-     
-    @person = PersonService.create_record(params)
+    exact_duplicates = PersonService.exact_duplicates(params)
 
-    #To be contued
+    if exact_duplicates.blank?
+        @person = PersonService.create_record(params)
+    else
+        redirect_to "/record_exists" and return
+    end
+
     if @person.present? && SETTINGS['potential_search']
       SimpleElasticSearch.add(person_for_elastic_search(@person,params))
     else
@@ -547,6 +551,10 @@ class PersonController < ApplicationController
           redirect_to '/view_cases' and return
         end
     end
+
+  end
+
+  def record_exists
 
   end
 
