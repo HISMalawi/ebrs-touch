@@ -414,7 +414,25 @@ class UsersController < ApplicationController
     elsif user && user.password_matches?(params[:new_password])
     	 result = "same"
     else
-      user.update_attributes(:password_hash => params[:new_password], :password_attempt => 0, :last_password_date => Time.now)
+
+      user.password_hash = params[:new_password]
+      user.password_attempt = 0
+      user.last_password_date = Time.now
+      result = user.save
+
+      #This solutions applies to users with multiple account usernames
+      #To be removed later
+
+      users = User.where(username: user.username)
+      if users.length > 1
+        users.each do |user|
+          user.password_hash = params[:new_password]
+          user.password_attempt = 0
+          user.last_password_date = Time.now
+          result = user.save
+        end
+      end
+
       flash["notice"] = "Your new password has been changed succesfully"
 
     end
