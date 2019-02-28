@@ -691,6 +691,8 @@ module PersonService
       AND pn.first_name = '#{params[:person][:first_name]}' AND pn.last_name = '#{params[:person][:last_name]}'
     ").map(&:person_id)
 
+    return [] if person_ids.blank?
+
     #Query by gender and birthdate
     gender = {'Female' => 'F', 'Male' => 'M'}[params[:person][:gender]]
     person_ids = Person.find_by_sql(" SELECT person_id FROM person

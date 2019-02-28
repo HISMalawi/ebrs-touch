@@ -43,7 +43,18 @@
         <tr><td>Created at</td><td><%= @user.created_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
         <tr><td>Updated at</td><td><%= @user.updated_at.to_date.strftime("%d/%b/%Y")%> </td></tr>
     </table>
+
+    <button id="btnAction" class="blue" style="position: absolute; right: 160px; bottom: 20px;"
+            onclick="window.location = '/change_password?user_id=<%=@user.id%>' ">
+      Change Password
+    </button>
   </div>
  
 
 </div>
+
+<script>
+    jQuery(document).ready(function(){
+        document.getElementsByClassName("red")[0].innerHTML = "Back";
+    })
+</script>

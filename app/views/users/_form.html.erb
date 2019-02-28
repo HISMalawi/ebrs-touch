@@ -36,9 +36,9 @@
 
           <td>
             <% if request.path.match(/new/) %>
-		<%= f.text_field  :username, :textCase => "lower",:value => @user_name,:tt_onload =>"$('touchscreenInput5').value = ($('user_first_name').value.substring(0,3)+$('user_last_name').value.substring(0,3)).toLowerCase()" ,:validationRule =>"\\w{6}\\w*" ,:validationMessage => "Username must have at least SIX letters", :textCase => "lower" %>
+		        <%= f.text_field  :username, :textCase => "lower",:value => @user_name,:tt_onload =>"$('touchscreenInput5').value = ($('user_first_name').value.substring(0,3)+$('user_last_name').value.substring(0,3)).toLowerCase()" ,:validationRule =>"\\w{6}\\w*" ,:validationMessage => "Username must have at least SIX letters", :textCase => "lower" %>
             <%else %>
-            <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower"%>
+                <%= f.text_field :username, :class => "input_cell", :placeholder => "Username", :required => true, :disabled => "disabled", :textCase => "lower"%>
             <% end %>
           </td>
 
@@ -128,17 +128,6 @@
             </tr>
 
         <% else %>
-<tr>
-              <td align="right">
-                <label for="user_password">Password</label>
-              </td>
-              <td>
-                :
-              </td>
-              <td>
-                <%= f.password_field :password, :class => "input_cell", :placeholder => "Password", :optional => true, :textCase => "lower" %>
-              </td>
-            </tr>
 
         <% end %>
 

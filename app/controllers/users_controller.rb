@@ -390,7 +390,9 @@ class UsersController < ApplicationController
     @targeturl = "/"
 
     @user = User.current
-
+    if params[:user_id]
+      @account_holder = User.find(params[:user_id])
+    end
     render :layout => "facility"
 
   end
@@ -399,11 +401,15 @@ class UsersController < ApplicationController
 
   def update_password
 
-    user = User.current
+    if params[:user_id].blank?
+      user = User.current
+    else
+      user = User.find(params[:user_id])
+    end
 
     result = user.password_matches?(params[:old_password])
 
-    if user && !user.password_matches?(params[:old_password])
+    if user && !user.password_matches?(params[:old_password]) && params[:user_id].blank?
     	 result = "not same"
     elsif user && user.password_matches?(params[:new_password])
     	 result = "same"
