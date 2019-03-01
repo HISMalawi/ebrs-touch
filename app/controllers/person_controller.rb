@@ -483,7 +483,6 @@ class PersonController < ApplicationController
 
       @person_details = PersonBirthDetail.find_by_person_id(params[:id])
 
-
       @person_name = PersonName.find_by_person_id(params[:id])
 
       @person_mother_name = @person.mother.person_names.first rescue nil
@@ -522,7 +521,9 @@ class PersonController < ApplicationController
     if exact_duplicates.blank?
         @person = PersonService.create_record(params)
     else
-        redirect_to "/record_exists" and return
+
+      session[:exact_duplicate_data] = params
+      redirect_to "/record_exists?person_ids=#{exact_duplicates.join(',')}" and return
     end
 
     if @person.present? && SETTINGS['potential_search']
@@ -555,7 +556,81 @@ class PersonController < ApplicationController
   end
 
   def record_exists
+    @exact_duplicates = []
 
+    person_ids = params[:person_ids].split(",")
+    person_ids.each do |person_id|
+
+      person        = Person.find(person_id)
+      person_name   = PersonName.where(person_id: person_id).first
+      mother        = PersonService.mother(person_id) rescue nil
+      father        = PersonService.father(person_id) rescue nil
+      status        = PersonRecordStatus.status(person_id)
+
+      mother_address = PersonAddress.where(person_id: mother.person_id).first #rescue nil
+      mother_home_district = Location.find(mother_address.home_district).name rescue nil
+      mother_home_district = mother_address.home_district_other if mother_home_district.blank? && mother_address.present?
+
+      @exact_duplicates << {
+          'first_name'  => person_name.first_name,
+          'last_name'   => person_name.last_name,
+          'middle_name' => person_name.middle_name,
+          'birthdate'   => person.birthdate.to_date.strftime("%d-%b-%Y"),
+          'gender'      => ({'M' => 'Male', 'F' => 'Female', 'N/A' => 'N/A'}[person.gender]),
+          'mother_name' => (Person.find(mother.person_id).name rescue "N/A"),
+          'father_name' => (Person.find(father.person_id).name rescue "N/A"),
+          'mother_home_district' => mother_home_district,
+          'record_status'        => status
+      }
+    end
+  end
+
+  def save_exact_duplicate
+
+    data = session[:exact_duplicate_data].with_indifferent_access
+
+    type_of_birth = data[:person][:type_of_birth]
+
+    if type_of_birth == 'Twin'
+
+      type_of_birth = 'First Twin'
+      params[:person][:type_of_birth] = 'First Twin'
+
+    elsif type_of_birth == 'Triplet'
+
+      type_of_birth = 'First Triplet'
+      data[:person][:type_of_birth] = 'First Triplet'
+    end
+
+    data[:person][:is_exact_duplicate] = true
+    data[:person][:duplicate] = params[:person_ids]
+
+    @person = PersonService.create_record(data)
+
+    if @person.present? && SETTINGS['potential_search']
+      SimpleElasticSearch.add(person_for_elastic_search(@person,data))
+    end
+
+    if User.current.user_role.role.role == "Data Supervisor"
+      redirect_to "/above_16_abroad" and return
+    end
+
+    if ["First Twin", "First Triplet", "Second Triplet"].include?(type_of_birth.strip)
+
+      if application_mode == 'Facility'
+        print_registration(@person.id, "/person/new?id=#{@person.id}") and return
+      else
+        redirect_to "/person/new?id=#{@person.id}" and return
+      end
+
+    else
+
+      if application_mode == 'Facility'
+        print_registration(@person.id, '/view_cases') and return
+      else
+        redirect_to '/view_cases' and return
+      end
+    end
   end
 
   def update_person

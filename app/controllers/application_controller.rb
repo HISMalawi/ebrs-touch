@@ -160,15 +160,15 @@ class ApplicationController < ActionController::Base
               mother_first_name: (mother_name.first_name rescue nil),
               mother_last_name:(mother_name.last_name rescue nil),
               mother_middle_name: (mother_name.middle_name rescue nil),
-              mother_district: (Location.find(mother_address.current_district).name rescue nil),
-              mother_village:(Location.find(mother_address.current_village).name rescue nil),
-              mother_ta: (Location.find(mother_address.current_ta).name rescue nil),
+              mother_district: (Location.find(mother_address.home_district).name rescue nil),
+              mother_village:(Location.find(mother_address.home_village).name rescue nil),
+              mother_ta: (Location.find(mother_address.home_ta).name rescue nil),
               father_first_name: (father_name.first_name rescue nil),
               father_last_name: (father_name.last_name rescue nil),
               father_middle_name: (father_name.middle_name rescue nil),
-              father_district: (Location.find(father_address.current_district).name rescue nil),
-              father_ta: (Location.find(father_address.current_ta).name rescue nil),
-              father_village: (Location.find(father_address.current_village).name rescue nil)
+              father_district: (Location.find(father_address.home_district).name rescue nil),
+              father_ta: (Location.find(father_address.home_ta).name rescue nil),
+              father_village: (Location.find(father_address.home_village).name rescue nil)
     }
     return person
     

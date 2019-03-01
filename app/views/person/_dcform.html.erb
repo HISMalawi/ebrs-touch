@@ -2426,7 +2426,6 @@ function age(date){
 
     var nowDate = new Date(Date.parse("<%= Date.today.strftime("%d/%b/%Y")%>"));
     var age = Math.floor((nowDate - dob)/31556952000);
-    console.log(age);
     return age;
 }
 
@@ -2483,148 +2482,93 @@ function makeCompulsory(id){
 
     function submitAfterSummary() {
 
-        /*summaryHash = {
-         "Child's Name" : ["child_first_name", "child_middle_name", "child_last_name"],
-         "Mother's Name" : ["child_mother_first_name", "child_mother_middle_name", "child_mother_last_name"],
-         "Father's Name" : ["child_father_first_name", "child_father_middle_name", "child_father_last_name"]
-         }*/
-
         showSpinner();
 
+        var msg = "";
 
-        var duplicate_search = [
-            "person_first_name",
-            "person_last_name",
-            "person_middle_name",
-            "person_birth_district",
-            "person_birthdate",
-            "person_gender",
-            "person_mother_last_name",
-            "person_mother_first_name",
-            "person_mother_middle_name",
-            "person_foster_mother_last_name",
-            "person_foster_mother_first_name",
-            "person_foster_mother_middle_name",
-            "person_father_first_name",
-            "person_father_last_name",
-            "person_father_middle_name",
-            "person_foster_father_last_name",
-            "person_foster_father_first_name",
-            "person_foster_father_middle_name",
-            "person_type_of_birth",
-            "person_relationship"]
+        var parent = document.createElement("div");
 
-        var data = {"twin_id": getUrlVars()["id"]}
+        var div = document.createElement("div");
+        div.style.height = "300px";
+        div.style.overflow = "auto";
 
-        for(var i = 0 ; i < duplicate_search.length ; i++){
-            if (__$(duplicate_search[i]) && __$(duplicate_search[i]).value){
-                data[duplicate_search[i].replace("person_","").replace("person_foster_","")] = __$(duplicate_search[i]).value
-            } else {
+        parent.appendChild(div);
 
-            }
+        var table = document.createElement("table");
+        table.style.width = "100%";
 
-        }
+        div.appendChild(table);
 
+        var tbody = document.createElement("tbody");
 
+        table.appendChild(tbody);
 
-        $.getJSON("/search_similar_record",data,function(response){
+        var keys = Object.keys(summaryHash);
 
+        for (var i = 0; i < keys.length; i++) {
 
-            if(response.response && response.response.length != 0 && canSearchPotential(response)){
+            var tr = document.createElement("tr");
 
+            tbody.appendChild(tr);
 
-                duplicatesPopup(response);
+            var td1 = document.createElement("th");
+            td1.align = "right";
+            td1.innerHTML = keys[i];
+            td1.style.width = "50%";
+            tr.appendChild(td1);
 
-                hideSpinner();
+            var td2 = document.createElement("td");
+            td2.innerHTML = ":";
 
-            }else{
-                var msg = "";
+            tr.appendChild(td2);
 
-                var parent = document.createElement("div");
+            var td3 = document.createElement("td");
+            td3.style.width = "50%";
+            var label = "";
 
-                var div = document.createElement("div");
-                div.style.height = "300px";
-                div.style.overflow = "auto";
+            for (var j = 0; j < summaryHash[keys[i]].length; j++) {
+                if (__$(summaryHash[keys[i]][j])) {
 
-                parent.appendChild(div);
-
-                var table = document.createElement("table");
-                table.style.width = "100%";
-
-                div.appendChild(table);
-
-                var tbody = document.createElement("tbody");
-
-                table.appendChild(tbody);
-
-                var keys = Object.keys(summaryHash);
-
-                for (var i = 0; i < keys.length; i++) {
-
-                    var tr = document.createElement("tr");
-
-                    tbody.appendChild(tr);
-
-                    var td1 = document.createElement("th");
-                    td1.align = "right";
-                    td1.innerHTML = keys[i];
-                    td1.style.width = "50%";
-                    tr.appendChild(td1);
-
-                    var td2 = document.createElement("td");
-                    td2.innerHTML = ":";
-
-                    tr.appendChild(td2);
-
-                    var td3 = document.createElement("td");
-                    td3.style.width = "50%";
-                    var label = "";
-
-                    for (var j = 0; j < summaryHash[keys[i]].length; j++) {
-                        if (__$(summaryHash[keys[i]][j])) {
-
-                            if (label.trim().length > 0) {
-                                if (keys[i].match("Location of Birth")) {
-                                    label = label.trim() + ", " + humanize(__$(summaryHash[keys[i]][j]).value);
-                                }else{
-                                    label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
-                                }
-
-                            } else {
-
-                                label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
-
-                            }
-
+                    if (label.trim().length > 0) {
+                        if (keys[i].match("Location of Birth")) {
+                            label = label.trim() + ", " + humanize(__$(summaryHash[keys[i]][j]).value);
+                        }else{
+                            label = label.trim() + " " + humanize(__$(summaryHash[keys[i]][j]).value);
                         }
+
+                    } else {
+
+                        label = humanize(__$(summaryHash[keys[i]][j]).value.trim());
 
                     }
 
-                    label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
-
-                    if (label == '')
-                        label = "<span class='blank'>N/A</span>"
-
-                    if (keys[i].match(/weight/i))
-                        label = label + " Kg"
-
-                    td3.innerHTML = label;
-
-                    tr.appendChild(td3);
-
                 }
 
-                var pos = checkCtrl(parent);
-
-                msg = parent.innerHTML;
-
-                var action = "document.forms[0].submit();";
-
-                hideSpinner();
-
-                showMsgForAction(msg, action, "600px", "Captured Data Summary");
             }
-        });
+
+            label = (label.trim) ? label.trim() : label.replace(/^\s+/,'');
+
+            if (label == '')
+                label = "<span class='blank'>N/A</span>"
+
+            if (keys[i].match(/weight/i))
+                label = label + " Kg"
+
+            td3.innerHTML = label;
+
+            tr.appendChild(td3);
+
+        }
+
+        var pos = checkCtrl(parent);
+
+        msg = parent.innerHTML;
+
+        var action = "document.forms[0].submit();";
+
+        hideSpinner();
+
+        showMsgForAction(msg, action, "600px", "Captured Data Summary");
 
     }
 

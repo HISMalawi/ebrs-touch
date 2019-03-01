@@ -1,4 +1,102 @@
-<div style="width: 100%;padding: 10%;">
-    <span style="font-size: 1.5em;">Failed to save, record already exists!</span> <br />
-    <button onclick="javascript:history.go(-1)" class="blue"> Back </button>
+<%=javascript_include_tag "datatables/prototype" %>
+<%=javascript_include_tag "datatables/jquery.dataTables.min" %>
+<%=javascript_include_tag "datatables/dataTables.bootstrap" %>
+<%=javascript_include_tag "bootstrap/bootstrap.min" %>
+
+<%= stylesheet_link_tag "datatables/jquery.dataTables.min" %>
+
+
+<style>
+
+
+    #example{
+        background-color: white;
+    }
+
+    #example tr td{
+        border: 1px solid lightgray;
+        font-size: 16px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .action-btn .fa{
+        min-width: 35px;
+        font-size: 18px;
+    }
+
+
+    th{
+        background: lightsteelblue;
+        color: black;
+        font-size: 16px;
+        padding: 15px !important;
+    }
+
+    .panel-heading{
+        margin-bottom: 20px;
+    }
+
+</style>
+
+<div class="panel panel-default">
+  <div class="panel-heading" style="height: 60px;padding-top: 40px;font-size: 25px;text-align: center; color: darkred;">
+    Record Is Exact Duplicate to (<%= (@exact_duplicates).length %>) Record(s)
+  </div>
+
+  <table id="example" class="display table table-condensed table-striped" cellspacing="0" style="width: 100%;margin: auto;">
+    <thead>
+    <tr>
+      <th style="text-align: left;">First name</th>
+      <th style="text-align: left;">Last name</th>
+      <th style="text-align: center;">Birthdate</th>
+      <th style="text-align: left;">Gender</th>
+      <th style="text-align: left;">Mother's Name</th>
+      <th style="text-align: left;">Mother Home District</th>
+      <th style="text-align: center;">Father Name</th>
+      <th style="text-align: center;">Record Status</th>
+
+    </tr>
+    </thead>
+    <%(@exact_duplicates || []).each do |record|
+
+    %>
+        <tr>
+          <td style="text-align: left;"><%= record['first_name']%></td>
+          <td style="text-align: center;"><%= record['last_name'] %></td>
+          <td style="text-align: center;"><%= record['birthdate'] %></td>
+          <td style="text-align: center;"><%= record['gender'] %></td>
+          <td style="text-align: center;"><%= record['mother_name'] %></td>
+          <td style="text-align: center;"><%= record['mother_home_district'] %></td>
+          <td style="text-align: center;"><%= record['father_name'] %></td>
+          <td style="text-align: center;"><%= record['record_status'] %></td>
+
+        </tr>
+    <%end%>
+    <tbody>
+    </tbody>
+  </table>
+
 </div>
+
+<div style="width: 90%;margin: auto;padding-left: 40%;">
+  <button class="red btn btn-danger pull-right" style="margin-top: 30px; cursor: pointer;
+          padding: 6px; "
+          onmousedown=" javascript:history.go(-1); ">
+    <b>Cancel</b>
+  </button>
+
+  <button class="blue btn btn-danger pull-right" style="margin-top: 30px; cursor: pointer;
+          padding: 6px; "
+          onmousedown="window.location = '/person/save_exact_duplicate?person_ids=<%=params[:person_ids]%>' ">
+    <b>Proceed to Save</b>
+  </button>
+</div>
+
+
+<style>
+    .action-btn, .act-btn{
+        border: none !important;
+    }
+</style>
+

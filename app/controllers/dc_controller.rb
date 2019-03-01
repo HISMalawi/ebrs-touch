@@ -140,6 +140,7 @@ def view_duplicates
     if params[:exact].present?
       @states = ["DC-DUPLICATE"]
        @section = "Exact Duplicates"
+      session[:exact_duplicate] = true
     else
       @states = ['FC-POTENTIAL DUPLICATE','DC-POTENTIAL DUPLICATE']
        @section = "Potential Duplicates"
@@ -170,7 +171,8 @@ def potential_duplicate
   @potential_records.duplicate_records.each do |record|
     @similar_records << person_details(record.person_id)
   end
-  @targeturl = params[:next_path]
+
+  @targeturl = request.referrer
   render :layout => "facility"
 end
 
