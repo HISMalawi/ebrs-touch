@@ -84,6 +84,11 @@
         <td>
           <h3 style="padding-bottom: 15px;color:darkslategray; height: 40px;margin-top: 0px;"><%= @section%></h3>
         </td>
+        <td  style="padding-bottom: 15px; min-width: 200px;">
+          <button class="btn btn-primary"  style="border-radius: 5px;" onclick="jQuery('#print_filters').modal('show')">
+            Filter By Informant Address
+          </button>
+        </td>
         <td colspan="8" style="width: 80%;" class="pull-right">
           <button onclick="selectBadge('All')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Total
             <span class="badge" style="background: #2e6da4"><%=@type_stats.values.sum || 0%></span></button>
@@ -100,10 +105,10 @@
     </table>
   </div>
 
+
   <div class="fix-middle" style="height: 40px; margin-top: 0px;">
         <button id="print-all" onclick="printAll()"
                 class=" btn btn-primary"><i class="fa fa-print"></i>Print Selected</button>
-
   </div>
 <style>
     #print-all, #dispatch-all{
@@ -204,6 +209,50 @@
   </div>
 </div>
 </div>
+
+<div class="modal fade" id="print_filters" tabindex="-1" role="dialog" aria-hidden="true" style="width:900px; margin: auto;">
+
+
+<div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Informant Village Filtering</h4>
+      </div>
+
+      <div class="modal-body" style="font-size: 1em;">
+        <label style="width:150px;font-weight: bold;">Informant District:</label>
+        <select name="informant_district" style="width: 160px;" onchange="filter_ta()"
+                id="informant_district">
+            <option value="">Informant District</option>
+          <% @districts.each do |id, name|%>
+              <option value="<%=name%>"><%=name%></option>
+          <% end %>
+        </select> <br /><br />
+
+        <label style="width:150px;font-weight: bold;">Informant TA:</label>
+        <select name="informant_ta" style="width: 160px;" onchange="filter_village()"
+                id="informant_ta">
+          <option value="">Informant TA</option>
+        </select>  <br /><br />
+
+        <label style="width:150px;font-weight: bold;">Informant Village:</label>
+        <select name="informant_village" style="width: 160px;"
+                id="informant_village">
+          <option value="">Informant Village</option>
+        </select>  <br /><br />
+      </div>
+
+        <div class="modal-footer">
+          <button id="scan_close" type="button" class="btn btn-sm btn-default pull-left"
+                  onmousedown="jQuery('#print_filters').modal('hide')" > Close </button>
+          <button id="scan_search" type="button" class="btn btn-primary pull-right" onclick="applyFilters()"> Apply Filter </button>
+        </div>
+
+    </div>
+  </div>
+</div>
+
 
 
 <div class="modal fade" id="printerModal" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
@@ -462,6 +511,51 @@
 
     } );
 
+    function filter_ta(){
+
+        jQuery.ajax({
+            url: "/search_by_ta?district=" + __$("informant_district").value,
+            success: function(data){
+                data = data.split("\n");
+                jQuery("#informant_ta").empty();
+                jQuery("#informant_village").empty();
+
+
+                var option       = document.createElement("option");
+                option.innerHTML = "";
+                document.getElementById("informant_ta").appendChild(option);
+
+                for(var i = 0; i < data.length; i++){
+                    var option       = document.createElement("option");
+                    option.innerHTML = data[i].trim();
+                    document.getElementById("informant_ta").appendChild(option);
+                }
+            }
+        })
+    }
+
+    function filter_village(){
+        __$("informant_village").value = "";
+
+        jQuery.ajax({
+            url: "/search_by_village?district=" + __$("informant_district").value + "&ta=" + __$("informant_ta").value,
+            success: function(data){
+                data = data.split("\n");
+                jQuery("#informant_village").empty();
+
+                var option       = document.createElement("option");
+                option.innerHTML = "";
+                document.getElementById("informant_village").appendChild(option);
+
+                for(var i = 0; i < data.length; i++){
+                    var option       = document.createElement("option");
+                    option.innerHTML = data[i].trim();
+                    document.getElementById("informant_village").appendChild(option);
+                }
+            }
+        })
+    }
+
     function initTable(){
 
         table =  $i('#example').DataTable(
@@ -478,6 +572,9 @@
                             d.type = type;
                             d.category = __$('category').value;
                             d.facility_id = __$('facility').value;
+                            d.informant_district = __$('informant_district').value;
+                            d.informant_ta = __$('informant_ta').value;
+                            d.informant_village = __$('informant_village').value;
                         },
                         dataFilter: function(data){
                             var json = jQuery.parseJSON( data );
@@ -512,6 +609,10 @@
         type = name;
         __$("birth_type").value = name;
         table.ajax.reload();
+    }
+
+    function applyFilters(){
+        reloadDataTable()
     }
 
     function printAll() {

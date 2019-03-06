@@ -207,7 +207,7 @@ def resolve_duplicate
         end
     else
       redirect_to params[:next_path]
-     end
+    end
 end
 
 def duplicates
@@ -452,10 +452,16 @@ def incomplete_case_comment
     render :layout => "touch"
   end
 
+def villages
+
+end
+
 def print_certificates
 
   @type_stats = PersonRecordStatus.type_stats(['HQ-CAN-PRINT', "HQ-CAN-RE-PRINT"], params[:had], params[:had_by])
   facility_tag_id = LocationTag.where(name: "Health Facility").first.id
+  district_tag_id = LocationTag.where(name: "District").first.id
+
   printable_statuses = Status.where("name IN ('HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT')").map(&:status_id)
 
   @facilities = ActiveRecord::Base.connection.select_all("
@@ -465,6 +471,14 @@ def print_certificates
         GROUP BY location_created_at
           "
   ).collect{|c| [c['location_created_at'], c['name']]}
+
+  @districts = ActiveRecord::Base.connection.select_all("
+        SELECT l.location_id, l.name FROM location_tag_map m
+          INNER JOIN location l ON l.location_id = m.location_id
+          WHERE m.location_tag_id = #{district_tag_id}
+        GROUP BY l.location_id
+          "
+  ).collect{|c| [c['location_id'], c['name']]}
 
   cur_loc_id = SETTINGS['location_id']
   cur_loc_name = Location.find(cur_loc_id).name
@@ -557,6 +571,23 @@ def print_certificates
              AND prev_s.status_id IN (#{prev_state_ids.join(', ')})"
     end
 
+    informant_join_query = "  "
+    if !params[:informant_village].blank? && !params[:informant_ta].blank? && !params[:informant_district].blank?
+
+      district_id          = Location.locate_id_by_tag(params[:informant_district], "District")
+      ta_id                = Location.locate_id(params[:informant_ta], "Traditional Authority", district_id)
+      village_id           = Location.locate_id(params[:informant_village], "Village", ta_id)
+
+      info_type_id         = PersonRelationType.where(name: "Informant").first.id
+      informant_join_query = "INNER JOIN person_relationship p_rel ON p_rel.person_a = person.person_id
+                                AND p_rel.person_relationship_type_id = #{info_type_id}
+                              INNER JOIN person_addresses info_a ON info_a.person_id = p_rel.person_b
+                                AND info_a.current_district = #{district_id}
+                                AND info_a.current_ta = #{ta_id}
+                                AND info_a.current_village  = #{village_id}
+                              "
+    end
+
     faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
                                                 LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
                                                 WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
@@ -565,6 +596,7 @@ def print_certificates
     .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
+              #{informant_join_query}
               #{had_query}
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
     .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
