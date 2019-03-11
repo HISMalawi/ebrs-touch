@@ -41,11 +41,17 @@ class PersonBirthDetail < ActiveRecord::Base
     def birthplace
       place_of_birth = Location.find(self.place_of_birth).name
       r = nil
+
       if place_of_birth == "Hospital"
         r = Location.find(self.birth_location_id).name
+        if r == "Other"
+          d = Location.find(self.district_of_birth).name rescue nil
+          d = "" if d == "Other"
+          r = "#{self.other_birth_location}, #{d}"
+        end
       elsif place_of_birth == "Home"
         l =  Location.find(self.birth_location_id) rescue ""
-        r = "#{r.village}, #{l.ta}, #{r.district}" rescue ""
+        r = "#{l.village}, #{l.ta}, #{l.district}" rescue ""
       else
         d = Location.find(self.district_of_birth).name rescue nil
         d = "" if d == "Other"
@@ -91,6 +97,17 @@ class PersonBirthDetail < ActiveRecord::Base
         return complete
       end
 
+      #First Name|Last Name|Birthdate|Gender|Mother First Name|Mother Last Name|Father First Name when Parants Married|
+      #Father last name if parents married|Place of birth not nil, "" or "Other"
+
+      if name.first_name.blank?
+        return complete
+      end
+
+      if name.last_name.blank?
+        return complete
+      end
+
       if person.birthdate.blank?
         return complete
       end
@@ -107,10 +124,6 @@ class PersonBirthDetail < ActiveRecord::Base
         return complete
       end
 
-      if (mother_person.birthdate.blank? rescue true)
-        return complete
-      end
-
       if self.parents_married_to_each_other.to_s == '1'
 
         if (father_person.person_names.last.first_name.blank? rescue true)
@@ -120,6 +133,10 @@ class PersonBirthDetail < ActiveRecord::Base
         if (father_person.person_names.last.last_name.blank? rescue true)
           return complete
         end
+      end
+
+      if [nil, "", "Other"].include?(self.birthplace)
+        return complete
       end
 
       return true

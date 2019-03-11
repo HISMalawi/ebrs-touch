@@ -206,7 +206,7 @@ class PersonController < ApplicationController
             {
                 "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
                 "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "<span id='c_yes' style='color: white; font-weight: bold;' >Yes</span>".html_safe : "<span id='c_no' style='font-weight: bold; color: white;' >No</span>".html_safe
             },
             {
                 "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
