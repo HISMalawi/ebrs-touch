@@ -2221,6 +2221,7 @@ class PersonController < ApplicationController
               #{by_ds_at_filter} ")
       .where(" prs.status_id IN (#{state_ids.join(', ')})
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
+              AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
               AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
