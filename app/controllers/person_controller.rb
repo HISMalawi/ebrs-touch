@@ -303,9 +303,9 @@ class PersonController < ApplicationController
         ],
         "Details of Village Headman" => [
             {
-                "Village Name" => PersonAttribute.source_village(@person.person_id),
-                "Village Headman Name" => PersonAttribute.by_type(@person.person_id, "Village Headman Name"),
-                "Village Headman Signed" => PersonAttribute.by_type(@person.person_id, "Village Headman Signature")
+                "Village Name" => (PersonAttribute.source_village(@person.person_id) rescue ""),
+                "Village Headman Name" => (PersonAttribute.by_type(@person.person_id, "Village Headman Name") rescue ""),
+                "Village Headman Signed" => (PersonAttribute.by_type(@person.person_id, "Village Headman Signature") rescue "")
             }
         ]
     }

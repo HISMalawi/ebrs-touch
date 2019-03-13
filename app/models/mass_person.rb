@@ -177,7 +177,7 @@ class MassPerson < ActiveRecord::Base
     #Query by name
     person_ids = PersonName.find_by_sql(" SELECT pn.person_id FROM person_name pn
       INNER JOIN person_birth_details pbd ON pbd.person_id = pn.person_id AND pn.voided = 0
-      AND pn.first_name = '#{record[:first_name]}' AND pn.last_name = '#{record[:last_name]}'
+      AND pn.first_name = \"#{record[:first_name]}\" AND pn.last_name = \"#{record[:last_name]}\"
     ").map(&:person_id)
 
     return [] if person_ids.blank?
@@ -195,7 +195,7 @@ class MassPerson < ActiveRecord::Base
     person_ids = PersonName.find_by_sql(
         "SELECT pr.person_a FROM person_name pn INNER JOIN person_relationship pr ON pr.person_b = pn.person_id
           AND pn.voided = 0 AND pr.person_relationship_type_id IN (#{mother_relationship_ids.join(',')})
-          AND pn.first_name = '#{record[:mother_first_name]}' AND pn.last_name = '#{record[:mother_last_name]}' AND pr.person_a IN (#{person_ids.join(',')})"
+          AND pn.first_name = \"#{record[:mother_first_name]}\" AND pn.last_name = \"#{record[:mother_last_name]}\" AND pr.person_a IN (#{person_ids.join(',')})"
     ).collect{|p| p.person_a}
 
     return [] if person_ids.blank?
