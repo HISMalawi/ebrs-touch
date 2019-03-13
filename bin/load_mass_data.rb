@@ -18,18 +18,18 @@ ALTER TABLE person_birth_details MODIFY number_of_prenatal_visits INT NULL
 EOF
 
 
-last_2017_ben = ActiveRecord::Base.connection.execute <<EOF
+last_2018_ben = ActiveRecord::Base.connection.execute <<EOF
     SELECT MAX(district_id_number) ben FROM person_birth_details;
 EOF
 
 
-last_2017_ben2 = ActiveRecord::Base.connection.execute <<EOF
-    SELECT MAX(value) ben FROM person_identifiers WHERE value LIKE '%/%/%2017';
+last_2018_ben2 = ActiveRecord::Base.connection.execute <<EOF
+    SELECT MAX(value) ben FROM person_identifiers WHERE value LIKE '%/%/%2018';
 EOF
 
-last_2017_ben =  [(last_2017_ben.first[0].split("/")[1].to_i rescue 0), (last_2017_ben2.first[0].split("/")[1].to_i rescue 0)].max
+last_2018_ben =  [(last_2018_ben.first[0].split("/")[1].to_i rescue 0), (last_2018_ben2.first[0].split("/")[1].to_i rescue 0)].max
 
-$counter = last_2017_ben
+$counter = last_2018_ben
 $district_code = Location.find(SETTINGS['location_id']).code
 puts $counter
 puts "Last BEN: #{$counter}"
@@ -49,7 +49,7 @@ def assign_next_ben(person_id)
 
   $counter = $counter.to_i + 1
   mid_number = $counter.to_s.rjust(8,'0')
-  ben = "#{$district_code}/#{mid_number}/2017"
+  ben = "#{$district_code}/#{mid_number}/2018"
   ActiveRecord::Base.connection.execute <<EOF
     UPDATE person_birth_details SET district_id_number = '#{ben}' WHERE person_id = #{person_id}
 EOF
@@ -84,25 +84,17 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
     end
 
     formated = MassPerson.format_person(record)
-    exact_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 100)
+    exact_duplicates =  MassPerson.exact_duplicates(record) #SimpleElasticSearch.query_duplicate_coded(formated, 100)
+
 
     if exact_duplicates.length > 0
 
+      status = "DC-DUPLICATE"
+      outcome = "Exact Duplicate"
       exact_dup << record.attributes.values.join(",")
-      record.upload_datetime = Time.now
-      record.upload_number = upload_number
-      record.upload_status = "UPLOADED"
-      record.save!
-
-      RecordChecks.create(
-          person_id: (-1 * record.id),
-          outcome: "Exact Duplicate"
-      )
-
-      next
     end
 
-    potential_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 80)
+    potential_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 85)
     if potential_duplicates.length > 0
       status = "DC-POTENTIAL DUPLICATE"
       outcome = "Potential Duplicate"

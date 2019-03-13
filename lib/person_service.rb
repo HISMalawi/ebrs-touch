@@ -375,19 +375,6 @@ module PersonService
 
   def self.create_mass_registration_person(mass_reg_person, status)
 
-    PersonTypeOfBirth.create(
-        name: "Unknown"
-    ) if PersonTypeOfBirth.where(name: "Unknown").blank?
-
-    ModeOfDelivery.create(
-        name: "Unknown"
-    ) if ModeOfDelivery.where(name: "Unknown").blank?
-
-    LevelOfEducation.create(
-        name: "Unknown"
-    ) if LevelOfEducation.where(name: "Unknown").blank?
-
-
     user_id = User.where(username: "admin#{SETTINGS['location_id']}").last.id
     codes = JSON.parse(File.read("#{Rails.root}/db/code2country.json"))
 
@@ -435,7 +422,7 @@ module PersonService
         other_birth_location: other_place,
         type_of_birth: PersonTypeOfBirth.where(name: "Unknown").last.id,
         mode_of_delivery_id: ModeOfDelivery.where(name: "Unknown").last.id,
-        location_created_at: Location.locate_id_by_tag(mass_reg_person["district_created_at"], "District"),
+        location_created_at: Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Village"),
         acknowledgement_of_receipt_date: mass_reg_person["created_at"].to_date.to_s,
         date_reported: mass_reg_person["created_at"].to_date.to_s,
         date_registered: mass_reg_person["created_at"].to_date.to_s,
@@ -444,7 +431,7 @@ module PersonService
         form_signed: (mass_reg_person[:form_signed] == "Yes" ? 1 : 0),
         flagged: 1,
         creator: user_id,
-        source_id: (-1 * mass_reg_person['id'].to_i)
+        source_id: (-1 * mass_reg_person['id'].to_i).to_s + "#" + mass_reg_person["creator"]
     )
 
     #create_mother
@@ -596,6 +583,10 @@ module PersonService
         f.write(mass_reg_person[:informant_id_number])
       }
 
+    elsif mass_reg_person[:informant_relationship] == "Mother" && !mother_person.blank?
+      informant_person = mother_person
+    elsif mass_reg_person[:informant_relationship] == "Father" && !father_person.blank?
+      informant_person = father_person
     else
 
       informant_person = CorePerson.create(
@@ -630,14 +621,15 @@ module PersonService
           :current_ta => i_ta_id,
           :current_village => i_village_id,
           :citizenship => i_resident_country,
-          :residential_country => i_resident_country
+          :residential_country => i_resident_country,
+          :address_line_1 => mass_reg_person[:informant_address_line1],
+          :address_line_2 => (mass_reg_person[:informant_address_line2].to_s + "  " + mass_reg_person[:informant_address_line3])
       )
 
       pai.save
 
       #create father_identifier
       if mass_reg_person[:informant_id_number].present?
-
         PersonIdentifier.create(
             person_id: informant_person.person_id,
             person_identifier_type_id: (PersonIdentifierType.find_by_name("National ID Number").id),
@@ -654,7 +646,34 @@ module PersonService
     )
 
 
-    PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM MASS REGISTRATION")
+    if mass_reg_person[:informant_phone_number].present?
+      PersonAttribute.create(
+          :person_id                => informant_person.id,
+          :person_attribute_type_id => PersonAttributeType.where(name: 'cell phone number').last.id,
+          :value                    => mass_reg_person[:informant_phone_number],
+          :voided                   => 0
+      )
+    end
+
+    if mass_reg_person[:village_headman_name].present?
+      PersonAttribute.create(
+          :person_id                => core_person.id,
+          :person_attribute_type_id => PersonAttributeType.where(name: 'Village Headman Name').last.id,
+          :value                    => mass_reg_person[:village_headman_name],
+          :voided                   => 0
+      )
+    end
+
+    if mass_reg_person[:village_headman_signed].present?
+      PersonAttribute.create(
+          :person_id                => informant_person.id,
+          :person_attribute_type_id => PersonAttributeType.where(name: 'Village Headman Signature').last.id,
+          :value                    => mass_reg_person[:village_headman_signed],
+          :voided                   => 0
+      )
+    end
+
+    PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM COMMUNITY REGISTRATION")
 
 =begin
     allocation = IdentifierAllocationQueue.new

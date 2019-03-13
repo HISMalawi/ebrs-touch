@@ -158,4 +158,63 @@ class MassPerson < ActiveRecord::Base
 
     return true
   end
+
+=begin
+
+  This method checks the exact duplicate of record by checking
+  child_first_name
+  child_last_name
+  child_gender
+  child_birthdate
+  mother_first_name
+  mother_last_name
+  child_district_of_birth
+=end
+
+  def self.exact_duplicates(record)
+
+    mother_relationship_ids = PersonRelationType.where(" name IN ('Mother', 'Adoptive-Mother') ").collect{|r| r.id}
+    #Query by name
+    person_ids = PersonName.find_by_sql(" SELECT pn.person_id FROM person_name pn
+      INNER JOIN person_birth_details pbd ON pbd.person_id = pn.person_id AND pn.voided = 0
+      AND pn.first_name = '#{record[:first_name]}' AND pn.last_name = '#{record[:last_name]}'
+    ").map(&:person_id)
+
+    return [] if person_ids.blank?
+
+    #Query by gender and birthdate
+    gender = {'Female' => 'F', 'Male' => 'M'}[record[:gender]]
+
+    person_ids = Person.find_by_sql(" SELECT person_id FROM person
+                  WHERE person_id IN (#{person_ids.join(',')}) AND gender ='#{gender}'
+                  AND birthdate = '#{record[:date_of_birth].to_date.to_s}' ").collect{|p| p.person_id}
+
+
+    return [] if person_ids.blank?
+
+    person_ids = PersonName.find_by_sql(
+        "SELECT pr.person_a FROM person_name pn INNER JOIN person_relationship pr ON pr.person_b = pn.person_id
+          AND pn.voided = 0 AND pr.person_relationship_type_id IN (#{mother_relationship_ids.join(',')})
+          AND pn.first_name = '#{record[:mother_first_name]}' AND pn.last_name = '#{record[:mother_last_name]}' AND pr.person_a IN (#{person_ids.join(',')})"
+    ).collect{|p| p.person_a}
+
+    return [] if person_ids.blank?
+
+    #Query by place of birth
+    map =  {'Mzuzu City' => 'Mzimba',
+            'Lilongwe City' => 'Lilongwe',
+            'Zomba City' => 'Zomba',
+            'Blantyre City' => 'Blantyre'}
+
+    record[:district_of_birth] = map[record[:district_of_birth]] if record[:district_of_birth].match(/City$/)
+    district_id = Location.locate_id_by_tag(record[:district_of_birth], 'District')
+
+    person_ids = PersonBirthDetail.find_by_sql("
+      SELECT person_id FROM person_birth_details pbd
+        WHERE district_of_birth = #{district_id} AND person_id IN (#{person_ids.join(',')})
+    ").collect{|p| p.person_id}
+
+    return person_ids
+  end
+
 end
