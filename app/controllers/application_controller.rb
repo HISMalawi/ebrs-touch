@@ -124,22 +124,6 @@ class ApplicationController < ActionController::Base
     informant = Person.find(informant_id)
     informant_name = PersonName.find_by_person_id(informant_id)
 
-    location_of_birth =""
-    place_of_birth = Location.find(birth_details.place_of_birth).name
-    case place_of_birth.downcase
-    when "hospital"
-      location_of_birth = Location.find(birth_details.birth_location_id).name
-    when "home"
-      village_of_birth = Location.find(birth_details.birth_location_id)
-      ta_of_birth  = Location.find(village_of_birth.parent_location)
-      district_of_birth = Location.find(ta_of_birth.parent_location)
-      location_of_birth = (village_of_birth.name rescue '') +" "+ (ta_of_birth.name rescue '') +" "+
-                          (district_of_birth.name rescue '')
-
-    when "other"
-      location_of_birth = birth_details.other_birth_location
-    end
-
     person = {
               id: person.id,
               first_name: person_name.first_name,
@@ -151,7 +135,7 @@ class ApplicationController < ActionController::Base
               gender: person.gender,
               status: person_status,
               place_of_birth: (Location.find(birth_details.place_of_birth).name rescue nil),
-              location_of_birth: location_of_birth,
+              location_of_birth: birth_details.birthplace,
               hospital_of_birth: (Location.find(birth_details.birth_location_id).name rescue nil),
               birth_address: (person.birth_address rescue nil),
               village_of_birth: (person.birth_village rescue nil),

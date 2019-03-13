@@ -75,8 +75,8 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
          record["district_of_birth"], record["ta_of_birth"], record["village_of_birth"] ] & ["", nil]).length > 0 ||
         ((!record["father_first_name"].blank? || !record["father_last_name"].blank? ||
             !record["father_nationality"].blank? ) &&
-        [record["father_first_name"], record["father_last_name"],
-         record["father_nationality"]] & ["", nil]).length > 0
+        ([record["father_first_name"], record["father_last_name"],
+         record["father_nationality"]] & ["", nil]).length > 0)
 
       status = "DC-INCOMPLETE"
       outcome = "Incomplete Record"
@@ -104,6 +104,13 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
     ActiveRecord::Base.transaction do
       person_id = record.map_to_ebrs_tables(upload_number, status)
 
+      if exact_duplicates.present?
+        exact_duplicate = PotentialDuplicate.create(person_id: person_id, created_at: (Time.now))
+        exact_duplicates.each do |pid|
+          exact_duplicate.create_duplicate(pid) #rescue nil
+        end
+      end
+
       if potential_duplicates.present?
         potential_duplicate = PotentialDuplicate.create(person_id: person_id, created_at: (Time.now))
         potential_duplicates.each do |result|
@@ -122,6 +129,8 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
       formated["id"] = person_id
       SimpleElasticSearch.add(formated)
+
+      puts "#{person_id} # #{status} # #{outcome}"
     end
   end
 

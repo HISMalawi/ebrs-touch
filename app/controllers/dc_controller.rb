@@ -578,14 +578,7 @@ def print_certificates
       ta_id                = Location.locate_id(params[:informant_ta], "Traditional Authority", district_id)
       village_id           = Location.locate_id(params[:informant_village], "Village", ta_id)
 
-      info_type_id         = PersonRelationType.where(name: "Informant").first.id
-      informant_join_query = "INNER JOIN person_relationship p_rel ON p_rel.person_a = person.person_id
-                                AND p_rel.person_relationship_type_id = #{info_type_id}
-                              INNER JOIN person_addresses info_a ON info_a.person_id = p_rel.person_b
-                                AND info_a.current_district = #{district_id}
-                                AND info_a.current_ta = #{ta_id}
-                                AND info_a.current_village  = #{village_id}
-                              "
+      village_filter_query = " AND pbd.location_created_at  = #{village_id}"
     end
 
     faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
@@ -596,11 +589,11 @@ def print_certificates
     .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
-              #{informant_join_query}
               #{had_query}
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
     .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
               AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
+              #{village_filter_query}
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query} #{facility_filter}
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
               person.birthdate, person.gender) REGEXP \"#{search_val}\"  #{search_category} ")
@@ -621,9 +614,9 @@ def print_certificates
       father = PersonService.father(p.person_id)
       details = PersonBirthDetail.find_by_person_id(p.person_id)
 
-      p['first_name'] = '' if p['first_name'].match('@')
-      p['last_name'] = '' if p['last_name'].match('@')
-      p['middle_name'] = '' if p['middle_name'].match('@')
+      p['first_name'] = '' if p['first_name'].present? && p['first_name'].match('@')
+      p['last_name'] = '' if p['last_name'].present? && p['last_name'].match('@')
+      p['middle_name'] = '' if p['middle_name'].present? && p['middle_name'].match('@')
 
       name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
       mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")

@@ -503,17 +503,13 @@ module PersonService
     )
 
     #create_father
-
     if mass_reg_person[:father_first_name].present? && mass_reg_person[:father_last_name].present?
 
       exi_father = PersonIdentifier.where(value: mass_reg_person[:father_id_number], voided: 0).first
 
       if !exi_father.blank?
         core_person = CorePerson.where(person_id: exi_father.person_id).first
-        File.open("#{Rails.root}/existing_ids", "a"){|f|
-          f.write(mass_reg_person[:father_id_number])
-        }
-        #father_person = Person.where(person_id: exi_father.person_id).first
+        father_person = Person.where(person_id: exi_father.person_id).first
       else
 
         core_person = CorePerson.create(
@@ -579,10 +575,6 @@ module PersonService
 
     if !exi_informant.blank?
       informant_person = CorePerson.where(person_id: exi_informant.person_id).first
-      File.open("#{Rails.root}/existing_ids", "a"){|f|
-        f.write(mass_reg_person[:informant_id_number])
-      }
-
     elsif mass_reg_person[:informant_relationship] == "Mother" && !mother_person.blank?
       informant_person = mother_person
     elsif mass_reg_person[:informant_relationship] == "Father" && !father_person.blank?
@@ -623,7 +615,7 @@ module PersonService
           :citizenship => i_resident_country,
           :residential_country => i_resident_country,
           :address_line_1 => mass_reg_person[:informant_address_line1],
-          :address_line_2 => (mass_reg_person[:informant_address_line2].to_s + "  " + mass_reg_person[:informant_address_line3])
+          :address_line_2 => (mass_reg_person[:informant_address_line2].to_s + "  " + mass_reg_person[:informant_address_line3].to_s).strip
       )
 
       pai.save
@@ -657,7 +649,7 @@ module PersonService
 
     if mass_reg_person[:village_headman_name].present?
       PersonAttribute.create(
-          :person_id                => core_person.id,
+          :person_id                => details.person_id,
           :person_attribute_type_id => PersonAttributeType.where(name: 'Village Headman Name').last.id,
           :value                    => mass_reg_person[:village_headman_name],
           :voided                   => 0
@@ -666,7 +658,7 @@ module PersonService
 
     if mass_reg_person[:village_headman_signed].present?
       PersonAttribute.create(
-          :person_id                => informant_person.id,
+          :person_id                => details.person_id,
           :person_attribute_type_id => PersonAttributeType.where(name: 'Village Headman Signature').last.id,
           :value                    => mass_reg_person[:village_headman_signed],
           :voided                   => 0

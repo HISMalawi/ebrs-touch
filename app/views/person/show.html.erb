@@ -567,12 +567,12 @@
                       "<tr><th colspan='4'>Child's details</th><th colspan='2'>Mother's details</th><th colspan='2'>Father's details</th><th rowspan='2'>Similarity</th></tr>"+
                       "<tr><th>First Name</th><th>Surname</th><th>Sex</th><th>DOB</th>"+
                       "<th>First Name</th><th>Last Name</th><th>First Name</th><th>Last Name</th></tr>"+
-                      "<td><%=@name.first_name %></td>"+
-                      "<td><%=@name.last_name %></td>"+
-                      "<td><%=@person.gender %></td>"+
-                      "<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') %></td>"+
-                      "<td><%= @mother_name.first_name %></td>"+
-                      "<td><%= @mother_name.last_name %></td>"+
+                      "<td><%=@name.first_name rescue 'N/A'%></td>"+
+                      "<td><%=@name.last_name rescue 'N/A'%></td>"+
+                      "<td><%=@person.gender rescue 'N/A'%></td>"+
+                      "<td><%= @person.birthdate.to_date.strftime('%d/%b/%Y') rescue 'N/A'%></td>"+
+                      "<td><%= @mother_name.first_name rescue 'N/A'%></td>"+
+                      "<td><%= @mother_name.last_name rescue 'N/A'%></td>"+
                       "<td><%= @father_name.first_name rescue 'N/A' %></td>"+
                       "<td><%= @father_name.last_name rescue 'N/A' %></td>"+
                       "<td></td>"+

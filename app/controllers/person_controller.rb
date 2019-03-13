@@ -300,6 +300,13 @@ class PersonController < ApplicationController
                 "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
                 ["Delayed Registration", "sub"] => "#{@delayed}"
             }
+        ],
+        "Details of Village Headman" => [
+            {
+                "Village Name" => PersonAttribute.source_village(@person.person_id),
+                "Village Headman Name" => PersonAttribute.by_type(@person.person_id, "Village Headman Name"),
+                "Village Headman Signed" => PersonAttribute.by_type(@person.person_id, "Village Headman Signature")
+            }
         ]
     }
 
