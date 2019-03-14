@@ -1906,9 +1906,6 @@ class PersonController < ApplicationController
   def ammend_case
     @person = Person.find(params[:id])
     @status = PersonRecordStatus.status(@person.id)
-    if @status != "DC-AMEND"
-       #PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
-    end
 
     @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
@@ -1916,7 +1913,10 @@ class PersonController < ApplicationController
     @name = @person.person_names.last
 
     @person_prev_values = {}
-    name_fields = ['first_name','last_name','middle_name',"gender","birthdate","birth_location_id","citizenship"]
+    name_fields = ['person_name', "gender","birthdate",
+                   "place_of_birth", "mother_name", "father_name",
+                   "mother_citizenship", "father_citizenship"]
+
     name_fields.each do |field|
         trail = AuditTrail.where(person_id: params[:id], field: field).order('created_at').last
         if trail.present?
@@ -1924,57 +1924,18 @@ class PersonController < ApplicationController
         end
     end
 
-    if @person_prev_values['first_name'].present? || @person_prev_values['last_name'].present?
-        name = "#{@person_prev_values['first_name'].present? ? @person_prev_values['first_name'] : @name.first_name} "+
-               "#{@person_prev_values['middle_name'].present? ? @person_prev_values['middle_name'] : (@name.middle_name rescue '')} " +
-               "#{@person_prev_values['last_name'].present? ? @person_prev_values['last_name'] : @name.last_name}"
-        @person_prev_values["person_name"] = name
-    end
-
-
-
     @address = @person.addresses.last
 
     @mother_person = @person.mother
     @mother_address = @mother_person.addresses.last
     @mother_name = @mother_person.person_names.last rescue nil
     @mother_nationality = Location.find(@mother_address.citizenship).country
-    @mother_prev_values = {}
-    name_fields.each do |field|
-        trail = AuditTrail.where(person_id: @mother_person.id, field: field).order('created_at').last
-        if trail.present?
-            @mother_prev_values[field] = trail.previous_value
-        end
-    end
-
-    if @mother_prev_values['first_name'].present? || @mother_prev_values['last_name'].present?
-        mother_name = "#{@mother_prev_values['first_name'].present? ? @mother_prev_values['first_name'] : @mother_name.first_name} "+
-               "#{@mother_prev_values['middle_name'].present? ? @mother_prev_values['middle_name'] : (@mother_name.middle_name rescue '')} " +
-               "#{@mother_prev_values['last_name'].present? ? @mother_prev_values['last_name'] : @mother_name.last_name}"
-        @person_prev_values["mother_name"] = mother_name
-    end
 
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
     @father_address = @father_person.addresses.last
     @father_nationality = Location.find(@father_address.citizenship).country
-    @father_prev_values = {}
-    name_fields.each do |field|
-        break if @father_person.blank?
-        trail = AuditTrail.where(person_id: @father_person.id, field: field).order('created_at').last
 
-        if trail.present?
-            @father_prev_values[field] = trail.previous_value
-        end
-    end
-
-    if @father_prev_values['first_name'].present? || @father_prev_values['last_name'].present?
-        father_name = "#{@father_prev_values['first_name'].present? ? @father_prev_values['first_name'] : @father_name.first_name} "+
-               "#{@father_prev_values['middle_name'].present? ? @father_prev_values['middle_name'] : (@father_name.middle_name rescue '')} " +
-               "#{@father_prev_values['last_name'].present? ? @father_prev_values['last_name'] : @father_name.last_name}"
-        @person_prev_values["father_name"] = father_name
-    end 
-    
     @targeturl = session[:list_url] 
     @section = 'Ammend Case'
     render :layout => "facility"
@@ -1997,9 +1958,13 @@ class PersonController < ApplicationController
 
   def amend_field
     fields = params[:fields].split(",")
+    user_id = User.current.id
     
     if fields.include? "Name"
+      person      = Person.find(params[:id])
       person_name = PersonName.find_by_person_id(params[:id])
+      AuditTrail.create_ammendment_trail(params[:id], "person_name", person.name, user_id)
+
       person_name.update_attributes(voided: true, void_reason: 'Amendment edited')
       person_name = PersonName.create(person_id: params[:id],
             first_name: params[:person][:first_name],
@@ -2007,10 +1972,18 @@ class PersonController < ApplicationController
     end
     if fields.include? "Date of birth"
         person = Person.find(params[:id])
+        AuditTrail.create_ammendment_trail(params[:id], "birthdate", person.birthdate, user_id)
+
         person.update_attributes(birthdate: params[:person][:birthdate], birthdate_estimated: (params[:person][:birthdate_estimated]? params[:person][:birthdate_estimated] : 0))
     end
     if fields.include? "Sex"
        person = Person.find(params[:id])
+
+       gender_n = {"F" => "Female", "M" => "Male"}[person.gender]
+       gender_n = person.gender if gender_n.blank?
+
+       AuditTrail.create_ammendment_trail(params[:id], "gender", gender_n, user_id)
+
        gender = params[:person][:gender]  == "Female" ? 'F' : 'M'
        person.update_attributes(gender: gender)
     end
@@ -2018,7 +1991,9 @@ class PersonController < ApplicationController
         person_birth_details = PersonBirthDetail.where(person_id: params[:id]).last
         place_of_birth = params[:person][:place_of_birth]
         place_of_birth_id = Location.locate_id_by_tag(params[:person][:place_of_birth], 'Place of Birth')
-        
+
+        AuditTrail.create_ammendment_trail(params[:id], "place_of_birth", person_birth_details.birthplace, user_id)
+
         case place_of_birth
         when "Home"
           district_id = Location.locate_id_by_tag(params[:person][:birth_district], 'District')
@@ -2064,16 +2039,14 @@ class PersonController < ApplicationController
     if fields.include? "Name of mother"
         person = Person.find(params[:id])
         person_mother_name = person.mother.person_names.last
+
+        AuditTrail.create_ammendment_trail(params[:id], "mother_name", (person.mother.name rescue nil), user_id)
+
         person_mother_name.update_attributes(voided: true, void_reason: 'Amendment edited')
         person_mother_name = PersonName.create(person_id: person.mother.id,
             first_name: params[:person][:mother][:first_name],
             last_name: params[:person][:mother][:last_name],
             middle_name: params[:person][:mother][:middle_name])
-
-        PersonNameCode.create(person_name_id: person_mother_name.person_name_id,
-            first_name_code: params[:person][:mother][:first_name].soundex,
-            last_name_code: params[:person][:mother][:last_name].soundex,
-            middle_name_code: params[:person][:mother][:middle_name].soundex)
     end
     if fields.include? "Name of father"
         person = Person.find(params[:id])
@@ -2081,10 +2054,15 @@ class PersonController < ApplicationController
 
         if @father_person.present?
           person_father_name = person.father.person_names.last
-            if person_father_name.present?
-              person_father_name.update_attributes(voided: true, void_reason: 'Amendment edited')
-            end
+
+          AuditTrail.create_ammendment_trail(params[:id], "father_name", (person.father.name rescue nil), user_id)
+
+          if person_father_name.present?
+            person_father_name.update_attributes(voided: true, void_reason: 'Amendment edited')
+          end
         else
+            AuditTrail.create_ammendment_trail(params[:id], "father_name", "", user_id)
+
             core_person = CorePerson.create(
                 :person_type_id     => PersonType.where(name: 'Father').last.id,
             )
@@ -2119,6 +2097,10 @@ class PersonController < ApplicationController
         @mother_person = person.mother
         location = Location.where(country: params[:person][:mother][:citizenship]).first
         @mother_address = @mother_person.addresses.last
+
+        m_c = Location.find(@mother_address.citizenship).country rescue nil
+        AuditTrail.create_ammendment_trail(params[:id], "mother_citizenship", m_c, user_id)
+
         @mother_address.citizenship = location.id
         @mother_address.save
     end
@@ -2126,8 +2108,13 @@ class PersonController < ApplicationController
     if fields.include? "Nationality of Father"
         person = Person.find(params[:id])
         @father_person = person.father
+
         location = Location.where(country: params[:person][:father][:citizenship]).first
         @father_address = @father_person.addresses.last
+
+        f_c = Location.find(@father_address.citizenship).country rescue nil
+        AuditTrail.create_ammendment_trail(params[:id], "father_citizenship", f_c , user_id)
+
         @father_address.citizenship = location.id
         @father_address.save
     end

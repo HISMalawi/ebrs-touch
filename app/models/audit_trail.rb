@@ -13,4 +13,15 @@ class AuditTrail < ActiveRecord::Base
     	self.ip_address = 	(AuditTrail.ip_address_accessor rescue (request.remote_ip rescue `ip route show`[/default.*/][/\d+\.\d+\.\d+\.\d+/]))
     	self.mac_address =  (AuditTrail.mac_address_accessor rescue (` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2] rescue MacAddress.address))
     end
+
+    def self.create_ammendment_trail(person_id, field, value, user_id)
+      type_id = AuditTrailType.where(name: "AMMENDMENT").first.id
+      AuditTrail.create(
+        audit_trail_type_id: type_id,
+        person_id: person_id,
+        field: field,
+        previous_value: value,
+        creator: user_id
+      )
+    end
 end
