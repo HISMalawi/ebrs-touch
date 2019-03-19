@@ -109,7 +109,7 @@ class PersonController < ApplicationController
     @informant_name = @informant_person.person_names.last rescue nil
 
     @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
-    days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
+    days_gone = ((@birth_details.date_reported.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
     @delayed =  days_gone > 42 ? "Yes" : "No"
     location = Location.find(SETTINGS['location_id'])
     facility_code = location.code
