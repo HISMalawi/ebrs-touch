@@ -585,14 +585,14 @@ module PersonService
           :person_type_id     => PersonType.where(name: 'Informant').last.id,
       )
 
-      #create father_person
+      #create informant_person
       informant_person = Person.create(
           :person_id          => informant_person.id,
           :gender             => 'N/A',
           :birthdate          =>  "1900-01-01".to_date.to_s,
           :birthdate_estimated => true
       )
-      #create father_name
+      #create informant_name
       PersonName.create(
           :person_id          => informant_person.id,
           :first_name         => mass_reg_person[:informant_first_name],
@@ -600,27 +600,7 @@ module PersonService
           :last_name          => mass_reg_person[:informant_last_name]
       )
 
-      #create father_address
-      i_district_id = Location.locate_id_by_tag(mass_reg_person["informant_district"], "District")
-      i_ta_id = Location.locate_id(mass_reg_person["informant_ta"], "Traditional Authority", district_id)
-      i_village_id = Location.locate_id(mass_reg_person["informant_village"], "Village", ta_id)
-      i_resident_country = Location.locate_id_by_tag(mass_reg_person[:informant_nationality], 'Country')
-      i_resident_country = Location.where(name: "Other").first.id if i_resident_country.blank?
-
-      pai = PersonAddress.new(
-          :person_id          => informant_person.id,
-          :current_district  => i_district_id,
-          :current_ta => i_ta_id,
-          :current_village => i_village_id,
-          :citizenship => i_resident_country,
-          :residential_country => i_resident_country,
-          :address_line_1 => mass_reg_person[:informant_address_line1],
-          :address_line_2 => (mass_reg_person[:informant_address_line2].to_s + "  " + mass_reg_person[:informant_address_line3].to_s).strip
-      )
-
-      pai.save
-
-      #create father_identifier
+      #create informant identifier
       if mass_reg_person[:informant_id_number].present?
         PersonIdentifier.create(
             person_id: informant_person.person_id,
@@ -629,6 +609,26 @@ module PersonService
         )
       end
     end
+
+    #create informant_address
+    pai = PersonAddress.where(person_id: informant_person.person_id).first
+    i_district_id = Location.locate_id_by_tag(mass_reg_person["informant_district"], "District")
+    i_ta_id = Location.locate_id(mass_reg_person["informant_ta"], "Traditional Authority", district_id)
+    i_village_id = Location.locate_id(mass_reg_person["informant_village"], "Village", ta_id)
+    i_resident_country = Location.locate_id_by_tag(mass_reg_person[:informant_nationality], 'Country')
+    i_resident_country = Location.where(name: "Other").first.id if i_resident_country.blank?
+
+    pai = PersonAddress.new() if pai.blank?
+    pai.person_id         = informant_person.person_id
+    pai.current_district  = i_district_id
+    pai.current_ta = i_ta_id
+    pai.current_village = i_village_id
+    pai.citizenship = i_resident_country
+    pai.residential_country = i_resident_country
+    pai.address_line_1 = mass_reg_person[:informant_address_line1]
+    pai.address_line_2 = (mass_reg_person[:informant_address_line2].to_s + "  " + mass_reg_person[:informant_address_line3].to_s).strip
+
+    pai.save
 
 
     PersonRelationship.create(

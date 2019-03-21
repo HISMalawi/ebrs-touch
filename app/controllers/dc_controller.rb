@@ -578,21 +578,34 @@ def print_certificates
       ta_id                = Location.locate_id(params[:informant_ta], "Traditional Authority", district_id)
       village_id           = Location.locate_id(params[:informant_village], "Village", ta_id)
 
-      village_filter_query = " AND pbd.location_created_at  = #{village_id}"
+      village_filter_query = " " #" AND pbd.location_created_at  = #{village_id}"
+
+      info_type_id         = PersonRelationType.where(name: "Informant").first.id
+      informant_join_query = "INNER JOIN person_relationship p_rel ON p_rel.person_a = person.person_id
+                                AND p_rel.person_relationship_type_id = #{info_type_id}
+                              INNER JOIN person_addresses info_a ON info_a.person_id = p_rel.person_b
+                                AND ((info_a.current_district = #{district_id}
+                                      AND info_a.current_ta = #{ta_id}
+                                      AND info_a.current_village  = #{village_id})
+                                        OR
+                                      (pbd.location_created_at  = #{village_id}))
+                              "
+
     end
 
-    faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
-                                                LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
-                                                WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+    #faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+     #                                           LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+       #                                         WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
 
     d = Person.order(" pbd.district_id_number, pbd.national_serial_number, n.first_name, n.last_name, cp.created_at ")
     .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
               INNER JOIN person_name n ON person.person_id = n.person_id
               INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
               #{had_query}
-              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id ")
+              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
+              #{informant_join_query}
+    ")
     .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
-              AND prs.person_record_status_id NOT IN (#{faulty_ids.join(', ')})
               #{village_filter_query}
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query} #{facility_filter}
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,

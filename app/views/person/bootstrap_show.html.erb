@@ -1032,7 +1032,7 @@
             alert("Please select printer!");
             return;
         }
-        window.location = "/person/dispatch_certificates?person_ids=<%= params[:person_id]%>&printer_name=" + printer_name;
+        window.location = "/person/dispatch_certificates?person_ids=<%= params[:id]%>&printer_name=" + printer_name;
     }
 
     function ajaxTrace(){
@@ -1042,7 +1042,7 @@
 
     function revalidate(){
 
-        var url = "/revalidate?person_id=<%= params[:person_id]%>";
+        var url = "/revalidate?person_id=<%= params[:id]%>";
         jQuery.ajax(
                 {
                     url: url,
@@ -1070,6 +1070,17 @@
         highlightNRISDiff();
 
     <% end %>
+
+
+    jQuery.ajax({
+        url: "/check_print_rules?person_ids=<%=params[:id]%>",
+        success: function(res){
+            if(res == "OK"){
+            }else{
+                alert("Missing printing requirement: BARCODE");
+            }
+        }
+    })
 
 
     <% if !@online %>
