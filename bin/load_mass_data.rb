@@ -19,7 +19,7 @@ EOF
 
 
 last_2018_ben = ActiveRecord::Base.connection.execute <<EOF
-    SELECT MAX(district_id_number) ben FROM person_birth_details;
+    SELECT MAX(district_id_number) ben FROM person_birth_details WHERE district_id_number LIKE '%/%/%2018';
 EOF
 
 
@@ -50,9 +50,10 @@ def assign_next_ben(person_id)
   $counter = $counter.to_i + 1
   mid_number = $counter.to_s.rjust(8,'0')
   ben = "#{$district_code}/#{mid_number}/2018"
-  ActiveRecord::Base.connection.execute <<EOF
-    UPDATE person_birth_details SET district_id_number = '#{ben}' WHERE person_id = #{person_id}
-EOF
+
+  pbd = PersonBirthDetail.where(person_id: person_id).first
+  pbd.district_id_number = ben
+  pbd.save
 
   PersonIdentifier.new_identifier(person_id, 'Birth Entry Number', ben)
 
