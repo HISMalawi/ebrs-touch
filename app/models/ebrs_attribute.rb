@@ -15,78 +15,59 @@ end
 module EbrsAttribute
 
   def send_data(hash)
-    raw_id = hash.id
+
+    return nil if SETTINGS["mass_data_migration_mode"].to_s == "true"
+		raw = hash
     hash = hash.as_json
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
 
-    district_id = nil
     location_id = nil
     person_id = hash['person_id']
     person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
     person_id = User.where(user_id: hash['user_id']).first.person_id rescue nil if person_id.blank?
+		document_id = self.document_id
 
-    created_at = PersonBirthDetail.where(person_id: person_id).last.location_created_at rescue nil
+    if SETTINGS["application_mode"] == "DC"
+			location_id = SETTINGS['location_id']
+		else
+    	created_at = PersonBirthDetail.where(person_id: person_id).last.location_created_at rescue nil 
+			district   = Location.find(created_at).district rescue nil
+			location_id = Location.locate_id_by_tag(district, "District") rescue nil
+		end 
 
-    if !created_at.blank?
-      district_id = Location.find(created_at).parent_location rescue nil
-      district_id = created_at if district_id.blank?
-    end
+    h = Pusher.database.get(document_id.to_s) if !document_id.blank?
+    h = nil if !h.blank? && !h['db_name'].blank? #This document was not found
 
-    if !person_id.blank?
-      district_id = Pusher.database.get(person_id)['district_id'] rescue nil if district_id.blank?
-      location_id = created_at.present? ? created_at : (Pusher.database.get(person_id)['location_id'] rescue nil)
-    end
-    if district_id.blank?
-      district_id = SETTINGS['application_mode'] == 'FC' ? Location.find(SETTINGS['location_id']).parent_location : SETTINGS['location_id']
-    end
-
-    location_id = (SETTINGS['location_id']) if location_id.blank?
-    h = Pusher.database.get(person_id.to_s) rescue nil
-
-    if h.present?
-
-      h['location_id'] = location_id || h['location_id'] || SETTINGS['location_id']
-      h['district_id'] = district_id
-      data = h[self.class.table_name]
-      if data.blank?
-        data = Hash.new
-      end
-
-      data["#{raw_id}"] = hash
-      h[self.class.table_name] = data
+    if h.present? && h['savable_data'].present?
+      data = h
+      hash.each{|k, v|
+				data['savable_data'][k] = v
+			}
     else
-
       data = Hash.new
-      data["#{raw_id}"] = hash
-
-      temp_hash = {
-          '_id' => person_id.to_s,
-          'type' => 'data',
-          'location_id' => location_id,
-          'district_id' => district_id,
-          self.class.table_name =>  data
-      }
-      h = temp_hash
+      data["_id"] = Pusher.database.server.next_uuid
+      hash['document_id'] = data['_id']
+      data['savable_data'] = hash
     end
-    port=    YAML.load_file(Rails.root.join('config','couchdb.yml'))[Rails.env]['port']
-    adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip|
-      "#{ip.ip_address}:#{port}"}.reject{|ip| !ip.match(/\d+\.\d+\.\d+\.\d+\:\d+/)}
 
-    h['change_agent'] = self.class.table_name
-    h['change_location_id'] = SETTINGS['location_id']
-    h['ip_addresses'] = adrs
+    data['document_id']        = data['_id']  # For association when loading to MYSQL after sync to another location
+		data['location_id']				 = location_id if !location_id.blank? #for sync filtering
+		data['class_name']				 = self.class.name
+		data['change_location_id'] = SETTINGS['location_id']
+		data['type'] = 'data_v2'
 
-    Pusher.database.save_doc(h)
+    Pusher.database.save_doc(data)
+		raw.update_column("document_id", data['_id'])
   end
 
   def self.included(base)
     base.class_eval do
       before_create :check_record_complteness_before_creating
       before_save :check_record_complteness_before_updating, :keep_prev_value
-      before_create :generate_key
+      #before_create :generate_key
       #after_create :create_or_update_in_couch
       #after_create :create_audit_trail_after_create
       after_commit :create_or_update_in_couch#, :create_audit_trail
@@ -129,7 +110,7 @@ module EbrsAttribute
   def max_id
     location_pad = SETTINGS['location_id'].to_s.rjust(5, '0').rjust(6, '1')
     max = (ActiveRecord::Base.connection.select_all("SELECT MAX(#{self.class.primary_key})
-        FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' ").last.values.last.to_i)
+        FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' FOR UPDATE  ").last.values.last.to_i)
     autoincpart = max.to_s.split('')[6 .. 1000].join('').to_i rescue 0
     auto_id = autoincpart + 1
     new_id = (location_pad + auto_id.to_s).to_i
@@ -148,7 +129,7 @@ module EbrsAttribute
 
   def create_audit_trail
 
-    if !["audit_trails","person_name_code","core_person","person_record_status"].include? self.class.table_name
+    if !["audit_trails","person_name_code","core_person"].include? self.class.table_name
       if self.prev.present?
         fields = self.attributes.keys
         prev = self.prev
