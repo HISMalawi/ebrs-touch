@@ -65,10 +65,23 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
   incomplete = [MassPerson.new.attributes.keys.join(",")]
   exact_dup  = [MassPerson.new.attributes.keys.join(",")]
   potential_dup = [MassPerson.new.attributes.keys.join(",")]
+  special_chars = [MassPerson.new.attributes.keys.join(",")]
+
   MassPerson.where(upload_status: "NOT UPLOADED").each do |record|
 
     status = "HQ-CAN-PRINT"
     outcome = "Success"
+
+    #Filter for Complete Cases
+    name_string = "#{record["last_name"].to_s}#{record["first_name"].to_s}#{record["middle_name"].to_s}#{record["mother_last_name"].to_s}" +
+                    "#{record["mother_first_name"].to_s}#{record["mother_middle_name".to_s].to_s}#{record["father_last_name"].to_s}" +
+                    "#{record["father_last_name"].to_s}#{record["mother_middle_name"].to_s}"
+
+    if name_string.match(/[-!$%^&*()_+|~=`{}\[\]:";@\#<>?,'.\/]/)
+      status = "DC-INCOMPLETE"
+      outcome = "Name(s) With Special Characters Found"
+      special_chars << record.attributes.values.join(",")
+    end
 
     #Filter for Complete Cases
     if ([record["last_name"], record["first_name"], record["gender"], record["date_of_birth"],
@@ -86,7 +99,6 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
     formated = MassPerson.format_person(record)
     exact_duplicates =  MassPerson.exact_duplicates(record) #SimpleElasticSearch.query_duplicate_coded(formated, 100)
-
 
     if exact_duplicates.length > 0
 
