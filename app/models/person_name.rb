@@ -6,9 +6,10 @@ class PersonName < ActiveRecord::Base
 
     belongs_to :person
     belongs_to :core_person
-    has_one :person_name_code
+    #has_one :person_name_code
 
-    after_save :name_codes
+    #after_save :name_codes
+    before_save :check_values
 
     def name_codes
       code = PersonNameCode.where(:person_name_id => self.id).last rescue nil
@@ -20,5 +21,10 @@ class PersonName < ActiveRecord::Base
       code.last_name_code  = self.last_name.soundex rescue nil
 
       code.save!
+    end
+
+    def check_values
+      self.last_name = " " if self.last_name.blank?
+      self.first_name = " " if self.first_name.blank?
     end
 end

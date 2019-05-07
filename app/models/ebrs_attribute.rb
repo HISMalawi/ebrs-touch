@@ -15,41 +15,26 @@ end
 module EbrsAttribute
 
   def send_data(hash)
+
+    return if self.class.table_name == "notification"
+
     raw_id = hash.id
     hash = hash.as_json
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
 
-    district_id = nil
-    location_id = nil
     person_id = hash['person_id']
     person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
     person_id = User.where(user_id: hash['user_id']).first.person_id rescue nil if person_id.blank?
 
-    created_at = PersonBirthDetail.where(person_id: person_id).last.location_created_at rescue nil
-
-    if !created_at.blank?
-      district_id = Location.find(created_at).parent_location rescue nil
-      district_id = created_at if district_id.blank?
-    end
-
-    if !person_id.blank?
-      district_id = Pusher.database.get(person_id)['district_id'] rescue nil if district_id.blank?
-      location_id = created_at.present? ? created_at : (Pusher.database.get(person_id)['location_id'] rescue nil)
-    end
-    if district_id.blank?
-      district_id = SETTINGS['application_mode'] == 'FC' ? Location.find(SETTINGS['location_id']).parent_location : SETTINGS['location_id']
-    end
-
-    location_id = (SETTINGS['location_id']) if location_id.blank?
+    location_id = (SETTINGS['location_id'])
     h = Pusher.database.get(person_id.to_s) rescue nil
 
     if h.present?
 
-      h['location_id'] = location_id || h['location_id'] || SETTINGS['location_id']
-      h['district_id'] = district_id
+      h['location_id'] = location_id if h['location_id'].blank?
       data = h[self.class.table_name]
       if data.blank?
         data = Hash.new
@@ -66,18 +51,13 @@ module EbrsAttribute
           '_id' => person_id.to_s,
           'type' => 'data',
           'location_id' => location_id,
-          'district_id' => district_id,
           self.class.table_name =>  data
       }
       h = temp_hash
     end
-    port=    YAML.load_file(Rails.root.join('config','couchdb.yml'))[Rails.env]['port']
-    adrs= Socket.ip_address_list.reject{|a| a.inspect.match(/127.0.0.1|0.0.0.0|localhost/) }.collect{|ip|
-      "#{ip.ip_address}:#{port}"}.reject{|ip| !ip.match(/\d+\.\d+\.\d+\.\d+\:\d+/)}
 
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']
-    h['ip_addresses'] = adrs
 
     Pusher.database.save_doc(h)
   end
