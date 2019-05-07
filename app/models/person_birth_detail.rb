@@ -209,11 +209,11 @@ class PersonBirthDetail < ActiveRecord::Base
 		end 
 
 		location = Location.find(SETTINGS['location_id'])
-        district_code = location.code
+    district_code = location.code
 		
 		if self.district_id_number.blank? 
 			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
-			if counter.blank? 
+      if counter.blank?
 				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
 
 				if !missing_ben.blank?
