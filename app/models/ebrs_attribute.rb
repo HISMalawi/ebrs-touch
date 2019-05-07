@@ -17,8 +17,8 @@ module EbrsAttribute
   def send_data(hash)
 
     return if self.class.table_name == "notification"
-
     raw_id = hash.id
+
     hash = hash.as_json
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
@@ -42,8 +42,8 @@ module EbrsAttribute
 
       data["#{raw_id}"] = hash
       h[self.class.table_name] = data
-    else
 
+    else
       data = Hash.new
       data["#{raw_id}"] = hash
 
@@ -59,14 +59,14 @@ module EbrsAttribute
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']
 
-    Pusher.database.save_doc(h)
+    Pusher.database.save_doc(data)
   end
 
   def self.included(base)
     base.class_eval do
       before_create :check_record_complteness_before_creating
       before_save :check_record_complteness_before_updating, :keep_prev_value
-      before_create :generate_key
+      #before_create :generate_key
       #after_create :create_or_update_in_couch
       #after_create :create_audit_trail_after_create
       after_commit :create_or_update_in_couch#, :create_audit_trail
@@ -109,7 +109,7 @@ module EbrsAttribute
   def max_id
     location_pad = SETTINGS['location_id'].to_s.rjust(5, '0').rjust(6, '1')
     max = (ActiveRecord::Base.connection.select_all("SELECT MAX(#{self.class.primary_key})
-        FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' ").last.values.last.to_i)
+        FROM #{self.class.table_name} WHERE #{self.class.primary_key} LIKE '#{location_pad}%' FOR UPDATE  ").last.values.last.to_i)
     autoincpart = max.to_s.split('')[6 .. 1000].join('').to_i rescue 0
     auto_id = autoincpart + 1
     new_id = (location_pad + auto_id.to_s).to_i
@@ -128,7 +128,7 @@ module EbrsAttribute
 
   def create_audit_trail
 
-    if !["audit_trails","person_name_code","core_person","person_record_status"].include? self.class.table_name
+    if !["audit_trails","person_name_code","core_person"].include? self.class.table_name
       if self.prev.present?
         fields = self.attributes.keys
         prev = self.prev

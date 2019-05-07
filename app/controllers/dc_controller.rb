@@ -256,14 +256,9 @@ def incomplete_case_comment
     @child = Person.find(params[:id])
     @birth_details = PersonBirthDetail.find_by_person_id(params[:id])
     old_state = PersonRecordStatus.status(params[:id])
-
-    allocate_record = IdentifierAllocationQueue.new
-    allocate_record.person_id = params[:id].to_i
-    allocate_record.assigned = 0
-    allocate_record.creator = User.current.id
-    allocate_record.person_identifier_type_id = (PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id rescue 1)
-    allocate_record.created_at = Time.now
-    allocate_record.save
+	
+	year = Date.today.year
+	ben  = @birth_details.generate_ben(year)
 
     if ["HQ-REJECTED","DC-VERIFY DUPLICATE"].include?(old_state)
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-RE-APPROVED")

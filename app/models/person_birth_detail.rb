@@ -201,4 +201,80 @@ class PersonBirthDetail < ActiveRecord::Base
       file.write barcode.to_png(:height => 50, :xdim => 2)
       file.close
     end
+
+	def generate_ben(year=Date.today.year)
+		
+		if !(ActiveRecord::Base.connection.table_exists? "ben_counter_#{year}")
+			` bundle exec rails runner bin/init_ben_counter.rb #{year}`
+		end 
+
+		location = Location.find(SETTINGS['location_id'])
+        district_code = location.code
+		
+		if self.district_id_number.blank? 
+			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
+			if counter.blank? 
+				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
+
+				if !missing_ben.blank?
+					ActiveRecord::Base.connection.execute("DELETE FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};")
+					ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(counter, person_id) VALUES (#{missing_ben.to_i}, #{self.person_id});")
+				else
+					ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(person_id) VALUES (#{self.person_id});")
+				end 
+
+				counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id};").as_json['counter']
+
+			end 
+			
+			mid_number = counter.to_s.rjust(8,'0')
+			ben   = "#{district_code}/#{mid_number}/#{year}"
+			self.update_attributes(district_id_number: ben)
+			self.update_attributes(date_registered: Date.today)
+			PersonIdentifier.new_identifier(self.person_id, 'Birth Entry Number', ben)
+		end
+		
+		ben
+	end 
+
+ def calculate_check_digit(serial_number)
+
+    number = serial_number.to_s
+    number = number.split(//).collect { |digit| digit.to_i }
+    parity = number.length % 2
+
+    sum = 0
+    number.each_with_index do |digit,index|
+      digit = digit * 2 if index%2!=parity
+      digit = digit - 9 if digit > 9
+      sum = sum + digit
+    end
+
+    check_digit = (9 * sum) % 10
+
+    return check_digit
+  end
+
+	def generate_facility_serial_number(location_id)
+		
+		if self.facility_serial_number.blank?
+			code = Location.find(SETTINGS['location_id']).code.squish
+			left = "P5#{code}"
+			from = left.length + 1
+			length = 6
+
+			last = (PersonBirthDetail.where(location_created_at: SETTINGS['location_id']).select(" MAX(SUBSTRING(facility_serial_number, #{from}, #{length})) AS last_num")[0]['last_num'] rescue 0 ).to_i
+
+			num = last + 1
+			num =  "%06d" % num
+
+			checkdigit = calculate_check_digit(num)
+			serial_number =  "#{left}#{num}#{checkdigit}"
+
+			self.update_attributes(facility_serial_number: serial_number)
+			PersonIdentifier.new_identifier(self.person_id, 'Facility Number', serial_number)	
+
+			serial_number		
+		end 
+	end 
 end

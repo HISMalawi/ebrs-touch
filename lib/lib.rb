@@ -519,22 +519,11 @@ module Lib
     end
 
 
-	  details["facility_serial_number"] = nil
+		details["facility_serial_number"] = nil
     details.save!
 
 		if SETTINGS["application_mode"] == "FC"
-      allocation = IdentifierAllocationQueue.new
-      allocation.person_id = person.id
-      allocation.assigned = 0
-      allocation.creator = User.current.id
-      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Facility Number").last.person_identifier_type_id
-      allocation.created_at = Time.now
-      allocation.save
-
-      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
-      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
-        AllocationQueue.perform_in(1)
-      end
+    	details.generate_facility_serial_number
     end
     
     return details
@@ -544,20 +533,9 @@ module Lib
     status = nil
 
     if params[:person][:verification_number].present?
+      details = PersonBirthDetails.where(person_id: person.id).first
       status = PersonRecordStatus.new_record_state(person.id, 'HQ-COMPLETE');
-      allocation = IdentifierAllocationQueue.new
-      allocation.person_id = person.id
-      allocation.assigned = 0
-      allocation.creator = User.current.id
-      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Birth Entry Number").last.person_identifier_type_id
-      allocation.created_at = Time.now
-      allocation.save
-
-      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
-      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
-        AllocationQueue.perform_in(1)
-      end
-
+			details.generate_ben(Date.today.year)
       return
     end
 
@@ -583,18 +561,7 @@ module Lib
     end
 
     if SETTINGS["application_mode"] == "FC"
-      allocation = IdentifierAllocationQueue.new
-      allocation.person_id = person.id
-      allocation.assigned = 0
-      allocation.creator = User.current.id
-      allocation.person_identifier_type_id = PersonIdentifierType.where(:name => "Facility Number").last.person_identifier_type_id
-      allocation.created_at = Time.now
-      allocation.save
-
-      workers = SuckerPunch::Queue.stats["AllocationQueue"]["workers"] rescue nil
-      if workers.blank? || workers["total"] == 0 || workers["busy"] > 0
-        AllocationQueue.perform_in(1)
-      end
+      details.generate_facility_serial_number
     end
 
     return status
