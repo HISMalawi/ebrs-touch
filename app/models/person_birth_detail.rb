@@ -255,7 +255,7 @@ class PersonBirthDetail < ActiveRecord::Base
     return check_digit
   end
 
-	def generate_facility_serial_number(location_id)
+	def generate_facility_serial_number
 		
 		if self.facility_serial_number.blank?
 			code = Location.find(SETTINGS['location_id']).code.squish
@@ -264,7 +264,6 @@ class PersonBirthDetail < ActiveRecord::Base
 			length = 6
 
 			last = (PersonBirthDetail.where(location_created_at: SETTINGS['location_id']).select(" MAX(SUBSTRING(facility_serial_number, #{from}, #{length})) AS last_num")[0]['last_num'] rescue 0 ).to_i
-
 			num = last + 1
 			num =  "%06d" % num
 
