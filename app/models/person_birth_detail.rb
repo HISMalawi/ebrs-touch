@@ -146,8 +146,13 @@ class PersonBirthDetail < ActiveRecord::Base
     end
 
     def national_id
-      PersonIdentifier.find_by_person_id_and_person_identifier_type_id(self.person_id,
-      PersonIdentifierType.find_by_name("National ID Number").id).value rescue ""
+      nid_type_id = PersonIdentifierType.find_by_name("National ID Number").id
+
+      PersonIdentifier.where(
+          person_id: self.person_id,
+          person_identifier_type_id: nid_type_id,
+          voided: 0
+      ).first.value rescue ""
     end
 
     def self.next_missing_brn
