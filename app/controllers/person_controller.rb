@@ -2532,4 +2532,20 @@ class PersonController < ApplicationController
     render :text => data.to_json and return
   end
 
+  def ajax_assign_single_national_id
+    person_id = params[:person_id]
+    r = nil
+
+    person = Person.find(person_id)
+    id_number = person.id_number
+
+    if id_number.present?
+      r = "RECORD ALREADY HAS NID: #{id_number}"
+    else
+      r  = PersonService.request_nris_id_remote(person_id)
+    end
+
+    render :text => r.to_json
+  end
+
 end

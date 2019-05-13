@@ -347,10 +347,6 @@
         Assign NID
       </div>
 
-      <div id="trace-btn"  class="btn btn-sea blue"  onclick="reSync()">
-        Re-run Sync
-      </div>
-
       <div id="trace-btn"  class="btn btn-danger red" onclick="window.parent.location = return_path">
         Back
       </div>
@@ -1115,6 +1111,22 @@
         }
     })
 
+    function querySingleNID(){
+
+        jQuery.ajax({
+            url: "/ajax_assign_single_national_id?person_id=<%= @person.id%>",
+            success: function(result){
+                if(result == "OK"){
+                    window.parent.location = window.parent.location;
+                }else{
+                    alert("Message: " + result);
+                }
+            },
+            error: function(error){
+                alert("Something Went Wrong!")
+            }
+        })
+    }
 
     <% if !@online %>
             jQuery("#DC-Print").attr("disabled", true);
