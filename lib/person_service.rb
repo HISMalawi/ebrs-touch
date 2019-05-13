@@ -781,7 +781,9 @@ module PersonService
 
   def self.request_nris_id_remote(person_id)
     remote_url = "#{SETTINGS["destination_app_link"]}/person/remote_nid_request?person_id=#{person_id}"
-    results = RestClient.get(remote_url) rescue "REMOTE SERVER COULD NOT BE REACHED"
+    results = RestClient.get(remote_url) rescue ["REMOTE SERVER COULD NOT BE REACHED", nil]
+
+    puts results
     results
   end
 
