@@ -79,15 +79,10 @@
 </script>
 <%=javascript_include_tag "bootstrap/bootstrap.min" %>
 
-<div id="trace-btn"
-     class="btn btn-primary blue"
-     style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
-     onclick="ajaxTrace()"
-> Trace</div>
-
 <shield id="shieldd"
         onclick="jQuery('#shieldd, #trace-div').hide(); "
-        style="position: absolute; display: none; top: 0px; left: 0px; width: 300vh; height: 300vh; background: black; opacity: 0.3;">
+        style="position: absolute; display: none; top: 0px; left: 0px; width: 300vh;
+                height: 300vh; background: black; opacity: 0.3;z-index: 2900">
 </shield>
 
 <div id="trace-div" style="position: absolute; height: 56vh; overflow-y: auto; display: none; top: 18%; left: 18%;width: 65%;background: white;border: 2px solid gray;border-radius: 5px;z-index: 3000">
@@ -134,7 +129,7 @@
       </table>
     </div>
 
-    <div id="stats" style="width: 100%; overflow: auto; border-bottom: 1px solid #ccc;padding: 12px;border: 1px solid lightsteelblue;">
+    <div id="stats" class="col-md-11 col-lg-11" style="overflow: auto; border-bottom: 1px solid #ccc;padding: 12px;border: 1px solid lightsteelblue;">
 
       <table width="85%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
 
@@ -342,9 +337,45 @@
           </button>
       <% end %>
     </div>
-</div>
 
-<% if @results.present? %>
+    <div class="col-md-1" id="left-buttons" style="padding: 0px;margin: 0px;margin-top: 20px;">
+      <div id="trace-btn"  class="btn btn-primary blue"  onclick="ajaxTrace()">
+        Trace
+      </div>
+
+      <div id="trace-btn"  class="btn btn-sea blue"  onclick="querySingleNID()">
+        Assign NID
+      </div>
+
+      <div id="trace-btn"  class="btn btn-sea blue"  onclick="reSync()">
+        Re-run Sync
+      </div>
+
+      <div id="trace-btn"  class="btn btn-danger red" onclick="window.parent.location = return_path">
+        Back
+      </div>
+    </div>
+
+
+    <style>
+        #left-buttons .btn{
+            cursor: pointer;
+            padding: 6px;
+            padding-left: 1px;
+            paddint-right: 1px;
+            width: 98%;
+            margin-left: 5%;
+            margin-bottom: 10px;
+            font-size: 1em;
+            color: white;
+        }
+
+        #left-buttons .btn-sea {
+            background: darkseagreen;
+        }
+    </style>
+
+    <% if @results.present? %>
 <div style="margin-top:8%" class="modal fade" id="duplicateModal" tabindex="-1" role="dialog" aria-labelledby="duplicateModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:70%;margin:auto">
     <div class="modal-content">
