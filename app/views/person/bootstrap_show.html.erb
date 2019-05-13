@@ -222,11 +222,13 @@
           Cancel
         </button>
 
-          <button id="DC-Print" class="btn btn-success pull-right"
-                  onclick="window.location = '/print_preview?person_ids=<%= params[:id]%>&no_print=true' ">
-            <span class="fa fa-print"></span>
-            Print
-          </button>
+        <% if ['HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT'].include?(@status) %>
+              <button id="DC-Print" class="btn btn-success pull-right"
+                      onclick="window.location = '/print_preview?person_ids=<%= params[:id]%>&no_print=true' ">
+                <span class="fa fa-print"></span>
+                Print
+              </button>
+         <% end %>
 
         <% if "HQ-POTENTIAL DUPLICATE-TBA"== @status %>
               <script type="text/javascript">
