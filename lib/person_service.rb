@@ -750,4 +750,33 @@ module PersonService
     return person_ids
   end
 
+
+  def self.qr_code_data(person_id)
+    person = Person.find(person_id)
+    details = PersonBirthDetail.where(person_id: person_id).first
+
+    birth_district = Location.find(details.district_of_birth).name rescue nil
+    place_of_birth = Location.find(details.birth_location_id).name rescue details.other_place_of_birth
+
+    if place_of_birth.downcase == 'other'
+      place_of_birth = details.other_birth_location
+    end
+    if !place_of_birth.blank?
+      place_of_birth += ", " + birth_district
+    else
+      place_of_birth = birth_district
+    end
+
+    str = "04~#{person.id_number}-#{details.district_id_number}-#{details.brn}"
+    str += "~#{person.printable_name}~#{person.birthdate.to_date.strftime("%d-%b-%Y")}~#{person.gender}"
+    str += "~#{place_of_birth}"
+    str += ("~#{person.mother.printable_name}" rescue '~')
+    str += ("~#{person.mother.citizenship}" rescue '~')
+    str += ("~#{person.father.printable_name}" rescue '~')
+    str += ("~#{person.father.citizenship}" rescue '~')
+    str += ("~#{details.date_registered.to_date.strftime("%d-%b-%Y")}" rescue nil)
+
+    str
+  end
+
 end

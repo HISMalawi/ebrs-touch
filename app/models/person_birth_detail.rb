@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'barby'
 require 'barby/barcode/code_128'
+require 'barby/barcode/qr_code'
 require 'barby/outputter/rmagick_outputter'
 require 'rqrcode'
 
@@ -200,11 +201,29 @@ class PersonBirthDetail < ActiveRecord::Base
       Array(found.min.to_i .. found.max.to_i) - found
     end
 
+=begin
     def self.generate_barcode(barcode, file_name, save_path)
       barcode = Barby::Code128B.new(barcode)
       file = File.open("#{save_path}/#{file_name}.png", "wb")
       file.write barcode.to_png(:height => 50, :xdim => 2)
       file.close
+    end
+=end
+
+    def self.generate_barcode(barcode, file_name, save_path)
+
+      if SETTINGS['enable_qr_code'] != true
+        barcode = Barby::Code128B.new(barcode)
+        file = File.open("#{save_path}/#{file_name}.png", "wb")
+        file.write barcode.to_png(:height => 50, :xdim => 2)
+        file.close
+      else
+        data = PersonService.qr_code_data(file_name)
+        barcode = Barby::QrCode.new(data, level: :q, size: 15)
+        file = File.open("#{save_path}/qr_#{file_name}.png", "wb")
+        file.write barcode.to_png(:height => 50, :xdim => 2)
+        file.close
+      end
     end
 
 	def generate_ben(year=Date.today.year)

@@ -17,3 +17,4 @@ enable_printing_when_hq_is_offline
 printer_name: test1|tst2|UpperSoftware
 barcodes_path: /var/www/barcodes/
 certificates_path: /var/www/certificates/
+enable_qr_code: true
