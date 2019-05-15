@@ -1120,6 +1120,7 @@
                 result = JSON.parse(result);
                 if(result[0] == "OK"){
                     __$("details_of_child__id_number").innerHTML = result[1]
+                    alert("Message: " + result[0]);
                 }else{
                     alert("Message: " + result[0]);
                 }
