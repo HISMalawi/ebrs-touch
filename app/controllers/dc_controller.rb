@@ -601,6 +601,7 @@ def print_certificates
               #{informant_join_query}
     ")
     .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
+              AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
               #{village_filter_query}
               AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query} #{facility_filter}
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
