@@ -786,7 +786,7 @@ module PersonService
     puts results
 	
     if results[0] == "OK"
-      idf = PersonIdentifier.where(person_identifier_id: results[1]["person_identifier_type_id"])
+      idf = PersonIdentifier.where(person_identifier_id: results[1]["person_identifier_id"])
       if idf.blank?
         id = PersonIdentifier.new(results[1])
 	      puts id.save
