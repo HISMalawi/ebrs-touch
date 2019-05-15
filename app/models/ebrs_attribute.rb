@@ -23,7 +23,7 @@ module EbrsAttribute
     hash.each {|k, v|
       hash[k] = v.to_s(:db) if (['Time', 'Date', 'Datetime'].include?(v.class.name))
     }
-
+    
     person_id = hash['person_id']
     person_id = hash['person_a'] if person_id.blank?
     person_id = PersonName.where(person_name_id: hash['person_name_id']).first.person_id rescue nil if person_id.blank?
@@ -59,7 +59,7 @@ module EbrsAttribute
     h['change_agent'] = self.class.table_name
     h['change_location_id'] = SETTINGS['location_id']
 
-    Pusher.database.save_doc(data)
+    Pusher.database.save_doc(h)
   end
 
   def self.included(base)
