@@ -781,10 +781,8 @@ module PersonService
 
   def self.request_nris_id_remote(person_id)
     remote_url = "#{SETTINGS["destination_app_link"]}/person/remote_nid_request?person_id=#{person_id}"
-    results = JSON.parse(RestClient.get(remote_url)) #rescue ["REMOTE SERVER COULD NOT BE REACHED", nil]
+    results = JSON.parse(RestClient.get(remote_url)) rescue ["REMOTE SERVER COULD NOT BE REACHED", nil]
 
-    puts results
-	
     if results[0] == "OK"
       idf = PersonIdentifier.where(person_identifier_id: results[1]["person_identifier_id"])
       if idf.blank?
@@ -793,7 +791,7 @@ module PersonService
       end
     end 
 
-    results
+    results[0]
   end
 
 end
