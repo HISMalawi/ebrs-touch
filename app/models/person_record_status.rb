@@ -33,7 +33,7 @@ class PersonRecordStatus < ActiveRecord::Base
   end
 
   def self.status(person_id)
-    self.where(:person_id => person_id, :voided => 0).order(" created_at ASC ").last.status.name rescue ""
+    self.where(:person_id => person_id).order(" created_at ASC ").last.status.name rescue ""
   end
 
   def self.type_stats(states=nil, old_state=nil, old_state_creator=nil)
