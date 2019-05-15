@@ -791,7 +791,7 @@ module PersonService
       end
     end 
 
-    results[0]
+    results
   end
 
 end

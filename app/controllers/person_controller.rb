@@ -2540,7 +2540,7 @@ class PersonController < ApplicationController
     id_number = person.id_number
 
     if id_number.present?
-      r = "RECORD ALREADY HAS NID: #{id_number}"
+      r = ["RECORD ALREADY HAS NID: #{id_number}", id_number]
     else
       r  = PersonService.request_nris_id_remote(person_id)
     end

@@ -1116,10 +1116,12 @@
         jQuery.ajax({
             url: "/ajax_assign_single_national_id?person_id=<%= @person.id%>",
             success: function(result){
-                if(result == "OK"){
-                    window.parent.location = window.parent.location;
+
+                result = JSON.parse(result);
+                if(result[0] == "OK"){
+                    __$("details_of_child__id_number").innerHTML = result[1]
                 }else{
-                    alert("Message: " + result);
+                    alert("Message: " + result[0]);
                 }
             },
             error: function(error){
