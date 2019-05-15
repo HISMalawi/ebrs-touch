@@ -789,6 +789,8 @@ module PersonService
         id = PersonIdentifier.new(results[1])
 	      puts id.save
       end
+
+      results[1] = results[1]["value"]
     end 
 
     results
