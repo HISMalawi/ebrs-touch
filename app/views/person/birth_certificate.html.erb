@@ -180,7 +180,7 @@
         Name of Mother
       </td>
       <td align="left">
-        <%= person.mother.printable_name rescue nil%>
+        <%= person.mother_all.printable_name rescue nil%>
       </td>
     </tr>
     <tr>
@@ -191,7 +191,7 @@
         Nationality of Mother
       </td>
       <td align="left">
-        <%= person.mother.citizenship rescue nil %>
+        <%= person.mother_all.citizenship rescue nil %>
       </td>
     </tr>
 
@@ -199,7 +199,7 @@
     <% if birth.parents_married_to_each_other.to_s == '0' %>
         <tr>
           <% if birth.court_order_attached.to_s == '1' || birth.parents_signed.to_s == '1'  %>
-              <% if (person.father.name.present? rescue false)%>
+              <% if (person.father_all.name.present? rescue false)%>
                   <td style="width: 130px;" align="right">
                     9.
                   </td>
@@ -207,7 +207,7 @@
                     Name of Father
                   </td>
                   <td align="left">
-                    <%= person.father.printable_name %>
+                    <%= person.father_all.printable_name %>
                   </td>
                   </tr>
 
@@ -219,7 +219,7 @@
                       Nationality of Father
                     </td>
                     <td align="left">
-                      <%= person.father.citizenship rescue nil %>
+                      <%= person.father_all.citizenship rescue nil %>
                     </td>
                   </tr>
               <% end %>
