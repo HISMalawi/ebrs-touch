@@ -844,6 +844,7 @@ module PersonService
         end
 
       rescue => e
+	puts e
         fixed = false
       end
     end
