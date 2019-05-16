@@ -234,8 +234,8 @@
             Name of Father
           </td>
           <td align="left">
-            <% if (person.father.name.present? rescue false) %>
-                <%= person.father.printable_name  %>
+            <% if (person.father_all.name.present? rescue false) %>
+                <%= person.father_all.printable_name  %>
             <% end %>
           </td>
         </tr>
@@ -248,7 +248,7 @@
             Nationality of Father
           </td>
           <td align="left">
-            <%= person.father.citizenship rescue nil %>
+            <%= person.father_all.citizenship rescue nil %>
           </td>
 
         </tr>
@@ -263,7 +263,7 @@
     <% if birth.parents_married_to_each_other.to_s == '0' %>
         <% if birth.court_order_attached.to_s == '1' || birth.parents_signed.to_s == '1'  %>
             <tr>
-              <% if (person.father.name.present? rescue false) %>
+              <% if (person.father_all.name.present? rescue false) %>
                   <td style="width: 130px;" align="right">
                     11.
                   </td>
