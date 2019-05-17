@@ -776,7 +776,8 @@ module PersonService
       end
 
       details.date_registered = date
-      details.save 
+      details.save
+      details.reload
     end
 
     str = "04~#{person.id_number}-#{details.district_id_number}-#{details.brn}"
