@@ -864,4 +864,60 @@ module PersonService
     fixed
   end
 
+  def self.force_sync_remote(person_id, models={})
+    url = "#{SETTINGS['destination_app_link'].split(":")[0 .. 1].join(':')}:5900/ebrs_hq_v2/#{person_id}"
+    doc = RestClient.get(url)
+    fixed = false
+
+    $models = {}
+    if !models.blank?
+      $models = {}
+    else
+      Rails.application.eager_load!
+      ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
+        $models[eval(n).table_name] = n
+      end
+    end
+
+    if !doc.blank?
+      doc = doc.as_json
+      ordered_keys = (['core_person', 'person', 'users', 'user_role'] +
+          doc.keys.reject{|k| ['_id', 'change_agent', '_rev', 'change_location_id',
+                               'ip_addresses', 'location_id', 'type', 'district_id'].include?(k)}).uniq
+
+      begin
+        (ordered_keys || []).each do |table|
+          next if doc[table].blank?
+          next if table == "notification"
+
+          doc[table].each do |p_value, data|
+
+            if data.has_key?("person_b")
+              PersonService.force_sync(data['person_b'])
+            end
+
+            record = eval($models[table]).find(p_value) rescue nil
+            if !record.blank?
+              record.update_columns(data)
+            else
+              record =  eval($models[table]).create(data)
+            end
+
+          end
+        end
+
+        fixed = true
+        ErrorRecords.where(person_id: person_id).each do |r|
+          r.passed = 1
+          r.save
+        end
+
+      rescue => e
+        fixed = false
+      end
+    end
+
+    fixed
+  end
+
 end
