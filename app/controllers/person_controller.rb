@@ -2548,4 +2548,10 @@ class PersonController < ApplicationController
     render :text => r.to_json
   end
 
+
+  def force_sync
+    value = PersonService.force_sync_remote(params[:person_id]) rescue false
+    render :text => value.to_s
+  end
+
 end

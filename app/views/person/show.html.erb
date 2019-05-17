@@ -145,11 +145,28 @@
   </div>
 
   <% if params['preview'].blank? %>
-      <div id="trace-btn"
-           class="btn btn-primary blue"
-           style="position: absolute; top: 11%; right: 5.2%;cursor: pointer;padding: 5px;"
-           onclick="ajaxTrace()"
-      > Trace</div>
+        <table style="position: absolute; top: 10%; right: 5.2%;cursor: pointer;padding: 0px !important;">
+          <tr>
+                <td>
+                  <div id="trace-btn"
+                       class="btn btn-primary blue"
+                       style="padding: 4px !important;"
+                       onclick="ajaxTrace()"
+                  > Trace</div>
+                </td>
+                <td>
+
+                <div id="trace-btn"
+                       class="btn btn-primary blue"
+                       onclick="ajaxSync()"
+                       style="padding: 4px !important;"
+                  > ForceSync</div>
+                </td>
+          </tr>
+        </table>
+
+
+
   <% end %>
 
   <table width="92%;" style="margin: auto;border: 1px solid gray;padding: 0px;">
@@ -608,6 +625,24 @@
 
     function ajaxTrace(){
         $("#shieldd, #trace-div").show();
+    }
+
+    function ajaxSync(){
+        jQuery.ajax({
+            url: "/person/force_sync?person_id=<%=params[:id]%>",
+            success: function(result){
+                showMsg("Success!!")
+                setTimeout(function() {
+                    window.location = window.location;
+                }, 1000);
+            },
+            error: function(e){
+                showMsg("Remote Server Error!");
+                setTimeout(function() {
+                    window.location = window.location;
+                }, 1000);
+            }
+        });
     }
 
     jQuery(document).ready(function(){

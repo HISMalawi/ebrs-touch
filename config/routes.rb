@@ -187,6 +187,7 @@ Rails.application.routes.draw do
   get '/search' => 'dc#search'
   get '/searched_cases' => 'person#searched_cases'
   post '/searched_cases' => 'person#searched_cases'
+  get 'person/force_sync'
 
   get "/person_label" => 'person#person_label'
   get "/person_id_label" => 'person#person_id_label'
