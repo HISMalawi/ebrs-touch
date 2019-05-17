@@ -767,6 +767,18 @@ module PersonService
       place_of_birth = birth_district
     end
 
+    if details.date_registered.blank?
+
+      date = PersonRecordStatus.where(person_id: details.person_id, status_id: 8).first.created_at rescue nil
+
+      if date.blank?
+        date = details.date_reported
+      end
+
+      details.date_registered = date
+      details.save 
+    end
+
     str = "04~#{person.id_number}-#{details.district_id_number}-#{details.brn}"
     str += "~#{person.printable_name}~#{person.birthdate.to_date.strftime("%d-%b-%Y")}~#{person.gender}"
     str += "~#{place_of_birth}"
