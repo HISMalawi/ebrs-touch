@@ -866,7 +866,7 @@ module PersonService
 
   def self.force_sync_remote(person_id, models={})
     url = "#{SETTINGS['destination_app_link'].split(":")[0 .. 1].join(':')}:5900/ebrs_hq_v2/#{person_id}"
-    doc = RestClient.get(url)
+    doc = JSON.parse(RestClient.get(url))
     fixed = false
 
     $models = {}
