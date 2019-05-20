@@ -15,11 +15,11 @@ class SimpleElasticSearch
          
 
       if person["mother_first_name"].present?
-        search_content = search_content + (person["mother_first_name"] rescue 'N/A') + " " 
+        search_content = search_content + (person["mother_first_name"] rescue 'N/A').to_s + " " 
       end  
 
       if person["mother_last_name"].present?
-        search_content = search_content +(person["mother_last_name"] rescue 'N/A') + " "
+        search_content = search_content +(person["mother_last_name"] rescue 'N/A').to_s + " "
       end
 
       return search_content.squish
@@ -39,11 +39,11 @@ class SimpleElasticSearch
          
 
       if person["mother_first_name"].present?
-        search_content = search_content + (person["mother_first_name"].soundex rescue '') + " " 
+        search_content = search_content + (person["mother_first_name"].soundex rescue '').to_s + " " 
       end  
 
       if person["mother_last_name"].present?
-        search_content = search_content + (person["mother_last_name"].soundex rescue '') + " "
+        search_content = search_content + (person["mother_last_name"].soundex rescue '').to_s + " "
       end
 
       return search_content.squish
