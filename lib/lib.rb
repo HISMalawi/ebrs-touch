@@ -531,9 +531,9 @@ module Lib
 
   def self.workflow_init(person,params)
     status = nil
+    details = PersonBirthDetail.where(person_id: person.id).first
 
     if params[:person][:verification_number].present?
-      details = PersonBirthDetails.where(person_id: person.id).first
       status = PersonRecordStatus.new_record_state(person.id, 'HQ-COMPLETE');
 			details.generate_ben(Date.today.year)
       return
