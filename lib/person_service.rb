@@ -699,7 +699,7 @@ module PersonService
     #Query by name
     person_ids = PersonName.find_by_sql(" SELECT pn.person_id FROM person_name pn
       INNER JOIN person_birth_details pbd On pbd.person_id = pn.person_id AND pn.voided = 0
-      AND pn.first_name = '#{params[:person][:first_name]}' AND pn.last_name = '#{params[:person][:last_name]}'
+      AND pn.first_name = \"#{params[:person][:first_name]}\" AND pn.last_name = \"#{params[:person][:last_name]}\"
     ").map(&:person_id)
 
     return [] if person_ids.blank?
