@@ -376,7 +376,11 @@
             <%= text_field(:user, :username, :textCase => "lower", :placeholder => "username", :class => 'input_cell', :style => "width: 250px;", :onclick => "changeFocusToMe(this)", :tabindex => 1) %>
           </td>
           <td rowspan="2" align="center" style="vertical-align: middle;">
-            <button class="blue" style="width: 150px; height: 122px;" tabindex=3 >Login</button>
+            <button class="blue" style="width: 90px; height: 70px;" tabindex=3 >Login</button>
+            <% if !SETTINGS['app_gate_url'].blank? %>
+                <button class="green" onmousedown="window.location = '<%=SETTINGS['app_gate_url']%>'"
+                        style="width: 90px; height: 70px;" tabindex=3 >Portal</button>
+            <% end %>
           </td>
         </tr>
         <tr>
