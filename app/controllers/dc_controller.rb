@@ -504,6 +504,8 @@ def print_certificates
       search_category = " AND (pbd.source_id IS NULL OR LENGTH(pbd.source_id) >  19)  "
     elsif params[:category] == 'mass_data'
       search_category = " AND (pbd.source_id IS NOT NULL AND LENGTH(pbd.source_id) <  20 ) "
+    elsif params[:category] == "community_data"
+      search_category = " AND (pbd.source_id IS NOT NULL AND pbd.source_id LIKE '%#%' ) "
     else
       search_category = ""
     end
