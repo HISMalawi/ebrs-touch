@@ -106,7 +106,7 @@ class PersonRecordStatus < ActiveRecord::Base
     return [] if person_id.blank?
     result = []
     PersonRecordStatus.where(person_id: person_id).order("created_at DESC").each do |status|
-      user = User.find(status.creator)
+	    user = User.find(status.creator) rescue nil
 			action = "Status changed to:  '#{status.status.name.titleize.gsub(/^Hq/, "HQ").gsub(/^Dc/, 'DC').gsub(/^Fc/, 'FC')}'"
 			if status.status.name.upcase == "DC-ACTIVE"
 				action  = "New Record Created"
@@ -117,9 +117,9 @@ class PersonRecordStatus < ActiveRecord::Base
       result << {
           "date" => status.created_at.strftime("%d-%b-%Y"),
           "time" => status.created_at.strftime("%I:%M %p"),
-          "site" => user.user_role.role.level,
+	  "site" => (user.user_role.role.level rescue ''),
           "action" => action,
-          "user"   => "#{user.first_name} #{user.last_name} <br /> <span style='font-size: 0.8em;'><i>(#{user.user_role.role.role})</i></span>",
+	  "user"   => ("#{user.first_name} #{user.last_name} <br /> <span style='font-size: 0.8em;'><i>(#{user.user_role.role.role})</i></span>" rescue ''),
           "comment" => status.comments
       }
     end
