@@ -1933,8 +1933,8 @@ class PersonController < ApplicationController
 
     @father_person = @person.father
     @father_name = @father_person.person_names.last rescue nil
-    @father_address = @father_person.addresses.last
-    @father_nationality = Location.find(@father_address.citizenship).country
+    @father_address = @father_person.addresses.last rescue nil
+    @father_nationality = Location.find(@father_address.citizenship).country rescue nil
 
     @targeturl = session[:list_url] 
     @section = 'Ammend Case'
