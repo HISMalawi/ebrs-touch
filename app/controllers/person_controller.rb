@@ -1163,9 +1163,12 @@ class PersonController < ApplicationController
 
     if ["national_id"].include?(params[:field])
         existing = PersonIdentifier.where("person_id = #{params[:id]} AND
-                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0").last
+                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0")
         if existing.present?
-                existing.voided = 1
+            existing.each do |e|
+              e.voided = 1
+              e.save
+            end
         end
 
         PersonIdentifier.create(
