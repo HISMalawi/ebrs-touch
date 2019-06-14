@@ -1555,7 +1555,7 @@ class PersonController < ApplicationController
     @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-    @targeturl = session[:list_url]
+    @targeturl = "/"
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
