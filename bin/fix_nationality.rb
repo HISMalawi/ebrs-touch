@@ -10,15 +10,17 @@ PersonBirthDetail.where("source_id LIKE '%-%' ").each do |pbd|
     mother_address     = PersonAddress.where(person_id: mother.person_id).first
     m_citizenship        = Location.where(country: mass_person.mother_nationality).last.id
     mother_address.citizenship = m_citizenship
+    puts m_citizenship
     mother_address.residential_country = m_citizenship
-    #mother_address.save
+    mother_address.save
   end
 
   if !father.blank?
     father_address     = PersonAddress.where(person_id: father.person_id).first
     f_citizenship        = Location.where(country: mass_person.father_nationality).last.id
     father_address.citizenship = f_citizenship
+    puts f_citizenship
     father_address.residential_country = f_citizenship
-    #father_address.save
+    father_address.save
   end
 end
