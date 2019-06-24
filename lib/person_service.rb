@@ -872,7 +872,7 @@ module PersonService
 
     $models = {}
     if !models.blank?
-      $models = {}
+      $models = models 
     else
       Rails.application.eager_load!
       ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
@@ -920,5 +920,99 @@ module PersonService
 
     fixed
   end
+  
+  def self.fix_location_ids(pid, models={})
+   
+    $models = {}
+    if !models.blank?
+      $models = models
+    else
+      Rails.application.eager_load!
+      ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
+        $models[eval(n).table_name] = n
+      end
+    end
 
+    doc = Pusher.database.get(pid.to_s)
+    location_id = doc['location_id']
+    location = Location.find(location_id)
+    all_locs = location.children
+    all_locs << location_id
+
+    location_pad = SETTINGS['location_id'].to_s.rjust(5, '0').rjust(6, '1')
+
+    pbd = nil
+    time_created = nil
+   
+    delete_detail = false
+    if !doc["person_birth_details"].blank? && doc['person_birth_details'].keys.length > 1
+	detete_detail = true
+    end 
+
+    (doc['person_birth_details'] || []).each do |k, d|
+
+      if all_locs.include?(d['location_created_at'])
+         pbd = d
+      end
+    end
+
+   
+
+    if !pbd.blank?
+      time_created = pbd['created_at'].to_time.strftime("%Y-%m-%d %H")
+    else
+      time_created = doc['core_person'].first.second['created_at'].to_time.strftime("%Y-%m-%d %H")
+    end
+
+    person_id = nil
+    ['core_person', 'person', 'person_name', 'person_relationship', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers'].each do |table|
+      next if doc[table].blank?
+ 
+      (doc[table] || []).each do |pkey, d|
+        time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
+        puts "#{person_id} ==== #{time} === #{time_created}"
+        if time != time_created || table != 'person_record_statuses'
+          #Delete in couchdb
+          obj = eval($models[table]).find(pkey)
+          if table == 'person_birth_details'
+	     obj.destroy
+	  end  
+        else 
+            obj = eval($models[table]).find(pkey)
+ 	     
+	    if !pkey.match(/^#{location_pad}/)
+              obj2 = obj.dup
+             
+	      if table == 'person_birth_details'
+                obj.reload
+                obj.destroy
+              end
+ 
+              if table == 'person_relationship'
+                person_b = PersonService.fix_location_ids(obj2.person_b)
+		obj2.person_a = person_id
+		obj2.person_b = person_b
+	      else 
+                obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
+	      end
+
+	      obj2.save 
+         
+              if table == 'core_person'
+                obj2.reload
+		person_id = obj2.person_id
+	      end 
+              
+              puts "#{pkey}====================#{person_id}"
+ 	      
+	      #delete in couch and recreate pkey
+            end
+        end 
+        
+      end
+
+    end
+
+    person_id
+  end
 end

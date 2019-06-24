@@ -1163,9 +1163,12 @@ class PersonController < ApplicationController
 
     if ["national_id"].include?(params[:field])
         existing = PersonIdentifier.where("person_id = #{params[:id]} AND
-                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0").last
+                             person_identifier_type_id = #{PersonIdentifierType.find_by_name('National ID Number').id} AND voided = 0")
         if existing.present?
-                existing.voided = 1
+            existing.each do |e|
+              e.voided = 1
+              e.save
+            end
         end
 
         PersonIdentifier.create(
@@ -1555,7 +1558,7 @@ class PersonController < ApplicationController
     @states = ["DC-PENDING","DC-INCOMPLETE"]
     @section = "Pending Cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
-    @targeturl = session[:list_url]
+    @targeturl = "/"
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
