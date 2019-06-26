@@ -971,43 +971,36 @@ module PersonService
       (doc[table] || []).each do |pkey, d|
         time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
         puts "#{person_id} ==== #{time} === #{time_created}"
-        if time != time_created || table != 'person_record_statuses'
-          #Delete in couchdb
-          obj = eval($models[table]).find(pkey)
-          if table == 'person_birth_details' && delete_detail
-	     obj.destroy
-	  end  
-        else 
-            obj = eval($models[table]).find(pkey)
+            
+        obj = eval($models[table]).find(pkey)
  	     
-	    if !pkey.match(/^#{location_pad}/)
-              obj2 = obj.dup
-             
-	      if table == 'person_birth_details' 
-                obj.reload
-                obj.destroy
-              end
- 
-              if table == 'person_relationship'
-                person_b = PersonService.fix_location_ids(obj2.person_b)
-		obj2.person_a = person_id
-		obj2.person_b = person_b
-	      else 
-                obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
-	      end
+				if !pkey.match(/^#{location_pad}/)
+		      obj2 = obj.dup
+		           
+			    if table == 'person_birth_details' 
+		              obj.reload
+		              obj.destroy
+		      end
+	 
+		      if table == 'person_relationship'
+		      	person_b = PersonService.fix_location_ids(obj2.person_b)
+						obj2.person_a = person_id
+						obj2.person_b = person_b
+			    else 
+		              obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
+			    end
 
-	      obj2.save 
-         
-              if table == 'core_person'
-                obj2.reload
-		person_id = obj2.person_id
-	      end 
-              
-              puts "#{pkey}====================#{person_id}"
- 	      
-	      #delete in couch and recreate pkey
-            end
-        end 
+			    obj2.save 
+		       
+		    	if table == 'core_person'
+		  			obj2.reload
+						person_id = obj2.person_id
+			    end 
+		            
+		      puts "#{pkey}====================#{person_id}"
+	 	      
+			    #delete in couch and recreate pkey
+	     	end       
         
       end
 
