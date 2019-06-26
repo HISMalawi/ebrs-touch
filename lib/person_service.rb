@@ -987,7 +987,7 @@ module PersonService
               obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
 			    end
 
-			    results = obj2.save 
+			    result = obj2.save 
 		       puts "#{table} #### #{result}"
 		    	if table == 'core_person'
 		  			obj2.reload
