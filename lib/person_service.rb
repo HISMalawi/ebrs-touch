@@ -963,7 +963,7 @@ module PersonService
     end
 
     person_id = nil
-    ['core_person', 'person', 'person_name', 'person_relationship', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers'].each do |table|
+    ['core_person', 'person', 'person_name', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers', 'person_relationship'].each do |table|
       next if doc[table].blank?
  
       (doc[table] || []).each do |pkey, d|
