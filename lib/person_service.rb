@@ -970,7 +970,6 @@ module PersonService
  
       (doc[table] || []).each do |pkey, d|
         time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
-        puts "#{person_id} ==== #{time} === #{time_created}"
             
         obj = eval($models[table]).find(pkey)
  	     
@@ -987,7 +986,7 @@ module PersonService
 						obj2.person_a = person_id
 						obj2.person_b = person_b
 			    else 
-		              obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
+              obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
 			    end
 
 			    obj2.save 
