@@ -946,7 +946,7 @@ module PersonService
    
     delete_detail = false
     if !doc["person_birth_details"].blank? && doc['person_birth_details'].keys.length > 1
-	delete_detail = true
+			delete_detail = true
     end 
 
     (doc['person_birth_details'] || []).each do |k, d|
@@ -954,9 +954,7 @@ module PersonService
       if all_locs.include?(d['location_created_at'])
          pbd = d
       end
-    end
-
-   
+    end   
 
     if !pbd.blank?
       time_created = pbd['created_at'].to_time.strftime("%Y-%m-%d %H")
@@ -970,7 +968,7 @@ module PersonService
  
       (doc[table] || []).each do |pkey, d|
         time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
-            
+   			next if time != time_created         
         obj = eval($models[table]).find(pkey)
  	     
 				if !pkey.match(/^#{location_pad}/)
@@ -989,14 +987,14 @@ module PersonService
               obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
 			    end
 
-			    obj2.save 
-		       
+			    results = obj2.save 
+		       puts "#{table} #### #{result}"
 		    	if table == 'core_person'
 		  			obj2.reload
 						person_id = obj2.person_id
 			    end 
 		            
-		      puts "#{pkey}====================#{person_id}"
+		      puts "#{table} # #{pkey}====================#{person_id}"
 	 	      
 			    #delete in couch and recreate pkey
 	     	end       
