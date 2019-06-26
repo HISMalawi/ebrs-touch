@@ -946,7 +946,7 @@ module PersonService
    
     delete_detail = false
     if !doc["person_birth_details"].blank? && doc['person_birth_details'].keys.length > 1
-	detete_detail = true
+	delete_detail = true
     end 
 
     (doc['person_birth_details'] || []).each do |k, d|
@@ -974,7 +974,7 @@ module PersonService
         if time != time_created || table != 'person_record_statuses'
           #Delete in couchdb
           obj = eval($models[table]).find(pkey)
-          if table == 'person_birth_details'
+          if table == 'person_birth_details' && delete_detail
 	     obj.destroy
 	  end  
         else 
@@ -983,7 +983,7 @@ module PersonService
 	    if !pkey.match(/^#{location_pad}/)
               obj2 = obj.dup
              
-	      if table == 'person_birth_details'
+	      if table == 'person_birth_details' 
                 obj.reload
                 obj.destroy
               end
