@@ -1021,8 +1021,9 @@ module PersonService
 			end
 		end 
 puts status
-		PersonRecordStatus.new_record_state(person_id, status, "Location ID Fix")
-		PersonRecordStatus.new_record_state(old_person_id, "DC-VOIDED", "Voided Due to Location Sync Anomaly")
+		u = User.where(username: 'admin279').first
+		PersonRecordStatus.new_record_state(person_id, status, "Location ID Fix", u.id)
+		PersonRecordStatus.new_record_state(old_person_id, "DC-VOIDED", "Voided Due to Location Sync Anomaly", u.id)
     person_id
   end
 end
