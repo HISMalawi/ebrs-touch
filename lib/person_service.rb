@@ -963,19 +963,27 @@ module PersonService
     end
 
     person_id = nil
+		old_person_id = nil
     ['core_person', 'person', 'person_name', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers', 'person_relationship'].each do |table|
       next if doc[table].blank?
- 
+ 	
       (doc[table] || []).each do |pkey, d|
         time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
    			next if time != time_created         
         obj = eval($models[table]).find(pkey)
  	     
 				if !pkey.match(/^#{location_pad}/)
+					if obj.attributes.has_key?('person_id') && old_person_id.blank?
+						old_person_id = obj.person_id
+					end 
+
 		      obj2 = obj.dup
 		           
 			    if table == 'person_birth_details' 
 		              obj.reload
+									obj.district_id_number = nil
+									obj.national_serial_number = nil
+									obj.save #Push to couch to remove BEN AND BRN at HQ
 		              obj.destroy
 		      end
 	 
@@ -1003,6 +1011,18 @@ module PersonService
 
     end
 
+		detail = PersonBirthDetail.where(person_id: person_id).first rescue nil 
+		status = "DC-COMPLETE"
+		if !detail.blank?
+			if detail.national_serial_number.present? 
+				status = "HQ-CAN-PRINT"
+			elsif detail.district_id_number.blank? 
+				status = "HQ-ACTIVE"
+			end
+		end 
+puts status
+		PersonRecordStatus.new_record_state(person_id, status, "Location ID Fix")
+		PersonRecordStatus.new_record_state(old_person_id, "DC-VOIDED", "Voided Due to Location Sync Anomaly")
     person_id
   end
 end
