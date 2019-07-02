@@ -950,7 +950,7 @@ module PersonService
    
     delete_detail = false
     if !doc["person_birth_details"].blank? && doc['person_birth_details'].keys.length > 1
-	detete_detail = true
+			delete_detail = true
     end 
 
     (doc['person_birth_details'] || []).each do |k, d|
@@ -958,9 +958,7 @@ module PersonService
       if all_locs.include?(d['location_created_at'])
          pbd = d
       end
-    end
-
-   
+    end   
 
     if !pbd.blank?
       time_created = pbd['created_at'].to_time.strftime("%Y-%m-%d %H")
@@ -969,54 +967,67 @@ module PersonService
     end
 
     person_id = nil
-    ['core_person', 'person', 'person_name', 'person_relationship', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers'].each do |table|
+		old_person_id = nil
+    ['core_person', 'person', 'person_name', 'person_birth_details', 'person_addresses', 'person_record_statuses', 'person_identifiers', 'person_relationship'].each do |table|
       next if doc[table].blank?
- 
+ 	
       (doc[table] || []).each do |pkey, d|
         time = d['created_at'].to_time.strftime("%Y-%m-%d %H")
-        puts "#{person_id} ==== #{time} === #{time_created}"
-        if time != time_created || table != 'person_record_statuses'
-          #Delete in couchdb
-          obj = eval($models[table]).find(pkey)
-          if table == 'person_birth_details'
-	     obj.destroy
-	  end  
-        else 
-            obj = eval($models[table]).find(pkey)
+   			next if time != time_created         
+        obj = eval($models[table]).find(pkey)
  	     
-	    if !pkey.match(/^#{location_pad}/)
-              obj2 = obj.dup
-             
-	      if table == 'person_birth_details'
-                obj.reload
-                obj.destroy
-              end
- 
-              if table == 'person_relationship'
-                person_b = PersonService.fix_location_ids(obj2.person_b)
-		obj2.person_a = person_id
-		obj2.person_b = person_b
-	      else 
-                obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
-	      end
+				if !pkey.match(/^#{location_pad}/)
+					if obj.attributes.has_key?('person_id') && old_person_id.blank?
+						old_person_id = obj.person_id
+					end 
 
-	      obj2.save 
-         
-              if table == 'core_person'
-                obj2.reload
-		person_id = obj2.person_id
-	      end 
-              
-              puts "#{pkey}====================#{person_id}"
- 	      
-	      #delete in couch and recreate pkey
-            end
-        end 
+		      obj2 = obj.dup
+		           
+			    if table == 'person_birth_details' 
+		              obj.reload
+									obj.district_id_number = nil
+									obj.national_serial_number = nil
+									obj.save #Push to couch to remove BEN AND BRN at HQ
+		              obj.destroy
+		      end
+	 
+		      if table == 'person_relationship'
+		      	person_b = PersonService.fix_location_ids(obj2.person_b)
+						obj2.person_a = person_id
+						obj2.person_b = person_b
+			    else 
+              obj2.person_id = person_id if table != 'core_person' && !person_id.blank?
+			    end
+
+			    result = obj2.save 
+		       puts "#{table} #### #{result}"
+		    	if table == 'core_person'
+		  			obj2.reload
+						person_id = obj2.person_id
+			    end 
+		            
+		      puts "#{table} # #{pkey}====================#{person_id}"
+	 	      
+			    #delete in couch and recreate pkey
+	     	end       
         
       end
 
     end
 
+		detail = PersonBirthDetail.where(person_id: person_id).first rescue nil 
+		status = "DC-COMPLETE"
+		if !detail.blank?
+			if detail.national_serial_number.present? 
+				status = "HQ-CAN-PRINT"
+			elsif detail.district_id_number.blank? 
+				status = "HQ-ACTIVE"
+			end
+		end 
+puts status
+		u = User.where(username: 'admin279').first
+		PersonRecordStatus.new_record_state(person_id, status, "Location ID Fix", u.id)
+		PersonRecordStatus.new_record_state(old_person_id, "DC-VOIDED", "Voided Due to Location Sync Anomaly", u.id)
     person_id
   end
 end
