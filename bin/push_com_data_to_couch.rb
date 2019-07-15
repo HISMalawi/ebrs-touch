@@ -28,12 +28,11 @@ def send_to_couch(person_id)
 		send_to_couch(a.person_b)
 		a.save		
 	}	
-
-	puts person_id
 end
 
 person_ids = PersonBirthDetail.where(" source_id LIKE '%#%' ").map(&:person_id)
-person_ids.each do |pid|
+person_ids.each_with_index do |pid, i|
+	puts "#{(i + 1)} # pid: #{pid}"
 	send_to_couch(pid)
 end
 
