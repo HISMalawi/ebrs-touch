@@ -411,7 +411,11 @@ module PersonService
       other_place = mass_reg_person["village_of_birth"]
       village_id = Location.locate_id_by_tag("Other", "Place Of Birth")
     end
-
+		
+		
+		district_created_at = 250
+		ta_created_at = Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Traditional Authority", district_created_at)
+		location_created_at = Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Village", ta_created_at)
 
     details = PersonBirthDetail.create(
         person_id: core_person.id,
@@ -422,7 +426,7 @@ module PersonService
         other_birth_location: other_place,
         type_of_birth: PersonTypeOfBirth.where(name: "Unknown").last.id,
         mode_of_delivery_id: ModeOfDelivery.where(name: "Unknown").last.id,
-        location_created_at: Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Village"),
+        location_created_at: location_created_at,
         acknowledgement_of_receipt_date: mass_reg_person["created_at"].to_date.to_s,
         date_reported: mass_reg_person["created_at"].to_date.to_s,
         date_registered: mass_reg_person["created_at"].to_date.to_s,
