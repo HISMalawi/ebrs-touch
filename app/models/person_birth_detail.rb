@@ -238,8 +238,7 @@ class PersonBirthDetail < ActiveRecord::Base
 		if self.district_id_number.blank? 
 			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
       if counter.blank?
-				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
-
+				missing_ben = nil #PersonBirthDetail.next_missing_ben(district_code, year)
 				if !missing_ben.blank?
 					ActiveRecord::Base.connection.execute("DELETE FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};")
 					ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(counter, person_id) VALUES (#{missing_ben.to_i}, #{self.person_id});")

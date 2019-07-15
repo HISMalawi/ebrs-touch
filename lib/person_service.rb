@@ -1016,7 +1016,7 @@ module PersonService
 		if !detail.blank?
 			if detail.national_serial_number.present? 
 				status = "HQ-CAN-PRINT"
-			elsif detail.district_id_number.blank? 
+			elsif detail.district_id_number.present? 
 				status = "HQ-ACTIVE"
 			end
 		end 
