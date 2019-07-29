@@ -51,15 +51,16 @@ class PersonBirthDetail < ActiveRecord::Base
         if r == "Other"
           r = "#{self.other_birth_location}, #{d}"
         else
-          r = "#{r}, #{d}"
+          r = [r, d].delete_if{|v| v.blank?}.join(", ")
         end
       elsif place_of_birth == "Home"
         l =  Location.find(self.birth_location_id) rescue ""
-        r = "#{l.village}, #{l.ta}, #{l.district}" rescue ""
+        d = Location.find(self.district_of_birth).name rescue l.district
+	      r = [l.village, l.ta, d].delete_if{|v| v.blank?}.join(", ") # rescue ""
       else
         d = Location.find(self.district_of_birth).name rescue nil
         d = "" if d == "Other"
-        r = "#{d}, #{self.other_birth_location}"
+        r = [self.other_birth_location, d].delete_if{|v| v.blank?}.join(", ")
       end
 
       r
