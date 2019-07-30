@@ -146,30 +146,8 @@
         Place of Birth
       </td>
       <td align="left">
-        <%
-           birth_place = birth.birth_place.name
-           if birth.district_of_birth.present?
-             birth_district = Location.find(birth.district_of_birth).name rescue nil
-             if birth_district.present?
-               place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
 
-               if place_of_birth.downcase == 'other'
-                 place_of_birth = birth.other_birth_location
-               end
-               if !place_of_birth.blank?
-                 place_of_birth += ", " + birth_district
-               else
-                 place_of_birth = birth_district
-               end
-             else
-               place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
-             end
-           else
-             place_of_birth = Location.find(birth.birth_location_id).name rescue birth.other_place_of_birth
-           end
-        %>
-
-        <%= place_of_birth %>
+        <%= birth.birthplace %>
       </td>
     </tr>
     <tr>
@@ -196,9 +174,8 @@
     </tr>
 
     <!-- ........................................ -->
-    <% if birth.parents_married_to_each_other.to_s == '0' %>
+    <% if person.father_all.blank? %>
         <tr>
-          <% if birth.court_order_attached.to_s == '1' || birth.parents_signed.to_s == '1'  %>
               <% if (person.father_all.name.present? rescue false)%>
                   <td style="width: 130px;" align="right">
                     9.
@@ -222,7 +199,6 @@
                       <%= person.father_all.citizenship rescue nil %>
                     </td>
                   </tr>
-              <% end %>
           <% end %>
 
     <% else %>

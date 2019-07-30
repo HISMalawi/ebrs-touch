@@ -704,4 +704,9 @@ def print_certificates
     render :text => "OK"
   end
 
+  def get_person_id
+    person_id = PersonBirthDetail.where(district_id_number: params[:ben]).last.person_id rescue ""
+    render :text => person_id
+  end
+
 end

@@ -220,6 +220,8 @@ Rails.application.routes.draw do
 
   get 'check_print_rules' => 'dc#check_print_rules'
 
+  get '/get_person_id'     => 'dc#get_person_id'
+
   resources :person
 
   resources :users
