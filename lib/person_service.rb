@@ -813,8 +813,8 @@ module PersonService
     results
   end
 
-  def self.force_sync(person_id, models={})
-    doc = Pusher.database.get(person_id.to_s)
+  def self.force_sync(person_id, models={}, doc={})
+    doc = Pusher.database.get(person_id.to_s) if doc.blank?
     fixed = false
 
     $models = {}
@@ -836,12 +836,12 @@ module PersonService
       begin
         (ordered_keys || []).each do |table|
           next if doc[table].blank?
-          next if table == "notification"
+          next if table == "notification" || table == "audit_trails"
 
           doc[table].each do |p_value, data|
 
             if data.has_key?("person_b")
-              PersonService.force_sync(data['person_b'])
+              #PersonService.force_sync(data['person_b'])
             end
 
             record = eval($models[table]).find(p_value) rescue nil
@@ -861,7 +861,7 @@ module PersonService
         end
 
       rescue => e
-	puts e
+	      puts e
         fixed = false
       end
     end
