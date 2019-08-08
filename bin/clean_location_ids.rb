@@ -38,12 +38,12 @@ Rails.application.eager_load!
 ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
    $models[eval(n).table_name] = n
 end
-raise "STOPPED".to_s
+#raise "STOPPED".to_s
 h = {}
 person_ids.each do |pid|
 	new_person_id = PersonService.fix_location_ids(pid, $models)  rescue next 
 	if !new_person_id.blank?
-		h[person_id] = new_person_id
+		h[pid] = new_person_id
 	end   
 end
 
