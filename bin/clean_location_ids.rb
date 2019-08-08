@@ -32,21 +32,20 @@ person_ids = PersonBirthDetail.where(" location_created_at = #{site_code} AND pe
 
 puts person_ids
 puts "#{person_ids.count}"
-
 $models = {}
 Rails.application.eager_load!
 ActiveRecord::Base.send(:subclasses).map(&:name).each do |n|
    $models[eval(n).table_name] = n
 end
-raise "STOPPED".to_s
+#raise "STOPPED".to_s
 h = {}
-person_ids.each do |pid|
+person_ids.each_with_index do |pid, i|
+	puts "NO. #{i}"
+	status = PersonRecordStatus.status(pid)
+	next if status.match(/Voided/i)
 	new_person_id = PersonService.fix_location_ids(pid, $models)  rescue next 
-	if !new_person_id.blank?
-		h[person_id] = new_person_id
-	end   
 end
 
-File.open("fixed_records_#{SETTINGS['location_id']}", "w"){|f| f.write(h.to_json)}
+#File.open("fixed_records_#{SETTINGS['location_id']}", "w"){|f| f.write(h.to_json)}
 
 
