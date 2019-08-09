@@ -88,6 +88,9 @@
           <button class="btn btn-primary"  style="border-radius: 5px;" onclick="jQuery('#print_filters').modal('show')">
             By Village of Community Registration
           </button>
+          <label  id = "filter_name" class="btn btn-default"  style="border-radius: 5px; border: none;">
+
+          </label>
         </td>
         <td colspan="8" style="width: 80%;" class="pull-right">
           <button onclick="selectBadge('All')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Total
@@ -603,7 +606,22 @@
 
     function reloadDataTable(node){
         type = __$('birth_type').value;
-        table.ajax.reload();
+        if(__$('category').value == 'community_data'){
+
+            var district = __$('informant_district').value;
+            var ta =     __$('informant_ta').value;
+            var village = __$('informant_village').value;
+
+            if(district == "" || ta == "" || village == ""){
+                alert("Missing filter, please select village of registration");
+                __$("filter_name").innerHTML = "";
+            }else {
+                __$("filter_name").innerHTML = village + ", " + ta;
+                table.ajax.reload();
+            }
+        }else{
+            table.ajax.reload();
+        }
     }
 
     function selectBadge(name){
@@ -613,10 +631,34 @@
     }
 
     function applyFilters(){
-        reloadDataTable()
+
+        var district = __$('informant_district').value;
+        var ta =     __$('informant_ta').value;
+        var village = __$('informant_village').value;
+
+        if(district == "" || ta == "" || village == ""){
+            alert("Missing filter, please select village of registration");
+            __$("filter_name").innerHTML = "";
+        }else {
+            __$("filter_name").innerHTML = village + ", " + ta;
+        }
+
+        reloadDataTable();
     }
 
     function printAll() {
+
+        var district = __$('informant_district').value;
+        var ta =     __$('informant_ta').value;
+        var village = __$('informant_village').value;
+
+        if(__$('category').value == 'community_data' && (district == "" || ta == "" || village == "")){
+            alert("Missing filter, please select village of registration");
+            __$("filter_name").innerHTML = "";
+            return;
+        }else {
+            __$("filter_name").innerHTML = village + ", " + ta;
+        }
 
         jQuery("#printerModal").modal("show");
         //Check for barcode availability before printing
@@ -682,6 +724,7 @@
     }
 
     function submitForm(){
+
         if (printer_name.length == 0){
             alert("Please select a printer");
         }else {
