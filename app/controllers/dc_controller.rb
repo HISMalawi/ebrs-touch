@@ -459,6 +459,7 @@ def print_certificates
 
   printable_statuses = Status.where("name IN ('HQ-CAN-PRINT', 'HQ-CAN-RE-PRINT')").map(&:status_id)
 
+=begin
   @facilities = ActiveRecord::Base.connection.select_all("
         SELECT d.location_created_at, l.name FROM person_birth_details d
           INNER JOIN location l ON l.location_id = d.location_created_at
@@ -466,6 +467,15 @@ def print_certificates
         GROUP BY location_created_at
           "
   ).collect{|c| [c['location_created_at'], c['name']]}
+=end
+
+  @facilities = ActiveRecord::Base.connection.select_all("
+        SELECT d.birth_location_id, l.name FROM person_birth_details d
+          INNER JOIN location l ON l.location_id = d.birth_location_id
+          INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{facility_tag_id}
+          WHERE l.parent_location = #{SETTINGS['location_id']}
+          "
+  ).collect{|c| [c['birth_location_id'], c['name']]}.uniq
 
   @districts = ActiveRecord::Base.connection.select_all("
         SELECT l.location_id, l.name FROM location_tag_map m
@@ -539,7 +549,7 @@ def print_certificates
     facility_filter = ""
     if !params[:facility_id].blank? && params[:facility_id] != "All"
       session[:facility_id] = params[:facility_id]
-      facility_filter = " AND pbd.location_created_at = #{params[:facility_id]} "
+      facility_filter = " AND pbd.birth_location_id = #{params[:facility_id]} "
     else
       session[:facility_id] = ""
     end
