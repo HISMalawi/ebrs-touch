@@ -444,7 +444,7 @@
       <select id="facility" label="facility" onchange="reloadDataTable(this)"
               style="color: #2f4f4f;border-radius: 3px;padding: 5px;font-weight: bold;margin: 5px;">
 
-        <option id="All2" value="All">Select Registration Facility</option>
+        <option id="All2" value="All">Select Birth Facility</option>
         <% (@facilities).each do |id, name|%>
             <option id="<%= id%>" value = "<%= id%>"><%= name%></option>
         <% end %>
