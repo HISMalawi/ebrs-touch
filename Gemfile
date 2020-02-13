@@ -44,7 +44,9 @@ end
 
 gem 'barby'
 
-gem 'rmagick'
+gem 'rmagick', '~>2.16.0'
+
+gem 'parallel','~>1.13.0'
 
 gem 'rqrcode'
 
