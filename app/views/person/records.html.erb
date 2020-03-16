@@ -152,19 +152,196 @@
 </select>
 
 <script>
+    function enableDisableFileType(action){
+        if(action == "disable"){
+            $("#PDF").attr("disabled",true);
+            $("#CSV").attr("disabled",true);
+        }else{
+            $("#PDF").removeAttr("disabled");
+            $("#CSV").removeAttr("disabled");
+        }
+        
+    }
+</script>
+
+<div id="dispatchPop" style=""> 
+                <form  id="dipatchForm" method="GET" action="/do_dispatch_these">
+                    <table id="dispatchModal">
+                        <tr>
+                            <th colspan="4"> Dispatch Criteria </th>
+                        </tr>
+                        <tr>
+                            <td style="width:15%; border-right: 2px solid #D3D3D3">TA</td>
+                            <td colspan="2"><input class="field" id="ta" name="ta" onfocus="fetchList('ta')"></td>
+                            <td rowspan="6" style="width:40%; border-left: 2px solid #D3D3D3">
+                                <div style="height: 350px; overflow-y:scroll">
+                                    <ul id="list">
+
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:15%; border-right: 2px solid #D3D3D3" >Village</td>
+                            <td colspan="2"><input   class="field" id="village" name="village" onfocus="fetchList('village')"></td>
+                        </tr>
+
+                        <tr>
+                            <td style="width:15%; border-right: 2px solid #D3D3D3" >Start Printed Date <span style="color:red">*</span></td>
+                            <td colspan="2"><input class="field" id="start" name="start"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:15%; border-right: 2px solid #D3D3D3">End Printed Date</td>
+                            <td colspan="2"><input class="field" id="end" name="end"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:15%; border-right: 2px solid #D3D3D3">Action <span style="color:red">*</span></td>
+                            <td>
+                                <input type="radio" id="print"  name="dispatch-action" value="print" onclick="enableDisableFileType('disable')" checked>
+                                <label for="print" onclick="enableDisableFileType('disable')">Print</label>
+                            </td>
+                            <td>
+                                <input type="radio" id="download" name="dispatch-action" value="download" onclick="enableDisableFileType('enable')">
+                                <label for="download" onclick="enableDisableFileType('enable')">Download</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style ="width:15%; border-right: 2px solid #D3D3D3">File Type</td>
+                            <td>
+                                <input type="radio" id="PDF" name="file_type" value="PDF" disabled>
+                                <label for="PDF">PDF</label>
+                            </td>
+                            <td>
+                                <input type="radio" id="CSV" name="file_type" value="CSV" disabled>
+                                <label for="CSV">CSV</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan= "2"></td>
+                            <td> <button class="red"  onmousedown="hideDispatchModal()">Close</button></td>
+                            <td > <button class="small blue" onmousedown="dispatch()">Proceed</button></td>
+                        </tr>
+
+                    </table>
+                </form>
+</div>
+<style>
+                    #dispatchModal  {
+                        font-size: 1em;
+                        width:98%;
+                        margin-left:1%;
+                    }
+                    .field{
+                        width:98%;
+                        margin:1%;
+                        height: 38px;
+                        border: 1.5px solid #3465a4;
+                        font-size: 1.5em;
+                    }
+                    #dispatchPop {
+                        position:absolute;
+                        top:10%;
+                        left:20%;
+                        width: 60%;
+                        height: 480px; 
+                        background: #ffffff; 
+                        border: 1px solid #D3D3D3; 
+                        box-shadow: 1px 2px #888888;
+                        display: none
+                    }
+
+</style>
+<% if @dispatch.present? && @dispatch %>
+    <button class="blue" style="position: absolute; right: 180px; bottom: 20px; cursor: pointer;
+                    border: 1px solid #fff; padding: 5px; border-radius: 50px; padding-top: 7px;" onmousedown="$('#dispatchPop').css('display','block')">
+            Dispatch Records
+    </button>
+<%end%>  
+
+<%= stylesheet_link_tag "jquery-ui/jquery-ui.min" %>
+<%=javascript_include_tag "jquery-ui/jquery-ui.min.js"%>
+<style>
+    .ui-datepicker-prev , .ui-datepicker-next {
+        background: #cdcdcd;
+        color: #000000;
+    }
+    .ui-icon{
+        color: black;
+    }
+</style>
+<script>
+    var district = "<%= @district.name %>";
+    var ta = ""
+    function fetchList(listType){
+        
+        if(listType == "ta"){
+            $.get("/search_by_ta?district="+district,function(data){
+                loadList(data.split("\n"),"ta")
+            })
+        }else if(listType == "village"){
+            $.get("/search_by_village?district="+district+"&ta="+ta,function(data){
+                loadList(data.split("\n"),"village")
+            })
+        }
+    }
+
+    function setInput(field,value){
+        document.getElementById(field).value = value
+        if(field == "ta"){
+            ta = value;
+        }
+    }
+    function loadList(list,field){
+        $("#list").html("");
+        var innerHTMLList = "";
+        for(var i = 0; i < list.length; i++){
+            innerHTMLList = innerHTMLList + "<li onclick= \"setInput('"+field+"','"+list[i]+"')\">"+list[i]+"</li>";
+        }
+        $("#list").html(innerHTMLList);
+    }
+    function hideDispatchModal(){
+        $("#dipatchForm").submit(function(e){
+            e.preventDefault()
+        });
+        $('#dispatchPop').css('display','none')
+    }
+    function dispatch(){
+        $("#dipatchForm").submit(function(e){
+            var values = $("#dipatchForm").serializeArray();
+            for(var i =0 ; i < values.length ; i++ ){
+                if(values[i].name == "start" && values[i].value.length == 0){
+                    alert("Please select date printed")
+                    e.preventDefault();
+                    break;                    
+                }
+                if(values[i].name == "action" && values[i].value.length == 0){
+                    alert("Please select action")
+                    e.preventDefault();
+                    break;                    
+                }
+            }
+            
+        })
+    }
+
+
+</script>
+<script>
 
 var table ;
 var syncChecked = false;
 
 $(document).ready(function() {
     initTable();
-
+    $("#start").datepicker({dateFormat:'yy-mm-dd'});
+    $("#end").datepicker({dateFormat:'yy-mm-dd'});
     var holder = __$('example_filter');
     holder.appendChild(__$('birth_type'));
 
     var search =__$('example_filter').getElementsByTagName("input")[0];
     search.setAttribute("onclick","changeFocusToMe(this)");
     searchData(search);
+   
 } );
 
 search_value = '';
