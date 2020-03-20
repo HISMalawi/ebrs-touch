@@ -188,25 +188,22 @@
 
                         <tr>
                             <td style="width:15%; border-right: 2px solid #D3D3D3" >TA</td>
-                            <td ><input style="width:15%;" class="field" id="ta" name="ta" onfocus="fetchList('ta')"></td>
-                            <td> X </td>                            
-                            
+                            <td colspan="2"><input  class="field" id="ta" name="ta" onfocus="fetchList('ta')"></td>
                             
                         </tr>
                         <tr>
                             <td style="width:15%; border-right: 2px solid #D3D3D3">Village</td>
-                            <td ><input style="width:15%;"  class="field" id="village" name="village" onfocus="fetchList('village')"></td>
-                            <td> X </td>
+                            <td colspan="2"><input  class="field" id="village" name="village" onfocus="fetchList('village')"></td>
                             
                         </tr>
                         <tr>
                             <td style="width:15%; border-right: 2px solid #D3D3D3">Action <span style="color:red">*</span></td>
                             <td>
-                                <input type="radio" id="print"  name="dispatch-action" value="print" onclick="enableDisableFileType('disable')" checked>
+                                <input type="radio" id="print"  name="dispatch_action" value="print" onclick="enableDisableFileType('disable')" checked>
                                 <label for="print" onclick="enableDisableFileType('disable')">Print</label>
                             </td>
                             <td>
-                                <input type="radio" id="download" name="dispatch-action" value="download" onclick="enableDisableFileType('enable')">
+                                <input type="radio" id="download" name="dispatch_action" value="download" onclick="enableDisableFileType('enable')">
                                 <label for="download" onclick="enableDisableFileType('enable')">Download</label>
                             </td>
                         </tr>

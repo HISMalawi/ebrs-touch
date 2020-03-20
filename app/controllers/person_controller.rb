@@ -1876,11 +1876,14 @@ class PersonController < ApplicationController
                 LIMIT 20000"
     @data = ActiveRecord::Base.connection.select_all(query).as_json
 
-    if params[:dispatch-action] == "download"
+
+
+    if params[:dispatch_action] == "download"
       file = "#{Rails.root}/public/dispatch/Dispatch-#{start_date}-#{end_date}.csv"
       write_csv(file,"header", ["BEN",	"Name",	"Sex", "BoB", "PoB", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant"])
       @data.each do |row|
         write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"]])
+        #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
       end
       send_file(file, :filename => "Dispatch-#{start_date}-#{end_date}.csv", :disposition => 'inline', :type => "text/csv")
     else
