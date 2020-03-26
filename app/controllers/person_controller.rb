@@ -93,20 +93,20 @@ class PersonController < ApplicationController
     #New Variables
 
     @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
-    @name = @person.person_names.last
+    @name = @person.person_names.first
     @address = @person.addresses.last
 
     @mother_person = @person.mother_all
     @mother_address = @mother_person.addresses.last rescue nil
-    @mother_name = @mother_person.person_names.last rescue nil
+    @mother_name = @mother_person.person_names.first rescue nil
 
     @father_person = @person.father_all
     @father_address = @father_person.addresses.last rescue nil
-    @father_name = @father_person.person_names.last rescue nil
+    @father_name = @father_person.person_names.first rescue nil
 
     @informant_person = @person.informant rescue nil
     @informant_address = @informant_person.addresses.last rescue nil
-    @informant_name = @informant_person.person_names.last rescue nil
+    @informant_name = @informant_person.person_names.first rescue nil
 
     @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
     days_gone = ((@birth_details.date_reported.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
@@ -2217,7 +2217,7 @@ class PersonController < ApplicationController
               INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
               #{by_ds_at_filter} ")
       .where(" prs.status_id IN (#{state_ids.join(', ')})
-              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) AND n.voided = 0
+              AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')})
               AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
               AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
                 person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
