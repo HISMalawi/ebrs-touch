@@ -222,6 +222,9 @@ Rails.application.routes.draw do
 
   get '/get_person_id'     => 'dc#get_person_id'
 
+  #dispatch
+  get '/do_dispatch_these' => 'person#do_dispatch_these'
+
   resources :person
 
   resources :users

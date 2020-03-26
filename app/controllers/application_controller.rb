@@ -73,7 +73,7 @@ class ApplicationController < ActionController::Base
   def login!(user)
     session[:user_id] = user.id
     AuditTrail.ip_address_accessor = request.remote_ip
-    AuditTrail.mac_address_accessor = ` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2]
+    AuditTrail.mac_address_accessor = ((` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2]  rescue MacAddress.address) rescue nil)
     AuditTrail.create(person_id: user.person_id,
                        audit_trail_type_id: AuditTrailType.find_by_name("SYSTEM").id,
                        comment: "User login") rescue nil
@@ -167,6 +167,11 @@ class ApplicationController < ActionController::Base
     render :template => 'person/print', :layout => nil
   end
 
+  def write_csv(file,type, row)
+    CSV.open(file, type=='header'? 'w' : 'a+' ) do |exporter|
+        exporter << row
+    end
+  end
 
   private
 

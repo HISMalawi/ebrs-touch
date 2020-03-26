@@ -10,8 +10,8 @@ class AuditTrail < ActiveRecord::Base
 	end
     def set_location
     	self.location_id =  SETTINGS['location_id']
-    	self.ip_address = 	(AuditTrail.ip_address_accessor rescue (request.remote_ip rescue `ip route show`[/default.*/][/\d+\.\d+\.\d+\.\d+/]))
-    	self.mac_address =  (AuditTrail.mac_address_accessor rescue (` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2] rescue MacAddress.address))
+    	self.ip_address = 	((AuditTrail.ip_address_accessor rescue (request.remote_ip rescue `ip route show`[/default.*/][/\d+\.\d+\.\d+\.\d+/])) rescue nil )
+    	self.mac_address =  ((AuditTrail.mac_address_accessor rescue (` arp #{request.remote_ip}`.split(/\n/).last.split(/\s+/)[2] rescue MacAddress.address)) rescue nil)
     end
 
     def self.create_ammendment_trail(person_id, field, value, user_id)

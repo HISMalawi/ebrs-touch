@@ -17,13 +17,13 @@ def send_to_couch(person_id)
 	PersonBirthDetail.where(person_id: person_id).each{|a| a.save}	
 
 	#PersonIdentifier
-	PersonIdentifier.where(person_id: person_id).each{|a| a.save}	
+	PersonIdentifier.where(person_id: person_id).order(:created_at).each{|a| a.save}	
 
 	#PersonRecordStatus
-	PersonRecordStatus.where(person_id: person_id).each{|a| a.save}	
+	PersonRecordStatus.where(person_id: person_id).order(:created_at).each{|a| a.save}	
 
 	#PersonRelationship
-	PersonRelationship.where(person_a: person_id).each{|a| 
+	PersonRelationship.where(person_a: person_id).order(:created_at).each{|a| 
 
 		send_to_couch(a.person_b)
 		a.save		

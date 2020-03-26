@@ -1824,8 +1824,78 @@ class PersonController < ApplicationController
 
   end  
 
+  def do_dispatch_these
+    start_date = params[:start].to_date.strftime('%Y-%m-%d 00:00:00')
+    if params[:end].blank?
+      end_date = Time.now.strftime('%Y-%m-%d 23:59:59')
+    else 
+      end_date = params[:end].to_date.strftime('%Y-%m-%d 23:59:59')
+    end
+
+    
+    
+    query = "SELECT person.person_id,person_birth_details.district_id_number as BEN, 
+                    CONCAT(first_name,' ', last_name) as Name ,
+                    gender as Sex,  DATE_FORMAT(birthdate,'%d/%M/%Y') as BoB,
+                    place_of_birth.name as PoB,
+                    CONCAT(district_of_birth.name, ',', birth_location.name) as Location,
+                    DATE_FORMAT(person_birth_details.date_registered,'%d/%M/%Y') as DateOfReg,
+                    CONCAT( InformantFirstName, ' ',  InformantLastName) as NameOfInformant,
+                    district as DistrictOfInformant, 
+                    ta as TraditionalAuthorityOfInformant, 
+                    village as VillageOfInformant
+                FROM person 
+                      INNER JOIN person_name 
+                      INNER JOIN person_birth_details
+                      INNER JOIN location place_of_birth
+                INNER JOIN location district_of_birth
+                INNER JOIN location birth_location
+                INNER JOIN  (SELECT person_id FROM person_record_statuses 
+                              WHERE status_id IN (SELECT status_id FROM `statuses` WHERE `name` = 'DC-PRINTED' OR `name` = 'HQ-PRINTED')
+                                    AND
+                              person_record_statuses.created_at >='#{start_date}' AND person_record_statuses.created_at <='#{end_date}') status
+
+                INNER JOIN (SELECT person_a, person_b,informant.first_name as InformantFirstName, 
+                      informant.last_name as InformantLastName, d.name district, ta.name ta , v.name village
+                      FROM `person_relationship` INNER JOIN person_addresses 
+                INNER JOIN location d INNER JOIN location ta INNER JOIN location v
+                INNER JOIN person_name informant
+                  ON  person_relationship.person_b = person_addresses.person_id
+                    AND person_addresses.current_district = d.location_id
+                    AND person_addresses.current_ta = ta.location_id
+                    AND person_addresses.current_village = v.location_id
+                    AND person_relationship.person_b = informant.person_id
+                    WHERE `person_relationship_type_id` = '4') address
+                ON person.person_id = person_name.person_id AND person.person_id = person_birth_details.person_id AND
+                  person_birth_details.person_id = status.person_id 
+                  AND address.person_a = person.person_id
+                  AND person_birth_details.place_of_birth = place_of_birth.location_id
+                  AND person_birth_details.district_of_birth = district_of_birth.location_id
+                  AND person_birth_details.birth_location_id = birth_location.location_id
+                ORDER BY Name,district, ta, village
+                LIMIT 20000"
+    @data = ActiveRecord::Base.connection.select_all(query).as_json
+
+
+
+    if params[:dispatch_action] == "download"
+      file = "#{Rails.root}/public/dispatch/Dispatch-#{start_date}-#{end_date}.csv"
+      write_csv(file,"header", ["BEN",	"Name",	"Sex", "BoB", "PoB", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant"])
+      @data.each do |row|
+        write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"]])
+        #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
+      end
+      send_file(file, :filename => "Dispatch-#{start_date}-#{end_date}.csv", :disposition => 'inline', :type => "text/csv")
+    else
+
+    end
+    
+  end
+
+
   def view_printed_cases
 
+    @district =  Location.current_district
     if params[:loc] == "hq"
       @states = ["HQ-PRINTED"]
       @section = "Cases Printed at HQ"
@@ -1845,6 +1915,7 @@ class PersonController < ApplicationController
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
+    @dispatch = true
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end

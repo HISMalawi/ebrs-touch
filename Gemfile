@@ -26,7 +26,7 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem "whitesimilarity"
-gem "wkhtmltopdf-binary"
+gem "wkhtmltopdf-binary", "0.12.3.1"
 gem 'mac-address'
 
 group :development, :test do
@@ -44,7 +44,9 @@ end
 
 gem 'barby'
 
-gem 'rmagick'
+gem 'rmagick', '~>2.16.0'
+
+gem 'parallel','~>1.13.0'
 
 gem 'rqrcode'
 
