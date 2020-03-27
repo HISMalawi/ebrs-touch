@@ -3,7 +3,7 @@ total = details.count
 m_type = PersonRelationType.find_by_name("Mother")
 f_type = PersonRelationType.find_by_name("Father")
 
-(details || []).each_with_index do |d, i|
+Parallel.each_with_index(details,in_processes: 7)  do |d,i|
   @name = PersonName.where(person_id: d.person_id).last
   @person = Person.find(d.person_id)
 
