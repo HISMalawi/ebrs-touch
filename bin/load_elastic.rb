@@ -1,9 +1,10 @@
+start_time = Time.now
 details = PersonBirthDetail.all
 total = details.count
 m_type = PersonRelationType.find_by_name("Mother")
 f_type = PersonRelationType.find_by_name("Father")
 
-(details || []).each_with_index do |d, i|
+Parallel.each_with_index(details,in_processes: 4)  do |d,i|
   @name = PersonName.where(person_id: d.person_id).last
   @person = Person.find(d.person_id)
 
@@ -62,3 +63,8 @@ f_type = PersonRelationType.find_by_name("Father")
     puts "#{i} / #{total}"
   end
 end
+end_time = Time.now
+
+time_taken = (end_time - start_time) / 1.minutes
+
+puts "#{time_taken} Minutes"
