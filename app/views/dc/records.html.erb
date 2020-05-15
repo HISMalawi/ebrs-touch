@@ -85,7 +85,7 @@
           <h3 style="padding-bottom: 15px;color:darkslategray; height: 40px;margin-top: 0px;"><%= @section%></h3>
         </td>
         <td  style="padding-bottom: 15px; min-width: 200px;">
-          <button class="btn btn-primary"  style="border-radius: 5px;" onclick="__$('processing_wait').style.display = 'none'; jQuery('#print_filters').modal('show')">
+          <button class="btn btn-primary hidden"  style="border-radius: 5px;" onclick="__$('processing_wait').style.display = 'none'; jQuery('#print_filters').modal('show')">
             By Village of Community Registration
           </button>
           <label  id = "filter_name" class="btn btn-default"  style="border-radius: 5px; border: none;">
@@ -113,6 +113,11 @@
         <button id="print-all" onclick="printAll()"
                 class=" btn btn-primary"><i class="fa fa-print"></i>Print Selected</button>
   </div>
+
+  <div class="fix-middle" style="height: 40px; margin-top: 0px;">
+  <button id="dispatch-all" onclick="jQuery('#printerModal2').modal('show')"
+          class=" btn btn-primary">Dispatch Selected</button>
+</div>
 <style>
     #print-all, #dispatch-all{
         display: none;
@@ -214,9 +219,7 @@
 </div>
 
 <div class="modal fade" id="print_filters" tabindex="-1" role="dialog" aria-hidden="true" style="width:900px; margin: auto;">
-
-
-<div class="modal-dialog">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header"style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
         <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -259,18 +262,21 @@
 
 
 
-<div class="modal fade" id="printerModal" tabindex="-1" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
+<div class="modal fade" id="printerModal" tabindex="-1" style="z-index:6000" role="dialog" aria-labelledby="printerModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
-          Select Printer
+          Print Actions
         </h4>
       </div>
       <div class="modal-body">
         <span style="text-align:center;">
           <table align="center" id="printers">
+          <tr>
+            <td><h4>Select printer</h4></td>
+          </tr>
             <%
                @available_printers = SETTINGS["printer_name"].split('|')
                @available_printers.each do |printer| %>
@@ -279,7 +285,20 @@
                   <td style="text-align: left; padding-left:50px;"><%= printer %></td>
                 </tr>
             <% end %>
+
+            <tr>
+              <td><h4>Action</h4></td>
+            </tr>
+            <tr>
+              <td><input type="radio" id="print"  value="Print" name="print_action" checked="true"/></td>
+              <td>Print</td>
+            </tr>
+            <tr>
+              <td><input type="radio" id="print_and_dispatch" value="Print and Dispatch" name="print_action" /></td>
+              <td>Print and Dispatch</td>
+            </tr>
           </table>
+          <br/>
         </span>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" onclick="submitForm();">Okay</button>
@@ -450,7 +469,11 @@
         <% end %>
       </select>
     </td>
-
+    <td>
+      <button class="btn btn-primary"  style="border-radius: 5px;" onclick="__$('processing_wait').style.display = 'none'; jQuery('#print_filters').modal('show')">
+        Filter By Address of Informant
+      </button>
+    </td>          
     <td id="p_h_2">
 
     </td>
@@ -652,7 +675,9 @@
         }
 
         __$("processing_wait").style.display = 'inline-block';
-        reloadDataTable();
+        table.ajax.reload();
+        jQuery('#print_filters').modal('hide')
+        //reloadDataTable();
     }
 
     function printAll() {
@@ -688,7 +713,7 @@
             alert("Please select printer!");
             return;
         }
-        window.location = "/person/dispatch_certificates?person_ids=" +  selected.join(',') + "&printer_name=" + printer_name;
+        window.location = "/person/dispatch_certificates?person_ids=" +  selected.join(',') + "&printer_name=" + printer_name+"&dispatch_action=download";
     }
 
     function checkSelections(){
@@ -700,11 +725,19 @@
             }
         }
 
+        var states = "<%= @states.join(',') %>".split(",");
+
+        var action = "print";
+
+        if(states.includes("DC-PRINTED") || states.includes("HQ-PRINTED")){
+          action = "dispatch";
+        }
+
         if(selected.length > 0){
-            if (__$('print-all')){
+            if (__$('print-all') && action == "print"){
                 jQuery('#print-all').show()
             }
-            if (__$('dispatch-all')){
+            if (__$('dispatch-all') && action == "dispatch" ){
                 jQuery('#dispatch-all').show()
             }
         }else{
@@ -733,11 +766,19 @@
     }
 
     function submitForm(){
+        var action = ""
+        if(__$("print").checked){
+            action = "&print_action=Print"
+        }
+
+        if(__$("print_and_dispatch").checked){
+          action = "&print_action=Print and Dispatch"
+        }
 
         if (printer_name.length == 0){
             alert("Please select a printer");
         }else {
-            window.location = "/print?person_ids=" + selected.join(',') + "&printer_name=" + printer_name;
+            window.location = "/print?person_ids=" + selected.join(',') + "&printer_name=" + printer_name+action;
         }
     }
 

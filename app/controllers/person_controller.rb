@@ -1825,36 +1825,27 @@ class PersonController < ApplicationController
   end  
 
   def do_dispatch_these
-    start_date = params[:start].to_date.strftime('%Y-%m-%d 00:00:00')
-    if params[:end].blank?
-      end_date = Time.now.strftime('%Y-%m-%d 23:59:59')
-    else 
-      end_date = params[:end].to_date.strftime('%Y-%m-%d 23:59:59')
-    end
-
     
     
     query = "SELECT person.person_id,person_birth_details.district_id_number as BEN, 
                     CONCAT(first_name,' ', last_name) as Name ,
-                    gender as Sex,  DATE_FORMAT(birthdate,'%d/%M/%Y') as BoB,
+                    gender as Sex,  DATE_FORMAT(birthdate,'%Y-%m-%d') as BoB,
                     place_of_birth.name as PoB,
                     CONCAT(district_of_birth.name, ',', birth_location.name) as Location,
-                    DATE_FORMAT(person_birth_details.date_registered,'%d/%M/%Y') as DateOfReg,
+                    DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg,
                     CONCAT( InformantFirstName, ' ',  InformantLastName) as NameOfInformant,
                     district as DistrictOfInformant, 
                     ta as TraditionalAuthorityOfInformant, 
                     village as VillageOfInformant
-                FROM person 
+                FROM 
+                  (SELECT * FROM person WHERE person_id IN('#{params[:person_ids].split(",").join("','")}')) person 
                       INNER JOIN person_name 
                       INNER JOIN person_birth_details
                       INNER JOIN location place_of_birth
                 INNER JOIN location district_of_birth
                 INNER JOIN location birth_location
                 INNER JOIN  (SELECT person_id FROM person_record_statuses 
-                              WHERE status_id IN (SELECT status_id FROM `statuses` WHERE `name` = 'DC-PRINTED' OR `name` = 'HQ-PRINTED')
-                                    AND
-                              person_record_statuses.created_at >='#{start_date}' AND person_record_statuses.created_at <='#{end_date}') status
-
+                              WHERE status_id IN (SELECT status_id FROM `statuses` WHERE `name` = 'DC-PRINTED' OR `name` = 'HQ-PRINTED')) status
                 INNER JOIN (SELECT person_a, person_b,informant.first_name as InformantFirstName, 
                       informant.last_name as InformantLastName, d.name district, ta.name ta , v.name village
                       FROM `person_relationship` INNER JOIN person_addresses 
@@ -1874,25 +1865,265 @@ class PersonController < ApplicationController
                   AND person_birth_details.birth_location_id = birth_location.location_id
                 ORDER BY Name,district, ta, village
                 LIMIT 20000"
+
     @data = ActiveRecord::Base.connection.select_all(query).as_json
 
 
 
     if params[:dispatch_action] == "download"
-      file = "#{Rails.root}/public/dispatch/Dispatch-#{start_date}-#{end_date}.csv"
+      file = "#{Rails.root}/public/dispatch/Dispatch.csv"
       write_csv(file,"header", ["BEN",	"Name",	"Sex", "BoB", "PoB", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant"])
       @data.each do |row|
         write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"]])
         #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
       end
-      send_file(file, :filename => "Dispatch-#{start_date}-#{end_date}.csv", :disposition => 'inline', :type => "text/csv")
+      send_file(file, :filename => "Dispatch.csv", :disposition => 'inline', :type => "text/csv")
     else
 
     end
     
   end
 
+  def view_printed_cases
+    #raise params[:statuses].inspect
+    @district =  Location.current_district
+    if params[:loc] == "hq"
+      @states = ["HQ-PRINTED"]
+      @section = "Cases Printed at HQ"
+    elsif params[:loc] == "dc"
+      @states = ["DC-PRINTED"]
+      @section = "Cases Printed at DC"
+    else
+      @states = ["HQ-PRINTED","DC-PRINTED"]
+      @section = "All Printed Cases"
+    end
 
+    @type_stats = PersonRecordStatus.type_stats(@states, params[:had], params[:had_by])
+    facility_tag_id = LocationTag.where(name: "Health Facility").first.id
+    district_tag_id = LocationTag.where(name: "District").first.id
+  
+    printable_statuses = Status.where("name IN ('#{@states.join("','")}')").map(&:status_id)
+  
+=begin
+    @facilities = ActiveRecord::Base.connection.select_all("
+          SELECT d.location_created_at, l.name FROM person_birth_details d
+            INNER JOIN location l ON l.location_id = d.location_created_at
+            INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{facility_tag_id}
+          GROUP BY location_created_at
+            "
+    ).collect{|c| [c['location_created_at'], c['name']]}
+=end
+  
+    @facilities = ActiveRecord::Base.connection.select_all("
+          SELECT d.birth_location_id, l.name FROM person_birth_details d
+            INNER JOIN location l ON l.location_id = d.birth_location_id
+            INNER JOIN location_tag_map m ON m.location_id = l.location_id AND m.location_tag_id = #{facility_tag_id}
+            WHERE l.parent_location = #{SETTINGS['location_id']}
+            "
+    ).collect{|c| [c['birth_location_id'], c['name']]}.uniq
+  
+    @districts = ActiveRecord::Base.connection.select_all("
+          SELECT l.location_id, l.name FROM location_tag_map m
+            INNER JOIN location l ON l.location_id = m.location_id
+            WHERE m.location_tag_id = #{district_tag_id}
+          GROUP BY l.location_id
+            "
+    ).collect{|c| [c['location_id'], c['name']]}
+  
+    cur_loc_id = SETTINGS['location_id']
+    cur_loc_name = Location.find(cur_loc_id).name
+  
+    @facilities << [cur_loc_id, "#{cur_loc_name} (ADR)"]
+  
+    params[:statuses] = [] if params[:statuses].blank?
+    session[:list_url] = request.referrer
+    @states = params[:statuses] if @states.blank?
+    @states = ["HQ-PRINTED","DC-PRINTED"] if @states.blank?
+  
+    @icoFolder = folder
+    @targeturl = "/"
+  
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states) rescue []
+    types = []
+  
+    @birth_type = params[:birth_type]
+  
+    search_val = params[:search][:value] rescue nil
+    search_val = '_' if search_val.blank?
+    search_category = ''
+  
+    if !params[:category].blank?
+  
+      if params[:category] == 'continuous'
+        search_category = " AND (pbd.source_id IS NULL OR LENGTH(pbd.source_id) >  19)  "
+      elsif params[:category] == 'mass_data'
+        search_category = " AND (pbd.source_id IS NOT NULL AND LENGTH(pbd.source_id) <  20 ) "
+      elsif params[:category] == "community_data"
+        search_category = " AND (pbd.source_id IS NOT NULL AND pbd.source_id LIKE '%#%' ) "
+      else
+        search_category = ""
+      end
+  
+      session[:category] = params[:category]
+    end
+  
+    if !params[:start].blank?
+  
+      loc_query = " "
+      locations = []
+  
+      if params[:district] == "All"
+        session[:district] = ""
+      end
+  
+      if params[:district].present? && params[:district] != "All"
+        session[:district] = params[:district]
+  
+        locations = [params[:district]]
+  
+        facility_tag_id = LocationTag.where(name: 'Health Facility').first.id rescue [-1]
+        (Location.find_by_sql("SELECT l.location_id FROM location l
+                              INNER JOIN location_tag_map m ON l.location_id = m.location_id AND m.location_tag_id = #{facility_tag_id}
+                            WHERE l.parent_location = #{params[:district]}") || []).each {|l|
+          locations << l.location_id
+        }
+        loc_query = " AND pbd.location_created_at IN (#{locations.join(', ')}) "
+      end
+  
+      facility_filter = ""
+      if !params[:facility_id].blank? && params[:facility_id] != "All"
+        session[:facility_id] = params[:facility_id]
+        facility_filter = " AND pbd.birth_location_id = #{params[:facility_id]} "
+      else
+        session[:facility_id] = ""
+      end
+  
+      state_ids = @states.collect{|s| Status.find_by_name(s).id} + [-1]
+      types=['Normal', 'Abandoned', 'Adopted', 'Orphaned'] if params[:type] == 'All'
+      types=['Abandoned', 'Adopted', 'Orphaned'] if params[:type] == 'All Special Cases'
+      types=[params[:type]] if types.blank?
+  
+      person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
+  
+      had_query = ' '
+      if !params['had'].blank?
+        #probe user who made previous change
+        user_hook = ""
+        if params['had_by'].present?
+  
+          had_by_users =  UserRole.where(role_id: Role.where(role: params['had_by']).last.id).map(&:user_id) rescue [-1]
+          had_by_users =  [-1] if had_by_users.blank?
+          user_hook = " AND prev_s.creator IN (#{had_by_users.join(', ')}) " if had_by_users.length > 0
+        end
+  
+        prev_states = params['had'].split('|')
+        prev_state_ids = prev_states.collect{|sn| Status.where(name: sn).last.id  rescue -1 }
+        had_query = " INNER JOIN person_record_statuses prev_s ON prev_s.person_id = prs.person_id #{user_hook}
+               AND prev_s.status_id IN (#{prev_state_ids.join(', ')})"
+      end
+  
+      informant_join_query = "  "
+      if !params[:informant_village].blank? && !params[:informant_ta].blank? && !params[:informant_district].blank?
+  
+        district_id          = Location.locate_id_by_tag(params[:informant_district], "District")
+        ta_id                = Location.locate_id(params[:informant_ta], "Traditional Authority", district_id)
+        village_id           = Location.locate_id(params[:informant_village], "Village", ta_id)
+  
+        village_filter_query = " " #" AND pbd.location_created_at  = #{village_id}"
+  
+        info_type_id         = PersonRelationType.where(name: "Informant").first.id
+        informant_join_query = "INNER JOIN person_relationship p_rel ON p_rel.person_a = person.person_id
+                                  AND p_rel.person_relationship_type_id = #{info_type_id}
+                                INNER JOIN person_addresses info_a ON info_a.person_id = p_rel.person_b
+                                  AND ((info_a.current_district = #{district_id}
+                                        AND info_a.current_ta = #{ta_id}
+                                        AND info_a.current_village  = #{village_id})
+                                          OR
+                                        (pbd.location_created_at  = #{village_id}))
+                                "
+  
+      end
+  
+      #faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+       #                                           LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+         #                                         WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+  
+      d = Person.order(" pbd.district_id_number, pbd.national_serial_number, n.first_name, n.last_name, cp.created_at ")
+      .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
+                INNER JOIN person_name n ON person.person_id = n.person_id
+                INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
+                #{had_query}
+                INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
+                #{informant_join_query}
+      ")
+      .where(" prs.status_id IN (#{state_ids.join(', ')}) AND n.voided = 0
+                AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
+                #{village_filter_query} AND pbd.district_id_number IS NOT NULL
+                AND pbd.birth_registration_type_id IN (#{person_reg_type_ids.join(', ')}) #{loc_query} #{facility_filter} 
+                AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
+                person.birthdate, person.gender) REGEXP \"#{search_val}\"  #{search_category} ")
+  
+      total = d.select(" count(*) c ")[0]['c'] rescue 0
+      page = (params[:start].to_i / params[:length].to_i) + 1
+  
+      data = d.group(" prs.person_id ")
+  
+      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn")
+      data = data.page(page)
+      .per_page(params[:length].to_i)
+  
+      @records = []
+      nid_data = []
+      data.each do |p|
+        mother = PersonService.mother(p.person_id)
+        father = PersonService.father(p.person_id)
+        details = PersonBirthDetail.find_by_person_id(p.person_id)
+  
+        p['first_name'] = '' if p['first_name'].present? && p['first_name'].match('@')
+        p['last_name'] = '' if p['last_name'].present? && p['last_name'].match('@')
+        p['middle_name'] = '' if p['middle_name'].present? && p['middle_name'].match('@')
+  
+        name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
+        mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+        father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+  
+        arr = [
+            p.ben
+            ]
+  
+        national_id = p.id_number rescue ""
+        arr  << (national_id)
+  
+        arr = arr + [name,
+                     p.birthdate.strftime('%d/%b/%Y'),
+                     p.gender,
+                     mother_name,
+                     father_name,
+                     Status.find(p.status_id).name.sub("HQ-CAN-PRINT", "CAN-PRINT"),
+                     p.person_id
+        ]
+  
+        @records << arr
+      end 
+  
+      render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => total,
+          "recordsFiltered" => total,
+          "data" => @records}.to_json and return
+    end
+  
+    @online = false
+    require 'open3'
+    host, port = SETTINGS['sync_host'].split(":")
+    a, b, c = Open3.capture3("nc -vw 5 #{host} #{port}")
+    if b.scan(/succeeded/).length > 0
+      @online = true
+    end
+  
+    render :template => "/dc/records", layout: "bootstrap_data_table"
+  end
+=begin
   def view_printed_cases
 
     @district =  Location.current_district
@@ -1919,7 +2150,7 @@ class PersonController < ApplicationController
     #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
-
+=end
   def view_voided_cases
     @states = ["DC-VOIDED"]
     @section = "Voided Cases"
