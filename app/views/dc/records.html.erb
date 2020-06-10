@@ -126,6 +126,7 @@
     }
 
 </style>
+<div id="table-div" style="height:650px;overflow:hidden;width:100%">
 <table id="example" class="display table table-condensed table-striped" cellspacing="0" width="100%">
   <thead>
     <tr>
@@ -170,7 +171,8 @@
   <tbody>
   </tbody>
 </table>
-
+</div>
+<%= render :partial => "/dc/scroll" %>
 </div>
 
 <button class="red btn btn-danger pull-right" style="width: 80px; float: right; margin-right: 40px; margin-top: 10px; cursor: pointer;
@@ -489,7 +491,8 @@
   <option id="orphaned">Orphaned</option>
 </select>
 
-
+<form id="selected-submit" method="post">
+</form>
 <script>
     selected = [];
     var table;
@@ -591,6 +594,7 @@
                     "processing": true,
                     "serverSide": true,
                     "ordering": false,
+                    "lengthMenu": [ 10, 50, 100, 500,1000,5000,10000 ],
                     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                         jQuery('td .action-btn', nRow).parent().parent().css('background', 'white');
                     },
@@ -713,7 +717,27 @@
             alert("Please select printer!");
             return;
         }
-        window.location = "/person/dispatch_certificates?person_ids=" +  selected.join(',') + "&printer_name=" + printer_name+"&dispatch_action=download";
+        var form = __$('selected-submit')
+        form.setAttribute("action", "/dispatch_certificates");
+        for(var i = 0; i <selected.length; i++){
+            var input = document.createElement("input")
+            input.name = "person_ids[]";
+            input.value = selected[i];
+            form.appendChild(input);
+        }
+
+        var input = document.createElement("input")
+        input.name = "printer_name";
+        input.value =  printer_name;
+        form.appendChild(input);
+
+        var input = document.createElement("input")
+        input.name = "dispatch_action";
+        input.value =  "download";
+        form.appendChild(input);
+
+        form.submit();
+        //window.location = "/dispatch_certificates?person_ids=" +  selected.join(',') + "&printer_name=" + printer_name+"&dispatch_action=download";
     }
 
     function checkSelections(){
@@ -767,18 +791,41 @@
 
     function submitForm(){
         var action = ""
-        if(__$("print").checked){
-            action = "&print_action=Print"
-        }
 
-        if(__$("print_and_dispatch").checked){
-          action = "&print_action=Print and Dispatch"
-        }
 
         if (printer_name.length == 0){
             alert("Please select a printer");
         }else {
-            window.location = "/print?person_ids=" + selected.join(',') + "&printer_name=" + printer_name+action;
+            var form = __$('selected-submit')
+            form.setAttribute("action", "/print");
+            for(var i = 0; i <selected.length; i++){
+                var input = document.createElement("input")
+                input.name = "person_ids[]";
+                input.value = selected[i];
+                form.appendChild(input);
+            }
+    
+            var input = document.createElement("input")
+            input.name = "printer_name";
+            input.value =  printer_name;
+            form.appendChild(input);
+    
+            if(__$("print").checked){
+              var input = document.createElement("input")
+              input.name = "print_action";
+              input.value =  "Print";
+              form.appendChild(input);
+            }
+      
+            if(__$("print_and_dispatch").checked){
+              var input = document.createElement("input")
+              input.name = "print_action";
+              input.value =  "Print and Dispatch";
+              form.appendChild(input);
+            }
+    
+            form.submit();
+            //window.location = "/print?person_ids=" + selected.join(',') + "&printer_name=" + printer_name+action;
         }
     }
 

@@ -1,0 +1,43 @@
+<style type="text/css">
+    #up {
+      position: absolute;
+
+      right: 1%;
+
+      top :30%;
+    }
+
+    #down {
+      position: absolute;
+
+      right: 1%;
+
+      bottom :30%;
+    }
+	.scroll{
+			background: #bed5de;
+            border : 0.005em solid #b3b1b1;
+
+            font-size: 2em;
+
+            width: 50px;
+
+            margin: 0.3%;
+
+            box-shadow: 2.5px 2.5px 1px #888888;
+
+           	padding: 0.1%;
+
+            text-align: center;
+            
+            z-index: 10000;
+	}
+</style>
+
+  <div id="up" class="scroll" onclick="document.getElementById('table-div').scrollBy(0, -200);">
+     <i class=" fa fa-arrow-up"></i>
+     <br/>
+ </div>
+ <div id="down" class="scroll" onclick="document.getElementById('table-div').scrollBy(0, 200);">
+     <i class=" fa fa-arrow-down"></i>
+ </div>

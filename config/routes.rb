@@ -121,6 +121,7 @@ Rails.application.routes.draw do
   post '/print_preview' => 'person#print_preview'
   get '/birth_certificate' => 'person#birth_certificate'
   get '/print' => 'person#print'
+  post '/print' => 'person#print'
 
   get '/pending_cases' => "dc#manage_pending_cases"
   get '/printed_cases' => "dc#printed_cases"
@@ -224,6 +225,7 @@ Rails.application.routes.draw do
 
   #dispatch
   get '/person/dispatch_certificates' => 'person#do_dispatch_these'
+  post '/dispatch_certificates' => 'person#do_dispatch_these'
 
   resources :person
 

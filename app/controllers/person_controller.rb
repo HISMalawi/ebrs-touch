@@ -1838,7 +1838,7 @@ class PersonController < ApplicationController
                     ta as TraditionalAuthorityOfInformant, 
                     village as VillageOfInformant
                 FROM 
-                  (SELECT * FROM person WHERE person_id IN('#{params[:person_ids].split(",").join("','")}')) person 
+                  (SELECT * FROM person WHERE person_id IN('#{params[:person_ids].join("','")}')) person 
                       INNER JOIN person_name 
                       INNER JOIN person_birth_details
                       INNER JOIN location place_of_birth
@@ -1863,19 +1863,16 @@ class PersonController < ApplicationController
                   AND person_birth_details.place_of_birth = place_of_birth.location_id
                   AND person_birth_details.district_of_birth = district_of_birth.location_id
                   AND person_birth_details.birth_location_id = birth_location.location_id
-                ORDER BY Name,district, ta, village
+                ORDER BY district, ta, village, person_name.last_name,  person_name.first_name
                 LIMIT 20000"
-
     @data = ActiveRecord::Base.connection.select_all(query).as_json
-
-
 
     if params[:dispatch_action] == "download"
       file = "#{Rails.root}/public/dispatch/Dispatch.csv"
-      write_csv(file,"header", ["BEN",	"Name",	"Sex", "BoB", "PoB", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant"])
-      @data.each do |row|
-        write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"]])
-        #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
+      write_csv(file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","Phone Number","Signature", "Date Signed"])
+      @data.each_with_index do |row,i|
+        write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"],"","","", ""])
+        PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
       end
       send_file(file, :filename => "Dispatch.csv", :disposition => 'inline', :type => "text/csv")
     else
@@ -2712,7 +2709,7 @@ class PersonController < ApplicationController
 
 
   def print
-
+    
     print_errors = {}
     print_error_log = Logger.new(Rails.root.join("log","print_error.log"))
     paper_size = GlobalProperty.find_by_property("paper_size").value rescue 'A5'
@@ -2723,7 +2720,8 @@ class PersonController < ApplicationController
       zoom = 0.89
     end
 
-    person_ids = params[:person_ids].split(',')
+    #person_ids = params[:person_ids].split(',')
+    person_ids = params[:person_ids]
     person_ids.each do |person_id|
       #begin
       print_url = "wkhtmltopdf --zoom #{zoom} --page-size #{paper_size} #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/birth_certificate?person_ids=#{person_id.strip} #{SETTINGS['certificates_path']}#{person_id.strip}.pdf\n"
