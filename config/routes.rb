@@ -226,6 +226,7 @@ Rails.application.routes.draw do
   #dispatch
   get '/person/dispatch_certificates' => 'person#do_dispatch_these'
   post '/dispatch_certificates' => 'person#do_dispatch_these'
+  get '/dispatch_preview' => "person#dispatch_preview"
 
   resources :person
 

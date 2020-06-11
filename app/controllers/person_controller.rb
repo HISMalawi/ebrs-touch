@@ -1829,7 +1829,7 @@ class PersonController < ApplicationController
     
     query = "SELECT person.person_id,person_birth_details.district_id_number as BEN, 
                     CONCAT(first_name,' ', last_name) as Name ,
-                    gender as Sex,  DATE_FORMAT(birthdate,'%Y-%m-%d') as BoB,
+                    gender as Sex,  DATE_FORMAT(birthdate,'%Y-%m-%d') as DoB,
                     place_of_birth.name as PoB,
                     CONCAT(district_of_birth.name, ',', birth_location.name) as Location,
                     DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg,
@@ -1868,17 +1868,36 @@ class PersonController < ApplicationController
     @data = ActiveRecord::Base.connection.select_all(query).as_json
 
     if params[:dispatch_action] == "download"
-      file = "#{Rails.root}/public/dispatch/Dispatch.csv"
-      write_csv(file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","Phone Number","Signature", "Date Signed"])
-      @data.each_with_index do |row,i|
-        write_csv(file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["BoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"],"","","", ""])
-        PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
+      if params[:file_type] == "CSV"
+        dispatch_file = "#{Rails.root}/tmp/Dispatch.csv"
+        write_csv(dispatch_file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","Phone Number","Signature", "Date Signed"])
+        @data.each_with_index do |row,i|
+          write_csv(dispatch_file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"],"","","", ""])
+          PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
+        end
+        send_file(dispatch_file, :filename => "Dispatch #{Time.now}.csv", :disposition => 'inline', :type => "text/csv")
+      elsif params[:file_type] == "PDF"
+        json_file = "#{Rails.root}/tmp/Dispatch.json"
+        File.open(json_file,"w") do |f|
+          f.write(@data.to_json)
+        end
+        dispatch_file = "#{Rails.root}/tmp/Dispatch.pdf"
+        dispatch_url = "wkhtmltopdf  -O landscape --zoom 0.75 #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/dispatch_preview?user_id=#{User.current.id} #{dispatch_file}\n"
+        Kernel.system dispatch_url
+        send_file(dispatch_file, :filename => "Dispatch #{Time.now}.pdf", :disposition => 'inline', type: 'application/pdf')
+        #render :text => @data.to_json
       end
-      send_file(file, :filename => "Dispatch.csv", :disposition => 'inline', :type => "text/csv")
     else
 
     end
-    
+  end
+
+
+  def dispatch_preview
+    @district =  Location.find(SETTINGS['location_id'])
+    User.current = User.find(params[:user_id])
+    @data =  JSON.parse(File.read("#{Rails.root}/tmp/Dispatch.json"))
+    render :layout => false
   end
 
   def view_printed_cases

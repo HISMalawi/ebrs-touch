@@ -1,0 +1,144 @@
+<!doctype html>
+<style>
+
+body {
+	-moz-user-select: none;
+	font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+	margin-left: 25px;
+	margin-right: 20px;
+	color: #000;
+	font-size: 10px;
+}
+
+#logo {
+	padding-right: 10px;
+}
+
+#header th  {
+	text-align: left;
+}
+
+#datatable , #datatable th, #datatable td {
+	border-collapse: collapse;
+	border: 1px solid gray;
+}
+
+#datatable td {
+	margin-left: 5px;
+	margin-right: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+
+}
+
+
+#datatable thead {display: table-header-group;}
+
+tr { page-break-inside: avoid; }
+
+table, tr, td, th, tbody, thead, tfoot, td div {
+    page-break-inside: avoid !important;
+}
+
+
+
+
+</style>
+
+<div id="header">
+  <h5>NRB Printed Certificates List</h5>
+  <table>
+   <tr>
+     <td rowspan="4" colspan="4" id="logo">
+     	<img src="/assets/coa.png" height="60">
+
+     </td>
+   </tr>
+  
+   <tr><th>District:</th>
+       <td colspan="3" style="min-width: 100px;"><%= @district.name %></td>
+   </tr>
+
+   <tr><th>Printed On:</th>
+       <td colspan="3"><%= Date.today.strftime("%d %b %Y") %></td>
+   </tr>
+  </table>
+</div>
+<br/>
+<br/>
+<div id="content" style="width: 99%;" >
+	<table id="datatable" style="width: 100%;">
+		<thead>
+			<tr>
+				<th rowspan="2" width="5">#</th>
+				<th rowspan="2" >BEN</th>
+				<th rowspan="2" width="100">Name</th>
+				<th rowspan="2" width="80">DoB</th>
+				<th rowspan="2" >Sex</th>
+				<th rowspan="2" >Place of Death</th>
+				<th rowspan="2">Location</th>
+				<th rowspan="2" width="80" >RegDate</th>
+				<th rowspan="2">Name Of Informant</th>
+				<th rowspan="2">District Of Infomant</th>
+				<th rowspan="2">Traditional Authority Of Infomant</th>
+				<th rowspan="2">Village Of Informant </th>
+				<th colspan="4" width="500">Collected By</th>
+		</tr>
+		<tr>
+				<th width="130">Name</th>
+				<th width="80">Phone Number</th>
+				<th width="80">Sig.</th>
+				<th width="80">Date</th>
+				
+		</tr>
+		</thead>
+	<tbody>
+		<% @data.each_with_index do |row, i| %>
+			<% PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")%>
+			<tr>
+				<td style="text-align:right">
+					<%= i + 1 %>
+				</td>
+				<td >
+					<%= row['BEN'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['Name'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['DoB'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['Sex'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['PoB'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['Location'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['DateOfReg'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['NameOfInformant'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['DistrictOfInformant'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['TraditionalAuthorityOfInformant'] %>
+				</td>
+				<td style="text-align:center" >
+					<%= row['VillageOfInformant'] %>
+				</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		<% end %>
+
+	 </tbody>
+	</table>
+</div>

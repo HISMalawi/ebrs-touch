@@ -317,24 +317,18 @@
       <div class="modal-header" style="background: #006f95 none repeat scroll 0 0;padding: 12px;" >
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title" id="printerModalLabel" style="text-align: left;">
-          Select Printer for Certificate(s) list
+          Select file format to download
         </h4>
       </div>
       <div class="modal-body">
-        <span style="text-align:center;">
-          <table align="center" id="printers">
-            <%
-               @available_printers = SETTINGS["printer_name"].split('|')
-               @available_printers.each do |printer| %>
-                <tr onmousedown="updateValue(this)" value="<%= printer %>">
-                  <td><input type="radio" class="printer_radio_button" value="<%= printer %>" name="printer_name"/></td>
-                  <td style="text-align: left; padding-left:50px;"><%= printer %></td>
-                </tr>
-            <% end %>
-          </table>
-        </span>
+          <div class="radio" onclick="fileType='CSV'">
+            <label><input type="radio" name="optradio">CSV</label>
+          </div>
+          <div class="radio" onclick="fileType='PDF'">
+            <label><input type="radio" name="optradio">PDF</label>
+          </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" onclick="dispatchAll();">Dispatch</button>
+          <button type="button" class="btn btn-primary" onclick="dispatchAll();">Download</button>
           <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -495,6 +489,7 @@
 </form>
 <script>
     selected = [];
+    var fileType = "";
     var table;
     var url = "<%= request.url%>";
 
@@ -713,12 +708,18 @@
     }
 
     function dispatchAll(){
-        if(printer_name.length == 0){
-            alert("Please select printer!");
-            return;
-        }
+
         var form = __$('selected-submit')
         form.setAttribute("action", "/dispatch_certificates");
+        if(fileType.length == 0){
+            alert("Please select file type to download!");
+            return;
+        }else{
+          var input = document.createElement("input")
+          input.name = "file_type";
+          input.value =  fileType;
+          form.appendChild(input);
+        }
         for(var i = 0; i <selected.length; i++){
             var input = document.createElement("input")
             input.name = "person_ids[]";
