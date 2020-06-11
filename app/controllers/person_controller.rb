@@ -1828,43 +1828,39 @@ class PersonController < ApplicationController
     
     
     query = "SELECT person.person_id,person_birth_details.district_id_number as BEN, 
-                    CONCAT(first_name,' ', last_name) as Name ,
-                    gender as Sex,  DATE_FORMAT(birthdate,'%Y-%m-%d') as DoB,
-                    place_of_birth.name as PoB,
-                    CONCAT(district_of_birth.name, ',', birth_location.name) as Location,
-                    DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg,
-                    CONCAT( InformantFirstName, ' ',  InformantLastName) as NameOfInformant,
-                    district as DistrictOfInformant, 
-                    ta as TraditionalAuthorityOfInformant, 
-                    village as VillageOfInformant
-                FROM 
-                  (SELECT * FROM person WHERE person_id IN('#{params[:person_ids].join("','")}')) person 
-                      INNER JOIN person_name 
-                      INNER JOIN person_birth_details
-                      INNER JOIN location place_of_birth
-                INNER JOIN location district_of_birth
-                INNER JOIN location birth_location
-                INNER JOIN  (SELECT person_id FROM person_record_statuses 
-                              WHERE status_id IN (SELECT status_id FROM `statuses` WHERE `name` = 'DC-PRINTED' OR `name` = 'HQ-PRINTED')) status
-                INNER JOIN (SELECT person_a, person_b,informant.first_name as InformantFirstName, 
-                      informant.last_name as InformantLastName, d.name district, ta.name ta , v.name village
-                      FROM `person_relationship` INNER JOIN person_addresses 
-                INNER JOIN location d INNER JOIN location ta INNER JOIN location v
-                INNER JOIN person_name informant
-                  ON  person_relationship.person_b = person_addresses.person_id
-                    AND person_addresses.current_district = d.location_id
-                    AND person_addresses.current_ta = ta.location_id
-                    AND person_addresses.current_village = v.location_id
-                    AND person_relationship.person_b = informant.person_id
-                    WHERE `person_relationship_type_id` = '4') address
-                ON person.person_id = person_name.person_id AND person.person_id = person_birth_details.person_id AND
-                  person_birth_details.person_id = status.person_id 
-                  AND address.person_a = person.person_id
-                  AND person_birth_details.place_of_birth = place_of_birth.location_id
-                  AND person_birth_details.district_of_birth = district_of_birth.location_id
-                  AND person_birth_details.birth_location_id = birth_location.location_id
-                ORDER BY district, ta, village, person_name.last_name,  person_name.first_name
-                LIMIT 20000"
+                  CONCAT(first_name,' ', last_name) as Name , gender as Sex, 
+                  DATE_FORMAT(birthdate,'%Y-%m-%d') as DoB, place_of_birth.name as PoB, 
+                  CONCAT(district_of_birth.name, ',', birth_location.name) as Location, 
+                  DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg, 
+                  CONCAT( InformantFirstName, ' ', InformantLastName) as NameOfInformant, 
+                  district as DistrictOfInformant, ta as TraditionalAuthorityOfInformant, 
+                  village as VillageOfInformant FROM 
+                      (SELECT * FROM person 
+                          WHERE person_id IN('#{params[:person_ids].join("','")}')) person 
+                            INNER JOIN person_name INNER JOIN person_birth_details INNER 
+                            JOIN location place_of_birth INNER JOIN location district_of_birth 
+                            INNER JOIN location birth_location 
+                            INNER JOIN (SELECT person_id FROM person_record_statuses 
+                                WHERE status_id IN (SELECT status_id FROM `statuses` 
+                                                        WHERE `name` = 'DC-PRINTED' OR `name` = 'HQ-PRINTED')) status 
+                            INNER JOIN (SELECT * FROM (SElECT person_a, person_b, person_name.first_name as InformantFirstName, person_name.last_name as InformantLastName
+                                        FROM person_relationship INNER JOIN person_name 
+                                              ON  person_relationship.person_b = person_name.person_id WHERE person_relationship_type_id = '4' AND 
+                                              person_a IN('#{params[:person_ids].join("','")}')) informant
+                    LEFT JOIN
+                    (SELECT person_id, d.name as district, ta.name as ta,v.name as village 
+                    FROM person_addresses INNER JOIN location d INNER JOIN location ta INNER JOIN location v
+                        ON person_addresses.current_district = d.location_id 
+                        AND person_addresses.current_ta = ta.location_id AND 
+                        person_addresses.current_village = v.location_id) address
+                      ON informant.person_a = address.person_id) informant_address 
+                    ON person.person_id = person_name.person_id AND person.person_id = person_birth_details.person_id 
+                    AND person_birth_details.person_id = status.person_id AND informant_address.person_a = person.person_id 
+                    AND person_birth_details.place_of_birth = place_of_birth.location_id 
+                    AND person_birth_details.district_of_birth = district_of_birth.location_id 
+                    AND person_birth_details.birth_location_id = birth_location.location_id 
+                    ORDER BY district, ta, village, person_name.last_name, person_name.first_name LIMIT 20000"
+    #raise query.to_s
     @data = ActiveRecord::Base.connection.select_all(query).as_json
 
     if params[:dispatch_action] == "download"

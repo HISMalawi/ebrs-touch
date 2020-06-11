@@ -7,7 +7,7 @@ def self.generate_stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], ap
                                                 WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
 
     Status.all.each do |status|
-      result[status.name] = self.find_by_sql("
+      result[status.name] = PersonRecordStatus.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
         INNER JOIN person_birth_details p ON p.person_id = s.person_id
           AND p.birth_registration_type_id IN (#{birth_type_ids.join(', ')})
@@ -18,13 +18,13 @@ def self.generate_stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], ap
     excluded_states = ['HQ-REJECTED', 'HQ-VOIDED', 'HQ-PRINTED', 'HQ-DISPATCHED'].collect{|s| Status.find_by_name(s).id}
     included_states = Status.where("name like 'HQ-%' ").map(&:status_id)
 
-    result['APPROVED BY ADR'] =  self.find_by_sql("
+    result['APPROVED BY ADR'] =  PersonRecordStatus.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
         WHERE voided = 0 AND status_id NOT IN (#{excluded_states.join(', ')})
             AND status_id IN (#{included_states.join(', ')})")[0]['c']
     end
     result    
-    File.open("#{Rails.root}/db/stats.json","w") do |f|
+    File.open("#{Rails.root}/tmp/stats.json","w") do |f|
       f.write(result.to_json)
     end 
 end
