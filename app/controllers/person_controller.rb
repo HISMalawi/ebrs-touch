@@ -562,6 +562,10 @@ class PersonController < ApplicationController
 
   end
 
+  def create_child_remote
+
+  end
+
   def record_exists
     @exact_duplicates = []
 
@@ -1832,7 +1836,8 @@ class PersonController < ApplicationController
                   DATE_FORMAT(birthdate,'%Y-%m-%d') as DoB, place_of_birth.name as PoB, 
                   CONCAT(district_of_birth.name, ',', birth_location.name) as Location, 
                   DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg, 
-                  CONCAT( InformantFirstName, ' ', InformantLastName) as NameOfInformant, 
+                  CONCAT( InformantFirstName, ' ', InformantLastName) as NameOfInformant,
+                  person_addresses_id, 
                   district as DistrictOfInformant, ta as TraditionalAuthorityOfInformant, 
                   village as VillageOfInformant FROM 
                       (SELECT * FROM person 
@@ -1848,12 +1853,29 @@ class PersonController < ApplicationController
                                               ON  person_relationship.person_b = person_name.person_id WHERE person_relationship_type_id = '4' AND 
                                               person_a IN('#{params[:person_ids].join("','")}')) informant
                     LEFT JOIN
-                    (SELECT person_id, d.name as district, ta.name as ta,v.name as village 
-                    FROM person_addresses INNER JOIN location d INNER JOIN location ta INNER JOIN location v
-                        ON person_addresses.current_district = d.location_id 
-                        AND person_addresses.current_ta = ta.location_id AND 
-                        person_addresses.current_village = v.location_id) address
-                      ON informant.person_a = address.person_id) informant_address 
+                    (SELECT d.person_addresses_id, d.person_id, d.name as district, ta, village FROM 
+                    (SELECT person_addresses_id, person_id, district.name 
+                    FROM person_addresses INNER JOIN location district 
+                      ON person_addresses.current_district = district.location_id 
+                    WHERE person_id IN(SELECT person_b FROM person_relationship WHERE person_relationship_type_id = '4' AND 
+                      person_a IN('#{params[:person_ids].join("','")}'))) d
+                    LEFT JOIN
+                          (SELECT t.person_addresses_id, t.person_id, t.name as ta , v.name as village FROM
+                      (SELECT person_addresses_id, person_id, ta.name 
+                      FROM person_addresses INNER JOIN location ta 
+                        ON person_addresses.current_ta = ta.location_id 
+                      WHERE person_id IN(SELECT person_b FROM person_relationship WHERE person_relationship_type_id = '4' AND 
+                        person_a IN('#{params[:person_ids].join("','")}'))) t
+                  
+                      LEFT JOIN
+                      (SELECT person_addresses_id, person_id, village.name 
+                      FROM person_addresses INNER JOIN location village
+                        ON person_addresses.current_village = village.location_id 
+                      WHERE person_id IN(SELECT person_b FROM person_relationship WHERE person_relationship_type_id = '4' AND 
+                        person_a IN('#{params[:person_ids].join("','")}'))) v
+                      ON t.person_addresses_id = v.person_addresses_id) ta_village
+                    ON d.person_addresses_id = ta_village.person_addresses_id) address
+                      ON informant.person_b = address.person_id) informant_address 
                     ON person.person_id = person_name.person_id AND person.person_id = person_birth_details.person_id 
                     AND person_birth_details.person_id = status.person_id AND informant_address.person_a = person.person_id 
                     AND person_birth_details.place_of_birth = place_of_birth.location_id 
@@ -1866,10 +1888,21 @@ class PersonController < ApplicationController
     if params[:dispatch_action] == "download"
       if params[:file_type] == "CSV"
         dispatch_file = "#{Rails.root}/tmp/Dispatch.csv"
-        write_csv(dispatch_file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","Phone Number","Signature", "Date Signed"])
+        write_csv(dispatch_file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","ID Number(TYPE - NUMBER)","Phone Number","Signature", "Date Signed"])
         @data.each_with_index do |row,i|
-          write_csv(dispatch_file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], row["TraditionalAuthorityOfInformant"], row["VillageOfInformant"],"","","", ""])
-          PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")
+         
+          village = row["VillageOfInformant"]
+          if row["VillageOfInformant"] =="Other"
+              address = PersonAddress.find(row["person_addresses_id"])
+              village = address.current_village_other
+          end 
+          ta = row["TraditionalAuthorityOfInformant"]
+          if row["TraditionalAuthorityOfInformant"] =="Other"
+            address = PersonAddress.find(row["person_addresses_id"])
+            ta = address.current_ta_other
+          end
+          write_csv(dispatch_file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], ta, village,"","","","", ""])
+          PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")
         end
         send_file(dispatch_file, :filename => "Dispatch #{Time.now}.csv", :disposition => 'inline', :type => "text/csv")
       elsif params[:file_type] == "PDF"

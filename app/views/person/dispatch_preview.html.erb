@@ -82,10 +82,11 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 				<th rowspan="2">District Of Infomant</th>
 				<th rowspan="2">Traditional Authority Of Infomant</th>
 				<th rowspan="2">Village Of Informant </th>
-				<th colspan="4" width="500">Collected By</th>
+				<th colspan="5" width="500">Collected By</th>
 		</tr>
 		<tr>
 				<th width="130">Name</th>
+				<th width="80">ID Number<br/>(Type-Number)</th>
 				<th width="80">Phone Number</th>
 				<th width="80">Sig.</th>
 				<th width="80">Date</th>
@@ -94,7 +95,18 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 		</thead>
 	<tbody>
 		<% @data.each_with_index do |row, i| %>
-			<% PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "Record dispatched at DC")%>
+			<% PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")%>
+			<%  @village = row["VillageOfInformant"]
+				if row["VillageOfInformant"] =="Other"
+					@address = PersonAddress.find(row["person_addresses_id"])
+					@village = @address.current_village_other
+				end 
+				@ta = row["TraditionalAuthorityOfInformant"]
+				if row["TraditionalAuthorityOfInformant"] =="Other"
+					@address = PersonAddress.find(row["person_addresses_id"])
+					@ta = @address.current_ta_other
+				end 
+			%>
 			<tr>
 				<td style="text-align:right">
 					<%= i + 1 %>
@@ -127,11 +139,12 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 					<%= row['DistrictOfInformant'] %>
 				</td>
 				<td style="text-align:center" >
-					<%= row['TraditionalAuthorityOfInformant'] %>
+					<%= @ta %>
 				</td>
 				<td style="text-align:center" >
-					<%= row['VillageOfInformant'] %>
+					<%= @village %>
 				</td>
+				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
