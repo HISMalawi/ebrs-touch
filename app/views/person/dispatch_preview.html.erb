@@ -71,20 +71,20 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 		<thead>
 			<tr>
 				<th rowspan="2" width="5">#</th>
-				<th rowspan="2" >BEN</th>
 				<th rowspan="2" width="100">Name</th>
 				<th rowspan="2" width="80">DoB</th>
 				<th rowspan="2" >Sex</th>
-				<th rowspan="2" >Place of Death</th>
+				<th rowspan="2" >Place of Birth</th>
 				<th rowspan="2">Location</th>
-				<th rowspan="2" width="80" >RegDate</th>
-				<th rowspan="2">Name Of Informant</th>
-				<th rowspan="2">District Of Infomant</th>
-				<th rowspan="2">Traditional Authority Of Infomant</th>
-				<th rowspan="2">Village Of Informant </th>
+				<th rowspan="2"> Name of Mother </th>
+				<th colspan="4">Informant</th>
 				<th colspan="5" width="500">Collected By</th>
 		</tr>
 		<tr>
+				<th>Name</th>
+				<th>District</th>
+				<th>TA</th>
+				<th>Village</th>
 				<th width="130">Name</th>
 				<th width="80">ID Number<br/>(Type-Number)</th>
 				<th width="80">Phone Number</th>
@@ -106,13 +106,15 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 					@address = PersonAddress.find(row["person_addresses_id"])
 					@ta = @address.current_ta_other
 				end 
+				mother_query = "SElECT person_a, person_b, person_name.first_name as MotherFirstName, person_name.last_name as MotherLastName
+				FROM person_relationship INNER JOIN person_name ON  person_relationship.person_b = person_name.person_id 
+				WHERE person_relationship_type_id = '5' AND  person_a = '#{row['person_id']}'"
+  
+				mother = ActiveRecord::Base.connection.select_all(mother_query ).as_json.first
 			%>
 			<tr>
 				<td style="text-align:right">
 					<%= i + 1 %>
-				</td>
-				<td >
-					<%= row['BEN'] %>
 				</td>
 				<td style="text-align:center" >
 					<%= row['Name'] %>
@@ -130,7 +132,7 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 					<%= row['Location'] %>
 				</td>
 				<td style="text-align:center" >
-					<%= row['DateOfReg'] %>
+					<%= "#{mother['MotherFirstName']} #{mother['MotherLastName']}" %>
 				</td>
 				<td style="text-align:center" >
 					<%= row['NameOfInformant'] %>

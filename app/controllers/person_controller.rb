@@ -563,7 +563,8 @@ class PersonController < ApplicationController
   end
 
   def create_child_remote
-
+    @person = PersonService.create_record(params)
+    render :text => @person.to_json
   end
 
   def record_exists
@@ -1888,7 +1889,7 @@ class PersonController < ApplicationController
     if params[:dispatch_action] == "download"
       if params[:file_type] == "CSV"
         dispatch_file = "#{Rails.root}/tmp/Dispatch.csv"
-        write_csv(dispatch_file,"header", ["BEN",	"Name",	"Sex", "DateOfBirth", "PlaceOfBirth", "Location", "DateOfReg", "NameOfInformant","DistrictOfInfomant", "TraditionalAuthorityOfInfomant", "VillageOfInformant","Collected By","ID Number(TYPE - NUMBER)","Phone Number","Signature", "Date Signed"])
+        write_csv(dispatch_file,"header", [	"Name",	"Sex", "Date of Birth", "Place of Birth", "Location", "Name of Mother", "Name of Informant","District of Infomant", "Traditional Authority of Infomant", "Village of Informant","Collected By","ID Number(TYPE - NUMBER)","Phone Number","Signature", "Date Signed"])
         @data.each_with_index do |row,i|
          
           village = row["VillageOfInformant"]
@@ -1901,7 +1902,14 @@ class PersonController < ApplicationController
             address = PersonAddress.find(row["person_addresses_id"])
             ta = address.current_ta_other
           end
-          write_csv(dispatch_file,"content", [row["BEN"],	row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], row["DateOfReg"], row["NameOfInformant"], row["DistrictOfInformant"], ta, village,"","","","", ""])
+
+          mother_query = "SElECT person_a, person_b, person_name.first_name as MotherFirstName, person_name.last_name as MotherLastName
+                      FROM person_relationship INNER JOIN person_name ON  person_relationship.person_b = person_name.person_id 
+                      WHERE person_relationship_type_id = '5' AND  person_a = '#{row['person_id']}'"
+        
+          mother = ActiveRecord::Base.connection.select_all(mother_query ).as_json.first
+          
+          write_csv(dispatch_file,"content", [row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], "#{mother['MotherFirstName']} #{mother['MotherLastName']}", row["NameOfInformant"], row["DistrictOfInformant"], ta, village,"","","","", ""])
           PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")
         end
         send_file(dispatch_file, :filename => "Dispatch #{Time.now}.csv", :disposition => 'inline', :type => "text/csv")

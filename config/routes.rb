@@ -228,6 +228,9 @@ Rails.application.routes.draw do
   post '/dispatch_certificates' => 'person#do_dispatch_these'
   get '/dispatch_preview' => "person#dispatch_preview"
 
+  #remote
+  post "/create_child_remote" => "person#create_child_remote"
+
   resources :person
 
   resources :users
