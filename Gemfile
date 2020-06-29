@@ -85,3 +85,5 @@ gem "faker", "~> 1.6.6"
 gem 'rest-client'
 
 gem "will_paginate", "3.1.6"
+
+gem 'rack-cors', require: 'rack/cors'

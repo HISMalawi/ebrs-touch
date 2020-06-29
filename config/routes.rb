@@ -230,6 +230,7 @@ Rails.application.routes.draw do
 
   #remote
   post "/create_child_remote" => "person#create_child_remote"
+  post "/remote_auth" => "person#remote_auth"
 
   resources :person
 

@@ -562,11 +562,6 @@ class PersonController < ApplicationController
 
   end
 
-  def create_child_remote
-    @person = PersonService.create_record(params)
-    render :text => @person.to_json
-  end
-
   def record_exists
     @exact_duplicates = []
 
@@ -1835,7 +1830,7 @@ class PersonController < ApplicationController
     query = "SELECT person.person_id,person_birth_details.district_id_number as BEN, 
                   CONCAT(first_name,' ', last_name) as Name , gender as Sex, 
                   DATE_FORMAT(birthdate,'%Y-%m-%d') as DoB, place_of_birth.name as PoB, 
-                  CONCAT(district_of_birth.name, ',', birth_location.name) as Location, 
+                  CONCAT(birth_location.name, ',', district_of_birth.name) as Location, 
                   DATE_FORMAT(person_birth_details.date_registered,'%Y-%m-%d') as DateOfReg, 
                   CONCAT( InformantFirstName, ' ', InformantLastName) as NameOfInformant,
                   person_addresses_id, 
@@ -2911,6 +2906,39 @@ class PersonController < ApplicationController
   def force_sync
     value = PersonService.force_sync_remote(params[:person_id]) rescue false
     render :text => value.to_s
+  end
+
+  def remote_auth
+    if params[:token].blank?
+      user = User.where(username: params[:username], active: 1).first
+      if user and user.password_matches?(params[:password])
+        random_token = SecureRandom.urlsafe_base64(nil, false)
+        Kernel.system("cd #{Rails.root}/tmp/sessions/ && touch #{random_token}")
+        render :text =>{:action => "success", :token => random_token, :remote_expires_at => 30.minutes.from_now.to_time}.to_json
+      else
+        render :text => {:action =>'Failed'}.to_json
+      end
+    else
+       if File.exist?("#{Rails.root}/tmp/sessions/#{params[:token]}") && Time.now < params[:remote_expires_at].to_time
+          render :text => {:action => "success", :token=> session[:remote_token], :remote_expires_at => 30.minutes.from_now.to_time}.to_json
+       else
+          render :text => {:action =>'Failed'}.to_json
+       end
+    end
+  end
+
+  def create_child_remote
+    if params[:token].present?
+      if File.exist?("#{Rails.root}/tmp/sessions/#{params[:token]}") && Time.now < params[:remote_expires_at].to_time
+        person = PersonService.create_record(params)
+        person["remote_expires_at"] = 30.minutes.from_now.to_time
+        person["token"] = params[:token]
+        person["remote_id"] = params[:person_id]
+        render :text => person.to_json
+     else
+        render :text => {:action =>'Failed'}.to_json and return
+     end
+    end
   end
 
 end
