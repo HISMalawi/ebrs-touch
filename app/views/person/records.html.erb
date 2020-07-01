@@ -213,9 +213,9 @@ function searchData(element) {
 var data = {};
 var printed = false; //Hook for twins to avoid reprints
 
-var url = "/person/paginated_data";
+var url = "/paginated_data";
 <% if params[:action] == 'searched_cases'%>
-var url = "/person/paginated_search_data";
+var url = "/paginated_search_data";
 
 <% end %>
 
@@ -236,6 +236,7 @@ function initTable(){
                 "ordering": false,
                 "ajax": {
                     "url": url,
+                    "type": "POST",
                     "data": function(d){
                         d.type = __$('birth_type').value;
                         d.statuses = "<%= @states.join(',')%>";

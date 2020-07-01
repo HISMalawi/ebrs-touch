@@ -464,6 +464,13 @@ module Lib
        end
     end
 
+    if User.current.present?
+      user_id = User.current.id
+      flagged = 0
+    else
+      user_id = User.where(username: "admin#{SETTINGS['location_id']}").last.id
+      flagged = 1
+    end
     details = PersonBirthDetail.create(
         person_id:                                person_id,
         birth_registration_type_id:               reg_type,
@@ -490,6 +497,8 @@ module Lib
         other_informant_relationship_to_person:   (params[:person][:informant][:relationship_to_person].to_s == "Other" ? (params[:person][:informant][:other_informant_relationship_to_person] rescue nil) : nil),
         acknowledgement_of_receipt_date:          Date.today.to_s,
         location_created_at:                      SETTINGS['location_id'],
+        flagged:                                  1,
+        creator:                                  user_id,
         date_reported:                            (params[:person][:date_reported].to_date rescue Date.today.to_s)
     )
 

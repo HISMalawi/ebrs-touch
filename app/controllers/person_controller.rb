@@ -2920,7 +2920,7 @@ class PersonController < ApplicationController
       end
     else
        if File.exist?("#{Rails.root}/tmp/sessions/#{params[:token]}") && Time.now < params[:remote_expires_at].to_time
-          render :text => {:action => "success", :token=> session[:remote_token], :remote_expires_at => 30.minutes.from_now.to_time}.to_json
+          render :text => {:action => "success", :token=> params[:token], :remote_expires_at => 30.minutes.from_now.to_time}.to_json
        else
           render :text => {:action =>'Failed'}.to_json
        end
@@ -2931,10 +2931,7 @@ class PersonController < ApplicationController
     if params[:token].present?
       if File.exist?("#{Rails.root}/tmp/sessions/#{params[:token]}") && Time.now < params[:remote_expires_at].to_time
         person = PersonService.create_record(params)
-        person["remote_expires_at"] = 30.minutes.from_now.to_time
-        person["token"] = params[:token]
-        person["remote_id"] = params[:person_id]
-        render :text => person.to_json
+        render :text => {:person =>person, :remote_expires_at =>30.minutes.from_now.to_time, :token => params[:token], :remote_id => params[:person_id] }.to_json
      else
         render :text => {:action =>'Failed'}.to_json and return
      end

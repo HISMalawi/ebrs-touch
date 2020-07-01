@@ -9,7 +9,11 @@ class PersonRecordStatus < ActiveRecord::Base
   def self.new_record_state(person_id, state, change_reason='', user_id=nil)
     ActiveRecord::Base.transaction do
     if user_id.blank?
-      user_id = User.current.id
+      if User.current.present?
+        user_id = User.current.id
+      else
+        user_id = User.where(username: "admin#{SETTINGS['location_id']}").last.id
+      end
     end
 
     state_id = Status.where(:name => state).first.id

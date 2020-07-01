@@ -212,7 +212,16 @@ Rails.application.routes.draw do
   post '/update' => "person#update"
 
   get '/person/paginated_data'
+  post '/person/paginated_data'
   get '/person/paginated_search_data'
+  post '/person/paginated_search_data'
+
+  get "/paginated_data" => "person#paginated_data"
+  post "/paginated_data" => "person#paginated_data"
+
+  get '/paginated_search_data' => "person#paginated_search_data"
+  post '/paginated_search_data' => "person#paginated_search_data"
+
   get '/person/search_by_nid'
   get '/offload' => "person#receive_data"
   post '/offload' => "person#receive_data"
