@@ -870,7 +870,8 @@ module PersonService
   end
 
   def self.force_sync_remote(person_id, models={})
-    url = "#{SETTINGS['destination_app_link'].split(":")[0 .. 1].join(':')}:5900/ebrs_hq_v2/#{person_id}"
+    #url = "#{SETTINGS['destination_app_link'].split(":")[0 .. 1].join(':')}:5900/ebrs_hq_v2/#{person_id}"
+    url = "#{SETTINGS['sync_protocol']}://#{SETTINGS['sync_username']}:#{SETTINGS['sync_password']}@#{SETTINGS['sync_host']}/#{SETTINGS['sync_database']}/#{person_id}"
     doc = JSON.parse(RestClient.get(url))
     fixed = false
 
