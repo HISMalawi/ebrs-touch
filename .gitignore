@@ -13,7 +13,9 @@ public/sites/*
 metadata.sql
 # Ignore all logfiles and tempfiles.
 /log/*.log
+/log/*
 /tmp
+/tmp/*
 config/*.pem
 config/*.yml
 nbproject/
