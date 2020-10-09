@@ -1,0 +1,20 @@
+application_mode: DC #FC|DC
+location_id: 250  #facility_id |district_id [location_id of the health facility or district_id in location table]
+enable_role_privileges: true # only works when in development mode
+duplicate_precision: 75
+potential_search: true
+app_gate_url: http://172.29.1.200:3007 
+assign_ben: true
+sync_protocol: 'http'
+sync_host: 192.168.48.2:5900
+sync_database: ebrs_hq_v2
+sync_username: admin
+sync_password: password
+ebrs_services_link: http://http://0.0.0.0:
+destination_app_link: http://192.168.48.2:5000
+enable_decentralised_printing: true
+enable_printing_when_hq_is_offline: false
+printer_name: balaka|secondary
+barcodes_path: /var/www/barcodes/
+certificates_path: /var/www/certificates/
+enable_qr_code: true

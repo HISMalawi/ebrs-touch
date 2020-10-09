@@ -2461,15 +2461,27 @@ class PersonController < ApplicationController
     if fields.include? "Nationality of Father"
         person = Person.find(params[:id])
         @father_person = person.father
-
         location = Location.where(country: params[:person][:father][:citizenship]).first
+
         @father_address = @father_person.addresses.last
 
-        f_c = Location.find(@father_address.citizenship).country rescue nil
-        AuditTrail.create_ammendment_trail(params[:id], "father_citizenship", f_c , user_id)
+        if @father_address.present?
+            f_c = Location.find(@father_address.citizenship).country rescue nil
+            AuditTrail.create_ammendment_trail(params[:id], "father_citizenship", f_c , user_id)
 
-        @father_address.citizenship = location.id
-        @father_address.save
+            @father_address.citizenship = location.id
+            @father_address.save
+        else
+            @father_address = PersonAddress.create(
+                person_id: @father_person.person_id,
+                citizenship: location.id,
+                residential_country: location.id
+
+            )
+
+
+        end
+        
     end
     redirect_to "/person/ammend_case?id=#{params[:id]}&next_path=#{params[:next_path]}" 
   end
