@@ -95,7 +95,11 @@ table, tr, td, th, tbody, thead, tfoot, td div {
 		</thead>
 	<tbody>
 		<% @data.each_with_index do |row, i| %>
-			<% PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")%>
+			<% #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")%>
+			<%
+				log = "#{Rails.root}/tmp/dispatch-#{Dir["#{Rails.root}/tmp/*"].count + 1}.txt"
+				`echo "#{row["person_id"]}" >> #{log}`
+			%>
 			<%  @village = row["VillageOfInformant"]
 				if row["VillageOfInformant"] =="Other"
 					@address = PersonAddress.find(row["person_addresses_id"])

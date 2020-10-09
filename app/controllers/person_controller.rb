@@ -1905,7 +1905,12 @@ class PersonController < ApplicationController
           mother = ActiveRecord::Base.connection.select_all(mother_query ).as_json.first
           
           write_csv(dispatch_file,"content", [row["Name"],	row["Sex"], row["DoB"], row["PoB"], row["Location"], "#{mother['MotherFirstName']} #{mother['MotherLastName']}", row["NameOfInformant"], row["DistrictOfInformant"], ta, village,"","","","", ""])
-          PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")
+          
+          log = "#{Rails.root}/tmp/dispatch-#{Dir["#{Rails.root}/tmp/*"].count + 1}.txt"
+          `echo "\n" >> #{log}`
+          `echo "#{row["person_id"]}" >> #{log}`
+  
+          #PersonRecordStatus.new_record_state(row["person_id"], "HQ-DISPATCHED", "DC-DISPATCHED")
         end
         send_file(dispatch_file, :filename => "Dispatch #{Time.now}.csv", :disposition => 'inline', :type => "text/csv")
       elsif params[:file_type] == "PDF"

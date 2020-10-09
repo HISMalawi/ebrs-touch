@@ -631,7 +631,7 @@
                 alert("Missing filter, please select village of registration");
                 __$("filter_name").innerHTML = "";
             }else {
-                __$("filter_name").innerHTML = village + ", " + ta;
+                __$("filter_name").innerHTML = village + ", " + ta +", "+district;
                 table.ajax.reload();
             }
         }else{
@@ -655,7 +655,7 @@
             alert("Missing filter, please select village of registration");
             __$("filter_name").innerHTML = "";
         }else {
-            __$("filter_name").innerHTML = village + ", " + ta;
+            __$("filter_name").innerHTML = village + ", " + ta +", "+district;;
         }
 
         __$("processing_wait").style.display = 'inline-block';
@@ -675,7 +675,7 @@
             __$("filter_name").innerHTML = "";
             return;
         }else {
-            __$("filter_name").innerHTML = village + ", " + ta;
+            __$("filter_name").innerHTML = village + ", " + ta +", "+district;;
         }
 
         jQuery("#printerModal").modal("show");
