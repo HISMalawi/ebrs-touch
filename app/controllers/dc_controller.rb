@@ -415,7 +415,7 @@ def incomplete_case_comment
     users.each do |u|
       name = PersonName.where(:person_id => u.person_id).last
       @users << [
-          ("#{name.first_name} #{name.middle_name} #{name.last_name} (#{u.username})".gsub(/\s+/, ' ') rescue ''),
+          ("#{name.first_name rescue nil} #{name.middle_name rescue nil} #{name.last_name rescue nil} (#{u.username})".gsub(/\s+/, ' ') rescue ''),
           u.username
       ]
     end
