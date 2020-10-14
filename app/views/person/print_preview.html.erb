@@ -90,7 +90,7 @@
 
     function submitForm(){
         if (printer_name.length > 0) {
-            window.location = "/print?person_ids=<%= params[:person_ids]%>&printer_name=" + printer_name;
+            window.location = "/print?person_ids[]=<%= params[:person_ids]%>&printer_name=" + printer_name;
         }else{
            $("#select-printer-warning").show()
         }
