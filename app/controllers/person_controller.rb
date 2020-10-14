@@ -2788,8 +2788,8 @@ class PersonController < ApplicationController
       zoom = 0.89
     end
 
-    #person_ids = params[:person_ids].split(',')
-    person_ids = params[:person_ids]
+    person_ids = params[:person_ids].split(',')
+    #person_ids = params[:person_ids]
     person_ids.each do |person_id|
       #begin
       print_url = "wkhtmltopdf --zoom #{zoom} --page-size #{paper_size} #{SETTINGS["protocol"]}://#{request.env["SERVER_NAME"]}:#{request.env["SERVER_PORT"]}/birth_certificate?person_ids=#{person_id.strip} #{SETTINGS['certificates_path']}#{person_id.strip}.pdf\n"
