@@ -2570,7 +2570,8 @@ class PersonController < ApplicationController
                        fn.first_name as father_first_name,
                        fn.last_name as father_last_name,
                        s.name as status,
-                       person_birth_details.acknowledgement_of_receipt_date as date_reported
+                       person_birth_details.acknowledgement_of_receipt_date as date_reported,
+                       person_birth_details.created_at
                     FROM person 
                     INNER JOIN person_name pn INNER JOIN person_birth_details
                     INNER JOIN person_relationship prm INNER JOIN person_name mn
@@ -2599,6 +2600,7 @@ class PersonController < ApplicationController
                       )
                       AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
                     person.birthdate, person.gender) REGEXP \"#{search_val}\"
+                    ORDER BY created_at DESC 
                     LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i };"
          
         data = ActiveRecord::Base.connection.select_all(query)
