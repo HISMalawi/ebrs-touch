@@ -234,6 +234,7 @@ function initTable(){
                 "serverSide": true,
                 'pageLength': 5,
                 "ordering": false,
+                "bInfo": false,
                 "ajax": {
                     "url": url,
                     "type": "POST",
@@ -302,7 +303,7 @@ function initTable(){
             }
         <% end %>
 
-        setTimeout("checkSync()", 250);
+        //setTimeout("checkSync()", 250);
     });
 
 }

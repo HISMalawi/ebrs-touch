@@ -2548,7 +2548,10 @@ class PersonController < ApplicationController
   #########################################################################
 
   def paginated_data
-        query = "SELECT
+      search_val = params[:search][:value] rescue nil
+      search_val = '_' if search_val.blank?
+
+      query = "SELECT
                        person.person_id,
                        person_birth_details.district_id_number as ben,
                        national_serial_number,
@@ -2570,21 +2573,28 @@ class PersonController < ApplicationController
                     INNER JOIN person_record_statuses ps
                     INNER JOIN statuses s
                     ON person.person_id = pn.person_id 
-                    AND person.person_id = person_birth_details.person_id
-                    AND person.person_id = prm. person_a
-                    AND prm.person_b = mn.person_id
-                    AND person.person_id = prf. person_a
-                    AND prf.person_b = fn.person_id
-                    AND person.person_id = ps.person_id
-                    AND ps.status_id = s.status_id
+                      AND person.person_id = person_birth_details.person_id
+                      AND person.person_id = prm. person_a
+                      AND prm.person_b = mn.person_id
+                      AND person.person_id = prf. person_a
+                      AND prf.person_b = fn.person_id
+                      AND person.person_id = ps.person_id
+                      AND ps.status_id = s.status_id
                     WHERE prm.person_relationship_type_id = 5
-                    AND pn.voided = 0 AND mn.voided = 0
-                    AND fn.voided =0 AND prf.person_relationship_type_id = 1
-                    AND pri.person_relationship_type_id = 4
-                    AND person.person_id = pri. person_a
-                    AND prf. person_b = fa.person_id
-                    AND s.name IN('#{params[:statuses].split(',').join("','")}') LIMIT 1000;"
-        
+                      AND pn.voided = 0 AND mn.voided = 0
+                      AND fn.voided =0 AND prf.person_relationship_type_id = 1
+                      AND pri.person_relationship_type_id = 4
+                      AND person.person_id = pri. person_a
+                      AND prf. person_b = fa.person_id
+                      AND ps.voided = 0
+                      AND s.name IN('#{params[:statuses].split(',').join("','")}')
+                      AND person_birth_details.location_created_at IN(
+                        SELECT 250 as location_id UNION SELECT location_id FROM location WHERE parent_location=250 UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=250)
+                      )
+                      AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
+                    person.birthdate, person.gender) REGEXP \"#{search_val}\"
+                    LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i };"
+         
         data = ActiveRecord::Base.connection.select_all(query)
 
         @records = []
@@ -2608,7 +2618,7 @@ class PersonController < ApplicationController
          render :text => {
           "draw" => params[:draw].to_i,
           "recordsTotal" => 10000,
-          "recordsFiltered" => 1000,
+          "recordsFiltered" => 10000,
           "data" => @records}.to_json and return 
       
   end
