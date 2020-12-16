@@ -2548,6 +2548,73 @@ class PersonController < ApplicationController
   #########################################################################
 
   def paginated_data
+        query = "SELECT
+                       person.person_id,
+                       person_birth_details.district_id_number as ben,
+                       national_serial_number,
+                       pn.first_name, 
+                       pn.last_name, 
+                       gender, 
+                       birthdate, 
+                       mn.first_name as mother_first_name,
+                       mn.last_name as mother_last_name,
+                       fn.first_name as father_first_name,
+                       fn.last_name as father_last_name,
+                       s.name as status,
+                       person_birth_details.acknowledgement_of_receipt_date as date_reported
+                    FROM person 
+                    INNER JOIN person_name pn INNER JOIN person_birth_details
+                    INNER JOIN person_relationship prm INNER JOIN person_name mn
+                    INNER JOIN person_relationship prf INNER JOIN person_name fn
+                    INNER JOIN person_relationship pri INNER JOIN person_addresses fa
+                    INNER JOIN person_record_statuses ps
+                    INNER JOIN statuses s
+                    ON person.person_id = pn.person_id 
+                    AND person.person_id = person_birth_details.person_id
+                    AND person.person_id = prm. person_a
+                    AND prm.person_b = mn.person_id
+                    AND person.person_id = prf. person_a
+                    AND prf.person_b = fn.person_id
+                    AND person.person_id = ps.person_id
+                    AND ps.status_id = s.status_id
+                    WHERE prm.person_relationship_type_id = 5
+                    AND pn.voided = 0 AND mn.voided = 0
+                    AND fn.voided =0 AND prf.person_relationship_type_id = 1
+                    AND pri.person_relationship_type_id = 4
+                    AND person.person_id = pri. person_a
+                    AND prf. person_b = fa.person_id
+                    AND s.name IN('#{params[:statuses].split(',').join("','")}') LIMIT 1000;"
+        
+        data = ActiveRecord::Base.connection.select_all(query)
+
+        @records = []
+        data.each do |p|
+            #raise p.inspect
+            row = []
+        row = [p['ben']] if params[:assign_ben] == 'true'
+        row << PersonIdentifier.by_type(p.person_id, "Verification Number") if params[:vnum]         == 'true'
+        row = row + [
+                "#{p['first_name']} #{p['last_name']} (#{p['gender']})",
+                p['birthdate'].strftime('%d/%b/%Y'),
+                "#{p['mother_first_name']} #{p['mother_last_name']}",
+                "#{p['father_first_name']} #{p['father_last_name']}",
+                (p['date_reported'].strftime('%d/%b/%Y') rescue nil),
+                p['status'],
+                p['person_id']
+
+            ]
+            @records << row
+          end
+         render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => 10000,
+          "recordsFiltered" => 1000,
+          "data" => @records}.to_json and return 
+      
+  end
+  
+
+  def paginated_data_back
     params[:statuses] = [] if params[:statuses].blank?
     states = params[:statuses].split(',')
     types = []

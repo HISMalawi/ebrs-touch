@@ -78,8 +78,8 @@ class PersonRecordStatus < ActiveRecord::Base
       result
   end
 
-  def self.stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], approved=true)
-    return JSON.parse(File.read("#{Rails.root}/tmp/stats.json"))
+  def self.stats
+      return JSON.parse(File.read("#{Rails.root}/db/stats.json"))
   end
 
   def self.trace_data(person_id)
