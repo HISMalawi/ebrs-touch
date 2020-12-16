@@ -2589,7 +2589,7 @@ class PersonController < ApplicationController
                       AND ps.voided = 0
                       AND s.name IN('#{params[:statuses].split(',').join("','")}')
                       AND person_birth_details.location_created_at IN(
-                        SELECT 250 as location_id UNION SELECT location_id FROM location WHERE parent_location=250 UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=250)
+                        SELECT 250 as location_id UNION SELECT location_id FROM location WHERE parent_location=#{SETTINGS['location_id']} UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=#{SETTINGS['location_id']})
                       )
                       AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
                     person.birthdate, person.gender) REGEXP \"#{search_val}\"
