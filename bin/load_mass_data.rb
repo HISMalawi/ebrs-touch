@@ -69,7 +69,7 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
   MassPerson.where(upload_status: "NOT UPLOADED").each do |record|
 
-    status = "HQ-CAN-PRINT"
+    status = "HQ-ACTIVE"
     outcome = "Success"
 
     #Filter for Complete Cases
@@ -132,7 +132,8 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
       end
 
       if status == "HQ-CAN-PRINT"
-        assign_next_ben(person_id)
+        d = PersonBirthDetail.where(person_id: person_id).first
+        d.generate_ben
       end
 
       RecordChecks.create(

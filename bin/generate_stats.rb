@@ -23,7 +23,7 @@ def self.generate_stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], ap
         WHERE voided = 0 AND status_id IN = 8 ")[0]['c']
     end
     result    
-    File.open("#{Rails.root}/tmp/stats.json","w") do |f|
+    File.open("#{Rails.root}/db/stats.json","w") do |f|
       f.write(result.to_json)
     end 
 end
