@@ -1573,7 +1573,7 @@ class PersonController < ApplicationController
   end
 
   def view_hq_rejected_cases
-    @states = ["HQ-REJECTED"]
+    @states = ["HQ-REJECTED","HQ-LOST-REJECTED"]
     @section = "Rejected Cases at HQ"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
@@ -2214,7 +2214,7 @@ class PersonController < ApplicationController
   end
 
   def view_approved_cases
-    @states = Status.where("name like 'HQ-%' ").map(&:name) - ['HQ-REJECTED', 'HQ-VOIDED', 'HQ-PRINTED', 'HQ-DISPATCHED']
+    @states = Status.where("name = 'HQ-ACTIVE' ").map(&:name)
     @section = "Approved Cases"
     @display_ben = true
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
