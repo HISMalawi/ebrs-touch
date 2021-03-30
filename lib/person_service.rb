@@ -375,7 +375,7 @@ module PersonService
 
   def self.create_mass_registration_person(mass_reg_person, status)
 
-    user_id = 1002601 #User.where(username: "admin#{SETTINGS['location_id']}").last.id
+    user_id = User.where(username: "admin#{SETTINGS['location_id']}").last.id
     codes = JSON.parse(File.read("#{Rails.root}/db/code2country.json"))
 
     # create core_person
@@ -405,7 +405,6 @@ module PersonService
     other_place = nil
     birth_location_id = Location.where(name: "Other").first.id
 
-
     if mass_reg_person['place_of_birth'] == "Home"
       other_place = nil
       ta_id = Location.locate_id(mass_reg_person["ta_of_birth"], "Traditional Authority", district_id)
@@ -414,17 +413,15 @@ module PersonService
       birth_location_id = Location.locate_id(mass_reg_person["hospital_of_birth"], "Health Facility", district_id)
     end
 
-    reg_type = BirthRegistrationType.where(name: mass_reg_person["birth_registration_type"]).last.id
+    reg_type = BirthRegistrationType.where(name: mass_reg_person["birth_registration_type"]).last.id  
 
-    if village_id.blank?
-      other_place = mass_reg_person["village_of_birth"]
-      village_id = Location.locate_id_by_tag("Other", "Place Of Birth")
+    type_of_birth = PersonTypeOfBirth.where(name: mass_reg_person['type_of_birth']).last.id rescue nil
+
+    if mass_reg_person['type_of_birth'] == "Twin"
+      type_of_birth = PersonTypeOfBirth.where(name: "First Twin").last.id     
     end
 		
-		
-		district_created_at = 250
-		ta_created_at = Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Traditional Authority", district_created_at)
-		location_created_at = Location.locate_id_by_tag(mass_reg_person["location_created_at"], "Village", ta_created_at)
+    puts "Begin Child"
 
     details = PersonBirthDetail.create(
         person_id: core_person.id,
@@ -433,7 +430,7 @@ module PersonService
         birth_location_id: birth_location_id,
         district_of_birth:  district_id,
         other_birth_location: mass_reg_person["other_place_of_birth_details"],
-        type_of_birth: PersonTypeOfBirth.where(name: mass_reg_person['type_of_birth']).last.id,
+        type_of_birth: type_of_birth,
         other_type_of_birth: mass_reg_person["other_type_of_birth_specified"],
         parents_married_to_each_other: ((mass_reg_person["parents_married"] == "Yes" ? 1 : 0) rescue nil),
         date_of_marriage: mass_reg_person["date_of_marriage"].to_date.to_s,
@@ -445,20 +442,19 @@ module PersonService
         number_of_children_born_still_alive: mass_reg_person["number_of_children_born_still_alive"],
         court_order_attached: ((mass_reg_person["court_order_attached"] == "Yes" ? 1 : 0) rescue nil),
         parents_signed: ((mass_reg_person["parents_signed"] == "Yes" ? 1 : 0) rescue nil),
-        location_created_at: 260,
+        location_created_at: SETTINGS['location_id'],
         birth_weight: (mass_reg_person['birth_weight'].to_f rescue nil),
         acknowledgement_of_receipt_date: mass_reg_person["date_reported"].to_date.to_s,
         date_reported: mass_reg_person["date_reported"].to_date.to_s,
         date_registered: Date.today.to_s,
-        level_of_education_id: LevelOfEducation.where(name: mass_reg_person["level_of_education"]).last.id,
+        level_of_education_id: (LevelOfEducation.where(name: mass_reg_person["level_of_education"]).last.id rescue nil),
         informant_relationship_to_person: mass_reg_person[:informant_relationship],
         form_signed: (mass_reg_person[:form_signed] == "Yes" ? 1 : 0),
         flagged: 1,
         creator: user_id,
-        created_at: mass_reg_person["created_at"].to_datetime.to_s(:db)
+        created_at: mass_reg_person["created_at"].to_datetime.to_s(:db),
         source_id: (-1 * mass_reg_person['id'].to_i).to_s + "$" + mass_reg_person["creator"]
     )
-
 
   if !mass_reg_person["child_id_number"].blank?
      PersonIdentifier.create(
@@ -468,6 +464,8 @@ module PersonService
      )
   end
 
+puts "completed child"
+puts "Begin mother"
     #create mother_core_person
     exi_mother = PersonIdentifier.where(value: mass_reg_person[:mother_id_number], voided: 0).first
 
@@ -485,10 +483,13 @@ module PersonService
       )
 
       #create mother_person
+
+      m_dob = mass_reg_person["mother_date_of_birth"].to_date.to_s rescue nil 
+      m_dob = "1900-01-01" if m_dob.blank?
       mother_person = Person.create(
           :person_id          => core_person.id,
           :gender             => 'F',
-          :birthdate          =>   (mass_reg_person["mother_date_of_birth"].to_date.to_s rescue "1900-01-01"),
+          :birthdate          =>   m_dob,
           :birthdate_estimated => false
       )
       #create mother_name
@@ -499,16 +500,17 @@ module PersonService
           :last_name          => mass_reg_person[:mother_last_name]
       )
       #create mother_address
+    
       m_district_id = Location.locate_id_by_tag(mass_reg_person["mother_home_district"], "District") rescue nil
       m_ta_id = Location.locate_id(mass_reg_person["mother_home_ta"], "Traditional Authority", district_id) rescue nil
       m_village_id = Location.locate_id(mass_reg_person["mother_home_village"], "Village", ta_id) rescue nil
-      m_citizenship = Location.where(country: mass_reg_person["mother_nationality"]).last.id rescue nil
+      m_citizenship = Location.where(country: mass_reg_person["mother_nationality"]).first.id #rescue nil
       m_citizenship = Location.where(name: "Other").first.id if m_citizenship.blank?
 
       m_district_id_res = Location.locate_id_by_tag(mass_reg_person["mother_residential_district"], "District") rescue nil
       m_ta_id_res = Location.locate_id(mass_reg_person["mother_residential_ta"], "Traditional Authority", district_id) rescue nil
       m_village_id_res = Location.locate_id(mass_reg_person["mother_residential_village"], "Village", ta_id) rescue nil
-      m_country_res = Location.where(country: mass_reg_person["mother_residential_country"]).last.id rescue nil
+      m_country_res = Location.where(name: mass_reg_person["mother_residential_country"]).first.id #rescue nil
       m_country_res = Location.where(name: "Other").first.id if m_country_res.blank?
 
       pam = PersonAddress.new(
@@ -526,7 +528,7 @@ module PersonService
       #pam.home_district_other = mass_reg_person["MotherDistrictName"] if m_district_id.blank?
       #pam.home_ta_other = mass_reg_person["MotherTAName"] if m_ta_id.blank?
       #pam.home_village_other = mass_reg_person["MotherVillageName"] if m_village_id.blank?
-      pam.save
+      a = pam.save
 
       #create mother_identifier
       if mass_reg_person[:mother_id_number].present?
@@ -545,6 +547,9 @@ module PersonService
     )
 
     #create_father
+
+    puts "Completed Mother"
+    puts "Begin Father"
     if mass_reg_person[:father_first_name].present? && mass_reg_person[:father_last_name].present?
 
       exi_father = PersonIdentifier.where(value: mass_reg_person[:father_id_number], voided: 0).first
@@ -559,10 +564,13 @@ module PersonService
         )
 
         #create father_person
+        f_dob = mass_reg_person["father_date_of_birth"].to_date.to_s rescue nil 
+        f_dob = "1900-01-01" if f_dob.blank?
+
         father_person = Person.create(
             :person_id          => core_person.id,
             :gender             => 'M',
-            :birthdate          =>  (mass_reg_person["father_date_of_birth"].to_date.to_s rescue "1900-01-01"),
+            :birthdate          =>  f_dob,
             :birthdate_estimated => false
         )
         #create father_name
@@ -577,18 +585,18 @@ module PersonService
         f_district_id = Location.locate_id_by_tag(mass_reg_person["father_home_district"], "District") rescue nil
         f_ta_id = Location.locate_id(mass_reg_person["father_home_ta"], "Traditional Authority", district_id) rescue nil
         f_village_id = Location.locate_id(mass_reg_person["father_home_village"], "Village", ta_id) rescue nil
-        f_citizenship = Location.where(country: mass_reg_person["father_nationality"]).last.id rescue nil
+        f_citizenship = Location.where(country: mass_reg_person["father_nationality"]).first.id rescue nil
         f_citizenship = Location.where(name: "Other").first.id if f_citizenship.blank?
 
 
         f_district_id_res = Location.locate_id_by_tag(mass_reg_person["father_residential_district"], "District") rescue nil
         f_ta_id_res = Location.locate_id(mass_reg_person["father_residential_ta"], "Traditional Authority", district_id) rescue nil
         f_village_id_res = Location.locate_id(mass_reg_person["father_residential_village"], "Village", ta_id) rescue nil
-        f_country_res = Location.where(country: mass_reg_person["father_residential_country"]).last.id rescue nil
+        f_country_res = Location.where(name: mass_reg_person["father_residential_country"]).first.id rescue nil
         f_country_res = Location.where(name: "Other").first.id if f_country_res.blank?
 
         paf = PersonAddress.new(
-            :person_id          => core_person.id,
+            :person_id      => core_person.id,
             :home_district  => f_district_id,
             :home_ta => f_ta_id,
             :home_village => f_village_id,
@@ -622,6 +630,9 @@ module PersonService
           person_relationship_type_id: PersonRelationType.where(name: 'Father').last.id
       )
     end
+
+  puts "Completed Father"
+  puts "Begin informant"
 
     exi_informant = PersonIdentifier.where(value: mass_reg_person[:informant_id_number], voided: 0).first
 
@@ -716,8 +727,8 @@ module PersonService
           :voided                   => 0
       )
     end
-
-    PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM COMMUNITY REGISTRATION")
+puts "Completed Informant"
+    PersonRecordStatus.new_record_state(ebrs_person.id, status, "NEW RECORD FROM FROM BRK")
 
 =begin
     allocation = IdentifierAllocationQueue.new
@@ -729,6 +740,10 @@ module PersonService
     allocation.save
 =end
     return ebrs_person.id
+  end
+
+  def twins
+    
   end
 
   def self.exact_duplicates(params)

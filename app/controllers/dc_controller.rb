@@ -262,6 +262,12 @@ def incomplete_case_comment
 
     if ["HQ-REJECTED","DC-VERIFY DUPLICATE"].include?(old_state)
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-RE-APPROVED")
+      prs = PersonRecordStatus.where(person_id: @child.person_id, status_id: 9, voided: 0).order('created_at asc').last
+
+      i = 1
+      for i in 1..20 do
+        prs.save
+      end
     else
       PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
     end

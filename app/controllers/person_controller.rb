@@ -2514,19 +2514,38 @@ class PersonController < ApplicationController
      status = "DC-DAMAGED"
     end
 
-    PersonRecordStatus.new_record_state(params['id'], status, "Reprint request; #{params['reason']}");
+    #PersonRecordStatus.new_record_state(params['id'], status, "Reprint request; #{params['reason']}");
+    PersonRecordStatus.new_record_state(params['id'], "HQ-CAN-PRINT", "Reprint request; #{params['reason']}");
+    pbd = PersonBirthDetail.where(person_id: params['id']).last
+
+    i = 1
+    for i in 1..20 do
+        pbd.save
+    end
 
     redirect_to session['list_url']
   end
 
   def approve_reprint_request
     PersonRecordStatus.new_record_state(params['id'], "HQ-#{params['reason'].upcase}", "Reprint request; #{params['reason']}");
+    pbd = PersonBirthDetail.where(person_id: params['id']).last
 
+    i = 1
+    for i in 1..20 do
+        pbd.save
+    end
     redirect_to session['list_url']
   end
 
   def approve_amendment_request
     PersonRecordStatus.new_record_state(params['id'], "HQ-AMEND", "Amendment request; Verifed by ADR");
+    prs = PersonRecordStatus.where(person_id: params['id'], status_id: 23, voided: 0).order('created_at DESC').first
+    
+    i = 1
+
+    for i in 1..20 do
+        prs.save
+    end
 
     redirect_to session['list_url']
   end

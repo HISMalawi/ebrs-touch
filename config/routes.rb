@@ -118,7 +118,7 @@ Rails.application.routes.draw do
   get '/print_cases' => "dc#print_cases"
 
   get '/print_preview' => 'person#print_preview'
-  post '/print_preview' => 'person#print_preview'
+  post 'dc/print_preview'
   get '/birth_certificate' => 'person#birth_certificate'
   get '/print' => 'person#print'
   post '/print' => 'person#print'

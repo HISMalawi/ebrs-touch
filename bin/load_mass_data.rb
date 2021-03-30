@@ -17,23 +17,6 @@ ActiveRecord::Base.connection.execute <<EOF
 ALTER TABLE person_birth_details MODIFY number_of_prenatal_visits INT NULL
 EOF
 
-
-last_2018_ben = ActiveRecord::Base.connection.execute <<EOF
-    SELECT MAX(district_id_number) ben FROM person_birth_details WHERE district_id_number LIKE '%/%/%2018';
-EOF
-
-
-last_2018_ben2 = ActiveRecord::Base.connection.execute <<EOF
-    SELECT MAX(value) ben FROM person_identifiers WHERE value LIKE '%/%/%2018';
-EOF
-
-last_2018_ben =  [(last_2018_ben.first[0].split("/")[1].to_i rescue 0), (last_2018_ben2.first[0].split("/")[1].to_i rescue 0)].max
-
-$counter = last_2018_ben
-$district_code = Location.find(SETTINGS['location_id']).code
-puts $counter
-puts "Last BEN: #{$counter}"
-
 if MassPerson.where(" upload_status  = 'NOT UPLOADED' ").count > 0
   puts "Upload Number: #{upload_number}"
   puts "#{MassPerson.where(" upload_status  = 'NOT UPLOADED' ").count} Records to be Loaded"
@@ -45,20 +28,7 @@ else
   puts "No Records Found to Load"
 end
 
-def assign_next_ben(person_id)
 
-  $counter = $counter.to_i + 1
-  mid_number = $counter.to_s.rjust(8,'0')
-  ben = "#{$district_code}/#{mid_number}/2018"
-
-  pbd = PersonBirthDetail.where(person_id: person_id).first
-  pbd.district_id_number = ben
-  pbd.save
-
-  PersonIdentifier.new_identifier(person_id, 'Birth Entry Number', ben)
-
-  ben
-end
 
 if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
@@ -67,7 +37,10 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
   potential_dup = [MassPerson.new.attributes.keys.join(",")]
   special_chars = [MassPerson.new.attributes.keys.join(",")]
 
-  MassPerson.where(upload_status: "NOT UPLOADED").each do |record|
+  MassPerson.where(upload_outcome: "Crashed Record").each do |record|
+
+    #next if record["first_name"].blank?
+    puts record.id
 
     status = "HQ-ACTIVE"
     outcome = "Success"
@@ -85,8 +58,8 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
 
     #Filter for Complete Cases
     if ([record["last_name"], record["first_name"], record["gender"], record["date_of_birth"],
-         record["mother_last_name"], record["mother_first_name"], record["mother_nationality"],
-         record["district_of_birth"], record["ta_of_birth"], record["village_of_birth"] ] & ["", nil]).length > 0 ||
+         record["mother_last_name"], record["mother_first_name"], record["mother_nationality"]
+        ] & ["", nil]).length > 0 ||
         ((!record["father_first_name"].blank? || !record["father_last_name"].blank? ||
             !record["father_nationality"].blank? ) &&
         ([record["father_first_name"], record["father_last_name"],
@@ -97,23 +70,40 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
       incomplete << record.attributes.values.join(",")
     end
 
+      #Filter for Wrong Dates
+    dates = [record["date_of_birth"], record["date_of_marriage"], record["mother_date_of_birth"], 
+            record["father_date_of_birth"], record["date_reported"]].delete_if{|d| d.blank? }
+
+    dates.each{|d| 
+      begin
+        d.to_date
+      rescue 
+        status = "DC-INCOMPLETE"
+        outcome = "Invalid Date Format"
+      end
+    }
+
+   
     formated = MassPerson.format_person(record)
     exact_duplicates =  MassPerson.exact_duplicates(record) #SimpleElasticSearch.query_duplicate_coded(formated, 100)
+
 
     if exact_duplicates.length > 0
 
       status = "DC-DUPLICATE"
       outcome = "Exact Duplicate"
       exact_dup << record.attributes.values.join(",")
+
     end
 
-    potential_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 85)
+    potential_duplicates = SimpleElasticSearch.query_duplicate_coded(formated, 85) rescue []
     if potential_duplicates.length > 0
       status = "DC-POTENTIAL DUPLICATE"
       outcome = "Potential Duplicate"
       potential_dup << record.attributes.values.join(",")
     end
 
+    begin
     ActiveRecord::Base.transaction do
       person_id = record.map_to_ebrs_tables(upload_number, status)
 
@@ -131,21 +121,39 @@ if ["YES", "Y"].include?(response.chomp.to_s.upcase)
         end
       end
 
-      if status == "HQ-CAN-PRINT"
+      if status == "HQ-ACTIVE"
         d = PersonBirthDetail.where(person_id: person_id).first
         d.generate_ben
       end
 
-      RecordChecks.create(
-          person_id: person_id,
-          outcome: outcome
-      )
+      mother = PersonRelationship.where(person_a: person_id, person_relationship_type_id: 5).first
+      mother_id = mother.person_b
+
+      address = PersonAddress.where(person_id: mother_id).first
+      mother_citizenship = Location.where(country: record["mother_nationality"]).first.id
+      address.citizenship = mother_citizenship
+      address.residential_country = Location.where(name: record["mother_residential_country"]).first.id
+      address.save
+
+#      RecordChecks.create(
+#          person_id: person_id,
+#          outcome: outcome
+#      )
 
       formated["id"] = person_id
       SimpleElasticSearch.add(formated)
 
       puts "#{person_id} # #{status} # #{outcome}"
-    end
+    end if outcome == "Success"
+
+  rescue => e
+     puts e 
+      outcome = "Crashed Record"
+  end
+
+    #Update outcome in mass_person table
+    record.upload_outcome = outcome
+    record.save
   end
 
   puts "Done"

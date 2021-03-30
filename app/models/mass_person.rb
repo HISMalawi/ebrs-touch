@@ -174,11 +174,14 @@ class MassPerson < ActiveRecord::Base
   def self.exact_duplicates(record)
 
     mother_relationship_ids = PersonRelationType.where(" name IN ('Mother', 'Adoptive-Mother') ").collect{|r| r.id}
+    #raise mother_relationship_ids.inspect
     #Query by name
     person_ids = PersonName.find_by_sql(" SELECT pn.person_id FROM person_name pn
       INNER JOIN person_birth_details pbd ON pbd.person_id = pn.person_id AND pn.voided = 0
       AND pn.first_name = \"#{record[:first_name]}\" AND pn.last_name = \"#{record[:last_name]}\"
     ").map(&:person_id)
+    
+    #raise person_ids.inspect
 
     return [] if person_ids.blank?
 
@@ -208,11 +211,13 @@ class MassPerson < ActiveRecord::Base
 
     record[:district_of_birth] = map[record[:district_of_birth]] if record[:district_of_birth].match(/City$/)
     district_id = Location.locate_id_by_tag(record[:district_of_birth], 'District')
-
+=begin    
     person_ids = PersonBirthDetail.find_by_sql("
       SELECT person_id FROM person_birth_details pbd
         WHERE district_of_birth = #{district_id} AND person_id IN (#{person_ids.join(',')})
     ").collect{|p| p.person_id}
+=end
+    #raise person_ids.inspect
 
     return person_ids
   end
