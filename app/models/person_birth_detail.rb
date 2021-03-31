@@ -239,10 +239,29 @@ class PersonBirthDetail < ActiveRecord::Base
 		if self.district_id_number.blank? 
 			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
       if counter.blank?
-				missing_ben = nil #PersonBirthDetail.next_missing_ben(district_code, year)
-				if !missing_ben.blank?
-					ActiveRecord::Base.connection.execute("DELETE FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};")
-					ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(counter, person_id) VALUES (#{missing_ben.to_i}, #{self.person_id});")
+				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
+        #raise missing_ben.inspect
+				if !missing_ben.blank? #correct missing ben
+          missing_person_id = ActiveRecord::Base.connection.select_one("SELECT person_id FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['person_id']
+          if !missing_person_id.blank?
+            missing_date_registered = ActiveRecord::Base.connection.select_one("SELECT created_at FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['created_at']
+            corrected_missing_ben = "#{district_code}/#{missing_ben}/#{year}"
+
+            corrected_pbd = PersonBirthDetail.where(person_id: missing_person_id).last
+            corrected_pbd.district_id_number = corrected_missing_ben rescue nil
+            corrected_pbd.date_registered = missing_date_registered.to_date rescue nil
+            corrected_pbd.save rescue nil
+
+            identifier = PersonIdentifier.where(person_id: missing_person_id, person_identifier_type_id: 2).last
+            if identifier.blank?
+              PersonIdentifier.new_identifier(self.person_id, 'Birth Entry Number', corrected_missing_ben)
+            end
+
+            ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(person_id) VALUES (#{self.person_id});")
+          else
+            ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(counter, person_id) VALUES (#{missing_ben.to_i}, #{self.person_id});")
+          end
+          
 				else
 					ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(person_id) VALUES (#{self.person_id});")
 				end 
