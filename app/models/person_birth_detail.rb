@@ -240,9 +240,9 @@ class PersonBirthDetail < ActiveRecord::Base
 			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
       if counter.blank?
 				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
-        #raise missing_ben.inspect
+        
 				if !missing_ben.blank? #correct missing ben
-          missing_person_id = ActiveRecord::Base.connection.select_one("SELECT person_id FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['person_id']
+          missing_person_id = ActiveRecord::Base.connection.select_one("SELECT person_id FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['person_id'] rescue nil
           if !missing_person_id.blank?
             missing_date_registered = ActiveRecord::Base.connection.select_one("SELECT created_at FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['created_at']
             corrected_missing_ben = "#{district_code}/#{missing_ben}/#{year}"
