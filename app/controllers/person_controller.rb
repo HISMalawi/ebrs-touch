@@ -2500,7 +2500,8 @@ class PersonController < ApplicationController
   end
 
   def do_amend
-    PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
+    #PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
+    PersonRecordStatus.new_record_state(params['id'], "HQ-CAN-PRINT", "Amendment request; #{params['reason']}")
 
     redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
   end
