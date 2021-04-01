@@ -93,20 +93,20 @@ class PersonController < ApplicationController
     #New Variables
 
     @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
-    @name = @person.person_names.first
+    @name = @person.person_names.order('created_at desc').first
     @address = @person.addresses.last
 
     @mother_person = @person.mother_all
     @mother_address = @mother_person.addresses.last rescue nil
-    @mother_name = @mother_person.person_names.first rescue nil
+    @mother_name = @mother_person.person_names.order('created_at desc').first rescue nil
 
     @father_person = @person.father_all
     @father_address = @father_person.addresses.last rescue nil
-    @father_name = @father_person.person_names.first rescue nil
+    @father_name = @father_person.person_names.order('created_at desc').first rescue nil
 
     @informant_person = @person.informant rescue nil
     @informant_address = @informant_person.addresses.last rescue nil
-    @informant_name = @informant_person.person_names.first rescue nil
+    @informant_name = @informant_person.person_names.order('created_at desc').first rescue nil
 
     @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
     days_gone = ((@birth_details.date_reported.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
@@ -492,9 +492,9 @@ class PersonController < ApplicationController
 
       @person_name = PersonName.find_by_person_id(params[:id])
 
-      @person_mother_name = @person.mother.person_names.first rescue nil
+      @person_mother_name = @person.mother.person_names.order('created_at desc').first rescue nil
 
-      @person_father_name = @person.father.person_names.first rescue nil
+      @person_father_name = @person.father.person_names.order('created_at desc').first rescue nil
 
       if PersonBirthDetail.find_by_person_id(params[:id]).type_of_birth == 2
          @type_of_birth = "Second Twin"
@@ -650,27 +650,27 @@ class PersonController < ApplicationController
     
     @person_name = PersonName.find_by_person_id(params[:id])
 
-    @person_mother_name = @person.mother.person_names.first rescue nil
+    @person_mother_name = @person.mother.person_names.order('created_at desc').first rescue nil
 
-    @person_father_name = @person.father.person_names.first rescue nil
+    @person_father_name = @person.father.person_names.order('created_at desc').first rescue nil
 
     #New Variables
 
     @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
-    @name = @person.person_names.last
+    @name = @person.person_names.order('created_at desc').first
     @address = @person.addresses.last
 
     @mother_person = @person.mother
     @mother_address = @mother_person.addresses.last rescue nil
-    @mother_name = @mother_person.person_names.last rescue nil
+    @mother_name = @mother_person.person_names.order('created_at desc').first rescue nil
 
     @father_person = @person.father
     @father_address = @father_person.addresses.last rescue nil
-    @father_name = @father_person.person_names.last rescue nil
+    @father_name = @father_person.person_names.order('created_at desc').first rescue nil
 
     @informant_person = @person.informant rescue nil
-    @informant_address = @informant_person.addresses.last rescue nil
-    @informant_name = @informant_person.person_names.last rescue nil
+    @informant_address = @informant_person.addresses.order('created_at desc').first rescue nil
+    @informant_name = @informant_person.person_names.order('created_at desc').first rescue nil
 
     @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
     days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
@@ -1201,7 +1201,7 @@ class PersonController < ApplicationController
          end
 
          if mother.present?
-            mother_name =  mother.person_names.first
+            mother_name =  mother.person_names.order('created_at desc').first
          else
             mother_name = nil
          end
@@ -1225,7 +1225,7 @@ class PersonController < ApplicationController
          end
 
          if father.present?
-            father_name =  father.person_names.first
+            father_name =  father.person_names.order('created_at desc').first
          else
             father_name = nil
          end
@@ -1593,17 +1593,17 @@ class PersonController < ApplicationController
     #New Variables
 
     @birth_details = PersonBirthDetail.where(person_id: @core_person.person_id).last
-    @name = @person.person_names.last
+    @name = @person.person_names.order('created_at desc').first
     @address = @person.addresses.last
 
     @mother_person = @person.mother
     @mother_address = @mother_person.addresses.last rescue nil
-    @mother_name = @mother_person.person_names.last rescue nil
+    @mother_name = @mother_person.person_names.order('created_at desc').first rescue nil
 
     @father_person = @person.father
     @father_address = @father_person.addresses.last rescue nil
 
-    @father_name = @father_person.person_names.last rescue nil
+    @father_name = @father_person.person_names.order('created_at desc').first rescue nil
 
 		if @mother_person.present?
         mother_birth_date = @mother_person.birthdate.present? && @mother_person.birthdate.to_date.strftime('%Y-%m-%d') =='1900-01-01' ? 'N/A':  @mother_person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil
@@ -1619,7 +1619,7 @@ class PersonController < ApplicationController
 
     @informant_person = @person.informant rescue nil
     @informant_address = @informant_person.addresses.last rescue nil
-    @informant_name = @informant_person.person_names.last rescue nil
+    @informant_name = @informant_person.person_names.order('created_at desc').first rescue nil
 
     @comments = PersonRecordStatus.where(" person_id = #{@person.id} AND COALESCE(comments, '') != '' ")
     days_gone = ((@birth_details.acknowledgement_of_receipt_date.to_date rescue Date.today) - @person.birthdate.to_date).to_i rescue 0
@@ -2268,7 +2268,7 @@ class PersonController < ApplicationController
     @prev_details = {}
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
 
-    @name = @person.person_names.last
+    @name = @person.person_names.order('created_at desc').first
 
     @person_prev_values = {}
     name_fields = ['person_name', "gender","birthdate",
@@ -2286,11 +2286,11 @@ class PersonController < ApplicationController
 
     @mother_person = @person.mother
     @mother_address = @mother_person.addresses.last
-    @mother_name = @mother_person.person_names.last rescue nil
+    @mother_name = @mother_person.person_names.order('created_at desc').first rescue nil
     @mother_nationality = Location.find(@mother_address.citizenship).country
 
     @father_person = @person.father
-    @father_name = @father_person.person_names.last rescue nil
+    @father_name = @father_person.person_names.order('created_at desc').first rescue nil
     @father_address = @father_person.addresses.last rescue nil
     @father_nationality = Location.find(@father_address.citizenship).country rescue nil
 
@@ -2302,14 +2302,14 @@ class PersonController < ApplicationController
   def amend_edit
     @person = Person.find(params[:id])
     @birth_details = PersonBirthDetail.where(person_id: params[:id]).last
-    @name = @person.person_names.last
+    @name = @person.person_names.order('created_at desc').first
     @address = @person.addresses.last
 
     @mother_person = @person.mother
-    @mother_name = @mother_person.person_names.last rescue nil
+    @mother_name = @mother_person.person_names.order('created_at desc').first rescue nil
 
     @father_person = @person.father
-    @father_name = @father_person.person_names.last rescue nil
+    @father_name = @father_person.person_names.order('created_at desc').first rescue nil
      @targeturl = "/person/ammend_case?id=#{params[:id]}"
     render :layout => "touch"
   end
@@ -2396,7 +2396,7 @@ class PersonController < ApplicationController
     end
     if fields.include? "Name of mother"
         person = Person.find(params[:id])
-        person_mother_name = person.mother.person_names.last
+        person_mother_name = person.mother.person_names.order('created_at desc').first
 
         AuditTrail.create_ammendment_trail(params[:id], "mother_name", (person.mother.name rescue nil), user_id)
 
@@ -2411,7 +2411,7 @@ class PersonController < ApplicationController
         @father_person = person.father
 
         if @father_person.present?
-          person_father_name = person.father.person_names.last
+          person_father_name = person.father.person_names.order('created_at desc').first
 
           AuditTrail.create_ammendment_trail(params[:id], "father_name", (person.father.name rescue nil), user_id)
 

@@ -269,7 +269,7 @@ def incomplete_case_comment
         prs.save
       end
     else
-      PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
+     PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
     end
 
     render :text =>  session[:list_url]

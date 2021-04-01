@@ -240,7 +240,7 @@ class PersonBirthDetail < ActiveRecord::Base
 			counter = ActiveRecord::Base.connection.select_one("SELECT counter FROM ben_counter_#{year} WHERE person_id = #{self.person_id}").as_json['counter'] rescue nil
       if counter.blank?
 				missing_ben = PersonBirthDetail.next_missing_ben(district_code, year)
-        
+
 				if !missing_ben.blank? #correct missing ben
           missing_person_id = ActiveRecord::Base.connection.select_one("SELECT person_id FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['person_id'] rescue nil
           if !missing_person_id.blank?
@@ -275,6 +275,7 @@ class PersonBirthDetail < ActiveRecord::Base
 			self.update_attributes(district_id_number: ben)
 			self.update_attributes(date_registered: Date.today)
 			PersonIdentifier.new_identifier(self.person_id, 'Birth Entry Number', ben)
+      #PersonRecordStatus.new_record_state(self.person_id, "HQ-ACTIVE")
 		end
 		
 		ben
