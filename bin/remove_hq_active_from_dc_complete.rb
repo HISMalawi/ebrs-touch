@@ -4,9 +4,9 @@ location = Location.find(SETTINGS['location_id'])
 district_code = location.code
 
 person_ids = PersonRecordStatus.find_by_sql("
-	 SELECT d.person_id FROM person_birth_details d
+	 SELECT distinct d.person_id FROM person_birth_details d
 	INNER JOIN person_record_statuses prs ON d.person_id = prs.person_id
-	WHERE prs.status_id = #{status_id} AND prs.voided = 0 AND d.district_id_number like '#{district_code}/%'
+	WHERE prs.status_id = #{status_id}
 	 ").map(&:person_id).uniq
 
 puts person_ids.count
