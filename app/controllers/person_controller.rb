@@ -2500,7 +2500,6 @@ class PersonController < ApplicationController
   end
 
   def do_amend
-    #PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
     PersonRecordStatus.new_record_state(params['id'], "HQ-CAN-PRINT", "Amendment request; #{params['reason']}")
 
     redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
@@ -2613,7 +2612,7 @@ class PersonController < ApplicationController
                       AND pri.person_relationship_type_id = 4
                       AND person.person_id = pri. person_a
                       AND prf. person_b = fa.person_id
-                      AND ps.voided = 0
+                      AND ps.voided = 0 
                       AND s.name IN('#{params[:statuses].split(',').join("','")}')
                       AND person_birth_details.location_created_at IN(
                         SELECT #{SETTINGS['location_id']} as location_id UNION SELECT location_id FROM location WHERE parent_location=#{SETTINGS['location_id']} UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=#{SETTINGS['location_id']})

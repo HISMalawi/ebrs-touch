@@ -247,14 +247,21 @@ class PersonBirthDetail < ActiveRecord::Base
             missing_date_registered = ActiveRecord::Base.connection.select_one("SELECT created_at FROM ben_counter_#{year} WHERE counter = #{missing_ben.to_i};").as_json['created_at']
             corrected_missing_ben = "#{district_code}/#{missing_ben}/#{year}"
 
-            corrected_pbd = PersonBirthDetail.where(person_id: missing_person_id).last
-            corrected_pbd.district_id_number = corrected_missing_ben rescue nil
-            corrected_pbd.date_registered = missing_date_registered.to_date rescue nil
-            corrected_pbd.save rescue nil
+            corrected_pbd_1 = PersonBirthDetail.where(person_id: missing_person_id).last
+            if corrected_pbd_1.blank?
+              PersonService.force_sync(missing_person_id)
+            end
 
-            identifier = PersonIdentifier.where(person_id: missing_person_id, person_identifier_type_id: 2).last
-            if identifier.blank?
-              PersonIdentifier.new_identifier(self.person_id, 'Birth Entry Number', corrected_missing_ben)
+            corrected_pbd = PersonBirthDetail.where(person_id: missing_person_id).last
+            if !corrected_pbd.blank?
+              corrected_pbd.district_id_number = corrected_missing_ben rescue nil
+              corrected_pbd.date_registered = missing_date_registered.to_date rescue nil
+              corrected_pbd.save rescue nil
+
+              identifier = PersonIdentifier.where(person_id: missing_person_id, person_identifier_type_id: 2).last
+              if identifier.blank?
+                PersonIdentifier.new_identifier(self.person_id, 'Birth Entry Number', corrected_missing_ben)
+              end
             end
 
             ActiveRecord::Base.connection.execute("INSERT INTO ben_counter_#{year}(person_id) VALUES (#{self.person_id});")
