@@ -2500,9 +2500,19 @@ class PersonController < ApplicationController
   end
 
   def do_amend
-    PersonRecordStatus.new_record_state(params['id'], "HQ-CAN-PRINT", "Amendment request; #{params['reason']}")
+    #PersonRecordStatus.new_record_state(params['id'], "DC-AMEND", "Amendment request; #{params['reason']}")
 
-    redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
+    PersonRecordStatus.new_record_state(params['id'], "HQ-AMEND", "Amendment request; #{params['reason']}")
+
+    d = PersonRecordStatus.where(person_id: params['id'], status_id: 23, voided: 0).last
+
+    i = 1
+    for i in 1..20 do
+        d.save
+    end
+
+    #redirect_to (params[:next_path]? params[:next_path] : "/manage_requests")
+    redirect_to session['list_url']
   end
 
   def do_reprint
