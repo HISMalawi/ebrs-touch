@@ -2610,9 +2610,9 @@ class PersonController < ApplicationController
                     INNER JOIN statuses s
                     ON person.person_id = pn.person_id 
                       AND person.person_id = person_birth_details.person_id
-                      AND person.person_id = prm. person_a
+                      AND person.person_id = prm.person_a
                       AND prm.person_b = mn.person_id
-                      AND person.person_id = prf. person_a
+                      AND person.person_id = prf.person_a
                       AND prf.person_b = fn.person_id
                       AND person.person_id = ps.person_id
                       AND ps.status_id = s.status_id
@@ -2621,7 +2621,7 @@ class PersonController < ApplicationController
                       AND fn.voided =0 AND prf.person_relationship_type_id = 1
                       AND pri.person_relationship_type_id = 4
                       AND person.person_id = pri. person_a
-                      AND prf. person_b = fa.person_id
+                      AND prf.person_b = fa.person_id
                       AND ps.voided = 0 
                       AND s.name IN('#{params[:statuses].split(',').join("','")}')
                       AND person_birth_details.location_created_at IN(

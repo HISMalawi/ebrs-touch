@@ -34,3 +34,4 @@ public/sentinel
 public/errors/*
 public/*.pdf
 vendor/*
+public/uploads/signature.png
