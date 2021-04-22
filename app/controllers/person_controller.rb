@@ -2918,6 +2918,15 @@ class PersonController < ApplicationController
       }
     end
 
+    print_status = PersonRecordStatus.where(person_id: person_id, status_id: 62, voided: 0).last
+
+    i = 1
+
+    for i in 1..20
+        print_status.save
+    end
+
+
     if print_errors.present?
       print_errors.each do |k,v|
         print_error_log.debug "#{k} : #{v}"
