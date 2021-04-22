@@ -2922,7 +2922,7 @@ class PersonController < ApplicationController
 
     i = 1
 
-    for i in 1..20
+    for i in 1..20 do
         print_status.save
     end
 
