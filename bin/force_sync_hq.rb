@@ -14,10 +14,10 @@ person_ids = PersonRecordStatus.find_by_sql("
 puts person_ids.count
 
 person_ids.each_with_index do |person_id, i|
-        active_statuses = PersonRecordStatus.where(person_id: person_id, voided: 0).count
-        active_statuses = active_statuses.to_i
+        #active_statuses = PersonRecordStatus.where(person_id: person_id, voided: 0).count
+        #active_statuses = active_statuses.to_i
 
-        next if active_statuses > 1
+        #next if active_statuses > 1
 
         a = PersonService.force_sync_remote(person_id) rescue nil
         puts "#{i} ## #{person_id} ## #{a}"
