@@ -1,3 +1,7 @@
+cur_loc_id = SETTINGS['location_id']
+cur_loc_name = Location.find(cur_loc_id).name
+district_code = Location.find(cur_loc_id).code
+
 person_ids = PersonRecordStatus.find_by_sql("
 	 SELECT distinct d.person_id FROM person_birth_details d
 	INNER JOIN person_record_statuses prs ON d.person_id = prs.person_id
