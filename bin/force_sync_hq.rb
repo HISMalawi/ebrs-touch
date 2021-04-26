@@ -14,27 +14,15 @@ person_ids = PersonRecordStatus.find_by_sql("
 puts person_ids.count
 
 person_ids.each_with_index do |person_id, i|
-	a = PersonService.force_sync_remote(person_id) rescue nil
+	
         active_statuses = PersonRecordStatus.where(person_id: person_id, voided: 0).count
         active_statuses = active_statuses.to_i
 
-        if active_statuses > 1
-        	status_2 = PersonRecordStatus.where(person_id: person_id, voided: 0).last
-        	if status_2.status_id > 8
-        		hq_active = PersonRecordStatus.where(person_id: person_id, status_id: 8).last
-        		hq_active.voided = 1
-        		hq_active.save
-        	else
-        		status_3 = PersonRecordStatus.where(person_id: person_id, voided: 0).first
-        		if status_3.status_id > 8
-        			hq_active = PersonRecordStatus.where(person_id: person_id, status_id: 8).last
-	        		hq_active.voided = 1
-	        		hq_active.save
-        		end
-        	end
-        end
+        next if active_statuses > 1
 
+        a = PersonService.force_sync_remote(person_id) rescue nil
+        
         #next if active_statuses > 1
 
-      puts "#{i} ## #{person_id} ## #{a}"
+        puts "#{i} ## #{person_id} ## #{a}"
 end
