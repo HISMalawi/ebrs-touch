@@ -20,7 +20,7 @@ person_ids.each_with_index do |person_id, i|
             prs.save
 
         end
+        puts "#{(i + 1)} # person_id: #{person_id}"
     end
 
-	puts "#{(i + 1)} # person_id: #{person_id}"
 end
