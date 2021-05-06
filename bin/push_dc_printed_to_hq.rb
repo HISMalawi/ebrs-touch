@@ -14,7 +14,7 @@ def write_csv_content(file, content)
     end
 end
 
-header = [  "Person ID"
+header = [  "person_id"
 		]
 write_csv_header("#{Rails.root}/db/#{district_code}_dc_printed.csv", header)
 
