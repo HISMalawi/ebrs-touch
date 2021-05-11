@@ -2916,14 +2916,14 @@ class PersonController < ApplicationController
         Kernel.system print_url
         Kernel.system "lp -d #{params[:printer_name]} #{SETTINGS['certificates_path'].strip}#{person_id.strip}.pdf\n"
       }
-    end
 
-    print_status = PersonRecordStatus.where(person_id: person_id, status_id: 62, voided: 0).last
+      print_status = PersonRecordStatus.where(person_id: person_id, status_id: 62, voided: 0).last
 
-    i = 1
+      i = 1
 
-    for i in 1..20 do
-        print_status.save
+      for i in 1..20 do
+          print_status.save
+      end
     end
 
 
