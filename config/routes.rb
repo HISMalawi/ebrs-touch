@@ -161,6 +161,7 @@ Rails.application.routes.draw do
   get "/view_pending_cases" => "person#view_pending_cases"
   get "/view_rejected_cases" => "person#view_rejected_cases"
   get "/view_hq_rejected_cases" => "person#view_hq_rejected_cases"
+  get "/view_can_print_cases" => "person#view_can_print_cases"
 
   get "/view_printed_cases" => "person#view_printed_cases"
   get "/view_voided_cases" => "person#view_voided_cases"

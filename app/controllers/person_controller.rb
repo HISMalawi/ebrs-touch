@@ -1581,6 +1581,15 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+  def view_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @section = "Editable CAN PRINT cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    #@records = PersonService.query_for_display(@states)
+    render :template => "person/records", :layout => "data_table"
+  end
+
   def edit
 
     @targeturl = request.path
@@ -1663,7 +1672,144 @@ class PersonController < ApplicationController
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
-    @record = {
+    if @status == "HQ-CAN-PRINT"
+        @record = {
+        "Details of Child" => [
+            {
+                "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                "National ID" => (@person.id_number rescue '')
+            },  
+            {
+                "First Name" => "#{@name.first_name rescue nil}",
+                "Other Name" => "#{@name.middle_name rescue nil}",
+                "Surname" => "#{@name.last_name rescue nil}"
+            },
+            {
+                "Date of birth" => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                "Sex" => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
+                "Place of birth" => place
+            },
+            {
+                "Name of Hospital" =>  hospital,
+                "Other Details" => other_place,
+            },
+            {
+                "District/State" => district,
+                "T/A" => ta,
+                "Village" => village
+            },
+            {
+                "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
+                "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
+                "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
+            },
+            {
+                "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
+                "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
+            },
+            {
+                "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
+                "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
+                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
+            },
+            {
+                "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
+                "Record Status" => "#{@status}",
+                "Child/Person Type" => "#{@birth_details.reg_type.name}"
+            }
+        ],
+        "Details of Child's Mother" => [
+            {
+                "First Name" => "#{@mother_name.first_name rescue nil}",
+                "Other Name" => "#{@mother_name.middle_name rescue nil}",
+                "Maiden Surname" => "#{@mother_name.last_name rescue nil}"
+            },
+            {
+                "Date of birth" => "#{mother_birth_date}",
+                "Nationality" => "#{@mother_person.citizenship rescue nil}",
+                "ID Number" => "#{@mother_person.id_number rescue nil}"
+            },
+            {
+                ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_district"] => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_ta"] => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_village"] => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+            },
+            {
+                ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_district"] => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_ta"] => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_village"] => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+            },
+            {
+                "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
+                "Number of prenatal visits" => "#{@birth_details.number_of_prenatal_visits rescue nil}",
+                "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
+            },
+            {
+                "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
+                "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
+                "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
+            },
+            {
+                "Level of education" => "#{@birth_details.level_of_education rescue nil}"
+            }
+        ],
+        "Details of Child's Father" => [
+            {
+                "First Name" => "#{@father_name.first_name rescue nil}",
+                "Other Name" => "#{@father_name.middle_name rescue nil}",
+                "Surname" => "#{@father_name.last_name rescue nil}"
+            },
+            {
+                "Date of birth" => "#{father_birth_date}",
+                "Nationality" => "#{@father_person.citizenship rescue nil}",
+                "ID Number" => "#{@father_person.id_number rescue nil}"
+            },
+            {
+                ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_district"] => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_ta"] => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_village"] => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+            },
+            {
+                ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_district"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_ta"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+            }
+        ],
+        "Details of Child's Informant" => [
+            {
+                "First Name" => "#{@informant_name.first_name rescue nil}",
+                "Other Name" => "#{@informant_name.middle_name rescue nil}",
+                "Family Name" => "#{@informant_name.last_name rescue nil}"
+            },
+            {
+                "Relationship to child" => informant_rel,
+                "ID Number" => "#{@informant_person.id_number rescue ""}"
+            },
+            {
+                ["Physical Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_home_district"] => "#{loc(@informant_address.home_district, 'District')rescue nil}",
+                ["T/A","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_ta"] => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
+                ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_village"] => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
+            },
+            {
+                ["Postal Address", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address"] => "#{@informant_address.address_line_1 rescue nil}",
+                "" => "#{@informant_address.address_line_2 rescue nil}",
+                ["City", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_city"]  => "#{@informant_address.city rescue nil}"
+            },
+            {
+                ["Phone Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_cell_phone_number"]  => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
+                "Informant Signed?"  => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
+            },
+            {
+                "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
+                "Delayed Registration" => "#{@delayed}"
+            }
+        ]
+    }
+
+    else
+        @record = {
         "Details of Child" => [
             {
                 "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
@@ -1798,6 +1944,7 @@ class PersonController < ApplicationController
         ]
     }
 
+    end
 
 
     @summaryHash = {
@@ -1823,6 +1970,7 @@ class PersonController < ApplicationController
     render :layout => "facility"
 
   end  
+
 
   def do_dispatch_these
     
@@ -2566,12 +2714,14 @@ class PersonController < ApplicationController
     @section = "Search Cases"
     @display_ben = true
     @search = true
+
     @user = User.find(params[:user_id]) rescue nil
     User.current = @user if !@user.blank?
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states) rescue nil
     filters = JSON.parse(params['data']) rescue {}
     @records = PersonService.search_results(filters)
+
     render :template => "person/records", :layout => "data_table"
   end
   #########################################################################
@@ -2585,12 +2735,19 @@ class PersonController < ApplicationController
       else
         types=[params[:type]]
       end
+
       #AND person_birth_details.birth_registration_type_id IN (SELECT birth_registration_type_id FROM birth_registration_type WHERE name IN('#{types.join("','")}'))
 
       limit_query = ""
 
       if search_val == "_"
         limit_query = "LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i }"
+      end
+
+      order_by_query = "ORDER BY created_at DESC"
+
+      if params['statuses'] == "HQ-CAN-PRINT"
+          order_by_query = "ORDER BY person_birth_details.district_id_number ASC"
       end
 
       query = "SELECT
@@ -2635,8 +2792,8 @@ class PersonController < ApplicationController
                         SELECT #{SETTINGS['location_id']} as location_id UNION SELECT location_id FROM location WHERE parent_location=#{SETTINGS['location_id']} UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=#{SETTINGS['location_id']})
                       )
                       AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
-                    person.birthdate, person.gender) REGEXP \"#{search_val}\" GROUP BY ps.person_id
-                    ORDER BY created_at DESC
+                    person.birthdate, person.gender) REGEXP \"#{search_val}\"
+                    #{order_by_query}
                     #{limit_query};"
                  
         data = ActiveRecord::Base.connection.select_all(query)
@@ -2667,95 +2824,6 @@ class PersonController < ApplicationController
       
   end
 
-=begin
-  def paginated_data
-    
-  params[:statuses] = [] if params[:statuses].blank?
-    states = params[:statuses].split(',')
-    types = []
-
-    search_val = params[:search][:value] rescue nil
-    search_val = '_' if search_val.blank?
-
-    puts "#{search_val}"
-
-    if !params[:start].blank?
-
-      state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
-
-
-      if params[:type] == 'All'
-        types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
-      else
-        types=[params[:type]]
-      end
-
-      person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
-
-      #faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
-      #                                          LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
-       #                                         WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
-
-      by_ds_at_filter = ""
-      pid_type_ver_id = PersonIdentifierType.where(name: "Verification Number").first.id
-      if params[:by_ds_at_dro].to_s == "true"
-        by_ds_at_filter = " INNER JOIN person_identifiers pidr ON pidr.person_id = prs.person_id
-          AND pidr.person_identifier_type_id = #{pid_type_ver_id} AND pidr.voided = 0 "
-      end
-
-      d = Person.order(" cp.created_at DESC ")
-      .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
-              INNER JOIN person_name n ON person.person_id = n.person_id
-              INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
-              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
-               ")
-      .where(" prs.status_id IN (#{state_ids.join(', ')})
-              AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
-              AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
-                person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
-
-      total = d.select(" count(*) c ")[0]['c'] rescue 0
-      page = (params[:start].to_i / params[:length].to_i) + 1
-
-      data = d.group(" prs.person_id ")
-
-      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_reported ")
-      data = data.page(page)
-      .per_page(params[:length].to_i)
-
-      @records = []
-      data.each do |p|
-        mother = PersonService.mother(p.person_id)
-        father = PersonService.father(p.person_id)
-        details = PersonBirthDetail.find_by_person_id(p.person_id)
-
-        name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
-        mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
-        father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
-        row = []
-        row = [p.ben] if params[:assign_ben] == 'true'
-        row << PersonIdentifier.by_type(p.person_id, "Verification Number") if params[:vnum]         == 'true'
-        row = row + [
-            "#{name} (#{p.gender})",
-            p.birthdate.strftime('%d/%b/%Y'),
-            mother_name,
-            father_name,
-            (p.date_reported.strftime('%d/%b/%Y') rescue nil),
-            Status.find(p.status_id).name,
-            p.person_id
-        ]
-        @records << row
-      end
-
-      render :text => {
-          "draw" => params[:draw].to_i,
-          "recordsTotal" => total,
-          "recordsFiltered" => total,
-          "data" => @records}.to_json and return
-    end
-
-  end
-=end
   def paginated_data_back
     params[:statuses] = [] if params[:statuses].blank?
     states = params[:statuses].split(',')
