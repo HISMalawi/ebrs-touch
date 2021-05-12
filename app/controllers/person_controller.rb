@@ -2579,13 +2579,20 @@ class PersonController < ApplicationController
   def paginated_data
       search_val = params[:search][:value] rescue nil
       search_val = '_' if search_val.blank?
-
+      puts "#{search_val}"
       if params[:type] == 'All'
         types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
       else
         types=[params[:type]]
       end
       #AND person_birth_details.birth_registration_type_id IN (SELECT birth_registration_type_id FROM birth_registration_type WHERE name IN('#{types.join("','")}'))
+
+      limit_query = ""
+
+      if search_val == "_"
+        limit_query = "LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i }"
+      end
+
       query = "SELECT
                        person.person_id,
                        person_birth_details.district_id_number as ben,
@@ -2628,10 +2635,10 @@ class PersonController < ApplicationController
                         SELECT #{SETTINGS['location_id']} as location_id UNION SELECT location_id FROM location WHERE parent_location=#{SETTINGS['location_id']} UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=#{SETTINGS['location_id']})
                       )
                       AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
-                    person.birthdate, person.gender) REGEXP \"#{search_val}\"
-                    ORDER BY created_at DESC 
-                    LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i };"
-         
+                    person.birthdate, person.gender) REGEXP \"#{search_val}\" GROUP BY ps.person_id
+                    ORDER BY created_at DESC
+                    #{limit_query};"
+                 
         data = ActiveRecord::Base.connection.select_all(query)
 
         @records = []
@@ -2659,8 +2666,96 @@ class PersonController < ApplicationController
           "data" => @records}.to_json and return 
       
   end
-  
 
+=begin
+  def paginated_data
+    
+  params[:statuses] = [] if params[:statuses].blank?
+    states = params[:statuses].split(',')
+    types = []
+
+    search_val = params[:search][:value] rescue nil
+    search_val = '_' if search_val.blank?
+
+    puts "#{search_val}"
+
+    if !params[:start].blank?
+
+      state_ids = states.collect{|s| Status.find_by_name(s).id} + [-1]
+
+
+      if params[:type] == 'All'
+        types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
+      else
+        types=[params[:type]]
+      end
+
+      person_reg_type_ids = BirthRegistrationType.where(" name IN ('#{types.join("', '")}')").map(&:birth_registration_type_id) + [-1]
+
+      #faulty_ids = [-1] + PersonRecordStatus.find_by_sql("SELECT prs.person_record_status_id FROM person_record_statuses prs
+      #                                          LEFT JOIN person_record_statuses prs2 ON prs.person_id = prs2.person_id AND prs.voided = 0 AND prs2.voided = 0
+       #                                         WHERE prs.created_at < prs2.created_at;").map(&:person_record_status_id)
+
+      by_ds_at_filter = ""
+      pid_type_ver_id = PersonIdentifierType.where(name: "Verification Number").first.id
+      if params[:by_ds_at_dro].to_s == "true"
+        by_ds_at_filter = " INNER JOIN person_identifiers pidr ON pidr.person_id = prs.person_id
+          AND pidr.person_identifier_type_id = #{pid_type_ver_id} AND pidr.voided = 0 "
+      end
+
+      d = Person.order(" cp.created_at DESC ")
+      .joins(" INNER JOIN core_person cp ON person.person_id = cp.person_id
+              INNER JOIN person_name n ON person.person_id = n.person_id
+              INNER JOIN person_record_statuses prs ON person.person_id = prs.person_id AND COALESCE(prs.voided, 0) = 0
+              INNER JOIN person_birth_details pbd ON person.person_id = pbd.person_id
+               ")
+      .where(" prs.status_id IN (#{state_ids.join(', ')})
+              AND prs.created_at = (SELECT MAX(created_at) FROM person_record_statuses prs2 WHERE prs2.person_id = person.person_id)
+              AND concat_ws('_', pbd.national_serial_number, pbd.district_id_number, n.first_name, n.last_name, n.middle_name,
+                person.birthdate, person.gender) REGEXP \"#{search_val}\" ")
+
+      total = d.select(" count(*) c ")[0]['c'] rescue 0
+      page = (params[:start].to_i / params[:length].to_i) + 1
+
+      data = d.group(" prs.person_id ")
+
+      data = data.select(" n.*, prs.status_id, pbd.district_id_number AS ben, person.gender, person.birthdate, pbd.national_serial_number AS brn, pbd.date_reported ")
+      data = data.page(page)
+      .per_page(params[:length].to_i)
+
+      @records = []
+      data.each do |p|
+        mother = PersonService.mother(p.person_id)
+        father = PersonService.father(p.person_id)
+        details = PersonBirthDetail.find_by_person_id(p.person_id)
+
+        name          = ("#{p['first_name']} #{p['middle_name']} #{p['last_name']}")
+        mother_name   = ("#{mother.first_name rescue 'N/A'} #{mother.middle_name rescue ''} #{mother.last_name rescue ''}")
+        father_name   = ("#{father.first_name rescue 'N/A'} #{father.middle_name rescue ''} #{father.last_name rescue ''}")
+        row = []
+        row = [p.ben] if params[:assign_ben] == 'true'
+        row << PersonIdentifier.by_type(p.person_id, "Verification Number") if params[:vnum]         == 'true'
+        row = row + [
+            "#{name} (#{p.gender})",
+            p.birthdate.strftime('%d/%b/%Y'),
+            mother_name,
+            father_name,
+            (p.date_reported.strftime('%d/%b/%Y') rescue nil),
+            Status.find(p.status_id).name,
+            p.person_id
+        ]
+        @records << row
+      end
+
+      render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => total,
+          "recordsFiltered" => total,
+          "data" => @records}.to_json and return
+    end
+
+  end
+=end
   def paginated_data_back
     params[:statuses] = [] if params[:statuses].blank?
     states = params[:statuses].split(',')
