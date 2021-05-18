@@ -1581,14 +1581,72 @@ class PersonController < ApplicationController
     render :template => "person/records", :layout => "data_table"
   end
 
+#########################################################################################################
+
   def view_can_print_cases
     @states = ["HQ-CAN-PRINT"]
+    @year = 2016
     @section = "Editable CAN PRINT cases"
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
     @display_ben = true
-    #@records = PersonService.query_for_display(@states)
     render :template => "person/records", :layout => "data_table"
   end
+
+  def view_2015_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2015
+    @section = "2015 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_2017_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2017
+    @section = "2017 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_2018_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2018
+    @section = "2018 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_2019_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2019
+    @section = "2019 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_2020_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2020
+    @section = "2020 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+  def view_2021_can_print_cases
+    @states = ["HQ-CAN-PRINT"]
+    @year = 2021
+    @section = "2021 cases"
+    @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states)
+    @display_ben = true
+    render :template => "person/records", :layout => "data_table"
+  end
+
+############################################################################################################  
 
   def edit
 
@@ -2729,7 +2787,6 @@ class PersonController < ApplicationController
   def paginated_data
       search_val = params[:search][:value] rescue nil
       search_val = '_' if search_val.blank?
-      puts "#{search_val}"
       if params[:type] == 'All'
         types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
       else
@@ -2822,6 +2879,102 @@ class PersonController < ApplicationController
           "recordsFiltered" => 10000,
           "data" => @records}.to_json and return 
       
+  end
+
+  def can_print_paginated_data
+  
+    year = params[:year]
+    search_val = params[:search][:value] rescue nil
+      search_val = '_' if search_val.blank?
+      if params[:type] == 'All'
+        types=['Normal', 'Abandoned', 'Adopted', 'Orphaned']
+      else
+        types=[params[:type]]
+      end
+
+      limit_query = ""
+
+      if search_val == "_"
+        limit_query = "LIMIT #{params[:length].to_i} OFFSET #{(params[:draw].to_i - 1) * params[:length].to_i }"
+      end
+
+      order_by_query = "ORDER BY person_birth_details.district_id_number ASC"
+
+
+      query = "SELECT
+                       person.person_id,
+                       person_birth_details.district_id_number as ben,
+                       national_serial_number,
+                       pn.first_name, 
+                       pn.last_name, 
+                       gender, 
+                       birthdate, 
+                       mn.first_name as mother_first_name,
+                       mn.last_name as mother_last_name,
+                       fn.first_name as father_first_name,
+                       fn.last_name as father_last_name,
+                       s.name as status,
+                       person_birth_details.acknowledgement_of_receipt_date as date_reported,
+                       person_birth_details.created_at
+                    FROM person 
+                    INNER JOIN person_name pn INNER JOIN person_birth_details
+                    INNER JOIN person_relationship prm INNER JOIN person_name mn
+                    INNER JOIN person_relationship prf INNER JOIN person_name fn
+                    INNER JOIN person_relationship pri INNER JOIN person_addresses fa
+                    INNER JOIN person_record_statuses ps
+                    INNER JOIN statuses s
+                    ON person.person_id = pn.person_id 
+                      AND person.person_id = person_birth_details.person_id
+                      AND person.person_id = prm.person_a
+                      AND prm.person_b = mn.person_id
+                      AND person.person_id = prf.person_a
+                      AND prf.person_b = fn.person_id
+                      AND person.person_id = ps.person_id
+                      AND ps.status_id = s.status_id
+                    WHERE prm.person_relationship_type_id = 5
+                      AND pn.voided = 0 AND mn.voided = 0
+                      AND fn.voided =0 AND prf.person_relationship_type_id = 1
+                      AND pri.person_relationship_type_id = 4
+                      AND person.person_id = pri. person_a
+                      AND pri.person_b = fa.person_id
+                      AND (fa.current_village IS NULL OR fa.current_village IN(35763))
+                      AND ps.voided = 0 
+                      AND person_birth_details.district_id_number LIKE '%/#{year}'
+                      AND s.name IN('#{params[:statuses].split(',').join("','")}')
+                      AND person_birth_details.location_created_at IN(
+                        SELECT #{SETTINGS['location_id']} as location_id UNION SELECT location_id FROM location WHERE parent_location=#{SETTINGS['location_id']} UNION SELECT location_id FROM location WHERE parent_location IN(SELECT location_id FROM location where parent_location=#{SETTINGS['location_id']})
+                      )
+                      AND concat_ws('_', person_birth_details.national_serial_number, person_birth_details.district_id_number, pn.first_name, pn.last_name, pn.middle_name,
+                    person.birthdate, person.gender) REGEXP \"#{search_val}\"
+                    #{order_by_query}
+                    #{limit_query};"
+                 
+        data = ActiveRecord::Base.connection.select_all(query)
+
+        @records = []
+        data.each do |p|
+            #raise p.inspect
+            row = []
+        row = [p['ben']] if params[:assign_ben] == 'true'
+        row << PersonIdentifier.by_type(p.person_id, "Verification Number") if params[:vnum]         == 'true'
+        row = row + [
+                "#{p['first_name']} #{p['last_name']} (#{p['gender']})",
+                p['birthdate'].strftime('%d/%b/%Y'),
+                "#{p['mother_first_name']} #{p['mother_last_name']}",
+                "#{p['father_first_name']} #{p['father_last_name']}",
+                (p['date_reported'].strftime('%d/%b/%Y') rescue nil),
+                p['status'],
+                p['person_id']
+
+            ]
+            @records << row
+          end
+         render :text => {
+          "draw" => params[:draw].to_i,
+          "recordsTotal" => 10000,
+          "recordsFiltered" => 10000,
+          "data" => @records}.to_json and return 
+
   end
 
   def paginated_data_back

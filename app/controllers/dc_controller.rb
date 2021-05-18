@@ -26,6 +26,16 @@ def manage_cases
   render :layout => "facility"
 end
 
+def edit_addresses
+  @stats = PersonRecordStatus.stats
+  @icoFolder = folder
+  @section = "Edit Addresses"
+  @targeturl = "/"
+  @folders = ActionMatrix.read_folders(User.current.user_role.role.role)
+
+  render :layout => "facility"
+end
+
 def printed_cases
   @stats = PersonRecordStatus.stats
   @icoFolder = folder

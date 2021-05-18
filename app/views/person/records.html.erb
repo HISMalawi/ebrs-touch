@@ -214,8 +214,15 @@ var data = {};
 var printed = false; //Hook for twins to avoid reprints
 
 var url = "/paginated_data";
+
+
 <% if params[:action] == 'searched_cases'%>
 var url = "/paginated_search_data";
+
+<% end %>
+
+<% if params[:action] == 'view_can_print_cases' || params[:action] == 'view_2015_can_print_cases' || params[:action] == 'view_2017_can_print_cases' || params[:action] == 'view_2018_can_print_cases' || params[:action] == 'view_2019_can_print_cases' || params[:action] == 'view_2020_can_print_cases'|| params[:action] == 'view_2021_can_print_cases'%>
+var url = "/can_print_paginated_data";
 
 <% end %>
 
@@ -241,6 +248,7 @@ function initTable(){
                     "data": function(d){
                         d.type = __$('birth_type').value;
                         d.statuses = "<%= @states.join(',')%>";
+                        d.year = "<%= @year %>"
                         d.assign_ben = "<%= (@display_ben rescue false) ? true : false %>";
                         d.vnum = "<%= (@display_ver_num rescue false) ? true : false %>";
                         d.data = data;

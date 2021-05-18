@@ -100,6 +100,28 @@
 
 <% end %>
 
+<% if @folders.include?("Edit Addresses")%>
+
+    <div class="button parent_menu" onclick="window.location = '/edit_addresses'" tag=1>
+      <table style="text-align: left;">
+        <tr>
+          <td rowspan="2">
+            <img src="<%= @icoFolder %>" height="60"/>
+          </td>
+          <td style="height: 30px;">
+            Edit Addresses
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 11px; font-style: italic;">
+            Can Print Records
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<% end %>
+
 
 <% if @folders.include?("Above 16 (Abroad)") && SETTINGS['application_mode'] == "DC" %>
 

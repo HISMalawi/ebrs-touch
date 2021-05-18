@@ -113,6 +113,7 @@ Rails.application.routes.draw do
   ########################### (create record form) routes end
 
   get '/manage_cases' => "dc#manage_cases"
+  get '/edit_addresses' => "dc#edit_addresses"
   get '/print_certificates' => "dc#print_certificates"
   get '/select_cases' => "dc#select_cases"
   get '/print_cases' => "dc#print_cases"
@@ -161,7 +162,16 @@ Rails.application.routes.draw do
   get "/view_pending_cases" => "person#view_pending_cases"
   get "/view_rejected_cases" => "person#view_rejected_cases"
   get "/view_hq_rejected_cases" => "person#view_hq_rejected_cases"
+
+
   get "/view_can_print_cases" => "person#view_can_print_cases"
+  get "/view_2021_can_print_cases" => "person#view_2021_can_print_cases"
+  get "/view_2020_can_print_cases" => "person#view_2020_can_print_cases"
+  get "/view_2019_can_print_cases" => "person#view_2019_can_print_cases"
+  get "/view_2018_can_print_cases" => "person#view_2018_can_print_cases"
+  get "/view_2017_can_print_cases" => "person#view_2017_can_print_cases"
+  get "/view_2015_can_print_cases" => "person#view_2015_can_print_cases"
+
 
   get "/view_printed_cases" => "person#view_printed_cases"
   get "/view_voided_cases" => "person#view_voided_cases"
@@ -214,11 +224,18 @@ Rails.application.routes.draw do
 
   get '/person/paginated_data'
   post '/person/paginated_data'
+
+  get '/person/can_print_paginated_data'
+  post '/person/can_print_paginated_data'
+
   get '/person/paginated_search_data'
   post '/person/paginated_search_data'
 
   get "/paginated_data" => "person#paginated_data"
   post "/paginated_data" => "person#paginated_data"
+
+  get "/can_print_paginated_data" => "person#can_print_paginated_data"
+  post "/can_print_paginated_data" => "person#can_print_paginated_data"
 
   get '/paginated_search_data' => "person#paginated_search_data"
   post '/paginated_search_data' => "person#paginated_search_data"
