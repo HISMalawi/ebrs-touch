@@ -1730,141 +1730,462 @@ class PersonController < ApplicationController
     informant_rel = (!@birth_details.informant_relationship_to_person.blank? ?
         @birth_details.informant_relationship_to_person : @birth_details.other_informant_relationship_to_person) rescue nil
 
-    if @status == "HQ-CAN-PRINT"
-        @record = {
-        "Details of Child" => [
-            {
-                "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
-                "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
-                "National ID" => (@person.id_number rescue '')
-            },  
-            {
-                "First Name" => "#{@name.first_name rescue nil}",
-                "Other Name" => "#{@name.middle_name rescue nil}",
-                "Surname" => "#{@name.last_name rescue nil}"
-            },
-            {
-                "Date of birth" => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
-                "Sex" => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
-                "Place of birth" => place
-            },
-            {
-                "Name of Hospital" =>  hospital,
-                "Other Details" => other_place,
-            },
-            {
-                "District/State" => district,
-                "T/A" => ta,
-                "Village" => village
-            },
-            {
-                "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
-                "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
-                "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
-            },
-            {
-                "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
-                "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
-            },
-            {
-                "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
-                "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
-                "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
-            },
-            {
-                "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
-                "Record Status" => "#{@status}",
-                "Child/Person Type" => "#{@birth_details.reg_type.name}"
+
+    mother_current_address =  {
+                ["Physical Residential Address, District"] => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                ["T/A"] => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                ["Village/Town"] => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+            }   
+
+    mother_home_addresses = {
+                ["Home Address, District"] => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                ["T/A"] => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                ["Home Address, Village/Town"] => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
             }
-        ],
-        "Details of Child's Mother" => [
-            {
-                "First Name" => "#{@mother_name.first_name rescue nil}",
-                "Other Name" => "#{@mother_name.middle_name rescue nil}",
-                "Maiden Surname" => "#{@mother_name.last_name rescue nil}"
-            },
-            {
-                "Date of birth" => "#{mother_birth_date}",
-                "Nationality" => "#{@mother_person.citizenship rescue nil}",
-                "ID Number" => "#{@mother_person.id_number rescue nil}"
-            },
-            {
+
+    father_current_addresses = {
+                ["Physical Residential Address, District"] => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                ["T/A"] => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                ["Village/Town"] => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+            }
+
+
+    father_home_addresses =  {
+                ["Home Address, District"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                ["T/A"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                ["Home Address, Village/Town"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+            }
+
+    if @birth_details.informant_relationship_to_person == "Mother"
+        mother_current_address = {
                 ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_district"] => "#{loc(@mother_address.current_district, 'District') rescue nil}",
                 ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_ta"] => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
                 ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_village"] => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
-            },
-            {
+            }
+
+        mother_home_addresses = {
                 ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_district"] => "#{loc(@mother_address.home_district, 'District') rescue nil}",
                 ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_ta"] => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
                 ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_village"] => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
-            },
-            {
-                "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
-                "Number of prenatal visits" => "#{@birth_details.number_of_prenatal_visits rescue nil}",
-                "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
-            },
-            {
-                "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
-                "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
-                "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
-            },
-            {
-                "Level of education" => "#{@birth_details.level_of_education rescue nil}"
             }
-        ],
-        "Details of Child's Father" => [
-            {
-                "First Name" => "#{@father_name.first_name rescue nil}",
-                "Other Name" => "#{@father_name.middle_name rescue nil}",
-                "Surname" => "#{@father_name.last_name rescue nil}"
-            },
-            {
-                "Date of birth" => "#{father_birth_date}",
-                "Nationality" => "#{@father_person.citizenship rescue nil}",
-                "ID Number" => "#{@father_person.id_number rescue nil}"
-            },
-            {
-                ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_district"] => "#{loc(@father_address.current_district, 'District') rescue nil}",
-                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_ta"] => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
-                ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_village"] => "#{loc(@father_address.current_village, 'Village') rescue nil}"
-            },
-            {
-                ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_district"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
-                ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_ta"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
-                ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+
+    end
+
+
+    if @status == "HQ-CAN-PRINT"
+        if @birth_details.informant_relationship_to_person == "Mother"
+            @record = {
+                "Details of Child" => [
+                    {
+                        "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                        "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                        "National ID" => (@person.id_number rescue '')
+                    },  
+                    {
+                        "First Name" => "#{@name.first_name rescue nil}",
+                        "Other Name" => "#{@name.middle_name rescue nil}",
+                        "Surname" => "#{@name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                        "Sex" => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
+                        "Place of birth" => place
+                    },
+                    {
+                        "Name of Hospital" =>  hospital,
+                        "Other Details" => other_place,
+                    },
+                    {
+                        "District/State" => district,
+                        "T/A" => ta,
+                        "Village" => village
+                    },
+                    {
+                        "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
+                        "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
+                        "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
+                    },
+                    {
+                        "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
+                        "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
+                    },
+                    {
+                        "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
+                    },
+                    {
+                        "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
+                        "Record Status" => "#{@status}",
+                        "Child/Person Type" => "#{@birth_details.reg_type.name}"
+                    }
+                ],
+                "Details of Child's Mother" => [
+                    {
+                        "First Name" => "#{@mother_name.first_name rescue nil}",
+                        "Other Name" => "#{@mother_name.middle_name rescue nil}",
+                        "Maiden Surname" => "#{@mother_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{mother_birth_date}",
+                        "Nationality" => "#{@mother_person.citizenship rescue nil}",
+                        "ID Number" => "#{@mother_person.id_number rescue nil}"
+                    },
+                   
+
+                    {
+                        ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_district"] => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                        ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_ta"] => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                        ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_current_village"] => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_district"] => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                        ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_ta"] => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                        ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=mother_address_home_village"] => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
+                        "Number of prenatal visits" => "#{@birth_details.number_of_prenatal_visits rescue nil}",
+                        "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
+                    },
+                    {
+                        "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
+                        "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
+                        "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
+                    },
+                    {
+                        "Level of education" => "#{@birth_details.level_of_education rescue nil}"
+                    }
+                ],
+                "Details of Child's Father" => [
+                    {
+                        "First Name" => "#{@father_name.first_name rescue nil}",
+                        "Other Name" => "#{@father_name.middle_name rescue nil}",
+                        "Surname" => "#{@father_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{father_birth_date}",
+                        "Nationality" => "#{@father_person.citizenship rescue nil}",
+                        "ID Number" => "#{@father_person.id_number rescue nil}"
+                    },
+                    {
+                        "Physical Residential Address, District" => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                        "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Home Address, District" => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                        "Home Address, Village/Town" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                    }
+                ],
+                "Details of Child's Informant" => [
+                    {
+                        "First Name" => "#{@informant_name.first_name rescue nil}",
+                        "Other Name" => "#{@informant_name.middle_name rescue nil}",
+                        "Family Name" => "#{@informant_name.last_name rescue nil}"
+                    },
+                    {
+                        "Relationship to child" => informant_rel,
+                        "ID Number" => "#{@informant_person.id_number rescue ""}"
+                    },
+                    {
+                        ["Physical Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_home_district"] => "#{loc(@informant_address.current_district, 'District')rescue nil}",
+                        ["T/A","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_ta"] => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
+                        ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_village"] => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        ["Postal Address", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address"] => "#{@informant_address.address_line_1 rescue nil}",
+                        "" => "#{@informant_address.address_line_2 rescue nil}",
+                        ["City", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_city"]  => "#{@informant_address.city rescue nil}"
+                    },
+                    {
+                        ["Phone Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_cell_phone_number"]  => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
+                        "Informant Signed?"  => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
+                    },
+                    {
+                        "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Delayed Registration" => "#{@delayed}"
+                    }
+                ]
             }
-        ],
-        "Details of Child's Informant" => [
-            {
-                "First Name" => "#{@informant_name.first_name rescue nil}",
-                "Other Name" => "#{@informant_name.middle_name rescue nil}",
-                "Family Name" => "#{@informant_name.last_name rescue nil}"
-            },
-            {
-                "Relationship to child" => informant_rel,
-                "ID Number" => "#{@informant_person.id_number rescue ""}"
-            },
-            {
-                ["Physical Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_home_district"] => "#{loc(@informant_address.home_district, 'District')rescue nil}",
-                ["T/A","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_ta"] => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
-                ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_village"] => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
-            },
-            {
-                ["Postal Address", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address"] => "#{@informant_address.address_line_1 rescue nil}",
-                "" => "#{@informant_address.address_line_2 rescue nil}",
-                ["City", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_city"]  => "#{@informant_address.city rescue nil}"
-            },
-            {
-                ["Phone Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_cell_phone_number"]  => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
-                "Informant Signed?"  => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
-            },
-            {
-                "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
-                "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
-                "Delayed Registration" => "#{@delayed}"
+        elsif @birth_details.informant_relationship_to_person == "Father"
+                @record = {
+                "Details of Child" => [
+                    {
+                        "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                        "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                        "National ID" => (@person.id_number rescue '')
+                    },  
+                    {
+                        "First Name" => "#{@name.first_name rescue nil}",
+                        "Other Name" => "#{@name.middle_name rescue nil}",
+                        "Surname" => "#{@name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                        "Sex" => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
+                        "Place of birth" => place
+                    },
+                    {
+                        "Name of Hospital" =>  hospital,
+                        "Other Details" => other_place,
+                    },
+                    {
+                        "District/State" => district,
+                        "T/A" => ta,
+                        "Village" => village
+                    },
+                    {
+                        "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
+                        "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
+                        "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
+                    },
+                    {
+                        "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
+                        "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
+                    },
+                    {
+                        "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
+                    },
+                    {
+                        "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
+                        "Record Status" => "#{@status}",
+                        "Child/Person Type" => "#{@birth_details.reg_type.name}"
+                    }
+                ],
+                "Details of Child's Mother" => [
+                    {
+                        "First Name" => "#{@mother_name.first_name rescue nil}",
+                        "Other Name" => "#{@mother_name.middle_name rescue nil}",
+                        "Maiden Surname" => "#{@mother_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{mother_birth_date}",
+                        "Nationality" => "#{@mother_person.citizenship rescue nil}",
+                        "ID Number" => "#{@mother_person.id_number rescue nil}"
+                    },
+                   
+
+                    {
+                        "Physical Residential Address, District" => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                        "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Home Address, District" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                        "Home Address, Village/Town" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
+                        "Number of prenatal visits" => "#{@birth_details.number_of_prenatal_visits rescue nil}",
+                        "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
+                    },
+                    {
+                        "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
+                        "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
+                        "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
+                    },
+                    {
+                        "Level of education" => "#{@birth_details.level_of_education rescue nil}"
+                    }
+                ],
+                "Details of Child's Father" => [
+                    {
+                        "First Name" => "#{@father_name.first_name rescue nil}",
+                        "Other Name" => "#{@father_name.middle_name rescue nil}",
+                        "Surname" => "#{@father_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{father_birth_date}",
+                        "Nationality" => "#{@father_person.citizenship rescue nil}",
+                        "ID Number" => "#{@father_person.id_number rescue nil}"
+                    },
+                    {
+                        ["Physical Residential Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_district"] => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                        ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_ta"] => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                        ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_current_village"] => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        ["Home Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_district"] => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                        ["T/A", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_ta"] => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                        ["Home Address, Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=father_address_home_village"] => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                    }
+                ],
+                "Details of Child's Informant" => [
+                    {
+                        "First Name" => "#{@informant_name.first_name rescue nil}",
+                        "Other Name" => "#{@informant_name.middle_name rescue nil}",
+                        "Family Name" => "#{@informant_name.last_name rescue nil}"
+                    },
+                    {
+                        "Relationship to child" => informant_rel,
+                        "ID Number" => "#{@informant_person.id_number rescue ""}"
+                    },
+                    {
+                        ["Physical Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_home_district"] => "#{loc(@informant_address.current_district, 'District')rescue nil}",
+                        ["T/A","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_ta"] => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
+                        ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_village"] => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        ["Postal Address", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address"] => "#{@informant_address.address_line_1 rescue nil}",
+                        "" => "#{@informant_address.address_line_2 rescue nil}",
+                        ["City", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_city"]  => "#{@informant_address.city rescue nil}"
+                    },
+                    {
+                        ["Phone Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_cell_phone_number"]  => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
+                        "Informant Signed?"  => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
+                    },
+                    {
+                        "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Delayed Registration" => "#{@delayed}"
+                    }
+                ]
             }
-        ]
-    }
+        else
+                @record = {
+                "Details of Child" => [
+                    {
+                        "Birth Entry Number" => "#{@birth_details.ben rescue nil}",
+                        "Birth Registration Number" => "#{@birth_details.brn  rescue nil}",
+                        "National ID" => (@person.id_number rescue '')
+                    },  
+                    {
+                        "First Name" => "#{@name.first_name rescue nil}",
+                        "Other Name" => "#{@name.middle_name rescue nil}",
+                        "Surname" => "#{@name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{@person.birthdate.to_date.strftime('%d/%b/%Y') rescue nil}",
+                        "Sex" => "#{(@person.gender == 'F' ? 'Female' : 'Male')}",
+                        "Place of birth" => place
+                    },
+                    {
+                        "Name of Hospital" =>  hospital,
+                        "Other Details" => other_place,
+                    },
+                    {
+                        "District/State" => district,
+                        "T/A" => ta,
+                        "Village" => village
+                    },
+                    {
+                        "Birth weight (kg)" => "#{@birth_details.birth_weight rescue nil}",
+                        "Type of birth" => "#{@birth_details.birth_type.name rescue nil}",
+                        "Other birth specified" => "#{@birth_details.other_type_of_birth rescue nil}"
+                    },
+                    {
+                        "Are the parents married to each other?" => "#{(@birth_details.parents_married_to_each_other.to_s == '1' ? 'Yes' : 'No') rescue nil}",
+                        "If yes, date of marriage" => "#{@birth_details.date_of_marriage.to_date.strftime('%d/%b/%Y')  rescue nil}"
+                    },
+                    {
+                        "Court Order Attached?" => "#{(@birth_details.court_order_attached.to_s == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Parents Signed?" => "#{(@birth_details.parents_signed == "1" ? 'Yes' : 'No') rescue nil}",
+                        "Record Complete?" => (@birth_details.record_complete? rescue false) ? "Yes" : "No"
+                    },
+                    {
+                        "Place where birth was recorded" => "#{loc(@birth_details.location_created_at)}",
+                        "Record Status" => "#{@status}",
+                        "Child/Person Type" => "#{@birth_details.reg_type.name}"
+                    }
+                ],
+                "Details of Child's Mother" => [
+                    {
+                        "First Name" => "#{@mother_name.first_name rescue nil}",
+                        "Other Name" => "#{@mother_name.middle_name rescue nil}",
+                        "Maiden Surname" => "#{@mother_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{mother_birth_date}",
+                        "Nationality" => "#{@mother_person.citizenship rescue nil}",
+                        "ID Number" => "#{@mother_person.id_number rescue nil}"
+                    },
+                   
+
+                    {
+                        "Physical Residential Address, District" => "#{loc(@mother_address.current_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@mother_address.current_ta, 'Traditional Authority') rescue nil}",
+                        "Village/Town" => "#{loc(@mother_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Home Address, District" => "#{loc(@mother_address.home_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@mother_address.home_ta, 'Traditional Authority') rescue nil}",
+                        "Home Address, Village/Town" => "#{loc(@mother_address.home_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Gestation age at birth in weeks" => "#{@birth_details.gestation_at_birth rescue nil}",
+                        "Number of prenatal visits" => "#{@birth_details.number_of_prenatal_visits rescue nil}",
+                        "Month of pregnancy prenatal care started" => "#{@birth_details.month_prenatal_care_started rescue nil}"
+                    },
+                    {
+                        "Mode of delivery" => "#{@birth_details.mode_of_delivery.name rescue nil}",
+                        "Number of children born to the mother, including this child" => "#{@birth_details.number_of_children_born_alive_inclusive rescue nil}",
+                        "Number of children born to the mother, and still living" => "#{@birth_details.number_of_children_born_still_alive rescue nil}"
+                    },
+                    {
+                        "Level of education" => "#{@birth_details.level_of_education rescue nil}"
+                    }
+                ],
+                "Details of Child's Father" => [
+                    {
+                        "First Name" => "#{@father_name.first_name rescue nil}",
+                        "Other Name" => "#{@father_name.middle_name rescue nil}",
+                        "Surname" => "#{@father_name.last_name rescue nil}"
+                    },
+                    {
+                        "Date of birth" => "#{father_birth_date}",
+                        "Nationality" => "#{@father_person.citizenship rescue nil}",
+                        "ID Number" => "#{@father_person.id_number rescue nil}"
+                    },
+                    {
+                        "Physical Residential Address, District" => "#{loc(@father_address.current_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@father_address.current_ta, 'Traditional Authority') rescue nil}",
+                        "Village/Town" => "#{loc(@father_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        "Home Address, District" => "#{loc(@father_address.home_district, 'District') rescue nil}",
+                        "T/A" => "#{loc(@father_address.home_ta, 'Traditional Authority') rescue nil}",
+                        "Home Address, Village/Town" => "#{loc(@father_address.home_village, 'Village') rescue nil}"
+                    }
+                ],
+                "Details of Child's Informant" => [
+                    {
+                        "First Name" => "#{@informant_name.first_name rescue nil}",
+                        "Other Name" => "#{@informant_name.middle_name rescue nil}",
+                        "Family Name" => "#{@informant_name.last_name rescue nil}"
+                    },
+                    {
+                        "Relationship to child" => informant_rel,
+                        "ID Number" => "#{@informant_person.id_number rescue ""}"
+                    },
+                    {
+                        ["Physical Address, District", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_home_district"] => "#{loc(@informant_address.current_district, 'District')rescue nil}",
+                        ["T/A","/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_ta"] => "#{loc(@informant_address.current_ta, 'Traditional Authority') rescue nil}",
+                        ["Village/Town", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_current_village"] => "#{loc(@informant_address.current_village, 'Village') rescue nil}"
+                    },
+                    {
+                        ["Postal Address", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address"] => "#{@informant_address.address_line_1 rescue nil}",
+                        "" => "#{@informant_address.address_line_2 rescue nil}",
+                        ["City", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_address_city"]  => "#{@informant_address.city rescue nil}"
+                    },
+                    {
+                        ["Phone Number", "/update_person?id=#{@person.person_id}&next_path=#{@targeturl}&field=informant_cell_phone_number"]  => "#{@informant_person.get_attribute('Cell Phone Number') rescue nil}",
+                        "Informant Signed?"  => "#{(@birth_details.form_signed == 1 ? 'Yes' : 'No')}"
+                    },
+                    {
+                        "Acknowledgement Date" => "#{@birth_details.acknowledgement_of_receipt_date.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Date of Registration" => "#{@birth_details.date_registered.to_date.strftime('%d/%b/%Y') rescue ""}",
+                        "Delayed Registration" => "#{@delayed}"
+                    }
+                ]
+            }
+        end
+        
 
     else
         @record = {

@@ -94,15 +94,15 @@
         </td>
         <td colspan="8" style="width: 80%;" class="pull-right">
           <button onclick="selectBadge('All')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Total
-            <span class="badge" style="background: #2e6da4"><%=@type_stats.values.sum || 0%></span></button>
+            <span class="badge" style="background: #2e6da4"><%#=@type_stats.values.sum || 0%></span></button>
           <button onclick="selectBadge('Abandoned')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Abandoned
-            <span class="badge" style="background: #2e6da4"><%=@type_stats['Abandoned'] || 0%></span></button>
+            <span class="badge" style="background: #2e6da4"><%#=@type_stats['Abandoned'] || 0%></span></button>
           <button onclick="selectBadge('Orphaned')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Orphaned
-            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Orphaned'] || 0%></span></button>
+            <span class="badge"  style="background: #2e6da4"><%#=@type_stats['Orphaned'] || 0%></span></button>
           <button onclick="selectBadge('Adopted')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;" class="btn btn-default">Adopted
-            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Adopted'] || 0%></span></button>
+            <span class="badge"  style="background: #2e6da4"><%#=@type_stats['Adopted'] || 0%></span></button>
           <button onclick="selectBadge('Normal')" type="button" style="float: right;margin: 0px !important;border-radius: 0px !important;width: 150px;" class="btn btn-default">Normal
-            <span class="badge"  style="background: #2e6da4"><%=@type_stats['Normal'] || 0%></span></button>
+            <span class="badge"  style="background: #2e6da4"><%#=@type_stats['Normal'] || 0%></span></button>
         </td>
       </tr>
     </table>

@@ -469,7 +469,7 @@ end
 
 def print_certificates
 
-  @type_stats = PersonRecordStatus.type_stats(['HQ-CAN-PRINT', "HQ-CAN-RE-PRINT"], params[:had], params[:had_by])
+  #@type_stats = PersonRecordStatus.type_stats(['HQ-CAN-PRINT', "HQ-CAN-RE-PRINT"], params[:had], params[:had_by])
   facility_tag_id = LocationTag.where(name: "Health Facility").first.id
   district_tag_id = LocationTag.where(name: "District").first.id
 
