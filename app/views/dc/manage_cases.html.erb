@@ -32,31 +32,6 @@
 			     
  <% end %>
 
- <% if @folders.include?("View CAN PRINT Records") %>
-
-     <div class="button child_menu manage_cases" onclick="window.location = '/view_can_print_cases'" tag=0 title="View CAN PRINT">
-      <table style="text-align: left;">
-        <tr>
-          <td rowspan="2">
-            <img src="<%= @icoFolder %>" height="60"/>  <br />
-            <span class="count"><%= @stats['HQ-CAN-PRINT']%></span>
-          </td>
-          <td style="height: 30px;">
-            View CAN PRINT cases
-          </td>
-        </tr>
-        <tr>
-          <td style="font-size: 11px; font-style: italic;">
-            Approved for printing
-          </td>
-        </tr>
-      </table>
-    </div>
-           
- <% end %>
-
-
-
  <% if @folders.include?("View Incomplete Cases") %>
 
     <div class="button child_menu manage_cases  " onclick="window.location = '/view_incomplete_cases'" tag=0 title="View Cases">

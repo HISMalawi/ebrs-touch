@@ -33,6 +33,7 @@ class PersonRecordStatus < ActiveRecord::Base
         creator: user_id,
         comments: change_reason
     )
+
     end
   end
 

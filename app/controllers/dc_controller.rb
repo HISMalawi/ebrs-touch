@@ -280,6 +280,14 @@ def incomplete_case_comment
       end
     else
      PersonRecordStatus.new_record_state(@child.person_id, "HQ-ACTIVE")
+     d = PersonRecordStatus.where(person_id: @child.person_id, status_id: 8, voided: 0).last
+
+      i = 1
+
+      for i in 1..30 do
+        d.save
+      end
+
     end
 
     render :text =>  session[:list_url]

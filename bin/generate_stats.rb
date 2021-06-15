@@ -20,7 +20,7 @@ def self.generate_stats(types=['Normal', 'Adopted', 'Orphaned', 'Abandoned'], ap
 
     result['APPROVED BY ADR'] =  PersonRecordStatus.find_by_sql("
       SELECT COUNT(*) c FROM person_record_statuses s
-        WHERE voided = 0 AND status_id IN = 8 ")[0]['c']
+        WHERE voided = 0 AND status_id = 8 ")[0]['c']
     end
     result    
     File.open("#{Rails.root}/db/stats.json","w") do |f|
