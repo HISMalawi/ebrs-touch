@@ -5,7 +5,6 @@ district_code = Location.find(cur_loc_id).code
 person_ids = PersonRecordStatus.find_by_sql("
 	 SELECT distinct d.person_id FROM person_birth_details d
 	INNER JOIN person_record_statuses prs ON d.person_id = prs.person_id
-	WHERE d.district_id_number like '#{district_code}/%'
 	 ").map(&:person_id).uniq
 person_ids.each_with_index do |person_id, i|
 	active_statuses = PersonRecordStatus.where(person_id: person_id, voided: 0).count
@@ -20,7 +19,9 @@ person_ids.each_with_index do |person_id, i|
             prs.save
 
         end
-        puts "#{(i + 1)} # person_id: #{person_id}"
+        puts "Corrected # person_id: #{person_id}"
+    else
+        puts "No active more than one active statuses for # person_id #{person_id}"
     end
 
 end
