@@ -3707,8 +3707,19 @@ class PersonController < ApplicationController
   def create_child_remote
     if params[:token].present?
       if File.exist?("#{Rails.root}/tmp/sessions/#{params[:token]}") && Time.now < params[:remote_expires_at].to_time
-        person = PersonService.create_record(params)
-        render :text => {:person =>person, :remote_expires_at =>30.minutes.from_now.to_time, :token => params[:token], :remote_id => params[:person_id] }.to_json
+        data = params[:person]
+       
+        remote_id = data['person_id']
+        
+        data.delete(:person_id)
+        person = MassPerson.new
+        MassPerson.new.attributes.keys.each do |d|
+            person[d] = data[d]
+        end
+        
+        person.save
+         #PersonService.create_record(params)
+        render :text => {:person =>person, :remote_expires_at =>30.minutes.from_now.to_time, :token => params[:token], :remote_id => remote_id }.to_json
      else
         render :text => {:action =>'Failed'}.to_json and return
      end
