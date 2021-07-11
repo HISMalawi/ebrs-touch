@@ -3099,7 +3099,13 @@ class PersonController < ApplicationController
 
     @actions = ActionMatrix.read_actions(User.current.user_role.role.role, @states) rescue nil
     filters = JSON.parse(params['data']) rescue {}
-    @records = PersonService.search_results(filters)
+
+    @param_present = false
+    if filters.present?
+        @param_present = true
+    end
+
+    #@records = PersonService.search_results(filters)
 
     render :template => "person/records", :layout => "data_table"
   end
@@ -3384,6 +3390,8 @@ class PersonController < ApplicationController
 
   def paginated_search_data
     filters = JSON.parse(params['data']) rescue {}
+
+    
     @records = PersonService.search_results(filters, params)
 
     render text: @records.to_json

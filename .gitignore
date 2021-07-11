@@ -35,3 +35,4 @@ public/errors/*
 public/*.pdf
 vendor/*
 public/uploads/signature.png
+db/stats.json
